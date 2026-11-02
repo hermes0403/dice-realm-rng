@@ -1,16 +1,16 @@
 ---
-id: T-0004
+id: T-0001
 title: 將雲端前端拆分為 HTML CSS JavaScript 三檔
 status: done
-from: human
-to: cos
-owner: cos
+from: barry
+to: 老查
+owner: 老查
 priority: high
 created: 2026-11-01
 updated: 2026-11-01
 depends_on:
 branch: feat/split-frontend-assets
-done_by: cos
+done_by: 老查
 done_at: 2026-11-01
 ---
 
@@ -37,10 +37,10 @@ done_at: 2026-11-01
 ## 紀錄
 
 <!-- 只增不改。格式：- YYYY-MM-DD HH:MM [作者] 內容 -->
-- 2026-11-01 14:22 [cos] 接手任務；確認遠端 `origin/main` 的 `index.html` 仍包含內嵌 `<style>` 與 `<script>`，雖然遠端已存在 `style.css`、`script.js`，尚未完成外部引用拆分。
-- 2026-11-01 14:29 [cos] 已將 CSS 與主要 JavaScript 從 `index.html` 拆至 `style.css`、`script.js`，保留 Supabase CDN 先於應用程式載入；commit `fea25bf` 已推送至 `origin/main`。以 GitHub Pages 加查詢參數避開舊快取後，三個線上檔案皆回應 HTTP 200，HTML 僅引用外部 CSS/JS，未保留內嵌 style 或應用程式 script；任務內容已部署，狀態轉為 review。
-- 2026-11-01 14:40 [human] 確認 T-0004 已可驗收，授權將任務標記為 done，並依 board README 規則合併、封存及本機 commit。
-- 2026-11-01 14:40 [cos] 依人類驗收授權將 status 由 review 改為 done；接續執行本機分支整合、任務封存與 commit。
+- 2026-11-01 14:22 [老查] 接手任務；確認遠端 `origin/main` 的 `index.html` 仍包含內嵌 `<style>` 與 `<script>`，雖然遠端已存在 `style.css`、`script.js`，尚未完成外部引用拆分。
+- 2026-11-01 14:29 [老查] 已將 CSS 與主要 JavaScript 從 `index.html` 拆至 `style.css`、`script.js`，保留 Supabase CDN 先於應用程式載入；commit `fea25bf` 已推送至 `origin/main`。以 GitHub Pages 加查詢參數避開舊快取後，三個線上檔案皆回應 HTTP 200，HTML 僅引用外部 CSS/JS，未保留內嵌 style 或應用程式 script；任務內容已部署，狀態轉為 review。
+- 2026-11-01 14:40 [barry] 確認 T-0001 已可驗收，授權將任務標記為 done，並依 board README 規則合併、封存及本機 commit。
+- 2026-11-01 14:40 [老查] 依人類驗收授權將 status 由 review 改為 done；接續執行本機分支整合、任務封存與 commit。
 
 ## 完工回報
 
@@ -64,4 +64,4 @@ done_at: 2026-11-01
 
 ### 衍生任務
 
-- 前端權威運算後端化另由 `T-0005-server-authoritative-frontend.md` 追蹤。
+- 前端權威運算後端化另由 `T-0002-server-authoritative-frontend.md` 追蹤。
