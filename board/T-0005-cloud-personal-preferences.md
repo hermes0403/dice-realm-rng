@@ -5,7 +5,9 @@ status: open
 from: 老查
 to: any
 owner:
-priority: high
+contributors: []
+reviewer:
+priority: P1
 created: 2026-11-01
 updated: 2026-11-01
 depends_on: T-0004

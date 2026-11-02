@@ -5,7 +5,9 @@ status: in_progress
 from: barry
 to: any
 owner: 老查
-priority: high
+contributors: []
+reviewer:
+priority: P1
 created: 2026-11-01
 updated: 2026-11-02
 depends_on:

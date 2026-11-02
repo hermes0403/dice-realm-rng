@@ -3,7 +3,7 @@
 ## Baseline and method
 
 - Baseline: `fea25bf:script.js` (`refactor(frontend): split HTML CSS and JavaScript`), 995 lines and 720,804 bytes. This is the 994-line-class source referenced by T-0016, not the earlier pre-asset-split `script.js` at `fea25bf^`.
-- Current snapshot: 42 JavaScript files; `script.js` is a 291-line application composition root.
+- Current snapshot: 44 JavaScript files; `script.js` is a 297-line application composition root. The two feature modules above 300 lines are `systems/dice.js` (437 lines) and `systems/pets.js` (517 lines); see `FRONTEND_MODULE_MAP.md` for their shared-state boundaries and rationale.
 - Static inventory: 212 named function declarations and named arrow-function assignments in the baseline. All 212 have a current owner or an explicitly documented rename/nested-helper mapping below; there are no unresolved names.
 - The inventory contains 211 unique identifiers because `categoryOrder` is intentionally declared twice in separate local scopes; both declarations remain in `ui/inventory.js`, matching the baseline's two local declarations.
 - Anonymous callbacks, object-literal method shorthand, and event-handler bodies are not counted as named declarations. This inventory tracks named function ownership, not every executable statement.
@@ -177,7 +177,7 @@ The following original call names remain as entry-point wrappers so existing cro
 The current module tree also contains factory/setup entry points and helpers introduced during extraction. These are not missing baseline functions; they establish explicit dependency-injection boundaries or replace top-level initialization:
 
 - Composition facades: `systems/realm-social.js`, `ui/equipment.js`.
-- Services and setup entry points: `createGameStateService`, `createCloudSaveService`, `createAuthService`, `createDeviceLockService`, `createVisitTrackingService`, `createPresenceService`, `createActivityLogService`, `setupAccountActions`, `createAdminGrantService`, `createAdminPlayerManagement`, `createAdminMonitoringSystem`, `setupAdminUIBindings`.
+- Services and setup entry points: `createGameStateService`, `createCloudSaveService`, `createAuthService`, `createDeviceLockService`, `createVisitTrackingService`, `createPresenceService`, `createActivityLogService`, `setupAccountActions`, `createTimerManager`, `createAdminGrantService`, `createAdminPlayerManagement`, `createAdminMonitoringSystem`, `setupAdminUIBindings`.
 - Feature/UI factories: `createWeatherSystem`, `createDiceSystem`, `createPetSystem`, `createProgressionSystem`, `createGlobalAnnouncements`, `createRealmPolls`, `createCoinBoostService`, `createGlobalBoostSystem`, `createLeaderboardSystem`, `createPetIncomeSystem`, `createCodexUI`, `createInventoryUI`, `createMainRenderUI`, `createNavigationUI`, `createPetNoticeUI`, `setupPetSellingUI`, `createGloveUI`, `createPotionUI`.
 - Additional private helpers remain local to their owning factory, including event-binding callbacks and UI rendering helpers.
 

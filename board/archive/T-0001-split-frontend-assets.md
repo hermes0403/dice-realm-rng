@@ -5,7 +5,9 @@ status: done
 from: barry
 to: 老查
 owner: 老查
-priority: high
+contributors: []
+reviewer:
+priority: P1
 created: 2026-11-01
 updated: 2026-11-01
 depends_on:

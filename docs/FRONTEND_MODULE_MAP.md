@@ -1,6 +1,6 @@
 # Frontend ES Module Map
 
-Status: eighth extraction pass, centralized interval/timeout management, lifecycle regression hardening, and user-led browser regression; the current tree contains 44 JavaScript files. `script.js` is a 284-line application composition root. The dice and pet systems remain the only feature modules above 300 lines; their shared state boundaries are documented below.
+Status: eighth extraction pass, centralized interval/timeout management, lifecycle regression hardening, and user-led browser regression; the current tree contains 44 JavaScript files. `script.js` is a 297-line application composition root. `systems/dice.js` (437 lines) and `systems/pets.js` (517 lines) remain the only feature modules above 300 lines; their shared state boundaries are documented below.
 
 ## Entry point
 
@@ -12,7 +12,7 @@ Status: eighth extraction pass, centralized interval/timeout management, lifecyc
 
 ```text
 index.html
-└── script.js (284 lines) — application composition root and remaining startup bindings
+└── script.js (297 lines) — application composition root and remaining startup bindings
     ├── config.js
     ├── data/
     │   ├── dice.js
@@ -34,12 +34,12 @@ index.html
     │   └── account-actions.js
     ├── systems/
     │   ├── coin-boost.js
-    │   ├── dice.js (399 lines)
+    │   ├── dice.js (437 lines)
     │   ├── global-boost.js
     │   ├── leaderboards.js
     │   ├── pet-income.js
     │   ├── pet-skills.js
-    │   ├── pets.js (488 lines)
+    │   ├── pets.js (517 lines)
     │   ├── progression.js
     │   ├── realm-social.js (composition facade)
     │   ├── global-announcements.js (185 lines)
@@ -104,7 +104,7 @@ The remaining composition-root responsibilities are:
 - Defining small shared gameplay helpers (`byId`, `totalDice`, potion/stat calculations and `toast`).
 - Wiring the remaining top-level controls, account actions, admin bindings and application startup.
 
-At the current snapshot, `script.js` is 284 lines, and the project contains 44 JavaScript files. Game-state creation, legacy migration, normalization, auto-sell preference persistence, local save, player presence, activity logs, account actions, pet-sale notices, codex rendering, main-page render orchestration, inventory sale and bag-capacity calculations live in focused modules. Auth lifecycle and cloud-save operations are implemented in `services/auth.js` and `services/cloud-save.js`; the entry point composes them and retains compatibility wrappers. The realm social and equipment features are divided into announcement/poll and glove/potion modules; their original entry modules act as small composition facades. Two feature modules remain above 300 lines: `systems/dice.js` (399) and `systems/pets.js` (488). They retain shared dice-roll/timer state and shared pet ownership/skill/crafting state respectively; further splitting needs a separately designed state boundary to avoid duplicating timers or pet-state mutation. `data/pets.js` is a catalogue/data file and is treated separately from feature modules.
+At the current snapshot, `script.js` is 297 lines, and the project contains 44 JavaScript files. Game-state creation, legacy migration, normalization, auto-sell preference persistence, local save, player presence, activity logs, account actions, pet-sale notices, codex rendering, main-page render orchestration, inventory sale and bag-capacity calculations live in focused modules. Auth lifecycle and cloud-save operations are implemented in `services/auth.js` and `services/cloud-save.js`; the entry point composes them and retains compatibility wrappers. The realm social and equipment features are divided into announcement/poll and glove/potion modules; their original entry modules act as small composition facades. Two feature modules remain above 300 lines: `systems/dice.js` (437) and `systems/pets.js` (517). They retain shared dice-roll/timer state and shared pet ownership/skill/crafting state respectively; further splitting needs a separately designed state boundary to avoid duplicating timers or pet-state mutation. `data/pets.js` is a catalogue/data file and is treated separately from feature modules.
 
 ## Validation performed
 
