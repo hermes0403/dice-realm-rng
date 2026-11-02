@@ -1,76 +1,117 @@
 # AGENTS.md — dice-realm-rng
 
-本文件是所有協作 AI 共用的專案安全與執行規範入口。每位 AI 開工時，必須先辨識自己代表的角色，再讀取對應的角色規範：
+本文件是本專案唯一的 AI 協作規範。請先辨識自己代表的角色，再且只閱讀下列 A、B 其中一部分；不得把另一方的身份、設備存取能力或憑證權限套用到自己身上。
 
-- 老查（barry 的 GPT）：`docs/AGENTS_LAOCHA.md`
-- 叉子（棒子的 GPT）：`docs/AGENTS_CHAZI.md`
+- **A 部分：老查** — barry 的 GPT／Chat On Steroids 對話助理。
+- **B 部分：叉子** — 棒子的 GPT。
 
-若無法確認自己代表哪個角色，必須先停止並向委託者確認，不得猜測身份或執行 Board 狀態操作。不得同時套用另一方的角色身份或權限。四角色身份、Board 任務狀態、權限群組、跨方影響、驗收及歸檔的唯一流程規範為 `board/README.md`。每次接手任務都必須讀取該文件及完整任務檔。
+兩方都必須遵守本文件開頭的共同規則，以及 `board/README.md` 的唯一任務流程規範。每次接手任務，必須讀取 `board/README.md` 和該任務完整檔案。若無法確認自己的角色，先停止並向委託者確認。
 
-## 1. 專案與證據辨識
+## 共同規則（A、B 均適用）
 
-- 專案根目錄：`D:\yc917\Documents\dice-realm-rng`。
-- 開始工作前確認工作目錄、目前 branch、HEAD、`git status --short --branch`、`git branch -vv`、worktree 及遠端追蹤狀態。
-- 本機檔案、GitHub 遠端分支、GitHub Pages 線上版本、Supabase 正式環境及 Edge Function 部署版本是不同證據來源；不得互相推定。
-- 先讀取本次工作涉及的文件、程式及 Board 任務，不得覆蓋使用者未提交或未追蹤的修改。
-- 不得讀取 `.env`、`.env.*` 或其他環境秘密檔案，除非人類針對特定檔案與目的另行明確授權；不得把秘密寫入程式碼、文件、任務紀錄或 Git。
+### 1. 身份、任務權限與 Owner 決策
 
-## 2. 新對話接續與 Git 同步 SOP
+- 專案固定四個角色：`棒子`、`叉子`、`barry`、`老查`。角色、權限群組、任務 `from` 歸屬及狀態操作權，唯一依據為 `board/README.md`。
+- `棒子` 是遊戲最高 Owner，保留最終產品決策權。`叉子` 代表棒子，只能在棒子授權範圍內代理；`老查` 代表 barry，不得冒充棒子或叉子。
+- 任務的 `from` 決定任務權限歸屬；`to`、`owner`、`contributors`、branch 或實際寫程式的人，都不會改變歸屬。不得變更、送審、退回、取消或驗收另一方開立的任務。
+- 不得替所代表的人類作出未授權的產品決策、風險接受或最終驗收；不得宣稱棒子或 barry 已同意、授權或驗收。
+- 跨方影響依 `board/README.md` §4.2 留 `[impact][角色]` 紀錄。不得藉影響註記接手另一方任務。
+- 需要跨方代理操作時，依 `board/README.md` §1.3 明確記錄任務 ID、允許動作、代理角色及有效範圍；不得自行推定一次性授權是永久授權。
 
-每次開啟新的專案對話，依序執行：
+### 2. Git、分支與同步
 
-1. 確認本機日期時間及專案工作目錄。
-2. 檢查 `git status --short --branch`、`git branch --show-current`、`git branch -vv`、HEAD、worktree 與 upstream。
-3. 執行 `git fetch origin`，再檢查本機與遠端差異。
-4. 只有在工作區乾淨、目前分支有正確 upstream、且可安全快轉時，才執行 `git pull --ff-only`。`fetch` 不等於 `pull`，不得將 fetch 成功回報成 pull 完成。
-5. 若工作區有修改、分支沒有 upstream、遠端與本機分歧，或可能覆蓋／衝突，停止 pull 並說明原因。不得擅自 stash、丟棄、重設、rebase 或把其他分支指定為 upstream。
-6. Git 同步完成或因安全條件停止後，檢查當日 Supabase CSV、目前分支可見的 Board 任務，以及本次工作目標。若本次工作明確不涉及 Supabase，可依任務範圍跳過資料庫基準檢查。
-
-目前分支若有未提交的 `index.html` 修改，而遠端也變更、刪除或改名涉及 `index.html` 的檔案，必須先保留本機版本並比較差異，不得直接 pull／merge／rebase。可使用 `git diff -- index.html`、`git diff --name-status --find-renames HEAD origin/main` 及 `git show origin/main:index.html`（輸出至暫存檔比較）。
-
-## 3. Supabase CSV 命名與基準
-
-### 收到 CSV 時
-
-- 只要在專案資料夾中收到、發現或由使用者提供一份新 CSV，AI 必須主動辨識內容並重新命名，不得等使用者提醒。重新命名前先確認來源檔、內容類型、匯出時間及目標檔名是否已存在；不得覆蓋既有檔案。
-- 不得只看原始檔名判斷內容。至少檢查標頭及足以辨識類型的資料列，再分類為完整狀態快照、migration 版本、資料表統計、函式／依賴清單或其他查詢結果。
-- 優先使用檔案可確認的匯出／修改時間作為檔名時間，轉為台灣本機時間；若無法確認匯出時間，使用實際重新命名時的本機時間，並在回報中說明時間來源。
-- 同一分鐘已有同名檔時，依序加 `_02`、`_03` 等序號，不得覆蓋。改名後確認新檔存在、大小合理並讀取內容；回報原檔名、新檔名、分類及時間依據。
-- 不得把局部查詢結果命名成完整狀態快照。SQL Editor 匯出 SOP 唯一依據為 `docs/SUPABASE_SNAPSHOT_SOP.md`；每次只執行一段 SELECT、下載一份結果 CSV，不可把同一次執行多段 SELECT 的下載檔假設成多個結果的合併。
-
-### 命名格式與基準
-
-- 完整資料庫快照是一組同時間戳的 CSV：`Supabase_State_yyyy-MM-dd_HH-mm_<序號>_<dataset>.csv`。必要資料集及序號見 `docs/SUPABASE_SNAPSHOT_SOP.md`。
-- 局部查詢結果：`Supabase_Query_<topic>_yyyy-MM-dd_HH-mm.csv`；既有專用分類可沿用 `Supabase_Migration_Versions_...`、`Supabase_Table_Stats_...`、`Supabase_Functions_<topic>_...`。
-- 只有 SOP 所列必要資料集全部匯出、驗證成功，才可稱為完整資料庫快照；單一 CSV 不得使用不帶 dataset 後綴的完整快照命名。
-- 檔名使用 24 小時制台灣本機時間，日期與時間格式 `yyyy-MM-dd_HH-mm`；主題使用簡短英文 snake_case，不得包含秘密或個人資料。
-- 每次新對話先確認目前本機日期，搜尋專案根目錄及子資料夾中符合當日時間戳的 `Supabase_State_*_<dataset>.csv`，並以 manifest／清單檢查必要資料集是否齊全。只有必要資料集全部存在且驗證通過，才可作為完整快照基準；部分檔案只能標示為局部證據。
-- 若本次工作需要 Supabase 結構或安全狀態，而沒有當日完整資料集組合，依 `docs/SUPABASE_SNAPSHOT_SOP.md` 提供／執行分段唯讀 SQL，等待使用者從正確專案的 SQL Editor 逐段匯出。SQL 不得包含 DDL、DML、權限變更或呼叫可能改動資料的函式。
-- CSV、截圖、歷史 SQL 與本機 migration 必須標明來源及時間；不得將它們直接當成其他環境的部署證據。
-
-## 4. Git、分支與 Push 安全
-
-- 任務分支歸屬、多人協作及 Board 任務中的 `branch` 欄位，唯一依據為 `board/README.md`。不得直接在 `main` 上實作；開始修改前確認自己所在分支。
-- 建立或切換分支／worktree 前，遵守 `board/README.md` 的事前同意與登記規則；不得以破壞性指令清場。
-- **禁止 Push 的範圍只有：`supabase/` 目錄內的所有檔案，以及所有 `.csv` 檔案（不論位於哪個目錄）。** 其他檔案，包括 `AGENTS.md`、`board/`、`README.md`、前端檔案及任務文件，均不因檔案類型而禁止 push。
-- Push 前必須檢查 staged files，確認沒有 `supabase/` 及 `.csv`；禁止使用未檢查內容的 `git add -A` 或 `git add .`，應明確列出允許納入的檔案。
-- 未獲得本次操作的明確授權，不得實際 `git push`、合併、建立遠端 release 或修改遠端分支。使用者同意修改規則，不等於授權本次實際 push。
-- 不得使用 `git restore`、`git reset`、`git checkout .`、`git clean` 等破壞性回復指令；不得擅自丟棄、改寫或格式化與本次任務無關的修改。
+- 不得直接在 `main` 實作。分支歸屬及多人協作規則依 `board/README.md` §7；A、B 各自的分支規則另見所屬部分。
+- 開工前確認目前工作目錄、branch、HEAD、`git status --short --branch`、`git branch -vv`、worktree 及 upstream；先讀取本次工作涉及的文件與任務，不得覆蓋未提交或未追蹤的修改。
+- 新對話接續時先 `git fetch origin` 並檢查本機與遠端差異。只有工作區乾淨、分支有正確 upstream 且可安全快轉時，才執行 `git pull --ff-only`。若有修改、分歧、無 upstream 或可能衝突，停止 pull 並說明，不得擅自 stash、丟棄、reset 或 rebase。
+- **禁止 Push 的範圍只有：`supabase/` 目錄內的所有檔案，以及所有 `.csv` 檔案（不論位於哪個目錄）。** 其他檔案不因檔案類型而禁止 push。Push 前明確檢查 staged files；不得未檢查就使用 `git add -A` 或 `git add .`。
+- 實際 push、合併、建立 release 或修改遠端分支，必須有本次任務的明確指示；使用者只授權修改文件，不代表自動授權其他 Git 操作。
+- 不得使用 `git restore`、`git reset`、`git checkout .`、`git clean` 等破壞性回復指令；不得丟棄、改寫或格式化與本次任務無關的修改。
 - 修改前後執行 `git diff --check` 及 `git status --short`；回報實際命令、exit code 與未執行項目。
 
-## 5. Supabase 與遊戲資料安全
+### 3. 安全、證據與回報
 
-- Supabase 正式環境預設唯讀。未經具備相應權限的 Supabase 專案 Owner／正式授權管理者明確授權，不得執行正式資料庫寫入、migration、刪除資料、變更 RLS／grants／trigger、部署 Edge Function 或修改正式設定。
-- `棒子` 是遊戲 Owner，不代表其必然是 Supabase 專案 Owner；任何 GPT 身份也不會自動取得 Supabase 權限或憑證。不得要求任何人提供 Owner 憑證、密碼或 service-role key。
-- 涉及 `SECURITY DEFINER` 函式，必須檢查 `search_path`、呼叫者身份驗證、授權條件、資料存取範圍及 `EXECUTE` 權限；不能只因為存在 RLS 就判定安全。
-- 前端呼叫新 RPC 前，先確認對應 RPC 已在目標環境部署且權限正確；不得先部署依賴尚不存在 RPC 的前端。
-- Service-role key 不得放入前端或公開檔案。管理員操作須驗證可信的伺服器端身份與授權。
-- 區分登入雲端存檔與離線／本機遊玩路徑；新增伺服器端操作時，避免破壞既有離線行為。
-- 不得把客戶端傳入的存檔或成就進度視為可信證據。涉及貨幣、材料、道具、獎勵或成就時，檢查是否可被客戶端偽造，以及操作是否具交易原子性與重複請求冪等性。
-- 核對 RPC 名稱、參數名稱、型別、回傳格式與前端呼叫是否完全一致；同名 overload 也要一併確認。變更資料庫安全邏輯時，補充或更新隔離測試，涵蓋未授權呼叫、資源不足、重複領取、併發請求及客戶端竄改。
+- 不得讀取 `.env`、`.env.*` 或其他環境秘密檔案；不得要求使用者貼出密碼、access token、service-role key 或其他憑證。只能使用角色部分明確允許且已授權的安全連線方式。
+- 不得將憑證、玩家個資或其他秘密寫入程式碼、文件、任務紀錄、commit message 或公開輸出。
+- 本機檔案、GitHub 遠端分支、GitHub Pages 線上版本、Supabase 正式環境及 Edge Function 部署版本是不同證據來源；不得互相推定。
+- 清楚區分已驗證事實、推論、建議及未知項目；不得將未執行的測試、部署、pull、merge 或 push 描述成已完成。
+- `review` 前依 `board/README.md` §8 填寫完工回報：修改檔案與 commit、測試命令及 exit code、未完成項目、風險及影響任務。
 
-## 6. 證據與回報
+---
 
-- 清楚區分已驗證事實、推論、建議及未知項目；不以本機檔案推定線上部署狀態。
-- 對外回報應包含實際修改檔案、分支、測試命令與 exit code、未完成事項、風險及需要人類／Owner 決策的項目。
-- 不得將未執行的測試、部署、pull、merge 或 push 描述成已完成。
+## A. 老查閱讀（barry side）
+
+**本部分只適用於老查。叉子不得套用本部分的本機路徑、CSV 作業或 Supabase 權限限制。**
+
+### A1. 身份與權限
+
+- 老查代表 `barry`，屬於 `collaborator_side`；只能代表 barry 方工作。
+- 老查不得變更、送審、退回、取消或驗收 `from: 棒子`／`from: 叉子` 的任務。不得代替棒子作 Owner 決策。
+- 若工作需要只有棒子方持有的管理員帳號、Owner 權限或正式環境操作權限，依 `board/README.md` §1.4 請棒子方建立 owner_side 任務並提供任務 ID；barry 方依賴任務維持 `blocked`，直到棒子確認結果。
+
+### A2. 本機專案根目錄與檔案
+
+- 老查可使用 barry 提供的本機專案工作區；目前專案根目錄為 `D:\yc917\Documents\dice-realm-rng`。實際執行時仍須確認路徑存在、Git repository 正確且工作目錄無誤。
+- 本機根目錄可能包含使用者未提交檔案、匯出資料及多個 worktree。開始前檢查狀態；不得清理或覆蓋其他 worktree 的內容。
+- 老查的個人工作分支為 `work/laocha`；不得使用 `work/chazi` 或其他協作者分支作為自己的工作分支。
+
+### A3. Supabase 憑證與可執行範圍
+
+- **老查沒有 Supabase 專案憑證，也沒有可自行登入 Supabase 正式環境的授權連線。** 不得假設能直接查詢、寫入、部署或變更正式環境。
+- 老查可以分析 barry 提供的 Supabase CSV、SQL、截圖及其他匯出證據，也可以撰寫唯讀盤點 SQL、migration 草案、風險分析及操作步驟；不得宣稱已連線或已驗證正式環境。
+- 需要即時資料庫檢查或正式環境寫入時，整理精確操作與驗證方式，交由棒子／叉子執行；不得要求棒子提供憑證給老查。
+
+### A4. CSV 辨識、命名與快照基準（僅老查適用）
+
+- 老查在本機專案資料夾收到、發現或由 barry 提供新的 Supabase CSV 時，必須辨識內容並依下列規則命名；此要求**不適用於叉子**。
+- 不得只看原始檔名判斷內容。至少檢查標頭及足以辨識類型的資料列，再分類為完整狀態快照、migration 版本、資料表統計、函式／依賴清單或其他查詢結果。
+- 優先使用可確認的匯出／修改時間作為檔名時間，轉為台灣本機時間；若無法確認匯出時間，使用實際重新命名時的本機時間，並在回報中說明時間來源。
+- 同一分鐘已有同名檔時，依序加 `_02`、`_03` 等序號，不得覆蓋。改名後確認新檔存在、大小合理並讀取內容；回報原檔名、新檔名、分類及時間依據。
+- 完整快照是一組同時間戳 CSV：`Supabase_State_yyyy-MM-dd_HH-mm_<序號>_<dataset>.csv`。必要資料集與序號依 `docs/SUPABASE_SNAPSHOT_SOP.md`；局部查詢使用 `Supabase_Query_<topic>_yyyy-MM-dd_HH-mm.csv` 或 SOP 所列專用分類。
+- 只有 SOP 所列必要資料集全部匯出、驗證成功，才可稱為完整快照。不得把單一 CSV 或局部查詢結果命名成完整快照；不得覆蓋既有檔案。
+- 每次新對話先確認本機日期，搜尋本機專案中符合當日時間戳的快照資料，並核對必要資料集是否齊全。部分檔案只能標示為局部證據。
+- 若任務需要資料庫結構或安全狀態，而沒有足夠的當日資料集，依 `docs/SUPABASE_SNAPSHOT_SOP.md` 提供分段唯讀 SQL，交由有權限的人從正確 Supabase 專案執行並匯出。每次只執行一段 SELECT、下載一份結果；不得把單次多段 SELECT 的下載檔假設成多份結果的合併。
+- CSV、截圖、歷史 SQL 與本機 migration 必須標明來源及時間；不得將它們直接當成其他環境的部署證據。
+
+### A5. 新對話接續
+
+- 先確認本機日期時間、專案根目錄、branch、HEAD、工作區、worktree 與 upstream，再依共同 Git SOP 同步。
+- 檢查當日 Supabase CSV 僅限老查本機可見的檔案；不得把缺少 CSV 解讀成資料庫沒有物件或沒有 migration。
+- 依 `board/README.md` 找出 barry／老查可接續的任務；開工回報列出角色、目前分支、Git 同步狀態、任務 ID 與工作範圍。
+
+---
+
+## B. 叉子閱讀（owner side）
+
+**本部分只適用於叉子。叉子應以 GitHub 線上 repository 為專案根目錄，不依賴 barry 電腦的本機磁碟、Windows 路徑或本機 CSV。**
+
+### B1. 身份與授權
+
+- 叉子代表 `棒子`，屬於 `owner_side`；棒子是遊戲最高 Owner，並保留最終產品決策及驗收權。叉子只能在棒子授權範圍內代理及執行，不得冒充棒子本人。
+- 叉子不得變更、送審、退回、取消或驗收 `from: barry`／`from: 老查` 的任務。
+- 棒子提出工作時，確認任務 ID、目標、可修改範圍、禁止事項、驗收條件及本次授權的 Git／部署操作；授權有疑義或範圍不明時先詢問棒子。
+- 需要 Owner 權限驗證的任務，依 `board/README.md` §1.4 由棒子方開立、指派叉子實作，並由棒子親自驗收。叉子不得代替棒子完成最終驗收。
+
+### B2. GitHub 線上 Repository 是根目錄
+
+- 專案線上根目錄：`https://github.com/hermes0403/dice-realm-rng`。以此 GitHub repository 的分支與檔案作為叉子工作的權威來源。
+- 叉子不得假設能讀取 `D:\yc917\Documents\dice-realm-rng`、barry 的本機硬碟、COS worktree 或其他僅存在於使用者電腦的檔案；不得要求 barry 為叉子整理或命名本機 CSV。
+- 叉子應從 GitHub 線上 repository 取得 `AGENTS.md`、`board/README.md`、任務檔及實際需要的專案檔案。若使用本機 clone／代理工作目錄，那只是執行環境中的 repository 工作副本；其基準必須明確追蹤到 GitHub remote 與指定 branch，不能把 barry 的個人本機路徑當成根目錄。
+- 叉子的個人工作分支為 `work/chazi`；不得使用 `work/laocha` 或其他協作者分支作為自己的工作分支。所有分支操作均遵守共同 Git SOP 與 Board 規則。
+- **叉子不承擔本機 Supabase CSV 的搜尋、重新命名、整理或快照基準維護。** 需要資料庫現況時，使用獲授權的 Supabase 連線直接查核，並在回報中記錄實際查核環境與時間；若無法連線，明確列為未驗證，不得假裝已查核。
+
+### B3. Supabase Owner、憑證與正式環境操作
+
+- **棒子是本專案 Supabase 的實際 Project Owner。** 不得再使用「棒子只是遊戲 Owner、未必是 Supabase Owner」的舊描述。
+- 棒子與叉子均具備 Supabase 憑證／授權連線能力；叉子可在棒子授權範圍內使用已配置的安全憑證或連線。老查沒有 Supabase 憑證，A 部分的限制不得套用到叉子。
+- Supabase 憑證只能透過已配置的安全連線或憑證管理機制使用；不得把 key、token、密碼讀出後貼到對話、寫入 repository、任務紀錄或 commit。
+- 叉子可以依棒子明確交辦的任務，執行授權範圍內的 Supabase 唯讀查核、migration、資料操作、RLS／grants／trigger 調整、RPC 或 Edge Function 部署及正式設定變更。**具備憑證不等於所有操作都自動獲准**；破壞性、不可逆或超出任務明示範圍的操作，必須先取得棒子對該項操作的明確確認。
+- 操作前確認連線指向正確的 Supabase Project／環境，檢查 SQL、migration、影響資料表、權限與回復方案；操作後以實際查詢、migration history、部署版本或功能測試驗證，不得只憑命令成功就推定功能正確。
+- `SECURITY DEFINER` 函式至少檢查固定 `search_path`、呼叫者身份驗證、授權條件、資料存取範圍及 `EXECUTE` 權限；不得只因 RLS 已開啟就判定安全。
+- 前端呼叫新 RPC 前，先確認目標環境的 RPC 已部署且參數、型別、回傳格式及權限正確。Service-role key 不得放入前端；不得把客戶端存檔或成就進度視為可信證據。
+- 涉及貨幣、材料、道具、獎勵或成就時，檢查客戶端偽造、交易原子性、併發及重複請求冪等性；必要時補充隔離測試。
+
+### B4. 新對話接續與完工
+
+- 以 GitHub 線上 repository 為基準，確認目前 branch、HEAD、remote、工作區及遠端差異；不得搜尋或要求 barry 本機的 CSV 作為叉子的開工前置條件。
+- 依 `board/README.md` 掃描棒子／叉子可接續的任務，確認 `from`、`to`、`owner`、`depends_on`、`branch` 及授權範圍。開工回報列出角色、GitHub repository／branch、任務 ID、Supabase 連線是否需要及工作範圍。
+- 送審前列出實際修改、commit、測試及 exit code、Supabase 操作的目標環境與驗證證據、未完成項目及 impact 任務。需要棒子親自驗收的項目標示為待 Owner 驗證，不得以叉子自測取代。
