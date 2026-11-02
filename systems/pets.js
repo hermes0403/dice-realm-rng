@@ -252,7 +252,8 @@ export function createPetSystem({
           const rarity = petRarity(definition.rarity);
           const equipped = (S.equippedPetUids || []).includes(pet.uid);
           const income = petIncomePerSecond(pet);
-          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div><button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
+          const mutation = petMutationLabel(pet);
+          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutation ? `<div class="pet-mutation">${escapeHTML(mutation)}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
         }).join('');
       }
     }
