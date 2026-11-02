@@ -262,3 +262,5 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 #petInventoryGrid .pet-name{font-size:clamp(11px,2.8vw,15px)!important}
 #petInventoryGrid .pet-meta{font-size:clamp(9px,2.3vw,12px)!important;line-height:1.4}
 @media(max-width:360px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}}
+
+.pet-mutation{margin-top:3px;color:#b9a5ff;font-size:12px;font-weight:750;overflow-wrap:anywhere;line-height:1.4}
