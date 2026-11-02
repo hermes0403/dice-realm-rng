@@ -1,0 +1,4 @@
+export function format(n){return Number(n||0).toLocaleString('en-US')}
+export function formatWalletScientific(n){const v=Number(n)||0;if(!Number.isFinite(v)||v===0)return '0$';const a=Math.abs(v),units=[['Qi',1e18],['Qa',1e15],['T',1e12],['B',1e9],['M',1e6],['K',1e3]];for(const [suffix,base] of units){if(a>=base)return String(Number((v/base).toFixed(a/base>=100?0:a/base>=10?1:2)))+suffix+'$'}return format(v)+'$'}
+export function compactNum(n){const v=Number(n)||0;if(v>=1e9)return (v/1e9).toLocaleString('en-US',{maximumFractionDigits:2})+'B';if(v>=1e6)return (v/1e6).toLocaleString('en-US',{maximumFractionDigits:2})+'M';if(v>=1e3)return (v/1e3).toLocaleString('en-US',{maximumFractionDigits:1})+'K';return format(v)}
+export function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
