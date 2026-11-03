@@ -82,7 +82,7 @@ export function setupPetSellingUI({
     }
 
     // Capture click ensures this working handler wins over any stale listener registered earlier.
-    document.addEventListener('click', event => {
+    document.addEventListener('click', async event => {
       const target = event.target;
       if (target.closest('#petSellBtn')) {
         event.preventDefault();
