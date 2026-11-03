@@ -1,7 +1,7 @@
 ---
 id: T-0020
 title: 在我的寵物清單顯示寵物變異
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -40,6 +40,11 @@ done_at:
 ## 紀錄
 
 - 2026-11-03 [叉子] 依棒子提出的需求建立任務；待在 work/chazi 檢查寵物卡片及 mutation 欄位後接手。
+
+- 2026-11-03 [叉子] 接手於 work/chazi。確認每隻寵物目前以獨立欄位保存外觀變異 variant（golden／diamond／rainbow）及天氣變異 mutation（rain／snow／thunder／crystal／hell）；原卡片只顯示 mutation，故漏掉外觀變異。
+- 2026-11-03 [叉子] 已新增 formatPetMutationLabels，按固定順序顯示外觀變異再顯示天氣變異，並移除「變異」尾字以符合「彩虹、打雷」格式；支援既有單值資料與陣列資料、去除重複標籤，沒有有效變異時回傳空字串，卡片仍以條件渲染避免空白第三行。沿用既有 .pet-mutation CSS 的 overflow-wrap:anywhere，長文字可換行。
+- 2026-11-03 [叉子] 驗證：systems/pets.js 語法解析通過；V8 測試覆蓋彩虹＋打雷、黃金＋雨、鑽石＋水晶、無變異、未知值、陣列重複值及不同寵物隔離；確認卡片仍只在有標籤時渲染變異行。已新增 tests/pet-mutation-display.test.js。
+- 2026-11-03 [叉子] 尚待手機／桌面真實瀏覽器版面驗收；未部署或合併。
 
 ## 完工回報
 
