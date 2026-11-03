@@ -12,11 +12,31 @@ export function createGlobalBoostSystem({
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
+  function timestampToMs(value) {
+    if (value == null || value === '') return NaN;
+    if (typeof value === 'number' && Number.isFinite(value)) return value < 1e12 ? value * 1000 : value;
+    const text = String(value).trim();
+    if (/^\\d+(?:\\.\\d+)?$/.test(text)) {
+      const numeric = Number(text);
+      return numeric < 1e12 ? numeric * 1000 : numeric;
+    }
+    const parsed = Date.parse(text);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
   function activeGlobalBoost() {
     const boost = getBoostState();
-    return boost && Number.isFinite(new Date(boost.ends_at).getTime()) && new Date(boost.ends_at).getTime() > Date.now()
-      ? boost
-      : { luck_percent: 0, speed_percent: 0, ends_at: null };
+    if (!boost) return { luck_percent: 0, speed_percent: 0, ends_at: null, _endsAtMs: NaN };
+    const endsAt = timestampToMs(boost.ends_at ?? boost.expires_at ?? boost.end_at);
+    if (Number.isFinite(endsAt) && endsAt <= Date.now()) {
+      return { luck_percent: 0, speed_percent: 0, ends_at: null, _endsAtMs: NaN };
+    }
+    return { ...boost, _endsAtMs: endsAt };
+  }
+  function remainingClock(endsAt) {
+    if (!Number.isFinite(endsAt)) return '剩餘時間無法讀取';
+    const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+    return '剩餘 ' + String(Math.floor(remaining / 60)).padStart(2, '0') + ':' +
+      String(remaining % 60).padStart(2, '0');
   }
 
   async function refreshGlobalBoost() {
@@ -45,14 +65,16 @@ export function createGlobalBoostSystem({
     const element = documentRef.getElementById('adminGlobalBoostStatus');
     if (!element) return;
     const boost = activeGlobalBoost();
-    if (!boost.ends_at) {
+    if (!boost.ends_at && !boost.expires_at && !boost.end_at) {
       element.textContent = '目前沒有全體加成';
       return;
     }
-    const remaining = Math.max(0, Math.ceil((new Date(boost.ends_at).getTime() - Date.now()) / 1000));
-    element.textContent = remaining
-      ? `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘 ${remaining} 秒`
-      : '全體加成已結束';
+    const remaining = Number.isFinite(boost._endsAtMs)
+      ? Math.max(0, Math.ceil((boost._endsAtMs - Date.now()) / 1000))
+      : null;
+    element.textContent = remaining == null
+      ? `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘時間無法讀取`
+      : `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘 ${remaining} 秒`;
   }
 
   function renderRealmActivity() {
@@ -63,7 +85,7 @@ export function createGlobalBoostSystem({
     const luckPercent = Number(boost.luck_percent) || 0;
     const speedPercent = Number(boost.speed_percent) || 0;
     const coinBoost = getCoinBoost();
-    const hasLuckOrSpeed = !!boost.ends_at && (luckPercent > 0 || speedPercent > 0);
+    const hasLuckOrSpeed = !!getBoostState() && (luckPercent > 0 || speedPercent > 0);
     const hasCoinBoost = !!coinBoost;
     const hasBoost = hasLuckOrSpeed || hasCoinBoost;
     welcome.hidden = hasBoost;
@@ -72,17 +94,12 @@ export function createGlobalBoostSystem({
       panel.innerHTML = '';
       return;
     }
-    const remaining = Math.max(0, Math.ceil((new Date(boost.ends_at).getTime() - Date.now()) / 1000));
-    const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
-    const seconds = String(remaining % 60).padStart(2, '0');
+    const globalRemaining = remainingClock(boost._endsAtMs);
     const cards = [];
-    if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small>剩餘 ${minutes}:${seconds}</small></span></button>`);
-    if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small>剩餘 ${minutes}:${seconds}</small></span></button>`);
+    if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small>${globalRemaining}</small></span></button>`);
+    if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small>${globalRemaining}</small></span></button>`);
     if (coinBoost) {
-      const coinRemaining = Math.max(0, Math.ceil((Number(coinBoost.expires_at) - Date.now()) / 1000));
-      const coinMinutes = String(Math.floor(coinRemaining / 60)).padStart(2, '0');
-      const coinSeconds = String(coinRemaining % 60).padStart(2, '0');
-      cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>剩餘 ${coinMinutes}:${coinSeconds}</small></span></button>`);
+      cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>${remainingClock(timestampToMs(coinBoost.expires_at))}</small></span></button>`);
     }
     panel.innerHTML = `<div class="eyebrow">REALM LIVE EVENT</div><h1>管理員活動</h1><div class="realm-activity-grid">${cards.join('')}</div>`;
   }
