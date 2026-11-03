@@ -13,13 +13,13 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
   }
 
   async function refreshCoinBoosts(force = false) {
-    if (refreshBusy || !getCurrentUser() || !supabaseClient) return;
+    if (refreshBusy || !getCurrentUser() || !supabaseClient) return false;
     if (!force && Date.now() - activeCoinBoosts.lastFetch < 5000) return;
     refreshBusy = true;
     activeCoinBoosts.lastFetch = Date.now();
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session?.access_token) return;
+      if (!session?.access_token) return false;
       const response = await fetch(`${SUPABASE_URL}/functions/v1/dice-rng-admin`, {
         method: 'POST',
         headers: {
@@ -32,8 +32,10 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || '讀取倍率失敗');
       activeCoinBoosts = { global: data.global || null, personal: data.personal || null, lastFetch: Date.now() };
+      return true;
     } catch (error) {
       console.warn('Coin boost refresh failed', error);
+      return false;
     } finally {
       refreshBusy = false;
     }
