@@ -31,7 +31,7 @@ done_at:
 - [x] 移除重複且先回傳的 achievement_counts 分支，確保正式執行的是現行成就清單。
 - [x] 管理員成就清單顯示「鑽石手套」及「糖果手套」，並納入現行 collect28 與舊版 collect30。
 - [x] 正式 Edge Function 部署後確認版本為 ACTIVE。
-- [x] 依 g5 持有狀態及購買紀錄重新確認唯一玩家，補回 craftVoid 並設 rewardGiven=true。
+- [ ] 依 g5 持有狀態及購買紀錄補回 craftVoid，並確認標記能持續保留。
 - [x] 確認其他玩家資產與藥水庫存未被修改。
 - [ ] 棒子登入管理員面板確認統計顯示，當事玩家登入後確認成就顯示完成。
 
@@ -40,23 +40,24 @@ done_at:
 - 2026-11-04 [叉子] 依棒子本次要求檢查管理員成就統計。發現 dice-rng-admin 有兩個同名 achievement_counts 分支；前面的舊分支先 return，導致後面正確的「鑽石手套／糖果手套」清單永遠無法執行。舊分支將 craftVoid 顯示為「虛空」，且只計算 unlockedAt。
 - 2026-11-04 [叉子] 已部署修正至 dice-rng-admin，版本 29、狀態 ACTIVE；現在只剩一個 achievement_counts 分支，並新增 collect28 現行成就統計，保留 collect30 舊版資料列。
 - 2026-11-04 [叉子] 唯讀複查發現先前補回的 craftVoid 標記已再次不見。重新核對後，唯一 g5 持有者有一筆 item_id=g5 購買紀錄；已只補回該玩家 craftVoid，unlockedAt 使用購買紀錄時間，rewardGiven=true，未發放任何藥水。
-- 2026-11-04 [叉子] SQL 回查確認 craftVoid 已寫入。正式面板與玩家端畫面仍待棒子／當事玩家實際登入驗收；GitHub Pages 部署狀態尚未確認。
+- 2026-11-04 [叉子] 更新後立即查詢可讀到 craftVoid，但後續再次唯讀查詢時標記已消失，代表玩家存檔仍可能被其他同步寫入覆蓋；目前不可視為資料修復完成。需先確認 T-0024 前端版本已部署並停止舊版客戶端覆寫，再重新補回並驗證持久性。正式面板與玩家端畫面仍待棒子／當事玩家實際登入驗收；GitHub Pages 部署狀態尚未確認。
 
 ## 完工回報
 
 ### 改了什麼
 
 - Supabase Edge Function dice-rng-admin：移除先回傳的舊版重複 achievement_counts 分支，保留現行成就清單；新增 collect28 統計，舊 collect30 保留為舊版項目。
-- Supabase game_saves：只為有 g5 持有狀態及 g5 購買紀錄的玩家補回 craftVoid，標記 rewardGiven=true。
+- Supabase game_saves：曾嘗試為有 g5 持有狀態及 g5 購買紀錄的玩家補回 craftVoid，標記 rewardGiven=true；後續複查發現標記再次消失，尚未完成持久性修復。
 
 ### 怎麼驗證的
 
 - get_edge_function：確認版本 29、ACTIVE，且只剩一個 achievement_counts 分支。
-- 唯讀 SQL：確認唯一 g5 持有者與一筆購買紀錄；更新後確認 craftVoid 內容與 rewardGiven=true。
+- 唯讀 SQL：確認唯一 g5 持有者與一筆購買紀錄；更新後同一查詢曾讀到 craftVoid，但後續查詢又為 null，故持久性驗證未通過。
 - 尚未以管理員登入呼叫前端面板，也尚未驗證 GitHub Pages 部署。
 
 ### 沒做／做不到的
 
+- craftVoid 標記再次消失，需先確認舊版前端是否持續覆寫雲端存檔，再補回標記並驗證持久性。
 - 尚待管理員與當事玩家實際登入確認前端畫面。
 - GitHub Pages 部署狀態無法透過目前可用的 GitHub API 讀取端點確認。
 
