@@ -276,9 +276,11 @@ export function createPetSystem({
           const db = petById(b.id) || { rarity: 'common', name: '未知寵物' };
           const ra = rarityOrder.indexOf(da.rarity);
           const rb = rarityOrder.indexOf(db.rarity);
-          if (petSortMode === 'income-asc') return petIncomePerSecond(a) - petIncomePerSecond(b) || ra - rb || da.name.localeCompare(db.name, 'zh-Hant');
+          const nameOrder = da.name.localeCompare(db.name, 'zh-Hant');
+          const weightOrder = (Number(a.kg) || 0) - (Number(b.kg) || 0);
+          if (petSortMode === 'income-asc') return petIncomePerSecond(a) - petIncomePerSecond(b) || ra - rb || nameOrder || weightOrder;
           const direction = petSortMode === 'rarity-asc' ? 1 : -1;
-          return direction * (ra - rb) || da.name.localeCompare(db.name, 'zh-Hant');
+          return direction * (ra - rb) || nameOrder || weightOrder;
         });
         grid.innerHTML = sorted.map(pet => {
           const definition = petById(pet.id) || { id: pet.id, name: '未知寵物', icon: '❔', rarity: 'common' };
@@ -286,7 +288,21 @@ export function createPetSystem({
           const equipped = (S.equippedPetUids || []).includes(pet.uid);
           const income = petIncomePerSecond(pet);
           const mutationTags = formatPetMutationTags(pet, PET_MUTATIONS);
-          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => `<span class="pet-mutation-tag ${tag.className}">${escapeHTML(tag.label)}</span>`).join('')}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
+          const mutationColors = {
+            'pet-mutation-golden': '#ffe69a',
+            'pet-mutation-diamond': '#b9e8ff',
+            'pet-mutation-rainbow': 'rainbow',
+            'pet-mutation-weather-thunder': '#fff12d',
+            'pet-mutation-weather-crystal': '#ff9bd5',
+            'pet-mutation-weather-hell': '#ff5364',
+            'pet-mutation-weather-snow': '#fff4e8',
+            'pet-mutation-weather-rain': '#72baff'
+          };
+          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => {
+            const color = mutationColors[tag.className] || '#ffffff';
+            const rainbowStyle = color === 'rainbow' ? 'color:transparent!important;background:linear-gradient(90deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1);background-clip:text;-webkit-background-clip:text;' : `color:${color}!important;`;
+            return `<span class="pet-mutation-tag ${tag.className}" style="${rainbowStyle}border-color:${color === 'rainbow' ? '#c69bff' : color}!important;text-shadow:0 0 7px ${color === 'rainbow' ? '#c69bff88' : color + '88'}">${escapeHTML(tag.label)}</span>`;
+          }).join('')}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
         }).join('');
       }
     }
