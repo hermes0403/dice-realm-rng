@@ -157,8 +157,21 @@ export function createPetSystem({
   }
 
   function petMutationLabel(pet) {
-    const mutation = PET_MUTATIONS[pet?.mutation];
-    return mutation ? `${mutation.name} · ×${mutation.multiplier}` : '';
+    if (!pet || typeof pet !== 'object') return '';
+    const labels = [];
+    const variantNames = { golden: '黃金', diamond: '鑽石', rainbow: '彩虹' };
+    const variants = Array.isArray(pet.variants) ? pet.variants : (Array.isArray(pet.variant) ? pet.variant : [pet.variant]);
+    for (const variant of variants) {
+      const label = variantNames[variant];
+      if (label && !labels.includes(label)) labels.push(label);
+    }
+    const mutations = Array.isArray(pet.mutations) ? pet.mutations : (Array.isArray(pet.mutation) ? pet.mutation : [pet.mutation]);
+    for (const key of mutations) {
+      const mutation = PET_MUTATIONS[key];
+      const label = mutation?.name?.replace(/變異$/, '');
+      if (label && !labels.includes(label)) labels.push(label);
+    }
+    return labels.join('、');
   }
 
   function rollPetWeightKg() {
