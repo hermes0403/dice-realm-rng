@@ -292,6 +292,7 @@ export function createDiceSystem(deps) {
     rollButton.disabled = true;
 
     timerManager.setTimeout(async () => {
+      if (currentRollSequence !== rollSequence) return;
       try {
         const currentState = getState();
         const angelUsed = (Number(currentState.potions?.angelCharges) || 0) > 0;
@@ -399,6 +400,7 @@ export function createDiceSystem(deps) {
         if (halloweenVariant) await playSmallReveal(dice, 'HALLOWEEN VARIANT');
         else if (dice.den === 4096) await playSmallReveal(dice, 'RARE DISCOVERY');
         else if (dice.den >= 10000) await playRarityReveal(dice);
+        if (currentRollSequence !== rollSequence) return;
 
         timerManager.setTimeout(() => {
           if (!releaseRoll(currentRollSequence)) return;
