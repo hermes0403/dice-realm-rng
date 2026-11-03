@@ -56,7 +56,7 @@ test('adds the fourth earnings rank entry without changing the existing three ra
     assert.match(document.elements.rareRank.innerHTML, /1\/2048/);
     assert.match(document.elements.moneyRank.innerHTML, /完成 2 個成就/);
     assert.match(document.elements.myRankStrip.innerHTML, /賺錢排行榜/);
-    assert.equal(document.myRankValues[3].textContent, '待後端開放');
+    assert.match(document.elements.myRankStrip.innerHTML, /待後端開放/);
     assert.match(document.elements.incomeRank.innerHTML, /尚未開放/);
     assert.doesNotMatch(selectedFields, /pet_income_per_second/);
   } finally {
@@ -84,7 +84,7 @@ test('keeps the earnings leaderboard unavailable when the profile query fails', 
     });
     await system.refreshLeaderboards();
     assert.match(document.elements.incomeRank.innerHTML, /尚未開放/);
-    assert.match(document.elements.myRankStrip.innerHTML, /待後端開放/);
+    assert.equal(document.myRankValues[3].textContent, '待後端開放');
   } finally {
     globalThis.document = previousDocument;
   }
