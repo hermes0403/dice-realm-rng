@@ -7,12 +7,13 @@ const bindings = readFileSync(new URL('../admin/ui-bindings.js', import.meta.url
 
 test('coin boost fold is located once inside the admin activities section', () => {
   const activity = html.indexOf('🎉 管理員活動');
+  const button = html.indexOf('id="adminActivityButton"');
   const boost = html.indexOf('id="adminCoinBoostFold"');
   const weather = html.indexOf('🌦 召喚與天氣');
-  assert.ok(activity >= 0 && activity < boost && boost < weather);
+  assert.ok(activity >= 0 && activity < button && button < boost && boost < weather);
   assert.equal((html.match(/id="adminCoinBoostFold"/g) || []).length, 1);
   assert.equal(html.slice(0, activity).includes('id="adminCoinBoostFold"'), false);
-  assert.match(html, /開啟管理員活動設定/);
+  assert.match(html, /開啟收益倍率設定/);
 });
 
 test('admin activity button opens and focuses the relocated coin boost fold', () => {
