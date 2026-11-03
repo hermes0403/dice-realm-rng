@@ -6,14 +6,14 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
     const money = document.getElementById('moneyRank');
     const income = document.getElementById('incomeRank');
     const mine = document.getElementById('myRankStrip');
-    if (!local || !rare || !money || !income) return;
+    if (!local || !rare || !money) return;
     if (!supabaseClient) {
       local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">雲端服務尚未載入，請重新整理。</div>';
-      income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
+      if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
       return;
     }
     local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">正在更新排行榜…</div>';
-    income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
+    if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
     try {
       const fields = 'user_id,username,total_rolls,unique_dice,rarest_den,coins,achievement_count,achievement_reached_at,updated_at';
       const { data, error } = await supabaseClient.from('player_profiles').select(fields).order('total_rolls', { ascending: false }).limit(1000);
