@@ -1,3 +1,16 @@
+/** Normalize ISO timestamps and Unix seconds/milliseconds to epoch milliseconds. */
+export function timestampToMs(value) {
+  if (value == null || value === '') return NaN;
+  if (typeof value === 'number' && Number.isFinite(value)) return value < 1e12 ? value * 1000 : value;
+  const text = String(value).trim();
+  if (/^\d+(?:\.\d+)?$/.test(text)) {
+    const numeric = Number(text);
+    return numeric < 1e12 ? numeric * 1000 : numeric;
+  }
+  const parsed = Date.parse(text);
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+
 /** Reads the effective personal/global coin multiplier from the admin API. */
 export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY }) {
   let activeCoinBoosts = { global: null, personal: null, lastFetch: 0 };
@@ -7,17 +20,18 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
     const now = Date.now();
     const { global, personal } = activeCoinBoosts;
     let multiplier = 1;
-    if (global && Number(global.expires_at) > now) multiplier = Math.max(multiplier, Number(global.multiplier) || 1);
-    if (personal && Number(personal.expires_at) > now) multiplier = Math.max(multiplier, Number(personal.multiplier) || 1);
+    if (global && timestampToMs(global.expires_at) > now) multiplier = Math.max(multiplier, Number(global.multiplier) || 1);
+    if (personal && timestampToMs(personal.expires_at) > now) multiplier = Math.max(multiplier, Number(personal.multiplier) || 1);
     return Math.max(1, Math.min(1000, multiplier));
   }
 
   function activeGlobalCoinBoost() {
     const boost = activeCoinBoosts.global;
-    if (!boost || Number(boost.expires_at) <= Date.now()) return null;
+    const expiresAt = timestampToMs(boost?.expires_at);
+    if (!boost || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
     const multiplier = Number(boost.multiplier) || 1;
     if (multiplier <= 1) return null;
-    return { multiplier, expires_at: Number(boost.expires_at) };
+    return { multiplier, expires_at: expiresAt };
   }
 
   async function refreshCoinBoosts(force = false) {
