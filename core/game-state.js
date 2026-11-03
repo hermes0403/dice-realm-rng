@@ -25,12 +25,8 @@ function normalizeGloves(x){
  const equipped=G.some(g=>g.id===equippedRaw)?equippedRaw:legacyToCurrent[equippedRaw];
  x.gloves=normalized;
  x.equipped=(equipped&&normalized[equipped])?equipped:'g0';
- // 舊版曾以「持有手套」直接解鎖合成成就，這會造成未合成卻顯示已完成。
- // 清除這兩筆由錯誤判斷產生的狀態，之後只在實際合成時解鎖。
- if(x.achievements&&typeof x.achievements==='object'){
-  delete x.achievements.craftVoid;
-  delete x.achievements.craftUniverse;
- }
+ // craftVoid／craftUniverse 是購買鑽石／糖果手套後取得的成就。
+ // 正規化手套持有狀態時保留既有成就，避免載入存檔時重置完成狀態。
  return x;
 }
 function migrateCurrency(x){if(!x||typeof x!=='object')return x;if(Number(x.currencyVersion||0)<2){x.coins=Math.max(0,Math.round((Number(x.coins)||0)/60));x.currencyVersion=2;}return x}
