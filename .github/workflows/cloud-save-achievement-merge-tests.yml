@@ -1,0 +1,32 @@
+name: Cloud save achievement merge regression tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'services/cloud-save.js'
+      - 'tests/cloud-save-pet-authority.test.js'
+      - 'docs/preserve-game-save-achievements.sql'
+      - 'board/T-0026-preserve-achievements-on-stale-save.md'
+      - 'board/README.md'
+      - '.github/workflows/cloud-save-achievement-merge-tests.yml'
+
+jobs:
+  cloud-save-achievement-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run cloud save regression tests
+        run: node --test tests/cloud-save-pet-authority.test.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
