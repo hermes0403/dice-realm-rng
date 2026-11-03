@@ -54,13 +54,14 @@ test('non-admin cannot submit coin boost and admin submission refreshes the acti
     adminCoinBoostApply: { disabled: false, addEventListener(_type, fn) { this.click = fn; } }
   };
   const document = { getElementById: id => elements[id] || null };
-  new Function('document', 'isAdmin', 'toast', 'adminApi', 'refreshCoinBoosts', 'confirm', bindings.slice(start, end))(
+  new Function('document', 'isAdmin', 'toast', 'adminApi', 'refreshCoinBoosts', 'confirm', 'renderRealmActivity', bindings.slice(start, end))(
     document,
     () => admin,
     () => {},
     async payload => { calls++; assert.equal(payload.action, 'set_coin_boost'); return { success: true }; },
     async force => { assert.equal(force, true); refreshes++; return true; },
-    () => true
+    () => true,
+    () => {}
   );
   await elements.adminCoinBoostApply.click();
   assert.equal(calls, 0);
