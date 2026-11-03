@@ -47,6 +47,8 @@ done_at:
 - 2026-11-04 [叉子] 已為當事玩家補回 craftVoid，沿用 g5 購買紀錄時間，rewardGiven=true，未重複發放藥水。獨立 SQL 查詢確認標記仍存在。
 - 2026-11-04 [叉子] 已在 task branch 加入前端雲端成就合併、回歸測試與 trigger SQL 文件；另以正式資料庫更新成空 achievements 模擬舊快照，trigger 回傳及後續獨立查詢均保留 craftVoid。CI 與實際玩家端／管理員面板驗收仍待完成。
 
+- 2026-11-04 [叉子] 完整盤點所有雲端成就 ID 時發現另有一筆舊版 rare1（管理員本人，且已有現行 rare2048），已同步加入管理統計並部署 dice-rng-admin v30 ACTIVE。
+
 ## 完工回報
 
 ### 改了什麼
