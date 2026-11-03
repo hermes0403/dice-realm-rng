@@ -173,14 +173,6 @@ export function createCloudSaveService(dependencies) {
   function save() {
     const S = getState();
     try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
-    try {
-      const previous = JSON.parse(localStorage.getItem(KEY) || 'null');
-      if (previous && Array.isArray(previous.pets) && previous.pets.length > 0 && (!Array.isArray(S.pets) || S.pets.length === 0)) {
-        localStorage.setItem(KEY + '_pet_recovery_backup', JSON.stringify(previous));
-      } else if (Array.isArray(S.pets) && S.pets.length > 0) {
-        localStorage.setItem(KEY + '_pet_recovery_backup', JSON.stringify({ ...S, pets: S.pets, petDiscovered: S.petDiscovered || {}, equippedPetUids: S.equippedPetUids || [] }));
-      }
-    } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
     document.getElementById('saveStatus').textContent = getCurrentUser() ? '雲端同步中…' : '本機存檔';
     if (getCurrentUser()) scheduleSync(700);
@@ -206,7 +198,6 @@ export function createCloudSaveService(dependencies) {
         try { return JSON.parse(scopedKey ? localStorage.getItem(scopedKey) || 'null' : 'null'); }
         catch { return null; }
       })();
-      const localPetsBeforeCloud = [];
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves').select('save_data').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
@@ -216,19 +207,13 @@ export function createCloudSaveService(dependencies) {
         S = migrateCurrency(normalizeGloves({ ...fresh(), ...data.save_data }));
         S.petIncomePending = Math.max(0, Number(localSaveBeforeCloud?.petIncomePending) || 0);
         if (S.petIncomePending > 0) S.coins = (Number(S.coins) || 0) + S.petIncomePending;
-        const cloudPets = Array.isArray(data.save_data.pets) ? data.save_data.pets : [];
-        const localPets = Array.isArray(localSaveBeforeCloud?.pets) ? localSaveBeforeCloud.pets : localPetsBeforeCloud;
-        const petMap = new Map();
-        for (const pet of [...cloudPets, ...localPets]) {
-          if (pet && typeof pet === 'object') {
-            const key = pet.uid || pet.id || `${pet.rarity || ''}:${pet.name || pet.petId || ''}`;
-            if (key) petMap.set(String(key), pet);
-          }
-        }
-        S.pets = [...petMap.values()].slice(0, 20);
+        // Cloud inventory is authoritative. Never union local pet snapshots into it:
+        // a stale browser copy could otherwise resurrect a pet already sold on the server.
+        S.pets = Array.isArray(data.save_data.pets) ? data.save_data.pets.slice(0, 20) : [];
         ensurePetData(S.pets);
-        S.equippedPetUids = Array.isArray(data.save_data.equippedPetUids) ? data.save_data.equippedPetUids : [];
-        S.equippedPetUids = [...new Set([...S.equippedPetUids, ...(Array.isArray(localSaveBeforeCloud?.equippedPetUids) ? localSaveBeforeCloud.equippedPetUids : [])])].filter(uid => S.pets.some(p => p.uid === uid)).slice(0, 3);
+        S.equippedPetUids = Array.isArray(data.save_data.equippedPetUids)
+          ? [...new Set(data.save_data.equippedPetUids)].filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
+          : [];
         S.petDiscovered = { ...localPetDiscoveredBeforeCloud, ...(localSaveBeforeCloud?.petDiscovered || {}), ...(data.save_data.petDiscovered || {}) };
         S.petAutoSellRarities = { ...(localSaveBeforeCloud?.petAutoSellRarities || {}), ...(data.save_data.petAutoSellRarities || {}) };
         S.autoDeleteDice = Array.isArray(S.autoDeleteDice) ? S.autoDeleteDice.filter(id => D.some(d => d.id === id && !d.weather && Number(d.den) >= 2 && Number(d.den) <= 600000)) : [];
