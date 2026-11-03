@@ -56,4 +56,4 @@ export const PET_INDIVIDUAL_ODDS={
  secret:[25,22,18,15,12,8]
 };
 export function randomPet(rarity){const arr=PETS.filter(p=>p.rarity===rarity&&!p.adminOnly&&!p.uniqueReward);if(!arr.length)return PETS[0];const weights=PET_INDIVIDUAL_ODDS[rarity]||arr.map(()=>1),total=arr.reduce((sum,p,i)=>sum+(Number(weights[i])||0),0);let roll=Math.random()*total;for(let i=0;i<arr.length;i++){roll-=Number(weights[i])||0;if(roll<0)return arr[i]}return arr[arr.length-1]}
-export const PET_MUTATIONS={rain:{name:'雨變異',multiplier:1.2,color:'#75baff'},snow:{name:'雪變異',multiplier:1.3,color:'#d8f2ff'},thunder:{name:'打雷變異',multiplier:1.4,color:'#ffe17c'},crystal:{name:'水晶變異',multiplier:1.7,color:'#c084fc'},hell:{name:'地獄變異',multiplier:2,color:'#ff4b55'}};
+export const PET_MUTATIONS={rain:{name:'雨變異',multiplier:1.2,color:'#4ea5ff'},snow:{name:'雪變異',multiplier:1.3,color:'#fff4e8'},thunder:{name:'打雷變異',multiplier:1.4,color:'#fff12d'},crystal:{name:'水晶變異',multiplier:1.7,color:'#ff9bd5'},hell:{name:'地獄變異',multiplier:2,color:'#ff4b55'}};

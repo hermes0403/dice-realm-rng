@@ -1,23 +1,38 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 import { petWeightSkillMultiplier } from './pet-skills.js';
 
-/** Formats the independent appearance and weather mutation fields on a pet instance. */
-export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
-  if (!pet || typeof pet !== 'object') return '';
-  const labels = [];
-  const variantNames = { golden: '黃金', diamond: '鑽石', rainbow: '彩虹' };
+/** Returns safe, individually styled tags for appearance and weather mutations. */
+export function formatPetMutationTags(pet, PET_MUTATIONS = {}) {
+  if (!pet || typeof pet !== 'object') return [];
+  const tags = [];
+  const seen = new Set();
+  const add = (key, label, className) => {
+    if (!label || seen.has(key)) return;
+    seen.add(key);
+    tags.push({ label, className });
+  };
+  const variantStyles = {
+    golden: { label: '黃金', className: 'pet-mutation-golden' },
+    diamond: { label: '鑽石', className: 'pet-mutation-diamond' },
+    rainbow: { label: '彩虹', className: 'pet-mutation-rainbow' }
+  };
   const variants = Array.isArray(pet.variants) ? pet.variants : (Array.isArray(pet.variant) ? pet.variant : [pet.variant]);
   for (const variant of variants) {
-    const label = variantNames[variant];
-    if (label && !labels.includes(label)) labels.push(label);
+    const style = variantStyles[variant];
+    if (style) add(`variant:${variant}`, style.label, style.className);
   }
   const mutations = Array.isArray(pet.mutations) ? pet.mutations : (Array.isArray(pet.mutation) ? pet.mutation : [pet.mutation]);
   for (const key of mutations) {
     const mutation = PET_MUTATIONS[key];
     const label = mutation?.name?.replace(/變異$/, '');
-    if (label && !labels.includes(label)) labels.push(label);
+    if (label) add(`weather:${key}`, label, `pet-mutation-weather-${key}`);
   }
-  return labels.join('、');
+  return tags;
+}
+
+/** Plain-text compatibility helper for prompts and tests. */
+export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
+  return formatPetMutationTags(pet, PET_MUTATIONS).map(tag => tag.label).join('、');
 }
 
 export function createPetSystem({
@@ -270,8 +285,8 @@ export function createPetSystem({
           const rarity = petRarity(definition.rarity);
           const equipped = (S.equippedPetUids || []).includes(pet.uid);
           const income = petIncomePerSecond(pet);
-          const mutation = petMutationLabel(pet);
-          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutation ? `<div class="pet-mutation">${escapeHTML(mutation)}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
+          const mutationTags = formatPetMutationTags(pet, PET_MUTATIONS);
+          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => `<span class="pet-mutation-tag ${tag.className}">${escapeHTML(tag.label)}</span>`).join('')}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
         }).join('');
       }
     }
@@ -517,6 +532,7 @@ export function createPetSystem({
     ensurePetData,
     petMutationForDice,
     petMutationLabel,
+    formatPetMutationTags,
     rollPetWeightKg,
     petWeightSkillMultiplier,
     addPet,
