@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatPetMutationLabels } from '../systems/pets.js';
+import { formatPetMutationLabels, formatPetMutationTags } from '../systems/pets.js';
 
 const PET_MUTATIONS = {
   rain: { name: '雨變異', multiplier: 1.2 },
@@ -34,4 +34,32 @@ test('formats each pet independently without carrying labels across instances', 
   const plainPet = { variant: null, mutation: null };
   assert.equal(formatPetMutationLabels(rainbowThunder, PET_MUTATIONS), '彩虹、打雷');
   assert.equal(formatPetMutationLabels(plainPet, PET_MUTATIONS), '');
+});
+
+test('assigns an independent color class to every mutation type', () => {
+  const tags = formatPetMutationTags({
+    variants: ['golden', 'diamond', 'rainbow'],
+    mutations: ['thunder', 'crystal', 'hell', 'snow', 'rain']
+  }, PET_MUTATIONS);
+  assert.deepEqual(tags.map(tag => [tag.label, tag.className]), [
+    ['黃金', 'pet-mutation-golden'],
+    ['鑽石', 'pet-mutation-diamond'],
+    ['彩虹', 'pet-mutation-rainbow'],
+    ['打雷', 'pet-mutation-weather-thunder'],
+    ['水晶', 'pet-mutation-weather-crystal'],
+    ['地獄', 'pet-mutation-weather-hell'],
+    ['雪', 'pet-mutation-weather-snow'],
+    ['雨', 'pet-mutation-weather-rain']
+  ]);
+});
+
+test('colored mutation tags still de-duplicate repeated appearance and weather values', () => {
+  const tags = formatPetMutationTags({
+    variants: ['golden', 'golden'],
+    mutations: ['rain', 'rain']
+  }, PET_MUTATIONS);
+  assert.deepEqual(tags.map(tag => tag.className), [
+    'pet-mutation-golden',
+    'pet-mutation-weather-rain'
+  ]);
 });
