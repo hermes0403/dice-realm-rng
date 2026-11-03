@@ -1,7 +1,7 @@
 ---
 id: T-0023
 title: 修正全服活動倒數並新增寵物出售清單排序與變異顯示
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-03 [叉子] 依棒子本次要求建立。work/chazi 與 main 目前存在分歧且包含多項未整合任務，因此本任務分支以最新 main 為乾淨基準，避免把其他任務混入本次修改；只修改 T-0023 所需檔案。
+- 2026-11-03 [叉子] 依棒子本次要求建立。work/chazi 與 main 目前存在分歧且包含多項未整合任務，因此本任務分支以最新 main 為乾淨基準，避免把其他任務混入本次修改；只修改 T-0023 所需檔案。\n- 2026-11-03 [叉子] 已修正金錢倍率到期時間解析，支援 ISO 日期、Unix 秒／毫秒及數字字串；寵物收益倍率判斷與首頁活動倒數共用正規化時間，無效時間顯示「剩餘時間無法讀取」，不再輸出 NaN。\n- 2026-11-03 [叉子] 已在寵物出售視窗加入稀有度低到高／高到低、每秒收益高到低／低到高排序；排序只改畫面順序，並保留已勾選 UID。每張寵物卡顯示每秒收益及黃金、鑽石、彩虹、雨、雪、打雷、水晶、地獄變異標籤，沿用既有變異顏色。\n- 2026-11-03 [叉子] GitHub Actions run 41648321034 成功：`node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js tests/coin-boost-timestamp.test.js tests/pet-sale-sort.test.js`，14 pass、0 fail；`git diff --check origin/main...HEAD` 成功，exit code 0。
 
 ## 完工回報
 
