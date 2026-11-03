@@ -150,3 +150,41 @@ test('global and personal coin boosts use the maximum multiplier, never multiply
     globalThis.fetch = originalFetch;
   }
 });
+
+test('coin boost status refresh is throttled and never polls once per second', async () => {
+  const originalNow = Date.now;
+  const originalFetch = globalThis.fetch;
+  let now = 5_000_000;
+  let fetchCount = 0;
+  Date.now = () => now;
+  globalThis.fetch = async () => {
+    fetchCount++;
+    return {
+      ok: true,
+      async json() {
+        return { global: { multiplier: 2, expires_at: now + 60_000 }, personal: null };
+      }
+    };
+  };
+  try {
+    const service = createCoinBoostService({
+      getCurrentUser: () => ({ id: 'player-1' }),
+      supabaseClient: { auth: { async getSession() { return { data: { session: { access_token: 'test-session' } } }; } } },
+      SUPABASE_URL: 'https://example.invalid',
+      SUPABASE_KEY: 'test-key'
+    });
+    assert.equal(await service.refreshCoinBoosts(true), true);
+    for (let second = 1; second <= 4; second++) {
+      now += 1000;
+      await service.refreshCoinBoosts();
+    }
+    assert.equal(fetchCount, 1);
+    now += 1000;
+    await service.refreshCoinBoosts();
+    assert.equal(fetchCount, 2);
+  } finally {
+    Date.now = originalNow;
+    globalThis.fetch = originalFetch;
+  }
+});
+
