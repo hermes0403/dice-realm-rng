@@ -47,6 +47,7 @@ done_at:
 - 2026-11-03 [叉子] 依棒子提出的全服金錢倍率首頁活動顯示及寵物每秒收益同步需求建立；沿用 work/chazi，先檢查既有 T-0019 與金錢倍率服務，實作前須確認顯示與實際入帳是否已經共用同一倍率，避免重複乘算。
 - 2026-11-03 [叉子] 已在 work/chazi 完成第一輪程式修改：systems/coin-boost.js 對外提供僅含全服倍率與 expires_at 的有效狀態；systems/global-boost.js 將「金錢倍率 xN」及本機每秒倒數加入首頁管理員活動，並在到期後移除卡片；script.js 完成狀態接線；admin/ui-bindings.js 在管理員成功設定全服倍率且狀態刷新成功後立即重繪活動區。寵物收益模組原本已以同一個 coinEarningMultiplier() 計算顯示值與實際入帳（各乘一次），因此未改動 systems/pet-income.js，避免重複乘算。該模組每秒呼叫 refreshCoinBoosts()，服務端狀態讀取有 5 秒節流；登入後可取得全服狀態，倒數不會每秒呼叫 API。
 - 2026-11-03 [叉子] 新增 tests/global-coin-boost-activity.test.js，覆蓋全服活動卡、到期移除、個人倍率不公開，以及寵物 x2 顯示／入帳只乘一次；tests/admin-coin-boost-ui.test.js 新增管理員設定成功後立即重繪的測試。尚未在可執行 Node 專案環境實際執行測試；目前 GitHub 未回報此分支的 CI workflow run。尚未部署、合併或進行真實瀏覽器／正式管理員帳號驗證。
+- 2026-11-03 [叉子] 第二輪補強：新增全服與個人倍率同時存在時取最大值、絕不相乘及到期回復 x1 的單元測試；新增 `.github/workflows/coin-boost-tests.yml`，在 work/chazi 更新或對 main 發 PR 時執行兩組收益／管理員 UI 回歸測試。修正管理員測試 mock，讓成功刷新回傳 true。GitHub Actions API 尚未回報任何 workflow run，因此測試仍未取得實際執行結果；未部署、未合併，待確認 Actions 執行狀態及棒子正式帳號驗收。
 
 ## 完工回報
 
