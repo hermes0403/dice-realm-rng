@@ -74,7 +74,6 @@ test('auto-roll watchdog starts with auto-roll and is cleared by manual stop', (
   assert.equal(dice.setupAutoRollUI(), true);
   elements.get('autoBtn').onclick();
   assert.equal(timers.intervals.size, 2);
-  assert.equal([...timers.manager.getStats().scopes['auto-roll-watchdog']?.intervals || []].length, 0);
   assert.equal(timers.manager.getStats().scopes['auto-roll-watchdog'].intervals, 1);
   assert.equal(timers.manager.getStats().scopes['auto-roll'].intervals, 1);
 
