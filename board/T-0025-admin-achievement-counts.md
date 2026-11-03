@@ -29,7 +29,7 @@ done_at:
 ## 驗收條件
 
 - [x] 移除重複且先回傳的 achievement_counts 分支，確保正式執行的是現行成就清單。
-- [x] 管理員成就清單顯示「鑽石手套」及「糖果手套」，並納入現行 collect28 與舊版 collect30。
+- [x] 管理員成就清單顯示「鑽石手套」及「糖果手套」，並納入現行 collect28、舊版 collect30 與舊版 rare1。
 - [x] 正式 Edge Function 部署後確認版本為 ACTIVE。
 - [ ] 依 g5 持有狀態及購買紀錄補回 craftVoid，並確認標記能持續保留。
 - [x] 確認其他玩家資產與藥水庫存未被修改。
@@ -41,6 +41,8 @@ done_at:
 - 2026-11-04 [叉子] 已部署修正至 dice-rng-admin，版本 29、狀態 ACTIVE；現在只剩一個 achievement_counts 分支，並新增 collect28 現行成就統計，保留 collect30 舊版資料列。
 - 2026-11-04 [叉子] 唯讀複查發現先前補回的 craftVoid 標記已再次不見。重新核對後，唯一 g5 持有者有一筆 item_id=g5 購買紀錄；已只補回該玩家 craftVoid，unlockedAt 使用購買紀錄時間，rewardGiven=true，未發放任何藥水。
 - 2026-11-04 [叉子] 更新後立即查詢可讀到 craftVoid，但後續再次唯讀查詢時標記已消失，代表玩家存檔仍可能被其他同步寫入覆蓋；目前不可視為資料修復完成。需先確認 T-0024 前端版本已部署並停止舊版客戶端覆寫，再重新補回並驗證持久性。正式面板與玩家端畫面仍待棒子／當事玩家實際登入驗收；GitHub Pages 部署狀態尚未確認。
+
+- 2026-11-04 [叉子] 盤點全部雲端成就 ID 時另發現一筆未列入管理統計的舊版 rare1；該筆屬管理員本人，且已有現行 rare2048 完成紀錄。已在 dice-rng-admin 加入「舊版稀有發現者」統計列，避免舊版紀錄漏算。Edge Function 已部署為 v30 ACTIVE，achievement_counts 仍只有一個分支。
 
 ## 完工回報
 
