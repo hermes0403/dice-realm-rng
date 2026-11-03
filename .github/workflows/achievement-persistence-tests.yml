@@ -8,6 +8,8 @@ on:
       - 'core/game-state.js'
       - 'ui/gloves.js'
       - 'tests/achievement-persistence.test.js'
+      - 'board/T-0024-achievement-unlock-persistence.md'
+      - 'board/README.md'
       - '.github/workflows/achievement-persistence-tests.yml'
 
 jobs:
