@@ -4,13 +4,16 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
     const local = document.getElementById('localRank');
     const rare = document.getElementById('rareRank');
     const money = document.getElementById('moneyRank');
+    const income = document.getElementById('incomeRank');
     const mine = document.getElementById('myRankStrip');
-    if (!local || !rare || !money) return;
+    if (!local || !rare || !money || !income) return;
     if (!supabaseClient) {
       local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">雲端服務尚未載入，請重新整理。</div>';
+      income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
       return;
     }
     local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">正在更新排行榜…</div>';
+    income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
     try {
       const fields = 'user_id,username,total_rolls,unique_dice,rarest_den,coins,achievement_count,achievement_reached_at,updated_at';
       const { data, error } = await supabaseClient.from('player_profiles').select(fields).order('total_rolls', { ascending: false }).limit(1000);
@@ -45,13 +48,14 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
           const i = list.findIndex(x => x.user_id === me);
           return i < 0 ? '尚未上榜' : '第 ' + format(i + 1) + ' 名';
         };
-        mine.innerHTML = `<div class="my-rank-card"><span class="my-rank-label">🎲 累積擲骰</span><div class="my-rank-value">${rank(sortRoll)}</div></div><div class="my-rank-card"><span class="my-rank-label">✦ 最稀有骰子</span><div class="my-rank-value">${rank(sortRare)}</div></div><div class="my-rank-card"><span class="my-rank-label">🏆 成就</span><div class="my-rank-value">${rank(sortAchievement)}</div></div>`;
+        mine.innerHTML = `<div class="my-rank-card"><span class="my-rank-label">🎲 累積擲骰</span><div class="my-rank-value">${rank(sortRoll)}</div></div><div class="my-rank-card"><span class="my-rank-label">✦ 最佳骰子</span><div class="my-rank-value">${rank(sortRare)}</div></div><div class="my-rank-card"><span class="my-rank-label">🏆 成就</span><div class="my-rank-value">${rank(sortAchievement)}</div></div><div class="my-rank-card"><span class="my-rank-label">💸 賺錢排行榜</span><div class="my-rank-value">待後端開放</div></div>`;
       }
     } catch (error) {
       console.error('Leaderboard load failed', error);
       const message = error?.message ? `排行榜載入失敗：${escapeHTML(error.message)}` : '雲端排行榜暫時無法載入。';
       local.innerHTML = rare.innerHTML = money.innerHTML = `<div class="empty">${message}</div>`;
-      if (mine) mine.querySelectorAll('.my-rank-value').forEach(x => x.textContent = '—');
+      income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
+      if (mine) mine.querySelectorAll('.my-rank-value').forEach((x, i) => { x.textContent = i === 3 ? '待後端開放' : '—'; });
     }
   }
 
