@@ -14,11 +14,11 @@ export function createGlobalBoostSystem({
   let globalBoostUISetup = false;
   function timestampToMs(value) {
     if (value == null || value === '') return NaN;
-    if (typeof value === 'number' && Number.isFinite(value)) return value < 1e12 ? value * 1000 : value;
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
     const text = String(value).trim();
     if (/^\d+(?:\.\d+)?$/.test(text)) {
       const numeric = Number(text);
-      return numeric < 1e12 ? numeric * 1000 : numeric;
+      return numeric < 1e11 ? numeric * 1000 : numeric;
     }
     const parsed = Date.parse(text);
     return Number.isFinite(parsed) ? parsed : NaN;
@@ -99,7 +99,7 @@ export function createGlobalBoostSystem({
     if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small>${globalRemaining}</small></span></button>`);
     if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small>${globalRemaining}</small></span></button>`);
     if (coinBoost) {
-      cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>${remainingClock(timestampToMs(coinBoost.expires_at))}</small></span></button>`);
+      cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>${remainingClock(Number(coinBoost.expires_at))}</small></span></button>`);
     }
     panel.innerHTML = `<div class="eyebrow">REALM LIVE EVENT</div><h1>管理員活動</h1><div class="realm-activity-grid">${cards.join('')}</div>`;
   }
