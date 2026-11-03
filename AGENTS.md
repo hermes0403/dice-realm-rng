@@ -20,12 +20,14 @@
 
 ### 2. Git、分支與同步
 
-- 不得直接在 `main` 實作。分支歸屬及多人協作規則依 `board/README.md` §7；A、B 各自的分支規則另見所屬部分。
-- 開工前確認目前工作目錄、branch、HEAD、`git status --short --branch`、`git branch -vv`、worktree 及 upstream；先讀取本次工作涉及的文件與任務，不得覆蓋未提交或未追蹤的修改。
-- 新對話接續時先 `git fetch origin` 並檢查本機與遠端差異。只有工作區乾淨、分支有正確 upstream 且可安全快轉時，才執行 `git pull --ff-only`。若有修改、分歧、無 upstream 或可能衝突，停止 pull 並說明，不得擅自 stash、丟棄、reset 或 rebase。
+- 不得直接在 `main` 實作。分支生命週期、角色整合分支及任務分支規則，唯一依據為 `board/README.md` §7、§13。
+- 開工前確認目前工作目錄、branch、HEAD、`git status --short --branch`、`git branch -vv`、所有 worktree 及 upstream；先讀取本次工作涉及的文件與任務，不得覆蓋未提交或未追蹤的修改。
+- 新對話接續時先 `git fetch origin`，分別檢查 `work/laocha`、`origin/work/laocha` 與 `origin/main`。只有工作區乾淨、upstream 正確且提交關係可安全快轉時，才執行 `git pull --ff-only` 或 `git merge --ff-only origin/main`；fetch 不等於 pull／merge。若有修改、分歧、無 upstream 或可能衝突，停止同步並說明，不得擅自 stash、丟棄、reset 或 rebase。
+- `work/laocha` 是老查的長期角色整合分支，不是直接撰寫每張任務的工作分支。每張任務使用獨立短期 `task/T-xxxx-short-name` 分支及對應 worktree；完成後依 Board §7 整合回角色分支。
 - **禁止 Push 的範圍只有：`supabase/` 目錄內的所有檔案，以及所有 `.csv` 檔案（不論位於哪個目錄）。** 其他檔案不因檔案類型而禁止 push。Push 前明確檢查 staged files；不得未檢查就使用 `git add -A` 或 `git add .`。
-- 實際 push、合併、建立 release 或修改遠端分支，必須有本次任務的明確指示；使用者只授權修改文件，不代表自動授權其他 Git 操作。
+- Push、PR 建立／合併、release 或任何遠端分支修改，必須有本次任務的明確指示；使用者只授權修改文件，不代表自動授權遠端操作。Board §7／§13 規定的標準本機流程（任務分支完成後整合回本人角色分支）已由任務指派預先授權，完成驗證後不需逐次詢問；不得因此直接整合到 `main`。
 - 不得使用 `git restore`、`git reset`、`git checkout .`、`git clean` 等破壞性回復指令；不得丟棄、改寫或格式化與本次任務無關的修改。
+- `.gitignore` 命中不代表檔案已停止追蹤；若 `.csv` 或 `supabase/` 內容已被 Git 追蹤，必須先檢查追蹤狀態及任務授權，不得用忽略規則掩蓋已追蹤變更。禁止以 `git add -f` 將這些檔案加入提交。
 - 修改前後執行 `git diff --check` 及 `git status --short`；回報實際命令、exit code 與未執行項目。
 
 ### 3. 安全、證據與回報

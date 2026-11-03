@@ -1,0 +1,5 @@
+﻿# Local CSV exports and snapshots
+*.csv
+
+# Root-level Supabase working files (kept local; do not push)
+/supabase/
