@@ -6,6 +6,7 @@ export function createGlobalBoostSystem({
   render,
   restartAutoInterval,
   loadAdminIncomeMonitor,
+  getCoinBoost = () => null,
   documentRef,
   timerManager
 }) {
@@ -61,7 +62,10 @@ export function createGlobalBoostSystem({
     const boost = activeGlobalBoost();
     const luckPercent = Number(boost.luck_percent) || 0;
     const speedPercent = Number(boost.speed_percent) || 0;
-    const hasBoost = !!boost.ends_at && (luckPercent > 0 || speedPercent > 0);
+    const coinBoost = getCoinBoost();
+    const hasLuckOrSpeed = !!boost.ends_at && (luckPercent > 0 || speedPercent > 0);
+    const hasCoinBoost = !!coinBoost;
+    const hasBoost = hasLuckOrSpeed || hasCoinBoost;
     welcome.hidden = hasBoost;
     panel.hidden = !hasBoost;
     if (!hasBoost) {
@@ -74,6 +78,12 @@ export function createGlobalBoostSystem({
     const cards = [];
     if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small>剩餘 ${minutes}:${seconds}</small></span></button>`);
     if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small>剩餘 ${minutes}:${seconds}</small></span></button>`);
+    if (coinBoost) {
+      const coinRemaining = Math.max(0, Math.ceil((Number(coinBoost.expires_at) - Date.now()) / 1000));
+      const coinMinutes = String(Math.floor(coinRemaining / 60)).padStart(2, '0');
+      const coinSeconds = String(coinRemaining % 60).padStart(2, '0');
+      cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>剩餘 ${coinMinutes}:${coinSeconds}</small></span></button>`);
+    }
     panel.innerHTML = `<div class="eyebrow">REALM LIVE EVENT</div><h1>管理員活動</h1><div class="realm-activity-grid">${cards.join('')}</div>`;
   }
 
@@ -83,8 +93,15 @@ export function createGlobalBoostSystem({
     documentRef.addEventListener('click', event => {
       const card = event.target.closest('[data-activity-detail]');
       if (!card) return;
-      const boost = activeGlobalBoost();
       const kind = card.dataset.activityDetail;
+      if (kind === 'coin') {
+        const coinBoost = getCoinBoost();
+        if (!coinBoost) return;
+        const remaining = Math.max(0, Math.ceil((Number(coinBoost.expires_at) - Date.now()) / 1000));
+        alert(`全服金錢倍率 x${Number(coinBoost.multiplier) || 1}\n剩餘 ${Math.floor(remaining / 60)} 分 ${remaining % 60} 秒`);
+        return;
+      }
+      const boost = activeGlobalBoost();
       const value = kind === 'luck' ? Number(boost.luck_percent) || 0 : Number(boost.speed_percent) || 0;
       const label = kind === 'luck' ? '運氣' : '速度';
       const remaining = Math.max(0, Math.ceil((new Date(boost.ends_at).getTime() - Date.now()) / 1000));

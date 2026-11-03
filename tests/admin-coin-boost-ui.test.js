@@ -54,13 +54,14 @@ test('non-admin cannot submit coin boost and admin submission refreshes the acti
     adminCoinBoostApply: { disabled: false, addEventListener(_type, fn) { this.click = fn; } }
   };
   const document = { getElementById: id => elements[id] || null };
-  new Function('document', 'isAdmin', 'toast', 'adminApi', 'refreshCoinBoosts', 'confirm', bindings.slice(start, end))(
+  new Function('document', 'isAdmin', 'toast', 'adminApi', 'refreshCoinBoosts', 'confirm', 'renderRealmActivity', bindings.slice(start, end))(
     document,
     () => admin,
     () => {},
     async payload => { calls++; assert.equal(payload.action, 'set_coin_boost'); return { success: true }; },
-    async force => { assert.equal(force, true); refreshes++; },
-    () => true
+    async force => { assert.equal(force, true); refreshes++; return true; },
+    () => true,
+    () => {}
   );
   await elements.adminCoinBoostApply.click();
   assert.equal(calls, 0);
@@ -69,4 +70,33 @@ test('non-admin cannot submit coin boost and admin submission refreshes the acti
   assert.equal(calls, 1);
   assert.equal(refreshes, 1);
   assert.match(elements.adminCoinBoostStatus.textContent, /重新同步/);
+});
+
+
+test('successful global coin boost setting immediately rerenders realm activity', async () => {
+  const start = bindings.indexOf("document.getElementById('adminCoinBoostScope')");
+  const end = bindings.indexOf("document.getElementById('adminCoinBoostPlayer').innerHTML", start);
+  let renderCalls = 0;
+  const elements = {
+    adminCoinBoostScope: { value: 'all', addEventListener() {} },
+    adminCoinBoostPlayerWrap: { hidden: true },
+    adminCoinBoostPlayer: { value: '' },
+    adminCoinBoostMultiplier: { value: '2' },
+    adminCoinBoostSeconds: { value: '60' },
+    adminCoinBoostStatus: { textContent: '' },
+    adminCoinBoostApply: { disabled: false, addEventListener(_type, fn) { this.click = fn; } }
+  };
+  const document = { getElementById: id => elements[id] || null };
+  new Function('document', 'isAdmin', 'toast', 'adminApi', 'refreshCoinBoosts', 'confirm', 'renderRealmActivity', bindings.slice(start, end))(
+    document,
+    () => true,
+    () => {},
+    async () => ({ success: true }),
+    async () => true,
+    () => true,
+    () => { renderCalls++; }
+  );
+  await elements.adminCoinBoostApply.click();
+  assert.equal(renderCalls, 1);
+  assert.match(elements.adminCoinBoostStatus.textContent, /收益計算已重新同步/);
 });
