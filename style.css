@@ -275,3 +275,5 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 .pet-mutation-weather-hell{color:#ff6674;background:#4a101b99;border-color:#ff5364;text-shadow:0 0 7px #ff354a88}
 .pet-mutation-weather-snow{color:#fff4e8;background:#4b4b4588;border-color:#fff4e8;text-shadow:0 0 7px #fff4e877}
 .pet-mutation-weather-rain{color:#72baff;background:#102e5488;border-color:#4ea5ff;text-shadow:0 0 7px #4ea5ff88}
+
+.pet-sell-sort-label{display:flex;align-items:center;gap:7px;min-width:0}.pet-sell-sort-label select{width:auto;min-width:150px;max-width:100%}.pet-sell-mutations{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}.pet-sell-mutations .pet-mutation-tag{font-size:9px;padding:2px 6px}
