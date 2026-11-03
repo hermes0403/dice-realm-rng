@@ -12,6 +12,14 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
     return Math.max(1, Math.min(1000, multiplier));
   }
 
+  function activeGlobalCoinBoost() {
+    const boost = activeCoinBoosts.global;
+    if (!boost || Number(boost.expires_at) <= Date.now()) return null;
+    const multiplier = Number(boost.multiplier) || 1;
+    if (multiplier <= 1) return null;
+    return { multiplier, expires_at: Number(boost.expires_at) };
+  }
+
   async function refreshCoinBoosts(force = false) {
     if (refreshBusy || !getCurrentUser() || !supabaseClient) return false;
     if (!force && Date.now() - activeCoinBoosts.lastFetch < 5000) return;
@@ -41,5 +49,5 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
     }
   }
 
-  return { coinEarningMultiplier, refreshCoinBoosts };
+  return { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost };
 }
