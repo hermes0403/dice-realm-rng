@@ -90,6 +90,36 @@ test('keeps the earnings leaderboard unavailable when the profile query fails', 
   }
 });
 
+test('keeps the original three rankings working when the earnings panel is absent', async () => {
+  const previousDocument = globalThis.document;
+  const document = createDocument();
+  delete document.elements.incomeRank;
+  globalThis.document = document;
+  const supabaseClient = {
+    from() {
+      return {
+        select() {
+          return { order() { return { limit: async () => ({ data: [], error: null }) }; } };
+        }
+      };
+    }
+  };
+
+  try {
+    const system = createLeaderboardSystem({
+      supabaseClient,
+      getCurrentUser: () => null,
+      escapeHTML: value => String(value),
+      format: value => String(value),
+      compactNum: value => String(value)
+    });
+    await system.refreshLeaderboards();
+    assert.match(document.elements.localRank.innerHTML, /目前還沒有排行榜資料/);
+  } finally {
+    globalThis.document = previousDocument;
+  }
+});
+
 test('renames the best-dice label and keeps the four-card strip mobile-friendly', () => {
   const html = readProjectFile('index.html');
   const css = readProjectFile('style.css');
