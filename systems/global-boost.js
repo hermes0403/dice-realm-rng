@@ -16,7 +16,7 @@ export function createGlobalBoostSystem({
     if (value == null || value === '') return NaN;
     if (typeof value === 'number' && Number.isFinite(value)) return value < 1e12 ? value * 1000 : value;
     const text = String(value).trim();
-    if (/^\\d+(?:\\.\\d+)?$/.test(text)) {
+    if (/^\d+(?:\.\d+)?$/.test(text)) {
       const numeric = Number(text);
       return numeric < 1e12 ? numeric * 1000 : numeric;
     }
