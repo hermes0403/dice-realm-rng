@@ -59,7 +59,7 @@ test('non-admin cannot submit coin boost and admin submission refreshes the acti
     () => admin,
     () => {},
     async payload => { calls++; assert.equal(payload.action, 'set_coin_boost'); return { success: true }; },
-    async force => { assert.equal(force, true); refreshes++; },
+    async force => { assert.equal(force, true); refreshes++; return true; },
     () => true
   );
   await elements.adminCoinBoostApply.click();
