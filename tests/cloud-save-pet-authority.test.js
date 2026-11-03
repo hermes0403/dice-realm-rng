@@ -122,3 +122,27 @@ test('an empty authoritative cloud pet inventory stays empty despite old local p
   assert.equal(writes.length, 1);
   assert.deepEqual(writes[0].save_data.pets, []);
 });
+
+test('cloud achievement snapshot is preserved when a stale client syncs', async () => {
+  const diamondAchievement = {
+    name: '鑽石手套',
+    desc: '購買鑽石手套',
+    reward: '速度藥水 I ×1',
+    rewardGiven: true,
+    unlockedAt: '2026-10-24T16:13:40.442689Z'
+  };
+  const { service, writes, getState } = createService({
+    localSave: { bag: { d1: 1 }, achievements: {}, coins: 100 },
+    cloudSave: {
+      bag: { d1: 1 },
+      achievements: { craftVoid: diamondAchievement },
+      coins: 100
+    }
+  });
+
+  await service.syncCloudSave();
+
+  assert.equal(writes.length, 1);
+  assert.deepEqual(writes[0].save_data.achievements.craftVoid, diamondAchievement);
+  assert.deepEqual(getState().achievements.craftVoid, diamondAchievement);
+});
