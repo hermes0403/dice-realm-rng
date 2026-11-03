@@ -55,6 +55,8 @@ done_at:
 - 2026-11-03 [叉子] 已依棒子指示將 T-0022 必要修改由 work/chazi 精準移植至獨立整合分支 integrate/t-0022-global-coin-boost；未合併 work/chazi 其他任務成果，未建立 PR、未合併 main、未部署。後續需在整合分支重新驗證自動化測試，並待棒子進行正式瀏覽器／管理員帳號驗收。
 - 2026-11-03 [叉子] 整合提交 `c28b8f5427554011e5983b8ef1eb2ec782330218` 已建立；另提交 `7c19433a523fbebdc63e52e0e137425c6087e31b` 將回歸 workflow 的 push 觸發範圍加入本整合分支。對照 GitHub blob SHA，systems/coin-boost.js、systems/global-boost.js、兩份測試及 admin/ui-bindings.js 與 work/chazi 對應檔案完全一致；script.js 僅移植 T-0022 的倍率服務接線，保留 main 原本寵物出售接線。來源分支 commit `0883c741743392f5ed79ad5dfc20d37a23d5f4cb` 的 Actions run `41627905388` 已實際執行 9/9 通過；整合分支目前尚無新的 Actions run。未能在本執行環境取得本機 clone，因此 `git diff --check` 未執行；尚待整合分支 CI 與正式瀏覽器／棒子管理員帳號驗收。
 
+- 2026-11-03 [叉子] 整合分支 GitHub Actions run `41645031408`（commit `7c19433a523fbebdc63e52e0e137425c6087e31b`）已完成，job `coin-boost` success；實際執行 `node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js`，9 pass、0 fail。整合分支自動化測試已通過；`git diff --check` 仍未執行，真實瀏覽器及棒子正式管理員帳號驗收待完成。
+
 ## 完工回報
 
 <!-- 推到 review 前必填；未完成就留空。 -->
