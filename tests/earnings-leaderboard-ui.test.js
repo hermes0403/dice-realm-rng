@@ -17,7 +17,9 @@ function createElement() {
 function createDocument() {
   const ids = ['localRank', 'rareRank', 'moneyRank', 'incomeRank', 'myRankStrip'];
   const elements = Object.fromEntries(ids.map(id => [id, createElement()]));
-  return { elements, getElementById: id => elements[id] || null };
+  const myRankValues = Array.from({ length: 4 }, () => ({ textContent: '—' }));
+  elements.myRankStrip.querySelectorAll = () => myRankValues;
+  return { elements, myRankValues, getElementById: id => elements[id] || null };
 }
 
 test('adds the fourth earnings rank entry without changing the existing three rankings', async () => {
@@ -55,7 +57,7 @@ test('adds the fourth earnings rank entry without changing the existing three ra
     assert.match(document.elements.rareRank.innerHTML, /1\/2048/);
     assert.match(document.elements.moneyRank.innerHTML, /完成 2 個成就/);
     assert.match(document.elements.myRankStrip.innerHTML, /賺錢排行榜/);
-    assert.match(document.elements.myRankStrip.innerHTML, /待後端開放/);
+    assert.equal(document.myRankValues[3].textContent, '待後端開放');
     assert.match(document.elements.incomeRank.innerHTML, /尚未開放/);
     assert.doesNotMatch(selectedFields, /pet_income_per_second/);
   } finally {
