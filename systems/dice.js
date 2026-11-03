@@ -481,12 +481,17 @@ export function createDiceSystem(deps) {
         if (!rolling) doRoll();
       }
     });
-    documentRef.addEventListener('pageshow', () => {
-      if (autoTimer && !rolling && totalDice() < (Number(getState().bagCapacity) || 35)) doRoll();
-    });
-    documentRef.addEventListener('focus', () => {
-      if (autoTimer && !rolling && totalDice() < (Number(getState().bagCapacity) || 35)) doRoll();
-    });
+    const resumeAutoRoll = () => {
+      if (!autoTimer || totalDice() >= (Number(getState().bagCapacity) || 35)) return;
+      if (rolling && rollingStartedAt && Date.now() - rollingStartedAt >= 15000) {
+        console.warn('頁面重新取得焦點後偵測到擲骰卡住，正在恢復自動擲骰');
+        rollSequence++;
+        releaseRoll(rollSequence);
+      }
+      if (!rolling) doRoll();
+    };
+    documentRef.addEventListener('pageshow', resumeAutoRoll);
+    documentRef.addEventListener('focus', resumeAutoRoll);
     return true;
   }
 
