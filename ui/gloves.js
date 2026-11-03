@@ -144,8 +144,11 @@ export function createGloveUI(deps) {
         updated_at: now
       }, { onConflict: 'user_id' });
       if (profileError) console.warn('Glove purchase profile mirror update failed; purchase is committed', profileError);
-      // Purchase RPC has committed; schedule the shared local/cloud save so achievement state is persisted.
-      save();
+      // Purchase RPC has committed; never roll back the confirmed purchase if local save scheduling fails.
+      try { save(); } catch (saveError) {
+        console.warn('Glove purchase committed but save scheduling failed', saveError);
+        void flushCloudSave();
+      }
       if (typeof logCraft === 'function') logCraft('glove', id, item.name);
       toast('購買成功！已裝備 ' + item.name);
       render();
