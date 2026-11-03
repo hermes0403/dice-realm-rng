@@ -10,7 +10,7 @@ reviewer: 棒子
 priority: P2
 created: 2026-11-03
 updated: 2026-11-03
-depends_on: T-0012, T-0014
+depends_on: [T-0012, T-0014]
 branch: work/chazi
 done_by: 棒子
 done_at:
