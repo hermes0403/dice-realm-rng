@@ -262,3 +262,16 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 #petInventoryGrid .pet-name{font-size:clamp(11px,2.8vw,15px)!important}
 #petInventoryGrid .pet-meta{font-size:clamp(9px,2.3vw,12px)!important;line-height:1.4}
 @media(max-width:360px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}}
+
+
+/* 寵物變異標籤：每種外觀／天氣變異使用獨立顏色 */
+.pet-mutations{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 8px;position:relative;z-index:2}
+.pet-mutation-tag{display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border:1px solid currentColor;border-radius:999px;font-size:10px;font-weight:900;line-height:1.25;letter-spacing:.02em;background:#101629;white-space:nowrap}
+.pet-mutation-golden{color:#ffe69a;background:linear-gradient(120deg,#5b471b88,#211b1288);border-color:#f4d77b}
+.pet-mutation-diamond{color:#b9e8ff;background:linear-gradient(120deg,#163d5888,#101b2c88);border-color:#8ed8ff}
+.pet-mutation-rainbow{color:transparent;background:linear-gradient(90deg,#ff6b6b 0%,#ffd166 22%,#7ee787 44%,#70c7ff 66%,#c69bff 84%,#ff8bd1 100%);background-clip:text;-webkit-background-clip:text;border-color:#c69bff;filter:drop-shadow(0 0 5px #b78cff66)}
+.pet-mutation-weather-thunder{color:#fff12d;background:#51470b88;border-color:#fff12d;text-shadow:0 0 8px #fff12d99}
+.pet-mutation-weather-crystal{color:#ff9bd5;background:#51213f88;border-color:#ff9bd5;text-shadow:0 0 7px #ff9bd588}
+.pet-mutation-weather-hell{color:#ff6674;background:#4a101b99;border-color:#ff5364;text-shadow:0 0 7px #ff354a88}
+.pet-mutation-weather-snow{color:#fff4e8;background:#4b4b4588;border-color:#fff4e8;text-shadow:0 0 7px #fff4e877}
+.pet-mutation-weather-rain{color:#72baff;background:#102e5488;border-color:#4ea5ff;text-shadow:0 0 7px #4ea5ff88}
