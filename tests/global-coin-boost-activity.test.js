@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createPetIncomeSystem } from '../systems/pet-income.js';
+import { createCoinBoostService } from '../systems/coin-boost.js';
 import { createGlobalBoostSystem } from '../systems/global-boost.js';
 import { createTimerManager } from '../core/timer-manager.js';
 
@@ -113,5 +114,39 @@ test('pet passive income display and payout apply the effective multiplier exact
     else globalThis.localStorage = originalStorage;
     if (originalDocument === undefined) delete globalThis.document;
     else globalThis.document = originalDocument;
+  }
+});
+
+
+test('global and personal coin boosts use the maximum multiplier, never multiply together', async () => {
+  const originalNow = Date.now;
+  const originalFetch = globalThis.fetch;
+  let now = 4_000_000;
+  Date.now = () => now;
+  globalThis.fetch = async () => ({
+    ok: true,
+    async json() {
+      return {
+        global: { multiplier: 2, expires_at: now + 60_000 },
+        personal: { multiplier: 3, expires_at: now + 60_000 }
+      };
+    }
+  });
+  try {
+    const service = createCoinBoostService({
+      getCurrentUser: () => ({ id: 'player-1' }),
+      supabaseClient: { auth: { async getSession() { return { data: { session: { access_token: 'test-session' } } }; } } },
+      SUPABASE_URL: 'https://example.invalid',
+      SUPABASE_KEY: 'test-key'
+    });
+    assert.equal(await service.refreshCoinBoosts(true), true);
+    assert.equal(service.coinEarningMultiplier(), 3);
+    assert.deepEqual(service.activeGlobalCoinBoost(), { multiplier: 2, expires_at: now + 60_000 });
+    now += 60_001;
+    assert.equal(service.coinEarningMultiplier(), 1);
+    assert.equal(service.activeGlobalCoinBoost(), null);
+  } finally {
+    Date.now = originalNow;
+    globalThis.fetch = originalFetch;
   }
 });
