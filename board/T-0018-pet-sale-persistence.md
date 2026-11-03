@@ -38,7 +38,11 @@ done_at:
 
 ## 紀錄
 
+<!-- 只增不改。格式：- YYYY-MM-DD HH:MM [作者] 內容 -->
 - 2026-11-03 [叉子] 接手於 work/chazi。確認根因是 loadCloudSave 將本機舊寵物與雲端寵物合併；已加入伺服器原子出售 RPC、售出 UID 防復原紀錄與雲端寵物權威載入，正在完成回歸測試。
+- 2026-11-03 [叉子] 完成 Supabase 交易與前端接線：sell_owned_pets 以 user_id 鎖定自己的 game_saves，依寵物定義 ID 對應品質計價，讀取目前有效的全服／個人金錢倍率，原子更新寵物、裝備清單及貨幣；pet_sale_tombstones 與 game_saves trigger 阻止舊分頁／舊快照重新寫回已售 UID。
+- 2026-11-03 [叉子] 回歸驗證：Supabase rollback-only SQL 測試結果 first_sale_count=1、second_sale_count=0、first_payout=expected_payout=10000、stale_snapshot_restored=false；V8 執行實際 cloud-save.js 的測試確認本機舊寵物不會合併回雲端清單；V8 執行實際 pet-selling.js 的測試確認登入出售會呼叫 RPC、快速連點只送出一次請求，並套用伺服器回傳的寵物與貨幣狀態。SQL 測試全程 rollback，未保留測試玩家資料變更。
+- 2026-11-03 [叉子] 尚未完成：未部署 work/chazi 至 GitHub Pages，故未執行真實瀏覽器的立即登出、延遲登入及重新整理回歸；也無法執行本機 git diff --check／Node test runner（執行環境無法連線 GitHub 取得 clone）。目前不合併、不部署，等待後續瀏覽器驗證。
 
 ## 完工回報
 
@@ -49,7 +53,3 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
-
-- 2026-11-03 [叉子] 完成 Supabase 交易與前端接線：sell_owned_pets 以 user_id 鎖定自己的 game_saves，依寵物定義 ID 對應品質計價，讀取目前有效的全服／個人金錢倍率，原子更新寵物、裝備清單及貨幣；pet_sale_tombstones 與 game_saves trigger 阻止舊分頁／舊快照重新寫回已售 UID。
-- 2026-11-03 [叉子] 回歸驗證：Supabase rollback-only SQL 測試結果 first_sale_count=1、second_sale_count=0、first_payout=expected_payout=10000、stale_snapshot_restored=false；V8 執行實際 cloud-save.js 的測試確認本機舊寵物不會合併回雲端清單；V8 執行實際 pet-selling.js 的測試確認登入出售會呼叫 RPC、快速連點只送出一次請求，並套用伺服器回傳的寵物與貨幣狀態。SQL 測試全程 rollback，未保留測試玩家資料變更。
-- 2026-11-03 [叉子] 尚未完成：未部署 work/chazi 至 GitHub Pages，故未執行真實瀏覽器的立即登出、延遲登入及重新整理回歸；也無法執行本機 git diff --check／Node test runner（執行環境無法連線 GitHub 取得 clone）。目前不合併、不部署，等待後續瀏覽器驗證。
