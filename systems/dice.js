@@ -36,7 +36,53 @@ export function createDiceSystem(deps) {
   } = deps;
 
   let autoTimer = null;
+  let autoWatchdog = null;
   let rolling = false;
+  let rollingStartedAt = 0;
+  let rollSequence = 0;
+
+  function withTimeout(promise, timeoutMs, label) {
+    let timeoutHandle = null;
+    const timeout = new Promise((_, reject) => {
+      timeoutHandle = timerManager.setTimeout(
+        () => reject(new Error(label + '逾時')),
+        timeoutMs,
+        'dice-roll-timeout'
+      );
+    });
+    return Promise.race([Promise.resolve(promise), timeout])
+      .finally(() => {
+        if (timeoutHandle !== null) timerManager.clearTimeout(timeoutHandle);
+      });
+  }
+
+  function releaseRoll(sequence = rollSequence) {
+    if (sequence !== rollSequence) return false;
+    rolling = false;
+    rollingStartedAt = 0;
+    documentRef.getElementById('rollBtn')?.classList.remove('roll-progress');
+    documentRef.getElementById('autoBtn')?.classList.remove('roll-progress');
+    documentRef.getElementById('rollBtn')?.removeAttribute('disabled');
+    documentRef.getElementById('diceFace')?.classList.remove('rolling');
+    return true;
+  }
+
+  function startAutoWatchdog() {
+    if (autoWatchdog) timerManager.clearInterval(autoWatchdog);
+    autoWatchdog = timerManager.setInterval(() => {
+      if (!autoTimer || !rolling || !rollingStartedAt) return;
+      if (Date.now() - rollingStartedAt < 45000) return;
+      console.warn('自動擲骰流程逾時，已解除卡住狀態');
+      rollSequence++;
+      releaseRoll(rollSequence);
+      if (totalDice() < (Number(getState().bagCapacity) || 35)) doRoll();
+    }, 10000, 'auto-roll-watchdog');
+  }
+
+  function stopAutoWatchdog() {
+    if (autoWatchdog) timerManager.clearInterval(autoWatchdog);
+    autoWatchdog = null;
+  }
 
   function addWeatherOdds(entries, pool, weather) {
     const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
@@ -227,6 +273,8 @@ export function createDiceSystem(deps) {
     }
 
     rolling = true;
+    rollingStartedAt = Date.now();
+    const currentRollSequence = ++rollSequence;
     // 先立即消耗本次擲骰序號並寫入本機，避免動畫期間重新整理重複取得第 10 抽雙倍。
     state.rolls = Math.max(0, Number(state.rolls) || 0) + 1;
     localStorage.setItem(KEY, JSON.stringify(state));
@@ -330,21 +378,30 @@ export function createDiceSystem(deps) {
         if (tenthRoll) toast('第 10 抽觸發雙倍運氣！本抽運氣 ×2');
         if (petSkillReward > 0) toast('寵物技能觸發：額外獲得 +' + format(petSkillReward) + '$');
 
-        await broadcastRareRoll(dice);
+        // 全服稀有公告獨立執行，避免遠端公告寫入延遲卡住自動擲骰。
+        Promise.resolve().then(() => broadcastRareRoll(dice)).catch(error => {
+          console.warn('稀有擲骰公告送出失敗', error);
+        });
         checkAchievements();
         checkDailyReward();
         if (autoWeatherDeposit) {
           save();
-          await autoDepositRolledWeatherDice(dice);
+          try {
+            await withTimeout(
+              autoDepositRolledWeatherDice(dice),
+              15000,
+              '天氣骰子自動投入'
+            );
+          } catch (error) {
+            console.warn('天氣骰子自動投入未能及時完成', error);
+          }
         }
         if (halloweenVariant) await playSmallReveal(dice, 'HALLOWEEN VARIANT');
         else if (dice.den === 4096) await playSmallReveal(dice, 'RARE DISCOVERY');
         else if (dice.den >= 10000) await playRarityReveal(dice);
 
         timerManager.setTimeout(() => {
-          rolling = false;
-          rollButton.classList.remove('roll-progress');
-          autoButton.classList.remove('roll-progress');
+          if (!releaseRoll(currentRollSequence)) return;
           save();
           render();
           if (autoTimer && totalDice() < (Number(getState().bagCapacity) || 35)) {
@@ -355,14 +412,7 @@ export function createDiceSystem(deps) {
         }, 250, 'dice-roll-settle');
       } catch (error) {
         console.error('擲骰流程發生錯誤', error);
-        rolling = false;
-        const roll = documentRef.getElementById('rollBtn');
-        const auto = documentRef.getElementById('autoBtn');
-        const diceFace = documentRef.getElementById('diceFace');
-        roll?.classList.remove('roll-progress');
-        auto?.classList.remove('roll-progress');
-        roll?.removeAttribute('disabled');
-        diceFace?.classList.remove('rolling');
+        releaseRoll(currentRollSequence);
         toast('擲骰失敗，請重新嘗試；詳細錯誤已記錄。');
       }
     }, Math.max(50, 650 / (1 + speed() / 100)), 'dice-roll-processing');
@@ -371,6 +421,7 @@ export function createDiceSystem(deps) {
   function stopAuto() {
     if (autoTimer) timerManager.clearInterval(autoTimer);
     autoTimer = null;
+    stopAutoWatchdog();
     documentRef.getElementById('autoBtn').classList.remove('roll-progress');
     documentRef.getElementById('autoBtn').disabled = false;
     documentRef.getElementById('stopBtn').disabled = true;
@@ -388,6 +439,7 @@ export function createDiceSystem(deps) {
       }
       if (!rolling) doRoll();
     }, Math.max(50, 950 / (1 + speed() / 100)), 'auto-roll');
+    startAutoWatchdog();
   }
 
   let autoRollUISetup = false;
@@ -410,6 +462,7 @@ export function createDiceSystem(deps) {
         }
         if (!rolling) doRoll();
       }, Math.max(50, 950 / (1 + speed() / 100)), 'auto-roll');
+      startAutoWatchdog();
       toast('自動擲骰已開始');
     };
     documentRef.getElementById('stopBtn').onclick = stopAuto;
@@ -419,9 +472,20 @@ export function createDiceSystem(deps) {
       if (documentRef.hidden) {
         const overlay = documentRef.getElementById('rarityOverlay');
         overlay?.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic');
-      } else if (autoTimer && !rolling && totalDice() < (Number(getState().bagCapacity) || 35)) {
-        doRoll();
+      } else if (autoTimer && totalDice() < (Number(getState().bagCapacity) || 35)) {
+        if (rolling && rollingStartedAt && Date.now() - rollingStartedAt >= 15000) {
+          console.warn('頁面恢復後偵測到擲骰卡住，正在恢復自動擲骰');
+          rollSequence++;
+          releaseRoll(rollSequence);
+        }
+        if (!rolling) doRoll();
       }
+    });
+    documentRef.addEventListener('pageshow', () => {
+      if (autoTimer && !rolling && totalDice() < (Number(getState().bagCapacity) || 35)) doRoll();
+    });
+    documentRef.addEventListener('focus', () => {
+      if (autoTimer && !rolling && totalDice() < (Number(getState().bagCapacity) || 35)) doRoll();
     });
     return true;
   }
