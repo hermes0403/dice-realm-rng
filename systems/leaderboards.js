@@ -54,7 +54,7 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
       console.error('Leaderboard load failed', error);
       const message = error?.message ? `排行榜載入失敗：${escapeHTML(error.message)}` : '雲端排行榜暫時無法載入。';
       local.innerHTML = rare.innerHTML = money.innerHTML = `<div class="empty">${message}</div>`;
-      income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
+      if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
       if (mine) mine.querySelectorAll('.my-rank-value').forEach((x, i) => { x.textContent = i === 3 ? '待後端開放' : '—'; });
     }
   }
