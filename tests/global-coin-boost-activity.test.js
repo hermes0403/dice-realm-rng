@@ -188,3 +188,38 @@ test('coin boost status refresh is throttled and never polls once per second', a
   }
 });
 
+
+
+test('global activity countdown parses ISO and Unix timestamps without NaN output', () => {
+  const originalNow = Date.now;
+  const now = 1_800_000_000_000;
+  Date.now = () => now;
+  try {
+    const welcome = { hidden: false };
+    const panel = { hidden: true, innerHTML: '' };
+    let state = { luck_percent: 15, speed_percent: 0, ends_at: new Date(now + 90_000).toISOString() };
+    const system = createGlobalBoostSystem({
+      getBoostState: () => state,
+      setBoostState(value) { state = value; },
+      getCoinBoost: () => null,
+      documentRef: {
+        getElementById(id) { return id === 'realmHeroWelcome' ? welcome : id === 'realmAdminActivity' ? panel : null; }
+      }
+    });
+    system.renderRealmActivity();
+    assert.match(panel.innerHTML, /剩餘 01:30/);
+    assert.doesNotMatch(panel.innerHTML, /NaN/);
+
+    state = { luck_percent: 15, speed_percent: 0, ends_at: String((now + 90_000) / 1000) };
+    system.renderRealmActivity();
+    assert.match(panel.innerHTML, /剩餘 01:30/);
+    assert.doesNotMatch(panel.innerHTML, /NaN/);
+
+    state = { luck_percent: 15, speed_percent: 0, ends_at: 'invalid-time' };
+    system.renderRealmActivity();
+    assert.match(panel.innerHTML, /剩餘時間無法讀取/);
+    assert.doesNotMatch(panel.innerHTML, /NaN/);
+  } finally {
+    Date.now = originalNow;
+  }
+});
