@@ -1,6 +1,25 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 import { petWeightSkillMultiplier } from './pet-skills.js';
 
+/** Formats the independent appearance and weather mutation fields on a pet instance. */
+export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
+  if (!pet || typeof pet !== 'object') return '';
+  const labels = [];
+  const variantNames = { golden: '黃金', diamond: '鑽石', rainbow: '彩虹' };
+  const variants = Array.isArray(pet.variants) ? pet.variants : (Array.isArray(pet.variant) ? pet.variant : [pet.variant]);
+  for (const variant of variants) {
+    const label = variantNames[variant];
+    if (label && !labels.includes(label)) labels.push(label);
+  }
+  const mutations = Array.isArray(pet.mutations) ? pet.mutations : (Array.isArray(pet.mutation) ? pet.mutation : [pet.mutation]);
+  for (const key of mutations) {
+    const mutation = PET_MUTATIONS[key];
+    const label = mutation?.name?.replace(/變異$/, '');
+    if (label && !labels.includes(label)) labels.push(label);
+  }
+  return labels.join('、');
+}
+
 export function createPetSystem({
   getState,
   PETS,
@@ -157,8 +176,7 @@ export function createPetSystem({
   }
 
   function petMutationLabel(pet) {
-    const mutation = PET_MUTATIONS[pet?.mutation];
-    return mutation ? `${mutation.name} · ×${mutation.multiplier}` : '';
+    return formatPetMutationLabels(pet, PET_MUTATIONS);
   }
 
   function rollPetWeightKg() {
@@ -252,7 +270,8 @@ export function createPetSystem({
           const rarity = petRarity(definition.rarity);
           const equipped = (S.equippedPetUids || []).includes(pet.uid);
           const income = petIncomePerSecond(pet);
-          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div><button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
+          const mutation = petMutationLabel(pet);
+          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutation ? `<div class="pet-mutation">${escapeHTML(mutation)}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
         }).join('');
       }
     }
