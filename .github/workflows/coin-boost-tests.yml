@@ -35,4 +35,4 @@ jobs:
         with:
           node-version: 22
       - name: Run coin boost regression tests
-        run: node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js
+        run: node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js tests/coin-boost-timestamp.test.js tests/pet-sale-sort.test.js
