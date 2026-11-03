@@ -50,6 +50,8 @@ done_at:
 - 2026-11-03 [叉子] 第二輪補強：新增全服與個人倍率同時存在時取最大值、絕不相乘及到期回復 x1 的單元測試；新增 `.github/workflows/coin-boost-tests.yml`，在 work/chazi 更新或對 main 發 PR 時執行兩組收益／管理員 UI 回歸測試。修正管理員測試 mock，讓成功刷新回傳 true。GitHub Actions API 尚未回報任何 workflow run，因此測試仍未取得實際執行結果；未部署、未合併，待確認 Actions 執行狀態及棒子正式帳號驗收。
 - 2026-11-03 [叉子] 驗證補充：GitHub Actions workflow `Coin boost regression tests`（run 41615880232，commit 9a3fda74816dcc4b18182e62b147fd14e70c2218）已完成，job `coin-boost` 與步驟 `Run coin boost regression tests` 均為 success；本機隔離測試副本亦為 8/8 通過。測試包含首頁卡片與倒數到期、收益顯示／實際入帳 x2 只套用一次、全服／個人倍率取最大值、管理員成功設定後立即重繪。仍待正式瀏覽器及棒子管理員帳號驗收；未合併、未部署。
 
+- 2026-11-03 19:31 [叉子] 已查到最新提交 0883c741743392f5ed79ad5dfc20d37a23d5f4cb 的 GitHub Actions 執行結果：workflow run 41627905388，job `coin-boost` 成功；實際執行 `node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js`，9 項測試全部通過（9 pass、0 fail）。仍未完成真實瀏覽器與棒子正式管理員帳號驗收；未合併、未部署。
+
 ## 完工回報
 
 <!-- 推到 review 前必填；未完成就留空。 -->
