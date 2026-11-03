@@ -1,7 +1,7 @@
 ---
 id: T-0021
 title: 新增每秒賺錢排行榜並調整排行榜入口名稱
-status: in_progress
+status: blocked
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -10,7 +10,7 @@ reviewer: 棒子
 priority: P2
 created: 2026-11-03
 updated: 2026-11-03
-depends_on: []
+depends_on: T-0012, T-0014
 branch: work/chazi
 done_by: 棒子
 done_at:
@@ -39,6 +39,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-03 [叉子] 接手任務，工作分支 work/chazi；已核對遠端 HEAD 及現有排行榜 UI／收益程式，開始實作可獨立完成的畫面部分。
+- 2026-11-03 15:04 [叉子] 已完成獨立 UI 部分：新增第四個個人排名入口與「每秒賺錢 TOP 10」區塊、將「最稀有骰子」改名「最佳骰子」，並加入手機兩欄排版與前端回歸測試。安全查核發現 `game_saves` 允許玩家更新自己的 `save_data`，`player_profiles` 允許玩家更新自己的任意 profile 欄位；`pet_income_per_second` 雖存在但目前沒有可信伺服器寫入者，且可由玩家自行修改。管理員 `pet_income_monitor` 也只是讀取玩家可寫存檔後在管理端計算，不能當公開可信排名來源。因此不讀取該欄位、不用客戶端存檔排名，收益區暫顯示等待伺服器權威資料。依賴已記錄至 T-0012／T-0014，並提出伺服器計算與安全公開投影方案；本任務轉為 blocked，等待兩項前置任務完成。
 
 ## 完工回報
 
