@@ -92,3 +92,35 @@ test('restarting the auto-roll interval keeps exactly one watchdog', () => {
   dice.stopAuto();
   assert.equal(timers.manager.getStats().total, 0);
 });
+
+test('watchdog recovers a roll that remains locked beyond the timeout', () => {
+  const previousNow = Date.now;
+  const previousStorage = globalThis.localStorage;
+  let now = 1000;
+  let writes = 0;
+  Date.now = () => now;
+  globalThis.localStorage = { setItem() { writes++; } };
+
+  try {
+    const { dice, timers, elements } = makeDiceSystem();
+    dice.setupAutoRollUI();
+    elements.get('autoBtn').onclick();
+
+    const [autoInterval, watchdogInterval] = [...timers.intervals.values()];
+    autoInterval.callback();
+    assert.equal(dice.isRolling(), true);
+    assert.equal(writes, 1);
+
+    now += 46000;
+    watchdogInterval.callback();
+    assert.equal(dice.isRolling(), true);
+    assert.equal(writes, 2);
+
+    dice.stopAuto();
+    timers.manager.clearAll();
+  } finally {
+    Date.now = previousNow;
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});
