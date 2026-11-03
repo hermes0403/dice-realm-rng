@@ -294,4 +294,4 @@ save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards()
 
 /* ---- merged from script2.js: achievement popup controls ---- */
 
-setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, save, toast, render, renderPetsPage, coinEarningMultiplier });
+setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier });
