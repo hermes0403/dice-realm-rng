@@ -20,26 +20,29 @@ function fakeTimers() {
 test('global coin boost appears in realm activity without exposing personal boost data', () => {
   const originalNow = Date.now;
   Date.now = () => 1_000_000;
-  const welcome = { hidden: false };
-  const panel = { hidden: true, innerHTML: '' };
-  const documentRef = {
-    getElementById(id) { return id === 'realmHeroWelcome' ? welcome : id === 'realmAdminActivity' ? panel : null; }
-  };
-  const system = createGlobalBoostSystem({
-    getBoostState: () => null,
-    setBoostState() {},
-    getCoinBoost: () => ({ multiplier: 2, expires_at: Date.now() + 60000 }),
-    documentRef
-  });
+  try {
+    const welcome = { hidden: false };
+    const panel = { hidden: true, innerHTML: '' };
+    const documentRef = {
+      getElementById(id) { return id === 'realmHeroWelcome' ? welcome : id === 'realmAdminActivity' ? panel : null; }
+    };
+    const system = createGlobalBoostSystem({
+      getBoostState: () => null,
+      setBoostState() {},
+      getCoinBoost: () => ({ multiplier: 2, expires_at: Date.now() + 60000 }),
+      documentRef
+    });
 
-  system.renderRealmActivity();
+    system.renderRealmActivity();
 
-  assert.equal(welcome.hidden, true);
-  assert.equal(panel.hidden, false);
-  assert.match(panel.innerHTML, /金錢倍率 x2/);
-  assert.match(panel.innerHTML, /剩餘 01:00/);
-  assert.doesNotMatch(panel.innerHTML, /personal|個人倍率/);
-  Date.now = originalNow;
+    assert.equal(welcome.hidden, true);
+    assert.equal(panel.hidden, false);
+    assert.match(panel.innerHTML, /金錢倍率 x2/);
+    assert.match(panel.innerHTML, /剩餘 01:00/);
+    assert.doesNotMatch(panel.innerHTML, /personal|個人倍率/);
+  } finally {
+    Date.now = originalNow;
+  }
 });
 
 test('expired global coin boost removes its activity card and restores welcome', () => {
