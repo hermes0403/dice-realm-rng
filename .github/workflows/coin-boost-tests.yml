@@ -5,6 +5,7 @@ on:
     branches:
       - work/chazi
       - integrate/t-0022-global-coin-boost
+      - task/T-0023-pet-sale-sort-and-boost-timer
     paths:
       - 'systems/coin-boost.js'
       - 'systems/global-boost.js'
