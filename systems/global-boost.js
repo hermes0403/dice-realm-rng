@@ -114,14 +114,23 @@ export function createGlobalBoostSystem({
       if (kind === 'coin') {
         const coinBoost = getCoinBoost();
         if (!coinBoost) return;
-        const remaining = Math.max(0, Math.ceil((Number(coinBoost.expires_at) - Date.now()) / 1000));
+        const expiresAt = timestampToMs(coinBoost.expires_at);
+        if (!Number.isFinite(expiresAt)) {
+          alert(`全服金錢倍率 x${Number(coinBoost.multiplier) || 1}\n剩餘時間無法讀取`);
+          return;
+        }
+        const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
         alert(`全服金錢倍率 x${Number(coinBoost.multiplier) || 1}\n剩餘 ${Math.floor(remaining / 60)} 分 ${remaining % 60} 秒`);
         return;
       }
       const boost = activeGlobalBoost();
       const value = kind === 'luck' ? Number(boost.luck_percent) || 0 : Number(boost.speed_percent) || 0;
       const label = kind === 'luck' ? '運氣' : '速度';
-      const remaining = Math.max(0, Math.ceil((new Date(boost.ends_at).getTime() - Date.now()) / 1000));
+      if (!Number.isFinite(boost._endsAtMs)) {
+        alert(`全體${label} +${value}%\n剩餘時間無法讀取`);
+        return;
+      }
+      const remaining = Math.max(0, Math.ceil((boost._endsAtMs - Date.now()) / 1000));
       alert(`全體${label} +${value}%\n剩餘 ${Math.floor(remaining / 60)} 分 ${remaining % 60} 秒`);
     });
     timerManager.clearScope('global-boost-refresh');
