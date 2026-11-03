@@ -123,6 +123,16 @@ export function createCloudSaveService(dependencies) {
       if (getCurrentUser()?.id !== syncingUserId) return;
       const S = getState();
       const payload = savePayload();
+      // Achievements are permanent unlocks. Merge the latest cloud snapshot before
+      // writing so a stale tab cannot erase achievements granted by another session.
+      const { data: latestSave, error: latestSaveError } = await supabaseClient.from('game_saves')
+        .select('save_data').eq('user_id', syncingUserId).maybeSingle();
+      if (latestSaveError) throw latestSaveError;
+      const cloudAchievements = latestSave?.save_data?.achievements;
+      if (cloudAchievements && typeof cloudAchievements === 'object' && !Array.isArray(cloudAchievements)) {
+        payload.achievements = { ...(payload.achievements || {}), ...cloudAchievements };
+        S.achievements = payload.achievements;
+      }
       const now = new Date().toISOString();
       const { error } = await supabaseClient.from('game_saves')
         .upsert({ user_id: syncingUserId, save_data: payload, updated_at: now }, { onConflict: 'user_id' });
