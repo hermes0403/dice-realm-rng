@@ -1,6 +1,9 @@
 name: Cloud save achievement merge regression tests
 
 on:
+  push:
+    branches:
+      - task/T-0026-preserve-achievements-on-stale-save
   pull_request:
     branches:
       - main
