@@ -37,14 +37,15 @@ done_at:
 - [x] 為唯一持有 g5 且有購買紀錄的玩家補回 craftVoid，rewardGiven=true。
 - [ ] 以管理員登入確認成就統計列出「鑽石手套」且人數包含當事玩家。
 - [ ] 當事玩家重新載入遊戲，確認成就頁顯示完成。
-- [ ] 完成 CI 測試、diff check 與正式環境持久性複查。
+- [x] 正式環境以空 achievements 模擬舊客戶端快照更新，trigger 仍保留 craftVoid；獨立查詢確認資料持續存在。
+- [ ] 完成 CI 測試與 diff check。
 
 ## 紀錄
 
 - 2026-11-04 [叉子] 查核 Supabase logs 發現當事玩家仍有有效登入 session，且遊戲端持續對 game_saves 執行完整快照 upsert。直接更新 craftVoid 後，舊快照會再次覆蓋，因此先前補發未能持久保存。
 - 2026-11-04 [叉子] 正式資料庫已建立 public.preserve_game_save_achievements() 與 trg_preserve_game_save_achievements。trigger 以 OLD achievements || NEW achievements 合併，讓新快照不能刪除已存在的永久成就；未使用 SECURITY DEFINER。
 - 2026-11-04 [叉子] 已為當事玩家補回 craftVoid，沿用 g5 購買紀錄時間，rewardGiven=true，未重複發放藥水。獨立 SQL 查詢確認標記仍存在。
-- 2026-11-04 [叉子] 已在 task branch 加入前端雲端成就合併、回歸測試與 trigger SQL 文件；尚待 CI 及實際玩家端／管理員面板驗收。
+- 2026-11-04 [叉子] 已在 task branch 加入前端雲端成就合併、回歸測試與 trigger SQL 文件；另以正式資料庫更新成空 achievements 模擬舊快照，trigger 回傳及後續獨立查詢均保留 craftVoid。CI 與實際玩家端／管理員面板驗收仍待完成。
 
 ## 完工回報
 
@@ -58,7 +59,7 @@ done_at:
 ### 怎麼驗證的
 
 - Supabase SQL：確認 trigger 已掛載於 public.game_saves。
-- Supabase SQL：確認當事玩家仍持有 g5，且 craftVoid 已存在、rewardGiven=true。
+- Supabase SQL：確認當事玩家仍持有 g5，且 craftVoid 已存在、rewardGiven=true；以空 achievements 模擬舊客戶端覆蓋後，trigger 仍保留 craftVoid，獨立查詢統計為 1 位玩家。
 - GitHub CI 與 diff check：待執行。
 
 ### 沒做／做不到的
