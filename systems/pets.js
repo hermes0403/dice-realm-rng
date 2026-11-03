@@ -1,6 +1,25 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 import { petWeightSkillMultiplier } from './pet-skills.js';
 
+/** Formats the independent appearance and weather mutation fields on a pet instance. */
+export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
+  if (!pet || typeof pet !== 'object') return '';
+  const labels = [];
+  const variantNames = { golden: '黃金', diamond: '鑽石', rainbow: '彩虹' };
+  const variants = Array.isArray(pet.variants) ? pet.variants : (Array.isArray(pet.variant) ? pet.variant : [pet.variant]);
+  for (const variant of variants) {
+    const label = variantNames[variant];
+    if (label && !labels.includes(label)) labels.push(label);
+  }
+  const mutations = Array.isArray(pet.mutations) ? pet.mutations : (Array.isArray(pet.mutation) ? pet.mutation : [pet.mutation]);
+  for (const key of mutations) {
+    const mutation = PET_MUTATIONS[key];
+    const label = mutation?.name?.replace(/變異$/, '');
+    if (label && !labels.includes(label)) labels.push(label);
+  }
+  return labels.join('、');
+}
+
 export function createPetSystem({
   getState,
   PETS,
@@ -157,21 +176,7 @@ export function createPetSystem({
   }
 
   function petMutationLabel(pet) {
-    if (!pet || typeof pet !== 'object') return '';
-    const labels = [];
-    const variantNames = { golden: '黃金', diamond: '鑽石', rainbow: '彩虹' };
-    const variants = Array.isArray(pet.variants) ? pet.variants : (Array.isArray(pet.variant) ? pet.variant : [pet.variant]);
-    for (const variant of variants) {
-      const label = variantNames[variant];
-      if (label && !labels.includes(label)) labels.push(label);
-    }
-    const mutations = Array.isArray(pet.mutations) ? pet.mutations : (Array.isArray(pet.mutation) ? pet.mutation : [pet.mutation]);
-    for (const key of mutations) {
-      const mutation = PET_MUTATIONS[key];
-      const label = mutation?.name?.replace(/變異$/, '');
-      if (label && !labels.includes(label)) labels.push(label);
-    }
-    return labels.join('、');
+    return formatPetMutationLabels(pet, PET_MUTATIONS);
   }
 
   function rollPetWeightKg() {
