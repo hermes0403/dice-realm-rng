@@ -144,10 +144,11 @@ export function createGloveUI(deps) {
         updated_at: now
       }, { onConflict: 'user_id' });
       if (profileError) console.warn('Glove purchase profile mirror update failed; purchase is committed', profileError);
-      localStorageRef.setItem(KEY, JSON.stringify(state));
-      const scopedKey = userSaveKey();
-      if (scopedKey) localStorageRef.setItem(scopedKey, JSON.stringify(state));
-      documentRef.getElementById('saveStatus').textContent = '雲端已同步';
+      // Purchase RPC has committed; never roll back the confirmed purchase if local save scheduling fails.
+      try { save(); } catch (saveError) {
+        console.warn('Glove purchase committed but save scheduling failed', saveError);
+        void flushCloudSave();
+      }
       if (typeof logCraft === 'function') logCraft('glove', id, item.name);
       toast('購買成功！已裝備 ' + item.name);
       render();
