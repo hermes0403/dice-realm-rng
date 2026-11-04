@@ -11,7 +11,8 @@ export function createPetIncomeSystem({
   KEY,
   refreshCoinBoosts,
   save,
-  timerManager
+  timerManager,
+  localStorageRef = globalThis.localStorage
 }) {
   let lastTick = Date.now();
   let saveCounter = 0;
@@ -57,7 +58,8 @@ export function createPetIncomeSystem({
     const S = getState();
     const now = Date.now();
     const elapsed = Math.max(0, Math.min(5, (now - lastTick) / 1000));
-    if (!getCurrentUser()) {
+    const user = getCurrentUser();
+    if (!user) {
       lastTick = now;
       return;
     }
@@ -77,7 +79,10 @@ export function createPetIncomeSystem({
         S.quest = S.quest || {};
         S.quest.coinsEarned = (Number(S.quest.coinsEarned) || 0) + earned;
         try {
-          localStorage.setItem(KEY, JSON.stringify(S));
+          const serialized = JSON.stringify(S);
+          localStorageRef.setItem(KEY, serialized);
+          const scopedKey = user.id ? `${KEY}_user_${String(user.id)}` : null;
+          if (scopedKey) localStorageRef.setItem(scopedKey, serialized);
         } catch (error) {
           console.warn('本機收益暫存失敗', error);
         }
