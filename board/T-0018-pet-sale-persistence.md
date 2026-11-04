@@ -70,3 +70,10 @@ done_at:
 ### 衍生任務／影響任務
 
 - 影響 T-0012：本任務只處理出售交易及寵物清單防復原；其餘寵物資產、技能與被動收益權威化仍由 T-0012 負責。
+
+ 
+## 補充驗收紀錄
+
+- 2026-11-04 16:00 [叉子] 重新查核 Supabase 正式專案：migration `20261103060728 pet_sale_persistence_and_idempotency` 與 `20261103060918 fix_pet_sale_rarity_lookup` 均已存在；`public.sell_owned_pets(text[])`、`public.pet_sale_tombstones` 及 `trg_filter_sold_pets_from_game_save` 均存在。RPC 僅授權 authenticated／service_role，anon 無法執行；trigger function 僅 postgres／service_role 可執行，tombstone 表已啟用 RLS 且未授予 anon／authenticated 存取。
+- 2026-11-04 16:00 [叉子] PR #2 已合併至 main（`2ff19db25266f32c4f8a67a4232e4d9826e170cd`），GitHub Pages 部署 run `41604124888` success。先前 rollback-only SQL 與 V8 測試紀錄仍可作為交易冪等及舊快照防復原證據；正式資料庫物件已再次確認。
+- 2026-11-04 16:00 [叉子] 尚缺真實玩家瀏覽器的立即登出、延遲登入及重新整理回歸；未以真實玩家資料執行出售測試，因此維持 review，不宣稱完整驗收。
