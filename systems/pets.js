@@ -279,6 +279,7 @@ export function createPetSystem({
           const nameOrder = da.name.localeCompare(db.name, 'zh-Hant');
           const weightOrder = (Number(a.kg) || 0) - (Number(b.kg) || 0);
           if (petSortMode === 'income-asc') return petIncomePerSecond(a) - petIncomePerSecond(b) || ra - rb || nameOrder || weightOrder;
+          if (petSortMode === 'income-desc') return petIncomePerSecond(b) - petIncomePerSecond(a) || rb - ra || nameOrder || weightOrder;
           const direction = petSortMode === 'rarity-asc' ? 1 : -1;
           return direction * (ra - rb) || nameOrder || weightOrder;
         });
