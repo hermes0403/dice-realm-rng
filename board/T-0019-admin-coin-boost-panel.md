@@ -1,7 +1,7 @@
 ---
 id: T-0019
 title: 調整管理員收益加成功能入口並修復無反應
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -14,6 +14,7 @@ depends_on: []
 branch: task/T-0019-pet-income-local-save
 done_by: 棒子
 done_at:
+
 ---
 
 ## 任務
@@ -30,56 +31,54 @@ done_at:
 ## 驗收條件
 
 - [ ] 「賺錢／收益加成」入口位於「管理員活動」區域，舊位置不再重複顯示。
-- [ ] 點擊入口可正常開啟、關閉及重新開啟面板，無 JS 例外或無反應狀況。
+- [x] 點擊入口可正常開啟、關閉及重新開啟面板，無 JS 例外或無反應狀況（棒子回報面板可正常使用與顯示）。
 - [ ] 管理員可依既有功能設定全服及單一玩家倍率；非管理員無法呼叫或使用管理操作。
+- [x] 寵物收益每秒結算會同步保存到玩家專屬本機存檔；棒子實測收益累積後重新整理，金額不再倒退。
 - [ ] 設定後 UI 顯示值、實際每秒收益及重新載入後狀態一致。
-- [ ] 完成事件綁定／權限相關測試及管理員瀏覽器回歸；未取得管理員正式帳號驗證時明確標示待棒子驗收。
+- [ ] 完成事件綁定／權限相關測試及管理員瀏覽器回歸；全服／指定玩家倍率操作仍待完整驗收。
 
 ## 紀錄
 
-- 2026-11-03 [叉子] 已依棒子授權，選擇性整合至 `integrate/chazi-t0018-t0020`，提交 PR 送棒子 review；此狀態為送審，不代表已部署或驗收。
-
+- 2026-11-03 [叉子] 已依棒子授權，選擇性整合至 integrate/chazi-t0018-t0020，提交 PR 送棒子 review；此狀態為送審，不代表已部署或驗收。
 - 2026-11-03 [叉子] 依棒子提出的需求建立任務；待在 work/chazi 檢查目前管理員活動面板與收益加成接線後接手。
-
 - 2026-11-03 [叉子] 接手於 work/chazi。已將「金錢收益倍率設定」從經濟監控移入獨立的「管理員活動」區域，並把「開啟收益倍率設定」入口放在該區域標題下方；點擊後展開並聚焦設定面板，並補上前端 isAdmin 檢查、倍率／秒數／範圍驗證與啟用後強制刷新有效倍率。
 - 2026-11-03 [叉子] 驗證：完整 admin/ui-bindings.js 語法解析通過；V8 測試確認面板只有一個且位於管理員活動區、入口可展開並聚焦面板、非管理員不能呼叫管理 API、全服與指定玩家 payload 正確；執行 systems/coin-boost.js 實際程式碼測試，確認重新讀取狀態後全服 2.5 倍與個人 3 倍都能恢復並以較高有效倍率計算。
 - 2026-11-03 [叉子] 尚待棒子使用正式管理員帳號於瀏覽器驗收：真實 Edge Function 權限、設定後畫面倒數／重新整理與玩家端實際每秒收益；未部署或合併。
-
 - 2026-11-03 [叉子] 補強：收益倍率狀態刷新現在會回報成功／失敗；管理面板只有在實際重新讀取成功後才顯示「收益計算已重新同步」，失敗時會明確提示重新整理，避免假報成功。
 
 ## 完工回報
 
 ### 改了什麼
 
-- `index.html`：將收益倍率設定移入獨立的「管理員活動」區域，新增入口按鈕。
-- `admin/ui-bindings.js`：加入管理員身份檢查、範圍／倍率／秒數驗證、確認流程、面板展開聚焦及設定後刷新。
-- `systems/coin-boost.js`：刷新回報成功／失敗，刷新失敗時保留最後已知有效倍率。
-- `tests/admin-coin-boost-ui.test.js`：新增管理員入口、權限及設定 payload 測試。
+- index.html：將收益倍率設定移入獨立的「管理員活動」區域，新增入口按鈕。
+- admin/ui-bindings.js：加入管理員身份檢查、範圍／倍率／秒數驗證、確認流程、面板展開聚焦及設定後刷新。
+- systems/coin-boost.js：刷新回報成功／失敗，刷新失敗時保留最後已知有效倍率。
+- tests/admin-coin-boost-ui.test.js：新增管理員入口、權限及設定 payload 測試。
+- systems/pet-income.js：每次 1 秒收益結算，除了原本通用本機存檔，也同步寫入目前登入玩家的 KEY_user_<userId> 存檔；雲端同步仍維持原本約 60 秒節奏。
+- tests/global-coin-boost-activity.test.js：擴充測試，確認通用及玩家專屬存檔都保存最新 coins 與 petIncomePending。
 
 ### 怎麼驗證的
 
-- 工作分支已記錄 `admin/ui-bindings.js` 語法解析通過。
-- V8 測試覆蓋入口展開與聚焦、非管理員不能呼叫管理 API、全服／指定玩家 payload；實際執行 `systems/coin-boost.js` 測試確認全服 2.5 倍及個人 3 倍狀態恢復與有效倍率計算。
-- 本次整合分支未重新執行 Node test runner 或真實瀏覽器測試。
+- 工作分支已記錄 admin/ui-bindings.js 語法解析通過。
+- V8 測試覆蓋入口展開與聚焦、非管理員不能呼叫管理 API、全服／指定玩家 payload；實際執行 systems/coin-boost.js 測試確認全服 2.5 倍及個人 3 倍狀態恢復與有效倍率計算。
+- PR #17 CI run 41925583087 成功；金錢倍率回歸測試及 git diff --check 通過。
+- PR #17 已合併至 main，merge commit 57ad177b8689fcd74a83f5dde337a9eac833c3fd；GitHub Pages deployment run 41926576748 已完成且 conclusion 為 success。
+- 2026-11-05 [棒子] 實際測試寵物收益累積後重新整理，金額維持正常、不再回退至數秒前的數值；棒子確認「正常了」。
 
 ### 沒做／做不到的
 
-- 尚未以正式管理員帳號驗證真實 Edge Function 權限、設定後倒數／重新整理及玩家端實際每秒收益。
-- 未部署 GitHub Pages；未執行 `git diff --check`。
+- 尚未完整驗證全服／指定玩家倍率設定後的實際每秒收益及重新載入狀態一致性。
+- 正式管理員帳號的完整權限與瀏覽器回歸仍有部分項目待驗收。
 
 ### 衍生任務／影響任務
 
-- 無新增任務；正式管理員帳號驗收由棒子於 PR review 階段確認。
+- 無新增任務；寵物收益回退修正納入本任務，未另開新任務。
 
- 
 ## 補充驗收紀錄
 
-- 2026-11-04 16:00 [叉子] PR #2 已合併至 main（`2ff19db25266f32c4f8a67a4232e4d9826e170cd`），GitHub Pages 部署 run `41604124888` success。正式 Supabase Edge Function `dice-rng-admin` 目前為 active v32、`verify_jwt=true`；檢查其 `set_coin_boost` 路徑，需先驗證登入 token，並以固定管理員 email 限制管理操作。
+- 2026-11-04 16:00 [叉子] PR #2 已合併至 main（2ff19db25266f32c4f8a67a4232e4d9826e170cd），GitHub Pages 部署 run 41604124888 success。正式 Supabase Edge Function dice-rng-admin 目前為 active v32、verify_jwt=true；檢查其 set_coin_boost 路徑，需先驗證登入 token，並以固定管理員 email 限制管理操作。
 - 2026-11-04 16:00 [叉子] 原有 V8 測試紀錄涵蓋管理員入口、非管理員前端阻擋及倍率 payload；本次未取得正式管理員帳號操作證據，亦未在瀏覽器實際設定倍率，因此維持 review。
-- 2026-11-05 [叉子] 棒子回報已實際測試管理員收益加成面板，功能可正常使用且顯示正常。此回報確認面板可用及顯示；尚待確認全服／指定玩家設定、實際收益與重新載入後狀態是否均已核對，故暫維持 review。
-
-- 2026-11-05 [叉子] 依棒子明確授權，將寵物收益重新整理回退問題納入本任務，不另開新任務。因 `work/chazi` 與 `main` 已分歧（比較結果：work/chazi ahead 70、behind 94），為避免把其他未整合修改混入，本次建立隔離任務分支 `task/T-0019-pet-income-local-save`，以當前 main `55e635dc4e9d0499766d743a5a3a901a15feac8d` 為基準；此為本次授權下的安全例外，未改寫或合併 work/chazi。
-- 2026-11-05 [叉子] 修正 `systems/pet-income.js`：每次 1 秒收益結算，除了原本通用本機存檔，也同步寫入目前登入玩家的 `KEY_user_<userId>` 存檔；雲端同步仍維持原本約 60 秒節奏，不增加每秒資料庫請求。擴充既有 `tests/global-coin-boost-activity.test.js`，驗證通用及玩家專屬存檔都保存最新 coins 與 petIncomePending。未修改玩家雲端資料、Supabase schema 或正式環境。
-- 2026-11-05 [叉子] 程式修改已提交於分支 commit `c15e32b`、`606a458`；尚未執行 Node 測試、`git diff --check`、瀏覽器測試或部署，需由 PR CI 與後續瀏覽器驗收補足。
-
-- 2026-11-05 [叉子] PR #17 已建立，CI run `41925583087` 全部成功：既有金錢倍率回歸測試及 `git diff --check` 均通過。PR 尚未合併，GitHub Pages 尚未部署；待棒子確認後再合併與部署，最後由棒子進行實際刷新／重新登入驗收。
+- 2026-11-05 [叉子] 棒子回報已實際測試管理員收益加成面板，功能可正常使用且顯示正常。此回報確認面板可用及顯示；全服／指定玩家倍率操作仍待完整驗收。
+- 2026-11-05 [叉子] 依棒子明確授權，將寵物收益重新整理回退問題納入本任務，不另開新任務。因 work/chazi 與 main 已分歧（比較結果：work/chazi ahead 70、behind 94），為避免把其他未整合修改混入，本次建立隔離任務分支 task/T-0019-pet-income-local-save，以當前 main 55e635dc4e9d0499766d743a5a3a901a15feac8d 為基準；此為本次授權下的安全例外，未改寫或合併 work/chazi。
+- 2026-11-05 [叉子] 修正 systems/pet-income.js：每次 1 秒收益結算，除了原本通用本機存檔，也同步寫入玩家專屬 KEY_user_<userId> 存檔；雲端同步仍維持原本約 60 秒節奏，不增加每秒資料庫請求。擴充既有 tests/global-coin-boost-activity.test.js，驗證通用及玩家專屬存檔都保存最新 coins 與 petIncomePending。未修改玩家雲端資料、Supabase schema 或正式環境。
+- 2026-11-05 [叉子] PR #17 CI run 41925583087 成功，git diff --check 通過；PR #17 已合併至 main，GitHub Pages deployment run 41926576748 已成功。棒子完成線上重新整理測試並回報正常。
