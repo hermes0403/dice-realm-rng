@@ -9,7 +9,7 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-03
-updated: 2026-11-03
+updated: 2026-11-05
 depends_on: []
 branch: work/chazi
 done_by: 棒子
@@ -76,3 +76,4 @@ done_at:
 
 - 2026-11-04 16:00 [叉子] PR #2 已合併至 main（`2ff19db25266f32c4f8a67a4232e4d9826e170cd`），GitHub Pages 部署 run `41604124888` success。正式 Supabase Edge Function `dice-rng-admin` 目前為 active v32、`verify_jwt=true`；檢查其 `set_coin_boost` 路徑，需先驗證登入 token，並以固定管理員 email 限制管理操作。
 - 2026-11-04 16:00 [叉子] 原有 V8 測試紀錄涵蓋管理員入口、非管理員前端阻擋及倍率 payload；本次未取得正式管理員帳號操作證據，亦未在瀏覽器實際設定倍率，因此維持 review。
+- 2026-11-05 [叉子] 棒子回報已實際測試管理員收益加成面板，功能可正常使用且顯示正常。此回報確認面板可用及顯示；尚待確認全服／指定玩家設定、實際收益與重新載入後狀態是否均已核對，故暫維持 review。
