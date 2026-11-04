@@ -1,6 +1,6 @@
 ---
 id: T-0030
-title: 完全隱藏退場寵物並修正玩家加入時間
+title: 永久移除四隻退場寵物並修正玩家加入時間
 status: review
 from: 叉子
 to: 叉子
@@ -25,7 +25,7 @@ done_at:
 ## 範圍與禁止
 
 - 只動：寵物圖鑑退場寵物篩選、管理員玩家清單／新玩家清單的加入時間資料鏈、必要的管理 Edge Function、測試與本任務 Board 紀錄。
-- 四隻退場寵物：冰原兔、藍晶甲蟲、日蝕金狼、星焰鳳皇；不得從玩家存檔刪除其既有持有資料。
+- 四隻退場寵物：冰原兔、藍晶甲蟲、日蝕金狼、星焰鳳皇；棒子於 2026-11-04 明確確認，需從所有玩家背包、裝備清單及圖鑑發現紀錄永久刪除。
 - 加入時間應使用 Supabase Auth 的 created_at，以台灣時區格式顯示；缺少資料時才顯示明確的未知狀態，不可把 UUID 或其他時間欄位冒充註冊時間。
 - 不要修改 work/chazi；本次依棒子明確授權從最新 main 建立獨立任務分支。
 - 不要修改與本任務無關的遊戲功能或玩家資料。
@@ -34,7 +34,7 @@ done_at:
 ## 驗收條件
 
 - [ ] 四隻退場寵物完全不出現在所有玩家的圖鑑列表、圖鑑進度分母及已發現數中。
-- [ ] 玩家存檔中原有退場寵物持有資料完整保留，不做刪除或重寫。
+- [x] 已從所有玩家存檔刪除四隻退場寵物實例、裝備 UID 與圖鑑發現旗標，並加入資料庫 trigger 防止舊端存檔再次寫回。
 - [ ] 管理員玩家清單及新玩家清單能取得並顯示 Auth created_at，格式為台灣時間。
 - [ ] 帳號識別碼前綴 71413984 的加入時間顯示為 2026-10-23 22:00:36（台灣時間）。
 - [ ] 新增或更新測試覆蓋退場寵物圖鑑隱藏及加入時間缺漏／正常顯示。
@@ -57,17 +57,21 @@ done_at:
 - UNOBTAINABLE_PET_IDS 清空，新增 REMOVED_PET_IDS 作為測試用退場 ID 清單；合成池不再包含這四隻。
 - Supabase dice-rng-admin 第 31 版加入 Auth created_at 合併，第 32 版同步移除四隻退場寵物的管理員發放名稱。
 - 前端加入時間固定使用 Asia/Taipei 時區，排序只依 created_at，不以 updated_at 假冒註冊時間。
+- 棒子確認永久刪除後，已清理 public.game_saves：原本找到 8 隻退場寵物，分布於 6 個帳號；同步清除 equippedPetUids 與 petDiscovered 的四個退場 ID。
+- 已套用資料庫 migration remove_retired_pet_instances_from_saves，更新既有 filter_sold_pets_from_game_save trigger，所有後續存檔也會過濾四隻退場寵物、其裝備 UID 及圖鑑旗標，避免舊裝置快取將其復原。
 
 ### 怎麼驗證的
 
 - 已確認帳號識別碼前綴 71413984 的 Auth created_at 為 2026-10-23T14:00:36.222718Z，即台灣時間 2026-10-23 22:00:36。
 - Edge Function dice-rng-admin 已部署成功，第 32 版，verify_jwt=true。
 - 新增測試覆蓋正式寵物定義移除、融合池排除、圖鑑及台灣時間格式；尚待 GitHub Actions 執行。
+- 資料庫驗證結果：remaining_inventory_instances=0、remaining_codex_flags=0、remaining_equipped_instances=0。
 
 ### 沒做／做不到的
 
-- 尚未刪除既有玩家存檔中的四隻寵物實例，等待棒子確認是否要一併永久刪除。
 - 尚未合併 PR 或部署 GitHub Pages。
 
 
 ### 衍生任務／影響任務
+
+- 2026-11-04 14:10 [叉子] 棒子明確確認永久刪除所有玩家已持有的四隻退場寵物。先查得 8 個寵物實例分布於 6 個帳號；實際存檔更新期間偵測到舊端資料可能回寫，因此同步擴充 game_saves trigger，依寵物定義 ID 過濾，並清除裝備 UID 與 petDiscovered 旗標。最終驗證三項剩餘數均為 0。
