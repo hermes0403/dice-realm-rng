@@ -70,3 +70,9 @@ done_at:
 - 尚未完成遊戲頁面實際顯示驗收。
 
 ### 衍生任務／影響任務
+
+ 
+## 補充驗收紀錄
+
+- 2026-11-04 16:00 [叉子] 更正先前紀錄：PR #15 已合併，Pages 部署 run `41802946762` success。PR workflow 的 pet-removal 回歸 job 成功，且該 job 已執行 `git diff --check`；但 workflow 執行的是 `tests/pet-removal-admin-counts.test.js`，並未執行新增的 `tests/pet-image-mapping.test.js`。
+- 2026-11-04 16:00 [叉子] 39 個 ID 對應的靜態核對已有紀錄；圖片映射專屬 Node 測試及線上圖鑑／背包實際顯示仍未完成，維持 review。
