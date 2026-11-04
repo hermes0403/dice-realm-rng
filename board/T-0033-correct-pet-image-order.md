@@ -1,7 +1,7 @@
 ---
 id: T-0033
 title: 依原始順序移除退役寵物圖片並修正配對
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -46,6 +46,10 @@ done_at:
 - 2026-11-04 [叉子] 比對 T-0032 修改前的 43 張原始圖片陣列，確認需刪除第 9、13、19、29 張（1 起算），其餘 39 張依原始順序對應 38 隻現役一般寵物及管理員水餃。
 - 2026-11-04 [叉子] 再次逐張檢視 39 張圖片，確認現有 PET_IMAGE_ASSETS 的內容、順序與寵物名稱相符；並確認 main 已成功完成 GitHub Pages build 與 deploy。原始 4 張退役圖早已不在現有 39 張表內，因此不再重複刪除。
 - 2026-11-04 [叉子] 為 index.html 的 script.js 入口，以及 script.js 中 data/pets.js、systems/pets.js 兩個模組匯入加上版本 query，強制瀏覽器取得最新寵物圖片映射與 ID 渲染程式。
+
+## 驗收紀錄
+
+- 2026-11-04 [叉子] PR #16 已合併至 main（2459544334da4c5d343eef2ebb72bc0ae6947637），GitHub Pages 部署 run 41806019959 success；但 Node 測試、git diff --check 及線上圖鑑／背包實際圖片驗證尚未完成。狀態調整為 review，待補測後再判定通過。
 
 ## 完工回報
 
