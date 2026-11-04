@@ -9,7 +9,7 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-03
-updated: 2026-11-03
+updated: 2026-11-05
 depends_on: []
 branch: work/chazi
 done_by: 棒子
@@ -77,3 +77,4 @@ done_at:
 - 2026-11-04 16:00 [叉子] 重新查核 Supabase 正式專案：migration `20261103060728 pet_sale_persistence_and_idempotency` 與 `20261103060918 fix_pet_sale_rarity_lookup` 均已存在；`public.sell_owned_pets(text[])`、`public.pet_sale_tombstones` 及 `trg_filter_sold_pets_from_game_save` 均存在。RPC 僅授權 authenticated／service_role，anon 無法執行；trigger function 僅 postgres／service_role 可執行，tombstone 表已啟用 RLS 且未授予 anon／authenticated 存取。
 - 2026-11-04 16:00 [叉子] PR #2 已合併至 main（`2ff19db25266f32c4f8a67a4232e4d9826e170cd`），GitHub Pages 部署 run `41604124888` success。先前 rollback-only SQL 與 V8 測試紀錄仍可作為交易冪等及舊快照防復原證據；正式資料庫物件已再次確認。
 - 2026-11-04 16:00 [叉子] 尚缺真實玩家瀏覽器的立即登出、延遲登入及重新整理回歸；未以真實玩家資料執行出售測試，因此維持 review，不宣稱完整驗收。
+- 2026-11-05 [叉子] 棒子以正式玩家帳號出售一隻「灰狼幼崽」（普通、14 kg、10$/秒）作實機驗收；玩家確認出售後寵物從背包消失、重新整理後未復原、登出並重新登入後仍未復原，且金錢已正常增加。此測試確認實際出售、刷新、重新登入及付款結果；未進行同一 UID 的手動重複請求測試，重複請求防重仍以既有 rollback-only SQL 與 V8 自動化測試為證。因延遲登入時間間隔未獨立量測，狀態維持 review，待其他驗收條件一併確認。
