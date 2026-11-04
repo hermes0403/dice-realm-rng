@@ -34,12 +34,12 @@ test('limited event entry uses exact desktop and mobile dimensions and hides for
 
 test('dragon crystal egg odds are the requested 100 percent table', () => {
   const expected = [
-    ['晶銅獸', '45%'], ['鏡冰靈', '30%'], ['晶龍哨兵', '15.6%'],
+    ['晶銅獸', '45%'], ['鏡冰靈', '30%'], ['晶龍哨兵', '14.6%'],
     ['異核雙子龍', '8.5%'], ['月光龍', '1.5%'], ['鯊皇', '0.4%']
   ];
   for (const [pet, chance] of expected) {
     assert.ok(html.includes(pet), pet);
     assert.ok(html.includes(chance), chance);
   }
-  assert.equal([45, 30, 15.6, 8.5, 1.5, 0.4].reduce((a, b) => a + b, 0), 100);
+  assert.equal([45, 30, 14.6, 8.5, 1.5, 0.4].reduce((a, b) => a + b, 0), 100);
 });
