@@ -27,18 +27,25 @@ export function createInventoryUI({
     const box = document.getElementById('autoSellDiceOptions');
     if (!box) return;
     const halloweenIds = new Set(['d33', 'd34', 'd35', 'd36']);
-    const categoryOrder = dice => halloweenIds.has(dice.id) ? 1 : dice.weather
-      ? ({ rain: 2, snow: 3, thunder: 4, crystal: 5, hell: 6 }[dice.weather] ?? 7) : 0;
-    const dice = D.filter(item => Number(item.den) >= 2 && Number(item.den) <= 600000)
+    const savedIds = Array.isArray(S.autoDeleteDice) ? S.autoDeleteDice : [];
+    const safeIds = savedIds.filter(id => !halloweenIds.has(id));
+    if (safeIds.length !== savedIds.length) {
+      S.autoDeleteDice = safeIds;
+      persistAutoSellPrefs();
+      save();
+    }
+    const categoryOrder = dice => dice.weather
+      ? ({ rain: 1, snow: 2, thunder: 3, crystal: 4, hell: 5 }[dice.weather] ?? 6) : 0;
+    const dice = D.filter(item => !halloweenIds.has(item.id)
+      && Number(item.den) >= 2 && Number(item.den) <= 600000)
       .slice().sort((a, b) => categoryOrder(a) - categoryOrder(b) || Number(a.den) - Number(b.den));
     const renderOne = item => {
-      const isHalloween = halloweenIds.has(item.id);
-      const selected = (S.autoDeleteDice || []).includes(item.id);
-      const color = isHalloween ? '#ff8a3d' : item.weather
+      const selected = safeIds.includes(item.id);
+      const color = item.weather
         ? ({ rain: '#3298ff', snow: '#ffffff', thunder: '#fff000', crystal: '#d56bff', hell: '#ff3434' }[item.weather] || '#4df27c')
         : '#4df27c';
       const weatherLabel = ({ rain: '雨', snow: '雪', thunder: '打雷', crystal: '水晶', hell: '地獄' })[item.weather] || '天氣';
-      return `<label class="auto-sell-option"><input type="checkbox" data-auto-delete="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}"><b>${chanceText(item)}</b> ${item.name}${isHalloween ? '（萬聖節）' : item.weather ? `（${weatherLabel}）` : ''}</span></label>`;
+      return `<label class="auto-sell-option"><input type="checkbox" data-auto-delete="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}"><b>${chanceText(item)}</b> ${item.name}${item.weather ? `（${weatherLabel}）` : ''}</span></label>`;
     };
     box.innerHTML = dice.map(renderOne).join('');
   }
