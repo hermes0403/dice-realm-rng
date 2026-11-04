@@ -10,6 +10,7 @@ test('limited event entry is placed between welcome hero and stats', () => {
   const entry = html.indexOf('class="limited-event-entry"');
   const stats = html.indexOf('class="stats"', welcome);
   assert.ok(welcome >= 0 && entry > welcome && stats > entry);
+  assert.match(html, /class="limited-event-entry"[^>]*hidden/);
 });
 
 test('event preview separates public coming-soon content from admin-only content', () => {
@@ -17,7 +18,18 @@ test('event preview separates public coming-soon content from admin-only content
   assert.match(html, /11\/6開啟 敬請期待\.\./);
   assert.match(html, /id="eventAdminPanel" hidden/);
   assert.match(navigation, /eventAdminPanel\) eventAdminPanel\.hidden = !allowed/);
+  assert.match(navigation, /eventEntry\) eventEntry\.hidden = !allowed/);
   assert.match(navigation, /if \(!isAdmin\(\)\) \{ toast\('沒有管理員權限'\)/);
+});
+
+test('limited event entry uses exact desktop and mobile dimensions and hides for non-admins', () => {
+  const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(css, /width:138px;\\s*height:29px;\\s*min-height:29px/);
+  assert.match(css, /width:130px;height:27px;min-height:27px/);
+  assert.match(css, /\\.limited-event-entry:hover/);
+  assert.match(css, /\\.limited-event-entry:active/);
+  assert.match(css, /\\.limited-event-entry:focus-visible/);
+  assert.match(css, /\\.limited-event-entry\\[hidden\\]\\{display:none!important\\}/);
 });
 
 test('dragon crystal egg odds are the requested 100 percent table', () => {
