@@ -317,6 +317,7 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
   transform:translateY(1px);
   box-shadow:inset 0 1px 3px #05091488;
 }
+.limited-event-entry:focus-visible{outline:2px solid #a9b8f4;outline-offset:2px}
 .limited-event-entry small{
   padding:3px 5px;
   border:1px solid #8491bf55;
