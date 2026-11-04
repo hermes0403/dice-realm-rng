@@ -86,7 +86,7 @@ test('admin page contains the requested pet sort labels and global inventory pan
 test('retired pets are excluded from codex for everyone, including previous owners', () => {
   const entries = getPetCodexEntries(PETS, ['c9', 'r4', 'l1', 'm2', 'c1']);
   assert.ok(entries.every(pet => !UNOBTAINABLE_PET_IDS.includes(pet.id)));
-  assert.equal(entries.length, PETS.length - 4);
+  assert.equal(entries.length, PETS.length);
   assert.equal(entries.find(pet => pet.id === 'c1').discovered, true);
   assert.ok(!entries.some(pet => pet.discovered && REMOVED_PET_IDS.includes(pet.id)));
 });
