@@ -80,7 +80,8 @@ test('pet passive income display and payout apply the effective multiplier exact
   const originalDocument = globalThis.document;
   let now = 3_000_000;
   Date.now = () => now;
-  globalThis.localStorage = { setItem() {} };
+  const savedValues = new Map();
+  globalThis.localStorage = { setItem(key, value) { savedValues.set(key, value); } };
   const elements = { petIncomeRate: { textContent: '' }, petIncomeEquipped: { textContent: '' }, coinBalance: { textContent: '' } };
   globalThis.document = { getElementById: id => elements[id] || null };
   try {
@@ -108,6 +109,9 @@ test('pet passive income display and payout apply the effective multiplier exact
     tick();
     assert.equal(state.coins, 6444);
     assert.equal(elements.petIncomeRate.textContent, '+6,444$/秒（2倍）');
+    assert.equal(JSON.parse(savedValues.get('test-state')).petIncomePending, 6444);
+    assert.equal(JSON.parse(savedValues.get('test-state_user_player-1')).petIncomePending, 6444);
+    assert.equal(JSON.parse(savedValues.get('test-state_user_player-1')).coins, 6444);
   } finally {
     Date.now = originalNow;
     if (originalStorage === undefined) delete globalThis.localStorage;
