@@ -2,21 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
-  PETS, UNOBTAINABLE_PET_IDS, PET_INDIVIDUAL_ODDS,
+  PETS, REMOVED_PET_IDS, UNOBTAINABLE_PET_IDS, PET_INDIVIDUAL_ODDS,
   getPetFusionPool, getPetFusionWeights, randomPet
 } from '../data/pets.js';
 import { aggregatePetInventoryCounts } from '../admin/monitoring.js';
 import { getPetCodexEntries } from '../systems/pets.js';
 import { formatPlayerJoinTime } from '../admin/player-management.js';
 
-test('four retired pets remain defined for old saves but are excluded from fusion pools', () => {
-  const names = ['冰原兔', '藍晶甲蟲', '日蝕金狼', '星焰鳳皇'];
-  const retired = PETS.filter(pet => UNOBTAINABLE_PET_IDS.includes(pet.id));
-  assert.deepEqual(retired.map(pet => pet.name), names);
-  assert.ok(retired.every(pet => pet.unobtainable === true));
-  for (const rarity of ['common', 'rare', 'legendary', 'mythic']) {
-    assert.ok(getPetFusionPool(rarity).every(pet => !UNOBTAINABLE_PET_IDS.includes(pet.id)));
-  }
+test('four retired pets are removed from the canonical pet definitions', () => {
+  assert.deepEqual(REMOVED_PET_IDS, ['c9', 'r4', 'l1', 'm2']);
+  assert.deepEqual(UNOBTAINABLE_PET_IDS, []);
+  assert.ok(PETS.every(pet => !REMOVED_PET_IDS.includes(pet.id)));
+  assert.ok(!PETS.some(pet => ['冰原兔', '藍晶甲蟲', '日蝕金狼', '星焰鳳皇'].includes(pet.name)));
 });
 
 test('remaining pet weights keep their original relative values and normalize over the remaining pool', () => {
@@ -40,7 +37,7 @@ test('random fusion never returns a retired pet', () => {
     for (let i = 0; i < 100; i++) {
       Math.random = () => i / 100;
       for (const rarity of ['common', 'rare', 'legendary', 'mythic']) {
-        assert.ok(!UNOBTAINABLE_PET_IDS.includes(randomPet(rarity).id));
+        assert.ok(!REMOVED_PET_IDS.includes(randomPet(rarity).id));
       }
     }
   } finally {
@@ -91,7 +88,7 @@ test('retired pets are excluded from codex for everyone, including previous owne
   assert.ok(entries.every(pet => !UNOBTAINABLE_PET_IDS.includes(pet.id)));
   assert.equal(entries.length, PETS.length - 4);
   assert.equal(entries.find(pet => pet.id === 'c1').discovered, true);
-  assert.ok(!entries.some(pet => pet.discovered && UNOBTAINABLE_PET_IDS.includes(pet.id)));
+  assert.ok(!entries.some(pet => pet.discovered && REMOVED_PET_IDS.includes(pet.id)));
 });
 
 test('join time uses Auth created_at and renders in Taiwan time', () => {
