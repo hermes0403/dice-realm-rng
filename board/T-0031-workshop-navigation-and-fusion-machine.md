@@ -1,7 +1,7 @@
 ---
 id: T-0031
 title: 整合工坊導覽並將寵物合成入口改為融合機
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -40,6 +40,10 @@ done_at:
 
 - 2026-11-04 [叉子] 棒子回覆「用啊」，明確授權本次從最新 main 建立獨立任務分支，並保留 work/chazi 不動。已建立 task/T-0031-workshop-navigation-and-fusion-machine，基準 commit 為 aa7e8d484f424bb4fbc0c87cd606b4a1ae9f10b1。
 - 2026-11-04 [叉子] 已修改 index.html、config.js、ui/navigation.js：寵物頁改名「融合機」、數量更新為 39 種；手套與藥水內容改放在單一「工坊」頁面，新增兩個內部分類切換，原有手套／藥水欄位 ID 保留。Board 索引及任務檔已建立。
+
+## 驗收紀錄
+
+- 2026-11-04 [叉子] PR #14 已合併至 main（fcc70fba3441ce144d00e8106c28130bb2d44aa5），但任務卡記錄的 git diff --check、瀏覽器導覽及融合／手套／藥水實際功能測試尚未執行。狀態調整為 review，待補測後再判定通過。
 
 ## 完工回報
 
