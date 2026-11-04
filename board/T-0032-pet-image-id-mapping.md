@@ -1,7 +1,7 @@
 ---
 id: T-0032
 title: 修復寵物圖片與寵物 ID 錯配
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -43,6 +43,10 @@ done_at:
 - 2026-11-04 [叉子] 棒子明確授權從最新 main 建立獨立修復分支，work/chazi 保持不動。開工前比較 main 與 work/chazi 為 diverged（main 相對 work/chazi：work/chazi ahead 70、behind 73），因此不從 work/chazi 派生。
 - 2026-11-04 [叉子] 已建立 task/T-0032-pet-image-id-mapping，基準為 main 最新提交 fcc70fba3441ce144d00e8106c28130bb2d44aa5。
 - 2026-11-04 [叉子] 查核 43 張原始圖片後確認其中 4 張分別屬於已退場寵物（冰原兔、藍晶甲蟲、日蝕金狼、星焰鳳皇）；其餘 39 張依實際圖像逐一對應到 39 個現役 pet ID。`PET_IMAGE_ASSETS` 已改為以 pet ID 為 key 的物件，`petArt()` 改用 `PET_IMAGE_ASSETS[pet.id]`，並為缺圖加上圖示 fallback。新增 `tests/pet-image-mapping.test.js`。
+
+## 驗收紀錄
+
+- 2026-11-04 [叉子] PR #15 已合併至 main（979ab016adca9ae18eed76f954042c956fa2cf30），靜態檢查確認 39 個 pet ID 對應完整；但 Node 測試、git diff --check 及瀏覽器圖鑑／背包驗證未執行。狀態調整為 review，尚不能判定完整通過。
 
 ## 完工回報
 
