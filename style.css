@@ -282,40 +282,52 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 .limited-event-entry-wrap{display:flex;justify-content:center;margin:10px 0 12px}.limited-event-entry{display:inline-flex;align-items:center;gap:9px;min-height:34px;padding:6px 15px;border:1px solid #7774c9;border-radius:999px;background:linear-gradient(110deg,#202d50,#302044);color:#f1edff;font-size:13px;font-weight:850;cursor:pointer}.limited-event-entry small{padding:2px 7px;border-radius:999px;background:#ffffff12;color:#d5caff;font-size:10px}#page-event .hero{margin-top:8px;text-align:center;padding:34px 18px}#page-event .hero h1{font-size:clamp(22px,5vw,32px);margin:12px 0}.event-admin-panel{margin-top:8px;padding:18px}.event-admin-wallet{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.event-admin-wallet>div{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #4b5782;border-radius:12px;background:linear-gradient(135deg,#172541,#211b37)}.event-admin-wallet strong{font-size:24px;color:#e1d8ff}.limited-event-egg{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 15px;border:1px solid #8c78c7;border-radius:12px;background:linear-gradient(110deg,#29294b,#30213f);color:#fff;text-align:left;cursor:pointer}.limited-event-egg span:first-child{display:flex;flex-direction:column;gap:4px}.limited-event-egg small{font-size:11px;color:#c4c4e5}.event-odds-panel{margin-top:12px;padding:12px;border:1px solid #424b70;border-radius:12px;background:#0d1426}.event-odds-table-wrap{overflow-x:auto}.event-odds-table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.event-odds-table th,.event-odds-table td{padding:10px 8px;border-bottom:1px solid #29334f;text-align:left}.event-odds-table th{color:#b9c8f4}.event-odds-table td:last-child,.event-odds-table th:last-child{text-align:right}.event-return-button{width:100%;margin-top:14px}@media(max-width:420px){.limited-event-entry{min-height:32px;padding:5px 13px;font-size:12px}.event-admin-panel{padding:13px}.event-admin-wallet>div{padding:11px}.event-odds-table{font-size:11px}.event-odds-table th,.event-odds-table td{padding:9px 6px}}
 
 
-/* 限時活動入口精簡版：扁平、緊湊、完整按鈕視覺 */
-.limited-event-entry-wrap{margin:7px 0 9px}
+/* 限時活動入口：小型橫向、俐落扁平 */
+.limited-event-entry-wrap{
+  display:flex;
+  justify-content:center;
+  margin:7px 0 9px;
+}
 .limited-event-entry{
-  min-height:27px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   gap:7px;
-  padding:3px 11px;
-  border:1px solid #6676a8;
+  width:138px;
+  min-height:29px;
+  padding:3px 10px;
+  border:1px solid #596b9b;
   border-radius:8px;
-  background:linear-gradient(180deg,#1b2942 0%,#151e33 100%);
-  color:#e6ecff;
+  background:linear-gradient(105deg,#182941 0%,#242342 100%);
+  color:#edf1ff;
   font-size:11px;
   font-weight:750;
-  letter-spacing:.045em;
+  letter-spacing:.055em;
   line-height:1;
-  box-shadow:inset 0 1px 0 #ffffff0c,0 2px 7px #05091466;
+  box-shadow:inset 0 1px 0 #ffffff12,0 2px 8px #05091455;
+  cursor:pointer;
   transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
 }
 .limited-event-entry:hover{
-  border-color:#9ba8e5;
-  background:linear-gradient(180deg,#263957 0%,#1b2942 100%);
-  box-shadow:inset 0 1px 0 #ffffff14,0 0 11px #8a9cff2b;
+  border-color:#8798d0;
+  background:linear-gradient(105deg,#223b5a 0%,#343052 100%);
+  box-shadow:inset 0 1px 0 #ffffff18,0 0 12px #8294e52b;
 }
-.limited-event-entry:active{transform:translateY(1px);box-shadow:inset 0 1px 3px #05091488}
+.limited-event-entry:active{
+  transform:translateY(1px);
+  box-shadow:inset 0 1px 3px #05091488;
+}
 .limited-event-entry small{
-  padding:2px 5px;
+  padding:3px 5px;
   border:1px solid #8491bf55;
   border-radius:5px;
-  background:#8295d014;
-  color:#c4cff7;
+  background:#8295d018;
+  color:#cbd5ff;
   font-size:9px;
-  font-weight:700;
+  font-weight:750;
   letter-spacing:.02em;
 }
 @media(max-width:420px){
-  .limited-event-entry{min-height:26px;padding:3px 10px;font-size:10px;gap:6px}
+  .limited-event-entry{width:130px;min-height:27px;padding:3px 9px;font-size:10px;gap:6px}
   .limited-event-entry small{font-size:9px;padding:2px 4px}
 }
