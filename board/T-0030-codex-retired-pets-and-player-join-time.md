@@ -1,7 +1,7 @@
 ---
 id: T-0030
 title: 完全隱藏退場寵物並修正玩家加入時間
-status: in_progress
+status: blocked
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -43,7 +43,11 @@ done_at:
 ## 紀錄
 
 - 2026-11-04 12:45 [叉子] 棒子明確授權從最新 main 建立獨立任務分支；保留 work/chazi 不動。已確認 main 上圖鑑目前使用「退場寵物只對曾發現者顯示」邏輯，需改為完全排除。
-- 2026-11-04 12:45 [叉子] 透過 Supabase 對 auth.users 執行唯讀查詢，確認識別碼前綴 71413984 對應帳號建立時間為 2026-10-23 14:00:36.222718 UTC（台灣時間 22:00:36）；管理面板未顯示此時間的原因仍待追查。
+- 2026-11-04 12:45 [叉子] 透過 Supabase 對 auth.users 執行唯讀查詢，確認識別碼前綴 71413984 對應帳號建立時間為 2026-10-23 14:00:36.222718 UTC（台灣時間 22:00:36）；管理面板未顯示此時間的原因是 dashboard Edge Function 目前只回傳 player_profiles，未合併 Auth created_at。
+- 2026-11-04 12:45 [叉子] 已在任務分支修改 systems/pets.js，圖鑑改為完全排除 unobtainable 寵物，完成率只計算仍在冊寵物；新增 getPetCodexEntries 純函式供測試。
+- 2026-11-04 12:45 [叉子] 已修改 admin/player-management.js，使用 Auth created_at 作為加入時間欄位並固定以 Asia/Taipei 格式化；加入時間排序不再退回使用 updated_at，避免把資料更新時間誤當註冊時間。
+- 2026-11-04 12:45 [叉子] 新增圖鑑與加入時間測試，並擴充既有 GitHub Actions 路徑監控。尚未執行測試：本次未建立 PR，無法觸發 repo CI；Intl 時區格式已以 Node.js 單獨確認輸出 2026/10/23 22:00:36。
+- 2026-11-04 12:45 [叉子] 阻塞：需更新並部署 Supabase Edge Function dice-rng-admin 的 dashboard 動作，使用 Auth Admin API 將 auth.users.created_at 合併到玩家資料；目前授權僅確認從 main 建立任務分支，尚未取得直接部署 Supabase Edge Function 的明確授權。
 
 ## 完工回報
 
