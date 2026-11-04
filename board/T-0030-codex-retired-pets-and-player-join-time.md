@@ -1,7 +1,7 @@
 ---
 id: T-0030
 title: 完全隱藏退場寵物並修正玩家加入時間
-status: blocked
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -53,8 +53,21 @@ done_at:
 
 ### 改了什麼
 
+- 從 data/pets.js 的正式 PETS 定義、每秒基礎收益及融合權重中直接移除 c9 冰原兔、r4 藍晶甲蟲、l1 日蝕金狼、m2 星焰鳳皇。
+- UNOBTAINABLE_PET_IDS 清空，新增 REMOVED_PET_IDS 作為測試用退場 ID 清單；合成池不再包含這四隻。
+- Supabase dice-rng-admin 第 31 版加入 Auth created_at 合併，第 32 版同步移除四隻退場寵物的管理員發放名稱。
+- 前端加入時間固定使用 Asia/Taipei 時區，排序只依 created_at，不以 updated_at 假冒註冊時間。
+
 ### 怎麼驗證的
 
+- 已確認帳號識別碼前綴 71413984 的 Auth created_at 為 2026-10-23T14:00:36.222718Z，即台灣時間 2026-10-23 22:00:36。
+- Edge Function dice-rng-admin 已部署成功，第 32 版，verify_jwt=true。
+- 新增測試覆蓋正式寵物定義移除、融合池排除、圖鑑及台灣時間格式；尚待 GitHub Actions 執行。
+
 ### 沒做／做不到的
+
+- 尚未刪除既有玩家存檔中的四隻寵物實例，等待棒子確認是否要一併永久刪除。
+- 尚未合併 PR 或部署 GitHub Pages。
+
 
 ### 衍生任務／影響任務
