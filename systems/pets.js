@@ -166,8 +166,8 @@ export function createPetSystem({
       : pet.rarity === 'mythic' ? '0 0 16px #ff334f88'
         : pet.rarity === 'legendary' ? '0 0 13px #ffc53377'
           : '0 0 9px ' + rarity.a + '66';
-    const index = Math.max(0, PETS.findIndex(item => item.id === pet.id)) % PET_IMAGE_ASSETS.length;
-    const src = PET_IMAGE_ASSETS[index];
+    const src = PET_IMAGE_ASSETS[pet.id];
+    if (!src) return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};font-size:${small ? '42px' : '64px'};filter:drop-shadow(${special})">${pet.icon || '◈'}</span>`;
     return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};overflow:hidden;filter:drop-shadow(${special});user-select:none"><img src="${src}" alt="${pet.name}" loading="lazy" style="display:block;width:100%;height:${small ? '82px' : '120px'};object-fit:contain;border-radius:8px;background:transparent"></span>`;
   }
 
