@@ -5,29 +5,29 @@ export const PET_RARITIES=[
  {id:'mythic',name:'神話',cls:'pet-rarity-mythic',a:'#d90022',b:'#ffffff'},
  {id:'secret',name:'秘密',cls:'pet-rarity-secret',a:'#080808',b:'#ffffff'}
 ];
-export const UNOBTAINABLE_PET_IDS = ['c9','r4','l1','m2'];
-const unobtainablePetIdSet = new Set(UNOBTAINABLE_PET_IDS);
+export const REMOVED_PET_IDS = ['c9','r4','l1','m2'];
+export const UNOBTAINABLE_PET_IDS = [];
 export const PETS=[
-['c1','灰狼幼崽','🐺','common'],['c2','暮色狐','🦊','common'],['c3','暗羽烏鴉','🐦‍⬛','common'],['c4','影紋貓','🐈‍⬛','common'],['c5','岩甲龜','🐢','common'],['c6','霧林鹿','🦌','common'],['c7','鐵喙鷹','🦅','common'],['c8','洞穴蝙蝠','🦇','common'],['c9','冰原兔','🐇','common'],
-['r1','霜痕狼','🐺','rare'],['r2','雷翼鴉','🐦‍⬛','rare'],['r3','星尾狐','🦊','rare'],['r4','藍晶甲蟲','🪲','rare'],['r5','冰棘鹿','🦌','rare'],['r6','電弧獵犬','🐕','rare'],['r7','深淵魟','🦈','rare'],['r8','月環貓頭鷹','🦉','rare'],['r9','晶角山羊','🐐','rare'],
-['l1','日蝕金狼','🐺','legendary'],['l2','耀日鳳凰','🦅','legendary'],['l3','星冠神鹿','🦌','legendary'],['l4','黃金機龍','🐉','legendary'],['l5','裂空獅鷲','🦁','legendary'],['l6','永夜巨蛇','🐍','legendary'],['l7','熔核巨鷹','🦅','legendary'],['l8','時序獵犬','🐕','legendary'],['l9','極光天馬','🐎','legendary'],
-['m1','赤白天龍','🐉','mythic'],['m2','星焰鳳皇','🦅','mythic'],['m3','混沌天狼','🐺','mythic'],['m4','天隕白虎','🐅','mythic'],['m5','創世神鹿','🦌','mythic'],['m6','深空巨龍','🐲','mythic'],['m7','紅月天鯨','🐋','mythic'],['m8','萬象玄龜','🐢','mythic'],['m9','時空九尾','🦊','mythic'],
+['c1','灰狼幼崽','🐺','common'],['c2','暮色狐','🦊','common'],['c3','暗羽烏鴉','🐦‍⬛','common'],['c4','影紋貓','🐈‍⬛','common'],['c5','岩甲龜','🐢','common'],['c6','霧林鹿','🦌','common'],['c7','鐵喙鷹','🦅','common'],['c8','洞穴蝙蝠','🦇','common'],
+['r1','霜痕狼','🐺','rare'],['r2','雷翼鴉','🐦‍⬛','rare'],['r3','星尾狐','🦊','rare'],['r5','冰棘鹿','🦌','rare'],['r6','電弧獵犬','🐕','rare'],['r7','深淵魟','🦈','rare'],['r8','月環貓頭鷹','🦉','rare'],['r9','晶角山羊','🐐','rare'],
+['l2','耀日鳳凰','🦅','legendary'],['l3','星冠神鹿','🦌','legendary'],['l4','黃金機龍','🐉','legendary'],['l5','裂空獅鷲','🦁','legendary'],['l6','永夜巨蛇','🐍','legendary'],['l7','熔核巨鷹','🦅','legendary'],['l8','時序獵犬','🐕','legendary'],['l9','極光天馬','🐎','legendary'],
+['m1','赤白天龍','🐉','mythic'],['m3','混沌天狼','🐺','mythic'],['m4','天隕白虎','🐅','mythic'],['m5','創世神鹿','🦌','mythic'],['m6','深空巨龍','🐲','mythic'],['m7','紅月天鯨','🐋','mythic'],['m8','萬象玄龜','🐢','mythic'],['m9','時空九尾','🦊','mythic'],
 ['s1','星界之狼','🐺','secret'],['s2','無序之龍','🐉','secret'],['s3','終焉渡鴉','🐦‍⬛','secret'],['s4','永寂環蛇','🐍','secret'],['s5','虛無君王','👁️','secret'],['s6','原初奇點','🌌','secret']
-].map(([id,name,icon,rarity])=>({id,name,icon,rarity,unobtainable:unobtainablePetIdSet.has(id)}));
+].map(([id,name,icon,rarity])=>({id,name,icon,rarity}));
 PETS.push({id:'dumpling_mythic',name:'水餃',icon:'🥟',rarity:'mythic',fusionOnly:false,adminOnly:true,uniqueReward:true});
 export function petById(id){return PETS.find(p=>p.id===id)}
 export const PET_BASE_INCOME={
- c1:10,c2:13,c3:15,c4:18,c5:20,c6:22,c7:25,c8:28,c9:30,
- r1:40,r2:45,r3:50,r4:58,r5:65,r6:72,r7:82,r8:91,r9:100,
- l1:250,l2:300,l3:360,l4:430,l5:500,l6:580,l7:660,l8:730,l9:800,
- m1:1200,m2:1400,m3:1650,m4:1900,m5:2200,m6:2500,m7:2700,m8:2850,m9:3000,dumpling_mythic:2000,
+ c1:10,c2:13,c3:15,c4:18,c5:20,c6:22,c7:25,c8:28,
+ r1:40,r2:45,r3:50,r5:65,r6:72,r7:82,r8:91,r9:100,
+ l2:300,l3:360,l4:430,l5:500,l6:580,l7:660,l8:730,l9:800,
+ m1:1200,m3:1650,m4:1900,m5:2200,m6:2500,m7:2700,m8:2850,m9:3000,dumpling_mythic:2000,
  s1:6000,s2:8000,s3:10000,s4:13000,s5:16000,s6:20000
 };
 export const PET_INCOME_ROLLS={
- common:[15,15,15,14,12,11,9,5,4],
- rare:[15,15,14,13,12,10,9,7,5],
- legendary:[15,15,14,13,12,10,9,7,5],
- mythic:[15,15,14,13,12,10,9,7,5],
+ common:[15,15,15,14,12,11,9,5],
+ rare:[15,15,14,12,10,9,7,5],
+ legendary:[15,14,13,12,10,9,7,5],
+ mythic:[15,14,13,12,10,9,7,5],
  secret:[25,22,18,15,12,8]
 };
 export function petBaseIncome(pet){return Math.max(0,Number(PET_BASE_INCOME[pet?.id])||0)}

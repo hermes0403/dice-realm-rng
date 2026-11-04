@@ -8,6 +8,7 @@ on:
       - 'data/pets.js'
       - 'systems/pets.js'
       - 'admin/monitoring.js'
+      - 'admin/player-management.js'
       - 'admin/ui-bindings.js'
       - 'script.js'
       - 'index.html'

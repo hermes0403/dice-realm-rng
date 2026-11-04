@@ -1,4 +1,12 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
+
+/** Build codex entries while excluding retired pets for every player, including previous owners. */
+export function getPetCodexEntries(petDefinitions = [], discoveredIds = []) {
+  const discovered = new Set(Array.isArray(discoveredIds) ? discoveredIds : []);
+  return (Array.isArray(petDefinitions) ? petDefinitions : [])
+    .filter(pet => pet && pet.unobtainable !== true)
+    .map(pet => ({ ...pet, discovered: discovered.has(pet.id) }));
+}
 import { petWeightSkillMultiplier } from './pet-skills.js';
 
 export function sortOwnedPets(pets, { mode = 'rarity-desc', petById, petIncomePerSecond, rarityOrder }) {
@@ -325,19 +333,19 @@ export function createPetSystem({
       ...Object.keys(S.petDiscovered || {}),
       ...(Array.isArray(S.pets) ? S.pets.map(pet => pet?.id).filter(Boolean) : [])
     ]);
-    const all = PETS.filter(pet => !pet.unobtainable || owned.has(pet.id));
-    const count = all.filter(pet => owned.has(pet.id)).length;
+    const all = getPetCodexEntries(PETS, [...owned]);
+    const count = all.filter(pet => pet.discovered).length;
     const percentage = all.length ? Math.round(count / all.length * 100) : 0;
     documentRef.getElementById('codexPct').textContent = percentage + '% · 已發現 ' + count + '/' + all.length;
     documentRef.getElementById('codexBar').style.width = percentage + '%';
     documentRef.querySelectorAll('[data-codex-category]').forEach(button => button.classList.toggle('active', button.dataset.codexCategory === 'pets'));
     documentRef.querySelector('#page-codex .hero .eyebrow').textContent = 'PET ARCHIVE DATABASE';
     documentRef.querySelector('#page-codex .hero h1').textContent = '記錄每一個生命。';
-    documentRef.querySelector('#page-codex .hero .muted').textContent = '已退場寵物只會保留在曾發現或持有者的圖鑑中。';
+    documentRef.querySelector('#page-codex .hero .muted').textContent = '已退場寵物已從圖鑑永久下架。';
     const grid = documentRef.getElementById('codexGrid');
     grid.className = 'pet-catalog-grid';
     grid.innerHTML = all.map(pet => {
-      const discovered = owned.has(pet.id);
+      const discovered = pet.discovered;
       const rarity = petRarity(pet.rarity);
       return `<div class="pet-card ${discovered ? '' : 'undiscovered'}" style="--rarity-color:${rarity.a}"><div class="pet-art">${discovered ? petArt(pet, true) : '<span style="font-size:42px;color:#50566e">?</span>'}</div><div class="pet-name ${rarity.cls}">${discovered ? pet.name : '???'}</div><div class="pet-meta ${rarity.cls}">${discovered ? rarity.name : '尚未發現'}</div></div>`;
     }).join('');

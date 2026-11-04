@@ -1,4 +1,15 @@
 /** Admin player list, rare-roll history, and suspicious-roll review UI. */
+
+/** Format the Auth account creation timestamp in Taiwan local time. */
+export function formatPlayerJoinTime(value) {
+  if (!value) return '後端未提供加入時間';
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return '加入時間資料無效';
+  return new Intl.DateTimeFormat('zh-TW', {
+    timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  }).format(date).replace(/\s+/g, ' ');
+}
 export function createAdminPlayerManagement(dependencies) {
   const { adminApi, supabaseClient, isAdmin, format, escapeHTML, documentRef } = dependencies;
   const document = documentRef;
@@ -20,7 +31,7 @@ async function loadAdminDashboard(){
   const count=document.getElementById('adminPlayerCount'),online=document.getElementById('adminOnlineCount');if(count)count.textContent=format(playerRows.length);if(online)online.textContent=format(data.onlineCount??playerRows.filter(p=>p.online).length);
   const usernameCounts={};playerRows.forEach(p=>{const k=String(p.username||'玩家').normalize('NFKC').trim().toLocaleLowerCase();usernameCounts[k]=(usernameCounts[k]||0)+1});
   players.innerHTML=playerRows.map(p=>{const name=String(p.username||'玩家'),duplicate=(usernameCounts[name.normalize('NFKC').trim().toLocaleLowerCase()]||0)>1,num=Number(p.player_number)>0?String(p.player_number).padStart(5,'0'):'待分配';return `<div class="admin-player"><div style="min-width:0"><b>${escapeHTML(name)}</b><div class="mini" style="color:#a8b7ff;font-weight:800">#${num}</div>${duplicate?`<div class="mini">同名帳號識別碼：${escapeHTML(String(p.user_id||'').slice(0,8))}</div>`:''}<div class="mini">擲骰 ${format(p.total_rolls||0)} 次 · 骰子 ${format(p.unique_dice||0)} 種 · ${format(p.coins||0)}$</div><div class="mini">最後活動：${p.last_seen?new Date(p.last_seen).toLocaleString():'尚無紀錄'}</div></div><span class="pill ${p.online?'admin-online':'admin-offline'}">${p.online?'● 在線':'○ 離線'}</span></div>`}).join('')||'<div class="empty">尚無玩家資料</div>';
-  const newBox=document.getElementById('adminNewPlayersList');if(newBox){newBox.innerHTML=[...playerRows].sort((a,b)=>new Date(b.created_at||b.updated_at||0)-new Date(a.created_at||a.updated_at||0)).slice(0,100).map(p=>`<div class="admin-log"><div><b>${escapeHTML(p.username||'玩家')}</b><div class="mini">加入時間：${p.created_at?new Date(p.created_at).toLocaleString():'後端未提供加入時間'}</div><div class="mini">帳號識別碼：${escapeHTML(String(p.user_id||'').slice(0,8))}</div></div><span class="pill">玩家</span></div>`).join('')||'<div class="empty">尚無玩家資料</div>';}
+  const newBox=document.getElementById('adminNewPlayersList');if(newBox){newBox.innerHTML=[...playerRows].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,100).map(p=>`<div class="admin-log"><div><b>${escapeHTML(p.username||'玩家')}</b><div class="mini">加入時間：${formatPlayerJoinTime(p.created_at)}</div><div class="mini">帳號識別碼：${escapeHTML(String(p.user_id||'').slice(0,8))}</div></div><span class="pill">玩家</span></div>`).join('')||'<div class="empty">尚無玩家資料</div>';}
   const crafts=Array.isArray(data.crafts)?data.crafts:[];if(logs)logs.innerHTML=crafts.map(x=>`<div class="admin-log"><div><b>${escapeHTML(x.username||'玩家')} · ${escapeHTML(x.item_name||x.item_id||'合成')}</b><div class="mini">${x.item_type==='potion'?'藥水合成':'手套合成'} · ${x.created_at?new Date(x.created_at).toLocaleString():'時間未提供'}</div></div><span class="pill">#${x.id??'—'}</span></div>`).join('')||'<div class="empty">目前沒有合成紀錄</div>';
   if(dashboardError){const status=document.getElementById('adminPlayerLoadStatus');if(status)status.textContent='玩家名單已由玩家資料表載入；管理後端附加資料暫時無法讀取：'+dashboardError;}
  }catch(e){players.innerHTML=`<div class="empty">玩家名單載入失敗：${escapeHTML(e.message||'未知錯誤')}<br>請確認登入狀態及 Supabase 連線後重新整理。</div>`;if(logs)logs.innerHTML='<div class="empty">合成紀錄暫時無法載入</div>';['adminTargetPlayer','adminPlayerWeatherTarget','adminBanTarget','adminDeleteTarget'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<option value="">玩家名單載入失敗</option>';});}
