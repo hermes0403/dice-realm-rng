@@ -9,7 +9,7 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-05
 depends_on: []
 branch: task/T-0034-limited-event-preview
 done_by:
@@ -46,12 +46,11 @@ done_at:
 - `style.css`：新增活動入口、管理員數量卡、機率表與手機版樣式。
 - `tests/limited-event-preview.test.js`：新增入口位置、權限區塊與機率表檢查。
 - `board/README.md`：新增 T-0034 索引。
-- 目前分支包含 4 個提交；最新 UI 提交為 `aca2c416ec55792c6256fce9d1d9394e517b88d9`。
+- 原有 UI 版本提交為 `aca2c416ec55792c6256fce9d1d9394e517b88d9`；本次追加管理員專屬入口修正及對應測試。
 
 ### 怎麼驗證的
 - GitHub 線上檔案讀回確認：首頁入口位於歡迎文案與統計區之間；一般玩家提示文字存在；管理員預覽區初始帶有 `hidden`；導覽權限切換及龍晶蛋點擊均有管理員檢查。
 - 核對六項機率：45 + 30 + 15.6 + 8.5 + 1.5 + 0.4 = 100%。
-- 比對 `main` 與任務分支：任務分支領先 4 個提交、落後 0 個；僅變更 Board、index、style、navigation 與新增測試檔。
 - `node --test tests/limited-event-preview.test.js` 尚未執行；嘗試 shallow clone 時因執行環境無法解析 github.com 而失敗。
 - `git diff --check` 尚未執行；目前無本機 repository worktree 可供執行。
 
@@ -64,3 +63,5 @@ done_at:
 - 後續若要讓數量連接真實帳號資料、活動蛋開啟或發放獎勵，需另開任務並先確認資料模型與伺服器端權限。
 
 - 2026-11-05 [叉子] 依棒子再次確認，限時活動入口整顆按鈕僅管理員可見；HTML 初始隱藏，登入權限更新時依 `isAdmin()` 顯示／隱藏，CSS 明確確保 `hidden` 不會被按鈕的 `display` 覆蓋。尺寸固定為桌面 138×29px、手機 130×27px；補上尺寸、權限與互動狀態測試。
+
+- 2026-11-05 [叉子] 追加修改提交：`c15a5d2`（入口初始 hidden）、`0c1e8bc`（依管理員權限切換入口）、`dee8b41`（固定桌面／手機尺寸及 hidden 規則）、`e2e8b5f`（補充尺寸與權限測試）、`deed36d`（任務紀錄）。靜態檢查 10 項全部通過：初始隱藏、登入權限切換、管理員活動面板與蛋按鈕權限、桌面 138×29px、手機 130×27px、懸停／按壓／鍵盤焦點、hidden 覆蓋規則及測試涵蓋。修改檔案未發現新增行尾空白；`style.css` 第 167 行有既存尾端空白，非本次新增。Node 測試與正式 `git diff --check` 仍未執行；尚未建立 PR、合併或部署。
