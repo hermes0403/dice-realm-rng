@@ -1,7 +1,7 @@
 ---
 id: T-0029
 title: 移除指定寵物並新增全服寵物持有數統計
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-04
 updated: 2026-11-04
 depends_on: []
 branch: task/T-0029-remove-pets-and-admin-pet-counts
-done_by:
-done_at:
+done_by: 叉子（依棒子授權技術驗收）
+done_at: 2026-11-04
 ---
 
 ## 任務
@@ -45,6 +45,10 @@ done_at:
 - 2026-11-04 12:12 [叉子] 依棒子明確同意，從最新 main 建立獨立任務分支；work/chazi 保持不動。
 - 2026-11-04 12:12 [叉子] 已開始處理寵物退場、權重重分配、背包排序標籤及管理員全服持有數統計；不操作玩家存檔，不合併、不部署。
 - 2026-11-04 12:23 [叉子] 修改與回歸測試已完成，PR #12 已建立；新增測試及三項既有回歸 workflow 全部成功，已送棒子驗收；未合併、未部署。
+
+## 驗收紀錄
+
+- 2026-11-04 [叉子] 技術驗收（依棒子授權）：PR #12 已合併至 main（656a5397e851c42f37d53a387801c41ad2625504）；Pet removal and admin inventory count tests 與 git diff --check 由 GitHub Actions 通過，寵物背包／自動出售、成就保存及金錢倍率回歸 workflow 亦成功；最新已確認的 GitHub Pages 部署 run 41806019959 success，包含本任務變更。任務卡所有驗收條件已有測試及合併部署證據，狀態更新為 done。尚未以正式管理員帳號做人工瀏覽器抽查，列為部署後觀察事項。
 
 ## 完工回報
 
