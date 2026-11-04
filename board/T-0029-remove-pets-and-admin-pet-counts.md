@@ -55,7 +55,7 @@ done_at:
 - `index.html`：更新寵物背包四種排序名稱及順序；新增全服寵物統計面板。
 - `admin/monitoring.js`、`admin/ui-bindings.js`、`script.js`：使用既有管理員專用存檔監控 API，彙總每種寵物總數、持有人數、全服寵物總數及持有寵物玩家數；畫面不顯示玩家個資。
 - 新增 `tests/pet-removal-admin-counts.test.js` 與 `.github/workflows/pet-removal-admin-counts-tests.yml`。
-- PR：`https://github.com/hermes0403/dice-realm-rng/pull/12`。最新任務 commit：`c22b61a977243c860992244f6ec3aa7ca5f29701`。
+- PR：`https://github.com/hermes0403/dice-realm-rng/pull/12`（程式碼變更與回歸測試均在該分支）。
 
 ### 怎麼驗證的
 
@@ -63,7 +63,7 @@ done_at:
 - GitHub Actions `41772800354`（寵物背包／自動出售回歸）：success。
 - GitHub Actions `41772800007`（金錢倍率回歸）：success。
 - GitHub Actions `41772800011`（成就保存回歸）：success。
-- 比較 `main...task/T-0029-remove-pets-and-admin-pet-counts`：12 commits ahead、0 behind，10 個任務相關檔案有變更。
+- PR 比較基底為最新 `main`，分支未落後 main；本任務共 10 個檔案有變更。
 
 ### 沒做／做不到的
 
