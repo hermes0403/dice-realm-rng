@@ -217,6 +217,7 @@ export function createAuthService(deps) {
       if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')
         && incomingUser && previousUser?.id === incomingUser.id) {
         setCurrentUser(incomingUser);
+        updateAdminVisibility();
         return;
       }
       if (incomingUser && !incomingUser.email_confirmed_at) {
