@@ -1,7 +1,7 @@
 ---
 id: T-0024
 title: 修正鑽石與糖果成就保存及雲端同步
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-04
 updated: 2026-11-04
 depends_on: []
 branch: task/T-0024-achievement-unlock-persistence
-done_by: 棒子
-done_at:
+done_by: 叉子（依棒子授權技術驗收）
+done_at: 2026-11-04
 ---
 
 ## 任務
@@ -29,12 +29,12 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 存檔正規化後保留既有 craftVoid 與 craftUniverse 成就。
-- [ ] 購買鑽石／糖果手套成功後呼叫既有 save 排程，讓成就與獎勵同步至雲端。
-- [ ] 新增回歸測試，覆蓋成就保留及購買後 save 呼叫。
-- [ ] 盤點其他成就定義與觸發條件；記錄發現及未修正項目。
-- [ ] 只為有 g5 持有狀態及對應購買紀錄、且缺少 craftVoid 的玩家補回完成標記；rewardGiven 必須為 true，不重複發放獎勵。
-- [ ] 測試通過、git diff --check 通過，PR 合併後確認 GitHub Pages 部署狀態。
+- [x] 存檔正規化後保留既有 craftVoid 與 craftUniverse 成就。
+- [x] 購買鑽石／糖果手套成功後呼叫既有 save 排程，讓成就與獎勵同步至雲端。
+- [x] 新增回歸測試，覆蓋成就保留及購買後 save 呼叫。
+- [x] 盤點其他成就定義與觸發條件；記錄發現及未修正項目。
+- [x] 只為有 g5 持有狀態及對應購買紀錄、且缺少 craftVoid 的玩家補回完成標記；rewardGiven 必須為 true，不重複發放獎勵。
+- [x] 測試通過、git diff --check 通過，PR 合併後確認 GitHub Pages 部署狀態。
 
 ## 紀錄
 
@@ -42,6 +42,7 @@ done_at:
 - 2026-11-04 [叉子] 已確認根因：normalizeGloves() 會刪除 craftVoid／craftUniverse；購買成功流程只寫本機存檔，未呼叫 save() 雲端同步。正式資料庫目前有 1 位玩家持有 g5 且有購買紀錄，但缺少 craftVoid。其他 20 項一般成就條件盤點未發現符合條件卻未標記的存檔。
 - 2026-11-04 [叉子] 已移除錯誤刪除邏輯，購買成功後改呼叫共用 save() 排程；新增 3 項回歸測試。正式資料庫已依 g5 持有與購買紀錄補回唯一缺漏的 craftVoid，設 rewardGiven=true，未調整藥水數量；唯讀驗證確認 1/1 標記完成。
 - 2026-11-04 [叉子] PR #8 已建立。GitHub Actions：achievement persistence 測試通過（3 pass、0 fail），git diff --check 通過；既有 coin boost regression workflow 亦通過。
+- 2026-11-04 [叉子] 技術驗收：PR #8 已合併至 main（merge commit 854d0af688f718f40acb5ed3be60bb4c6713e7ce）；PR head 的 Achievement persistence regression tests 與 Coin boost regression tests 均成功；任務紀錄確認正式資料庫唯一符合條件的玩家已補標 craftVoid，rewardGiven=true，未改動藥水數量。GitHub Pages 最新部署 run 41806019959 已於 2026-11-04 09:16:32Z success，部署 commit 2459544334da4c5d343eef2ebb72bc0ae6947637（包含本任務合併內容）。依棒子授權完成技術驗收並更新狀態。
 
 ## 完工回報
 
@@ -60,11 +61,11 @@ done_at:
 - `git diff --check origin/main...HEAD`：GitHub Actions exit code 0。
 - `Coin boost regression tests`：GitHub Actions 通過。
 - Supabase 唯讀複查：g5 持有者 1 位、成就標記 1 筆、rewardGiven=true 1 筆。
+- PR #8 已合併；GitHub Pages 最新部署 run 41806019959 success。
 
 ### 沒做／做不到的
 
 - 糖果手套目前沒有持有者，無需補資料；已修正未來購買同步路徑。
 - 未更動玩家藥水數量或其他玩家資料。
-- GitHub Pages 部署須待 PR 合併後確認。
 
 ### 衍生任務／影響任務
