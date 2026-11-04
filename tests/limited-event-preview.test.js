@@ -24,12 +24,12 @@ test('event preview separates public coming-soon content from admin-only content
 
 test('limited event entry uses exact desktop and mobile dimensions and hides for non-admins', () => {
   const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
-  assert.match(css, /width:138px;\\s*height:29px;\\s*min-height:29px/);
-  assert.match(css, /width:130px;height:27px;min-height:27px/);
-  assert.match(css, /\\.limited-event-entry:hover/);
-  assert.match(css, /\\.limited-event-entry:active/);
-  assert.match(css, /\\.limited-event-entry:focus-visible/);
-  assert.match(css, /\\.limited-event-entry\\[hidden\\]\\{display:none!important\\}/);
+  assert.ok(css.includes('width:138px;\\n  height:29px;\\n  min-height:29px;'));
+  assert.ok(css.includes('width:130px;height:27px;min-height:27px;'));
+  assert.ok(css.includes('.limited-event-entry:hover'));
+  assert.ok(css.includes('.limited-event-entry:active'));
+  assert.ok(css.includes('.limited-event-entry:focus-visible'));
+  assert.ok(css.includes('.limited-event-entry[hidden]{display:none!important}'));
 });
 
 test('dragon crystal egg odds are the requested 100 percent table', () => {
