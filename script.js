@@ -220,7 +220,7 @@ adminPetOddsUI = setupAdminPetOddsUI({
 });
 adminMonitoringSystem = createAdminMonitoringSystem({
   adminApi, supabaseClient, isAdmin, format, formatWalletScientific, escapeHTML,
-  toast, petIncomePerSecond, loadAdminDashboard, documentRef: document
+  toast, petIncomePerSecond, loadAdminDashboard, documentRef: document, PETS
 });
 const { doRoll, stopAuto, restartAutoInterval: restartAutoIntervalImpl, isRolling, isAutoRolling, setupAutoRollUI } = createDiceSystem({
  D, ANGEL_ODDS, POTIONS, KEY, supabaseClient, timerManager, getState:()=>S, getCurrentUser:()=>currentUser,
@@ -257,7 +257,7 @@ petSystem.setupPetSystemUI();
 setupAdminUIBindings({
   documentRef: document, loadAdminDashboard, loadAdminRareRolls, analyzeSuspiciousRolls,
   loadAdminOnlineCurve, loadAdminAchievementCounts, loadAdminPotionLogs,
-  loadAdminDeletedAccounts, loadAdminIncomeMonitor, loadAdminWeatherHistory,
+  loadAdminDeletedAccounts, loadAdminIncomeMonitor, loadAdminPetInventoryCounts, loadAdminWeatherHistory,
   loadAdminGrantHistory, adminApi, isAdmin, toast, applyServerWeatherRow,
   supabaseClient, format, escapeHTML, D, populateAdminPetSelects, petById,
   writeAdminGrantLog, refreshLeaderboards, refreshCoinBoosts,
@@ -281,6 +281,7 @@ function loadAdminAchievementCounts(){return adminMonitoringSystem?.loadAdminAch
 function loadAdminPotionLogs(){return adminMonitoringSystem?.loadAdminPotionLogs()}
 function loadAdminDeletedAccounts(){return adminMonitoringSystem?.loadAdminDeletedAccounts()}
 function loadAdminIncomeMonitor(){return adminMonitoringSystem?.loadAdminIncomeMonitor()}
+function loadAdminPetInventoryCounts(){return adminMonitoringSystem?.loadAdminPetInventoryCounts()}
 function setPlayerBan(banned){return adminMonitoringSystem?.setPlayerBan(banned)}
 setupAccountActions({
   documentRef: document, getState: () => S, setState: value => { S = value; },
