@@ -14,6 +14,10 @@ export function createNavigationUI({
     document.querySelectorAll('[data-page="admin"]').forEach(button => {
       button.hidden = !allowed;
     });
+    const eventAdminPanel = document.getElementById('eventAdminPanel');
+    if (eventAdminPanel) eventAdminPanel.hidden = !allowed;
+    const eventLockedPanel = document.getElementById('eventLockedPanel');
+    if (eventLockedPanel) eventLockedPanel.hidden = allowed;
     const panel = document.getElementById('page-admin');
     if (panel) panel.hidden = !allowed;
     const odds = document.getElementById('adminPetOddsManagementFold');
@@ -55,6 +59,15 @@ export function createNavigationUI({
   document.getElementById('sideNav').innerHTML = '<small>GAME MENU</small>' + navHTML();
   document.getElementById('mobileNav').innerHTML = navHTML();
   document.addEventListener('click', event => {
+    const eggButton = event.target.closest('[data-event-egg]');
+    if (eggButton) {
+      if (!isAdmin()) { toast('沒有管理員權限'); return; }
+      const odds = document.getElementById('dragonCrystalOdds');
+      const expanded = eggButton.getAttribute('aria-expanded') === 'true';
+      if (odds) odds.hidden = expanded;
+      eggButton.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      return;
+    }
     const workshopButton = event.target.closest('[data-workshop-category]');
     if (workshopButton) { setWorkshopCategory(workshopButton.dataset.workshopCategory); return; }
     const button = event.target.closest('[data-page],[data-go]');
