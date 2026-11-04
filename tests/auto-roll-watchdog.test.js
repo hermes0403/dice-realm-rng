@@ -9,12 +9,17 @@ function makeElement(id) {
     id,
     disabled: false,
     onclick: null,
+    textContent: '',
+    style: { setProperty() {} },
     classList: {
       add(...names) { names.forEach(name => classes.add(name)); },
       remove(...names) { names.forEach(name => classes.delete(name)); },
+      toggle(name, force) {
+        if (force === undefined ? !classes.has(name) : force) classes.add(name);
+        else classes.delete(name);
+      },
       contains(name) { return classes.has(name); }
     },
-    style: { setProperty() {} },
     removeAttribute() { this.disabled = false; }
   };
 }
@@ -41,7 +46,11 @@ function makeTimers() {
 }
 
 function makeDiceSystem() {
-  const elements = new Map(['autoBtn', 'stopBtn', 'rollBtn', 'diceFace'].map(id => [id, makeElement(id)]));
+  const ids = [
+    'autoBtn', 'stopBtn', 'rollBtn', 'diceFace',
+    'resultName', 'resultRarity', 'resultSub'
+  ];
+  const elements = new Map(ids.map(id => [id, makeElement(id)]));
   const listeners = new Map();
   const documentRef = {
     hidden: false,
@@ -53,17 +62,26 @@ function makeDiceSystem() {
     getElementById(id) { return elements.get(id) || null; }
   };
   const timers = makeTimers();
+  const state = {
+    bagCapacity: 35, rolls: 0, bag: {}, first: {},
+    quest: { rolls: 0, coinsEarned: 0, rare: 0 },
+    potions: {}, autoDepositWeatherEnabled: true,
+    autoDepositDice: ['rain-die'], best: null, rollCounts: {}
+  };
   const dice = createDiceSystem({
-    D: [], ANGEL_ODDS: [], POTIONS: [], KEY: 'test-save',
-    timerManager: timers.manager, supabaseClient: null,
-    getState: () => ({ bagCapacity: 35, rolls: 0, bag: {} }),
-    getCurrentUser: () => null, getWeather: () => ({ type: 'sunny', types: ['sunny'] }),
+    D: [{ id: 'rain-die', den: 2048, weather: 'rain', color: '#55aaff', icon: '🌧️', name: '雨骰' }],
+    ANGEL_ODDS: [], POTIONS: [], KEY: 'test-save',
+    timerManager: timers.manager, supabaseClient: {},
+    getState: () => state,
+    getCurrentUser: () => ({ id: 'test-user' }),
+    getWeather: () => ({ type: 'rain', types: ['rain'] }),
     luck: () => 0, speed: () => 0, byId: () => null,
     format: String, chanceText: String, totalDice: () => 0,
     go() {}, toast() {}, isLockHeld: () => false, isHeartbeatActive: () => true,
     scheduleUnlock() {}, applyPetRollSkills: () => 0, potionMaterialTotal: () => 0,
     checkAchievements() {}, checkDailyReward() {}, save() {},
-    autoDepositRolledWeatherDice: async () => {}, broadcastRareRoll: async () => {},
+    autoDepositRolledWeatherDice: () => new Promise(() => {}),
+    broadcastRareRoll: async () => {},
     render() {}, documentRef
   });
   return { dice, timers, elements, listeners };
@@ -93,7 +111,7 @@ test('restarting the auto-roll interval keeps exactly one watchdog', () => {
   assert.equal(timers.manager.getStats().total, 0);
 });
 
-test('watchdog recovers a roll that remains locked beyond the timeout', () => {
+test('watchdog recovers a roll that remains locked beyond the timeout', async () => {
   const previousNow = Date.now;
   const previousStorage = globalThis.localStorage;
   let now = 1000;
@@ -108,6 +126,10 @@ test('watchdog recovers a roll that remains locked beyond the timeout', () => {
 
     const [autoInterval, watchdogInterval] = [...timers.intervals.values()];
     autoInterval.callback();
+    const processing = [...timers.timeouts.values()].find(timer => timer.delay === 650);
+    assert.ok(processing, 'roll processing timer should be scheduled');
+    processing.callback();
+    await Promise.resolve();
     assert.equal(dice.isRolling(), true);
     assert.equal(writes, 1);
 
