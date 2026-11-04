@@ -1,7 +1,7 @@
 ---
 id: T-0022
 title: 顯示全服金錢倍率活動並同步寵物每秒收益
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -56,6 +56,10 @@ done_at:
 - 2026-11-03 [叉子] 整合提交 `c28b8f5427554011e5983b8ef1eb2ec782330218` 已建立；另提交 `7c19433a523fbebdc63e52e0e137425c6087e31b` 將回歸 workflow 的 push 觸發範圍加入本整合分支。對照 GitHub blob SHA，systems/coin-boost.js、systems/global-boost.js、兩份測試及 admin/ui-bindings.js 與 work/chazi 對應檔案完全一致；script.js 僅移植 T-0022 的倍率服務接線，保留 main 原本寵物出售接線。來源分支 commit `0883c741743392f5ed79ad5dfc20d37a23d5f4cb` 的 Actions run `41627905388` 已實際執行 9/9 通過；整合分支目前尚無新的 Actions run。未能在本執行環境取得本機 clone，因此 `git diff --check` 未執行；尚待整合分支 CI 與正式瀏覽器／棒子管理員帳號驗收。
 
 - 2026-11-03 [叉子] 整合分支 GitHub Actions run `41645031408`（commit `7c19433a523fbebdc63e52e0e137425c6087e31b`）已完成，job `coin-boost` success；實際執行 `node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js`，9 pass、0 fail。整合分支自動化測試已通過；`git diff --check` 仍未執行，真實瀏覽器及棒子正式管理員帳號驗收待完成。
+
+## 驗收紀錄
+
+- 2026-11-04 [叉子] PR #6 已合併至 main（f807989cb66daa09f400125fdff2e29664d54edd），Coin boost regression tests 已由 GitHub Actions 通過，且最新 Pages 部署已包含此變更。但驗收條件仍要求真實瀏覽器及正式管理員帳號驗證；目前未取得該項實測證據，因此轉為 review，不判定 done。
 
 ## 完工回報
 
