@@ -9,7 +9,7 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-05
 depends_on: []
 branch: task/T-0032-pet-image-id-mapping
 done_by:
@@ -76,3 +76,5 @@ done_at:
 
 - 2026-11-04 16:00 [叉子] 更正先前紀錄：PR #15 已合併，Pages 部署 run `41802946762` success。PR workflow 的 pet-removal 回歸 job 成功，且該 job 已執行 `git diff --check`；但 workflow 執行的是 `tests/pet-removal-admin-counts.test.js`，並未執行新增的 `tests/pet-image-mapping.test.js`。
 - 2026-11-04 16:00 [叉子] 39 個 ID 對應的靜態核對已有紀錄；圖片映射專屬 Node 測試及線上圖鑑／背包實際顯示仍未完成，維持 review。
+
+- 2026-11-05 [叉子] 棒子已完成線上人工驗收：圖鑑、寵物背包及其他寵物圖片位置均正確，重新整理後仍正確。另從 GitHub main 靜態重查，39 個現役 pet ID 唯一、39 筆圖片 key 唯一且順序完全相同、39 張圖片內容不重複、4 個退場 ID（c9、r4、l1、m2）均無映射；petArt 依 `PET_IMAGE_ASSETS[pet.id]` 取圖並保留缺圖 fallback，未使用舊 `findIndex` 配圖。11 項等價靜態斷言全部通過。PR #15/#16 的新增 patch 逐行掃描未發現尾端空白或空白後接 tab。因執行環境無法解析 github.com（`git clone` 回報 `Could not resolve host: github.com`），`node --test tests/pet-image-mapping.test.js` 與正式 `git diff --check` 命令仍未能執行；patch 空白掃描僅作替代檢查，不冒稱為原命令通過。維持 review，待 Node 測試可執行後再結案。
