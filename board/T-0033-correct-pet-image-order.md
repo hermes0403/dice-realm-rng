@@ -22,9 +22,10 @@ done_at:
 
 ## 範圍與禁止
 
-- 只動：寵物圖片資產對應、相關測試及 Board 紀錄。
-- 從原始圖片序列移除第 9、13、19、29 張（1 起算），對應退役寵物 ID：c9、r4、l1、m2。
-- 剩餘圖片必須依現役 PETS 順序對應：38 隻一般寵物及最後的管理員寵物水餃。
+- 只動：寵物圖片資產對應檢查、前端入口與寵物模組快取版本、相關測試及 Board 紀錄。
+- 確認目前 main 的 ID 圖片表已排除原始圖片序列第 9、13、19、29 張（1 起算），對應退役寵物 ID：c9、r4、l1、m2；不得重複刪除其他圖片。
+- 現有 39 張圖片必須依現役 PETS 順序對應：38 隻一般寵物及最後的管理員寵物水餃。
+- 對 index.html 的 script.js 入口、script.js 內 data/pets.js 與 systems/pets.js 匯入加版本 query，避免瀏覽器繼續使用舊模組快取。
 - 保留依穩定 pet ID 取圖，不得恢復陣列索引或取餘數配圖。
 - 不修改玩家存檔、持有寵物、融合機率、寵物收益或 Supabase 資料。
 - work/chazi 與 main 均不直接修改；本任務由最新 main 建立獨立分支。此授權不包含 PR、合併或部署。
@@ -43,20 +44,25 @@ done_at:
 
 - 2026-11-04 [叉子] 棒子明確允許從最新 main 建立新分支並修改；work/chazi 保持不動。
 - 2026-11-04 [叉子] 比對 T-0032 修改前的 43 張原始圖片陣列，確認需刪除第 9、13、19、29 張（1 起算），其餘 39 張依原始順序對應 38 隻現役一般寵物及管理員水餃。
-- 2026-11-04 [叉子] 已在 task/T-0033-correct-pet-image-order 修正 PET_IMAGE_ASSETS，並補上測試要求 key 順序必須與 PETS 順序一致。
+- 2026-11-04 [叉子] 再次逐張檢視 39 張圖片，確認現有 PET_IMAGE_ASSETS 的內容、順序與寵物名稱相符；並確認 main 已成功完成 GitHub Pages build 與 deploy。原始 4 張退役圖早已不在現有 39 張表內，因此不再重複刪除。
+- 2026-11-04 [叉子] 為 index.html 的 script.js 入口，以及 script.js 中 data/pets.js、systems/pets.js 兩個模組匯入加上版本 query，強制瀏覽器取得最新寵物圖片映射與 ID 渲染程式。
 
 ## 完工回報
 
 ### 改了什麼
 
-- data/pets.js：依原始 43 張圖片序列移除退役寵物的第 9、13、19、29 張，將剩餘 39 張依現役 PETS 順序建立 ID 對應。
+- data/pets.js：確認 main 中現有 39 張 ID 對應與原始 43 張圖片序列移除退役圖後的順序完全一致；此檔無需再次修改。
 - tests/pet-image-mapping.test.js：新增圖片對應 key 順序必須與 PETS 順序一致的測試。
+- index.html：為 script.js 加版本 query。
+- script.js：為 data/pets.js、systems/pets.js 加版本 query。
 - board/README.md：新增 T-0033 索引。
 
 ### 怎麼驗證的
 
 - 已透過原始 main 版本 fcc70fba3441ce144d00e8106c28130bb2d44aa5 取得原始 43 張圖片序列。
-- 靜態核對確認原始 PETS 移除 c9、r4、l1、m2 後，其餘 38 個 ID 順序與目前 PETS 完全一致；加入管理員水餃後共 39 個 ID，與過濾後 39 張圖片數量一致。
+- 靜態核對確認原始 43 張圖移除第 9、13、19、29 張後，剩餘 39 張與現有 PET_IMAGE_ASSETS 的值逐筆完全相同；39 個 key 順序與現有 PETS 完全一致，圖片內容無重複。
+- 已逐張目視檢查 39 張圖，寵物圖像內容與名稱一致。
+- GitHub Actions 的 Pages build 與 deploy job 均為 success（run 41802946762，commit 979ab016adca9ae18eed76f954042c956fa2cf30）。
 - Node 測試、git diff --check、瀏覽器實際圖鑑／背包驗證尚未執行。
 
 ### 沒做／做不到的
