@@ -14,6 +14,8 @@ export function createNavigationUI({
     document.querySelectorAll('[data-page="admin"]').forEach(button => {
       button.hidden = !allowed;
     });
+    const eventEntry = document.querySelector('.limited-event-entry');
+    if (eventEntry) eventEntry.hidden = !allowed;
     const eventAdminPanel = document.getElementById('eventAdminPanel');
     if (eventAdminPanel) eventAdminPanel.hidden = !allowed;
     const eventLockedPanel = document.getElementById('eventLockedPanel');
