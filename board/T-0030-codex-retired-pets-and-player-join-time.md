@@ -64,7 +64,7 @@ done_at:
 
 - 已確認帳號識別碼前綴 71413984 的 Auth created_at 為 2026-10-23T14:00:36.222718Z，即台灣時間 2026-10-23 22:00:36。
 - Edge Function dice-rng-admin 已部署成功，第 32 版，verify_jwt=true。
-- 新增測試覆蓋正式寵物定義移除、融合池排除、圖鑑及台灣時間格式；尚待 GitHub Actions 執行。
+- 新增測試覆蓋正式寵物定義移除、融合池排除、圖鑑及台灣時間格式；GitHub Actions run 41783844591 全部成功，包含測試與 `git diff --check`。
 - 資料庫驗證結果：remaining_inventory_instances=0、remaining_codex_flags=0、remaining_equipped_instances=0。
 
 ### 沒做／做不到的
@@ -75,3 +75,4 @@ done_at:
 ### 衍生任務／影響任務
 
 - 2026-11-04 14:10 [叉子] 棒子明確確認永久刪除所有玩家已持有的四隻退場寵物。先查得 8 個寵物實例分布於 6 個帳號；實際存檔更新期間偵測到舊端資料可能回寫，因此同步擴充 game_saves trigger，依寵物定義 ID 過濾，並清除裝備 UID 與 petDiscovered 旗標。最終驗證三項剩餘數均為 0。
+- 2026-11-04 14:12 [叉子] 修正 Intl.DateTimeFormat 在 Node 環境產生窄空白字元的差異；GitHub Actions run 41783844591 通過，寵物移除／管理統計測試及 `git diff --check` 均成功。
