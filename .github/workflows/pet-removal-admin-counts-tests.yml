@@ -1,0 +1,34 @@
+name: Pet removal and admin inventory count tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'data/pets.js'
+      - 'systems/pets.js'
+      - 'admin/monitoring.js'
+      - 'admin/ui-bindings.js'
+      - 'script.js'
+      - 'index.html'
+      - 'tests/pet-removal-admin-counts.test.js'
+      - '.github/workflows/pet-removal-admin-counts-tests.yml'
+
+jobs:
+  pet-removal-and-admin-counts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run pet removal and admin count tests
+        run: node --test tests/pet-removal-admin-counts.test.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD

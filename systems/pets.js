@@ -144,7 +144,7 @@ export function createPetSystem({
   }
 
   function populateAdminPetSelects() {
-    const options = PETS.map(pet => `<option value="${pet.id}">${pet.name}（${petRarity(pet.rarity).name}）</option>`).join('');
+    const options = PETS.filter(pet => !pet.unobtainable).map(pet => `<option value="${pet.id}">${pet.name}（${petRarity(pet.rarity).name}）</option>`).join('');
     for (const id of ['adminSinglePetId', 'adminAllPetId']) {
       const element = documentRef.getElementById(id);
       if (element && !element.options.length) element.innerHTML = options;
@@ -321,16 +321,19 @@ export function createPetSystem({
 
   function renderPetCodex() {
     const S = getState();
-    const all = PETS;
-    const owned = new Set(Object.keys(S.petDiscovered || {}));
+    const owned = new Set([
+      ...Object.keys(S.petDiscovered || {}),
+      ...(Array.isArray(S.pets) ? S.pets.map(pet => pet?.id).filter(Boolean) : [])
+    ]);
+    const all = PETS.filter(pet => !pet.unobtainable || owned.has(pet.id));
     const count = all.filter(pet => owned.has(pet.id)).length;
-    const percentage = Math.round(count / all.length * 100);
+    const percentage = all.length ? Math.round(count / all.length * 100) : 0;
     documentRef.getElementById('codexPct').textContent = percentage + '% · 已發現 ' + count + '/' + all.length;
     documentRef.getElementById('codexBar').style.width = percentage + '%';
     documentRef.querySelectorAll('[data-codex-category]').forEach(button => button.classList.toggle('active', button.dataset.codexCategory === 'pets'));
     documentRef.querySelector('#page-codex .hero .eyebrow').textContent = 'PET ARCHIVE DATABASE';
     documentRef.querySelector('#page-codex .hero h1').textContent = '記錄每一個生命。';
-    documentRef.querySelector('#page-codex .hero .muted').textContent = '共 43 種寵物；未發現的寵物會顯示為未知剪影。';
+    documentRef.querySelector('#page-codex .hero .muted').textContent = '已退場寵物只會保留在曾發現或持有者的圖鑑中。';
     const grid = documentRef.getElementById('codexGrid');
     grid.className = 'pet-catalog-grid';
     grid.innerHTML = all.map(pet => {
