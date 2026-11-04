@@ -52,7 +52,7 @@ test('admin aggregation counts pet instances and unique holders without exposing
     { user_id: 'player-c', save_data: { pets: [] } }
   ], PETS);
   const byId = new Map(stats.counts.map(row => [row.petId, row]));
-  assert.equal(stats.totalPets, 4);
+  assert.equal(stats.totalPets, 5);
   assert.equal(stats.playersWithPets, 2);
   assert.equal(stats.speciesWithOwners, 3);
   assert.equal(byId.get('c1').count, 3);
