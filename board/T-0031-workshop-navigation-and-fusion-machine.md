@@ -39,12 +39,17 @@ done_at:
 ## 紀錄
 
 - 2026-11-04 [叉子] 棒子回覆「用啊」，明確授權本次從最新 main 建立獨立任務分支，並保留 work/chazi 不動。已建立 task/T-0031-workshop-navigation-and-fusion-machine，基準 commit 為 aa7e8d484f424bb4fbc0c87cd606b4a1ae9f10b1。
+- 2026-11-04 [叉子] 已修改 index.html、config.js、ui/navigation.js：寵物頁改名「融合機」、數量更新為 39 種；手套與藥水內容改放在單一「工坊」頁面，新增兩個內部分類切換，原有手套／藥水欄位 ID 保留。Board 索引及任務檔已建立。
 
 ## 完工回報
 
 ### 改了什麼
 
 ### 怎麼驗證的
+
+- GitHub compare：任務分支相對 main 為 ahead 5、behind 0；變更僅含 index.html、config.js、ui/navigation.js 與兩份 Board 文件。
+- 靜態檢查：融合機標題、39 種寵物、完整說明文字、工坊頁及兩個分類 panel 各存在一次；融合按鈕、配方清單及藥水清單 ID 均保留；script.js、style.css、ui/navigation.js、config.js、index.html 未找到舊的 page-gloves／page-potions 導覽引用。
+- `git diff --check`、瀏覽器實際操作及遊戲內融合／手套／藥水功能測試：未執行，GitHub 檔案 API 無法替代本機工作樹與瀏覽器驗證。
 
 ### 沒做／做不到的
 
