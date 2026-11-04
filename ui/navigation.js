@@ -27,6 +27,12 @@ export function createNavigationUI({
     ).join('');
   }
 
+  function setWorkshopCategory(category) {
+    document.querySelectorAll('[data-workshop-category]').forEach(button => button.classList.toggle('active', button.dataset.workshopCategory === category));
+    document.getElementById('workshop-gloves-panel')?.toggleAttribute('hidden', category !== 'gloves');
+    document.getElementById('workshop-potions-panel')?.toggleAttribute('hidden', category !== 'potions');
+  }
+
   function go(id) {
     if (id === 'admin' && !isAdmin()) {
       toast('沒有管理員權限');
@@ -42,12 +48,15 @@ export function createNavigationUI({
     if (id === 'leaderboard') refreshLeaderboards();
     if (id === 'weather-summon') loadWeatherSummonData();
     if (id === 'pets') renderPetsPage();
+    if (id === 'workshop') setWorkshopCategory('gloves');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   document.getElementById('sideNav').innerHTML = '<small>GAME MENU</small>' + navHTML();
   document.getElementById('mobileNav').innerHTML = navHTML();
   document.addEventListener('click', event => {
+    const workshopButton = event.target.closest('[data-workshop-category]');
+    if (workshopButton) { setWorkshopCategory(workshopButton.dataset.workshopCategory); return; }
     const button = event.target.closest('[data-page],[data-go]');
     if (!button) return;
     go(button.dataset.page || button.dataset.go);

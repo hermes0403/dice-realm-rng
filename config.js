@@ -4,6 +4,6 @@ export const SUPABASE_KEY='sb_publishable_1KaqGPbK2OVgXEvrVyM_7A_yQJBlrHC';
 export const DEVICE_LOCK_KEY='diceRealmDeviceLock_v1';
 export const WEATHER_TYPES={dumpling:{label:'水餃天氣',icon:'🥟',chance:0},rain:{label:'雨天',icon:'🌧️',chance:.08},snow:{label:'雪天',icon:'❄️',chance:.06},thunder:{label:'打雷',icon:'⚡',chance:.04},crystal:{label:'水晶天氣',icon:'💎',chance:0},hell:{label:'地獄天氣',icon:'🔥',chance:0}};
 export const DEVICE_ACCOUNT_LIMIT=3;
-export const pages=[['roll','擲骰大廳','✦'],['inventory','骰子背包','▦'],['codex','收藏圖鑑','◈'],['pets','寵物合成','♧'],['gloves','手套工坊','♧'],['potions','藥水工坊','⚗'],['weather-summon','天氣召喚','✧'],['quests','任務成就','☷'],['leaderboard','排行榜','♜'],['profile','設定','◎'],['admin','管理員面板','⚙']];
+export const pages=[['roll','擲骰大廳','✦'],['inventory','骰子背包','▦'],['codex','收藏圖鑑','◈'],['pets','融合機','♧'],['workshop','工坊','⚒'],['weather-summon','天氣召喚','✧'],['quests','任務成就','☷'],['leaderboard','排行榜','♜'],['profile','設定','◎'],['admin','管理員面板','⚙']];
 export const VISITOR_KEY='diceRealmVisitorIdV1';
 export const ADMIN_GRANT_LABELS={coins:'遊戲幣 ($)',luck1:'運氣藥水 I',luck2:'運氣藥水 II',luck3:'運氣藥水 III',angel1:'天堂藥水 I',angel2:'天堂藥水 II'};
