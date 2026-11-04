@@ -1,7 +1,7 @@
 ---
 id: T-0028
 title: 排除萬聖節骰子自動出售並補齊寵物背包排序
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-04
 updated: 2026-11-04
 depends_on: []
 branch: task/T-0028-pet-backpack-sort-and-auto-sell-filter
-done_by:
-done_at:
+done_by: 叉子（依棒子授權技術驗收）
+done_at: 2026-11-04
 ---
 
 ## 任務
@@ -42,6 +42,10 @@ done_at:
 - 2026-11-04 09:54 [叉子] 已更新首頁說明與寵物排序選項；自動出售選項移除萬聖節骰子，並在渲染時清除舊設定中的萬聖節 ID；擲骰出售判斷另加萬聖節保護。寵物收益遞減排序邏輯已加入，尚待測試。
 
 - 2026-11-04 10:00 [叉子] 新增純函式排序／篩選與回歸測試；GitHub Actions run 41757623632 成功，其他既有 PR workflow 亦全部成功。任務已送 PR #11，等待棒子驗收；未合併、未部署。
+
+## 驗收紀錄
+
+- 2026-11-04 [叉子] 技術驗收（依棒子授權）：PR #11 已合併至 main（8d07b092c5115f3b842596c94e0fa31cd60788ef）；本任務 Pet backpack and auto-sell regression tests、git diff --check 均由 GitHub Actions 通過，PR 上其他既有回歸 workflow 亦成功；最新已確認的 GitHub Pages 部署 run 41806019959 success，包含本任務變更。驗收條件均有自動化測試及合併部署證據，狀態更新為 done。未另行執行真實玩家瀏覽器操作，列為部署後觀察事項。
 
 ## 完工回報
 
