@@ -77,3 +77,9 @@ done_at:
 ### 衍生任務／影響任務
 
 - 待本任務完成後，由棒子在正式 Pages 驗收圖鑑及寵物背包圖片。
+
+ 
+## 補充驗收紀錄
+
+- 2026-11-04 16:00 [叉子] 更正先前紀錄：PR #16 已合併，Pages 部署 run `41806019959` success。PR workflow 的 pet-removal 回歸 job `41805922228` 成功，且已執行 `git diff --check`；但 workflow 執行的是 `tests/pet-removal-admin-counts.test.js`，並未執行新增的寵物圖片映射測試。
+- 2026-11-04 16:00 [叉子] 原始 43 張圖片移除 4 張後與 39 張 ID 對應表的逐筆核對已有紀錄；圖片映射專屬 Node 測試及線上圖鑑／背包實際顯示仍未完成，維持 review。
