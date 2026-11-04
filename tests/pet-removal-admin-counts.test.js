@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import {
   PETS, UNOBTAINABLE_PET_IDS, PET_INDIVIDUAL_ODDS,
   getPetFusionPool, getPetFusionWeights, randomPet
@@ -62,4 +63,22 @@ test('admin aggregation counts pet instances and unique holders without exposing
   assert.equal(byId.get('s1').count, 0);
   assert.equal(byId.get('unknown-pet').count, 1);
   assert.ok(stats.counts.every(row => !('user_id' in row) && !('username' in row)));
+});
+
+test('admin page contains the requested pet sort labels and global inventory panel', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const labels = [
+    '<option value="rarity-asc">依稀有度遞增</option>',
+    '<option value="rarity-desc">依稀有度遞減</option>',
+    '<option value="income-asc">依每秒金錢遞增</option>',
+    '<option value="income-desc">依每秒金錢遞減</option>'
+  ];
+  let previousIndex = -1;
+  for (const label of labels) {
+    const index = html.indexOf(label);
+    assert.ok(index > previousIndex, 'sort labels should appear in the requested order');
+    previousIndex = index;
+  }
+  assert.ok(html.includes('id="adminPetInventoryCountsFold"'));
+  assert.ok(html.includes('id="adminPetInventoryCountsList"'));
 });
