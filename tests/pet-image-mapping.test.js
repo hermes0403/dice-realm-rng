@@ -6,6 +6,7 @@ test('every active pet has one explicit image mapping by stable ID', () => {
   const activeIds = PETS.map(pet => pet.id);
   assert.equal(activeIds.length, 39);
   assert.equal(new Set(activeIds).size, activeIds.length);
+  assert.deepEqual(Object.keys(PET_IMAGE_ASSETS), activeIds, 'image order must follow the active PETS order');
   assert.deepEqual(Object.keys(PET_IMAGE_ASSETS).sort(), [...activeIds].sort());
   for (const pet of PETS) {
     assert.equal(typeof PET_IMAGE_ASSETS[pet.id], 'string', pet.id);
