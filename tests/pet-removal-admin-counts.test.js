@@ -6,6 +6,8 @@ import {
   getPetFusionPool, getPetFusionWeights, randomPet
 } from '../data/pets.js';
 import { aggregatePetInventoryCounts } from '../admin/monitoring.js';
+import { getPetCodexEntries } from '../systems/pets.js';
+import { formatPlayerJoinTime } from '../admin/player-management.js';
 
 test('four retired pets remain defined for old saves but are excluded from fusion pools', () => {
   const names = ['冰原兔', '藍晶甲蟲', '日蝕金狼', '星焰鳳皇'];
@@ -81,4 +83,19 @@ test('admin page contains the requested pet sort labels and global inventory pan
   }
   assert.ok(html.includes('id="adminPetInventoryCountsFold"'));
   assert.ok(html.includes('id="adminPetInventoryCountsList"'));
+});
+
+
+test('retired pets are excluded from codex for everyone, including previous owners', () => {
+  const entries = getPetCodexEntries(PETS, ['c9', 'r4', 'l1', 'm2', 'c1']);
+  assert.ok(entries.every(pet => !UNOBTAINABLE_PET_IDS.includes(pet.id)));
+  assert.equal(entries.length, PETS.length - 4);
+  assert.equal(entries.find(pet => pet.id === 'c1').discovered, true);
+  assert.ok(!entries.some(pet => pet.discovered && UNOBTAINABLE_PET_IDS.includes(pet.id)));
+});
+
+test('join time uses Auth created_at and renders in Taiwan time', () => {
+  assert.equal(formatPlayerJoinTime('2026-10-23T14:00:36.222Z'), '2026/10/23 22:00:36');
+  assert.equal(formatPlayerJoinTime(null), '後端未提供加入時間');
+  assert.equal(formatPlayerJoinTime('invalid'), '加入時間資料無效');
 });
