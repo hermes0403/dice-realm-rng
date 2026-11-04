@@ -1,6 +1,22 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 import { petWeightSkillMultiplier } from './pet-skills.js';
 
+export function sortOwnedPets(pets, { mode = 'rarity-desc', petById, petIncomePerSecond, rarityOrder }) {
+  const owned = Array.isArray(pets) ? pets : [];
+  return [...owned].sort((a, b) => {
+    const da = petById(a.id) || { rarity: 'common', name: '未知寵物' };
+    const db = petById(b.id) || { rarity: 'common', name: '未知寵物' };
+    const ra = rarityOrder.indexOf(da.rarity);
+    const rb = rarityOrder.indexOf(db.rarity);
+    const nameOrder = da.name.localeCompare(db.name, 'zh-Hant');
+    const weightOrder = (Number(a.kg) || 0) - (Number(b.kg) || 0);
+    if (mode === 'income-asc') return petIncomePerSecond(a) - petIncomePerSecond(b) || ra - rb || nameOrder || weightOrder;
+    if (mode === 'income-desc') return petIncomePerSecond(b) - petIncomePerSecond(a) || rb - ra || nameOrder || weightOrder;
+    const direction = mode === 'rarity-asc' ? 1 : -1;
+    return direction * (ra - rb) || nameOrder || weightOrder;
+  });
+}
+
 /** Returns safe, individually styled tags for appearance and weather mutations. */
 export function formatPetMutationTags(pet, PET_MUTATIONS = {}) {
   if (!pet || typeof pet !== 'object') return [];
@@ -271,16 +287,8 @@ export function createPetSystem({
         grid.innerHTML = '<div class="empty">尚未擁有寵物，先使用兩顆骰子合成。</div>';
       } else {
         const rarityOrder = PET_RARITIES.map(rarity => rarity.id);
-        const sorted = [...pets].sort((a, b) => {
-          const da = petById(a.id) || { rarity: 'common', name: '未知寵物' };
-          const db = petById(b.id) || { rarity: 'common', name: '未知寵物' };
-          const ra = rarityOrder.indexOf(da.rarity);
-          const rb = rarityOrder.indexOf(db.rarity);
-          const nameOrder = da.name.localeCompare(db.name, 'zh-Hant');
-          const weightOrder = (Number(a.kg) || 0) - (Number(b.kg) || 0);
-          if (petSortMode === 'income-asc') return petIncomePerSecond(a) - petIncomePerSecond(b) || ra - rb || nameOrder || weightOrder;
-          const direction = petSortMode === 'rarity-asc' ? 1 : -1;
-          return direction * (ra - rb) || nameOrder || weightOrder;
+        const sorted = sortOwnedPets(pets, {
+          mode: petSortMode, petById, petIncomePerSecond, rarityOrder
         });
         grid.innerHTML = sorted.map(pet => {
           const definition = petById(pet.id) || { id: pet.id, name: '未知寵物', icon: '❔', rarity: 'common' };
