@@ -1,3 +1,15 @@
+/** Keep Halloween dice out of auto-sell preferences, including stale saved IDs. */
+export function filterAutoSellDice(dice, selectedIds = []) {
+  const halloweenIds = new Set(['d33', 'd34', 'd35', 'd36']);
+  const safeIds = (Array.isArray(selectedIds) ? selectedIds : []).filter(id => !halloweenIds.has(id));
+  const categoryOrder = item => item.weather
+    ? ({ rain: 1, snow: 2, thunder: 3, crystal: 4, hell: 5 }[item.weather] ?? 6) : 0;
+  const options = (Array.isArray(dice) ? dice : [])
+    .filter(item => !halloweenIds.has(item.id) && Number(item.den) >= 2 && Number(item.den) <= 600000)
+    .slice().sort((a, b) => categoryOrder(a) - categoryOrder(b) || Number(a.den) - Number(b.den));
+  return { dice: options, selectedIds: safeIds };
+}
+
 /** Inventory rendering and its local selection/sale interactions. */
 export function createInventoryUI({
   D,
@@ -26,19 +38,13 @@ export function createInventoryUI({
     const S = getState();
     const box = document.getElementById('autoSellDiceOptions');
     if (!box) return;
-    const halloweenIds = new Set(['d33', 'd34', 'd35', 'd36']);
     const savedIds = Array.isArray(S.autoDeleteDice) ? S.autoDeleteDice : [];
-    const safeIds = savedIds.filter(id => !halloweenIds.has(id));
+    const { dice, selectedIds: safeIds } = filterAutoSellDice(D, savedIds);
     if (safeIds.length !== savedIds.length) {
       S.autoDeleteDice = safeIds;
       persistAutoSellPrefs();
       save();
     }
-    const categoryOrder = dice => dice.weather
-      ? ({ rain: 1, snow: 2, thunder: 3, crystal: 4, hell: 5 }[dice.weather] ?? 6) : 0;
-    const dice = D.filter(item => !halloweenIds.has(item.id)
-      && Number(item.den) >= 2 && Number(item.den) <= 600000)
-      .slice().sort((a, b) => categoryOrder(a) - categoryOrder(b) || Number(a.den) - Number(b.den));
     const renderOne = item => {
       const selected = safeIds.includes(item.id);
       const color = item.weather
