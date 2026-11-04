@@ -13,7 +13,7 @@ export const PETS=[
 ['l1','日蝕金狼','🐺','legendary'],['l2','耀日鳳凰','🦅','legendary'],['l3','星冠神鹿','🦌','legendary'],['l4','黃金機龍','🐉','legendary'],['l5','裂空獅鷲','🦁','legendary'],['l6','永夜巨蛇','🐍','legendary'],['l7','熔核巨鷹','🦅','legendary'],['l8','時序獵犬','🐕','legendary'],['l9','極光天馬','🐎','legendary'],
 ['m1','赤白天龍','🐉','mythic'],['m2','星焰鳳皇','🦅','mythic'],['m3','混沌天狼','🐺','mythic'],['m4','天隕白虎','🐅','mythic'],['m5','創世神鹿','🦌','mythic'],['m6','深空巨龍','🐲','mythic'],['m7','紅月天鯨','🐋','mythic'],['m8','萬象玄龜','🐢','mythic'],['m9','時空九尾','🦊','mythic'],
 ['s1','星界之狼','🐺','secret'],['s2','無序之龍','🐉','secret'],['s3','終焉渡鴉','🐦‍⬛','secret'],['s4','永寂環蛇','🐍','secret'],['s5','虛無君王','👁️','secret'],['s6','原初奇點','🌌','secret']
-] .map(([id,name,icon,rarity])=>({id,name,icon,rarity,unobtainable:unobtainablePetIdSet.has(id)}));
+].map(([id,name,icon,rarity])=>({id,name,icon,rarity,unobtainable:unobtainablePetIdSet.has(id)}));
 PETS.push({id:'dumpling_mythic',name:'水餃',icon:'🥟',rarity:'mythic',fusionOnly:false,adminOnly:true,uniqueReward:true});
 export function petById(id){return PETS.find(p=>p.id===id)}
 export const PET_BASE_INCOME={
