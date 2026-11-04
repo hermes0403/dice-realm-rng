@@ -70,3 +70,9 @@ done_at:
 ### 衍生任務／影響任務
 
 - 無新增任務；正式管理員帳號驗收由棒子於 PR review 階段確認。
+
+ 
+## 補充驗收紀錄
+
+- 2026-11-04 16:00 [叉子] PR #2 已合併至 main（`2ff19db25266f32c4f8a67a4232e4d9826e170cd`），GitHub Pages 部署 run `41604124888` success。正式 Supabase Edge Function `dice-rng-admin` 目前為 active v32、`verify_jwt=true`；檢查其 `set_coin_boost` 路徑，需先驗證登入 token，並以固定管理員 email 限制管理操作。
+- 2026-11-04 16:00 [叉子] 原有 V8 測試紀錄涵蓋管理員入口、非管理員前端阻擋及倍率 payload；本次未取得正式管理員帳號操作證據，亦未在瀏覽器實際設定倍率，因此維持 review。
