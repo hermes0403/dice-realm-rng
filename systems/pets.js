@@ -1,9 +1,12 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 
 /** Build codex entries while excluding retired pets for every player, including previous owners. */
+import { EVENT_PETS } from '../data/pets.js';
 export function getPetCodexEntries(petDefinitions = [], discoveredIds = []) {
   const discovered = new Set(Array.isArray(discoveredIds) ? discoveredIds : []);
-  return (Array.isArray(petDefinitions) ? petDefinitions : [])
+  const definitions = Array.isArray(petDefinitions) ? petDefinitions : [];
+  const knownIds = new Set(definitions.map(pet => pet?.id).filter(Boolean));
+  return [...definitions, ...EVENT_PETS.filter(pet => !knownIds.has(pet.id))]
     .filter(pet => pet && pet.unobtainable !== true)
     .map(pet => ({ ...pet, discovered: discovered.has(pet.id) }));
 }
