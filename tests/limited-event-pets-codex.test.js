@@ -42,3 +42,28 @@ test('all limited-event pets resolve to the dedicated sprite-sheet asset', () =>
     assert.ok(PET_IMAGE_ASSETS[pet.id].endsWith('/assets/pets/events/event-pets-sprite.jpg'));
   }
 });
+
+
+test('codex sorts all pets by rarity, then ascending income within each rarity', () => {
+  const entries = getPetCodexEntries(PETS, []);
+  const rarityOrder = ['common', 'rare', 'legendary', 'mythic', 'secret'];
+  const rank = pet => rarityOrder.indexOf(pet.rarity);
+  for (let i = 1; i < entries.length; i++) {
+    const previous = entries[i - 1];
+    const current = entries[i];
+    assert.ok(rank(previous) <= rank(current), `${previous.name} must not follow ${current.name}`);
+    if (previous.rarity === current.rarity) {
+      assert.ok(
+        (PET_BASE_INCOME[previous.id] || 0) <= (PET_BASE_INCOME[current.id] || 0),
+        `${previous.name} must not earn more than ${current.name}`
+      );
+    }
+  }
+  for (const pet of EVENT_PETS) {
+    assert.ok(entries.some(entry => entry.id === pet.id), pet.name);
+  }
+
+  const special = { id: 'test-special-rarity', name: '特殊品質測試寵物', rarity: 'admin' };
+  const withSpecial = getPetCodexEntries([...PETS, special], []);
+  assert.equal(withSpecial.at(-1).id, special.id);
+});

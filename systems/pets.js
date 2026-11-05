@@ -1,13 +1,23 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 
 /** Build codex entries while excluding retired pets for every player, including previous owners. */
-import { EVENT_PETS } from '../data/pets.js';
+import { EVENT_PETS, PET_BASE_INCOME } from '../data/pets.js';
 export function getPetCodexEntries(petDefinitions = [], discoveredIds = []) {
   const discovered = new Set(Array.isArray(discoveredIds) ? discoveredIds : []);
   const definitions = Array.isArray(petDefinitions) ? petDefinitions : [];
   const knownIds = new Set(definitions.map(pet => pet?.id).filter(Boolean));
+  const rarityOrder = ['common', 'rare', 'legendary', 'mythic', 'secret'];
   return [...definitions, ...EVENT_PETS.filter(pet => !knownIds.has(pet.id))]
     .filter(pet => pet && pet.unobtainable !== true)
+    .sort((a, b) => {
+      const rankA = rarityOrder.indexOf(a.rarity);
+      const rankB = rarityOrder.indexOf(b.rarity);
+      const rarityDiff = (rankA < 0 ? rarityOrder.length : rankA) - (rankB < 0 ? rarityOrder.length : rankB);
+      if (rarityDiff !== 0) return rarityDiff;
+      const incomeA = Number(PET_BASE_INCOME[a.id]) || 0;
+      const incomeB = Number(PET_BASE_INCOME[b.id]) || 0;
+      return incomeA - incomeB || String(a.name || '').localeCompare(String(b.name || ''), 'zh-Hant');
+    })
     .map(pet => ({ ...pet, discovered: discovered.has(pet.id) }));
 }
 import { petWeightSkillMultiplier } from './pet-skills.js';
