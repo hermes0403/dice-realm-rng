@@ -234,7 +234,8 @@ export function createDiceSystem(deps) {
     face.classList.add('rolling');
     const rollButton = documentRef.getElementById('rollBtn');
     const autoButton = documentRef.getElementById('autoBtn');
-    const rollDuration = Math.max(50, 950 / (1 + speed() / 100));
+    const weatherSpeedBonus = getWeather()?.type === 'shark' || (getWeather()?.types || []).includes('shark') ? 100 : 0;
+    const rollDuration = Math.max(50, 950 / (1 + (speed() + weatherSpeedBonus) / 100));
     rollButton.style.setProperty('--roll-duration', rollDuration + 'ms');
     autoButton.style.setProperty('--roll-duration', rollDuration + 'ms');
     rollButton.classList.remove('roll-progress');
