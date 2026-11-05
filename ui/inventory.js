@@ -68,7 +68,8 @@ export function createInventoryUI({
   function updateInventorySelectedCount() {
     const grid = document.getElementById('inventoryGrid');
     if (!grid) return;
-    const total = grid.querySelectorAll('input[data-sell-select]:checked').length;
+    const total = [...grid.querySelectorAll('input[data-sell-select]:checked')]
+      .reduce((sum, input) => sum + Math.max(0, Number(input.dataset.sellAmount) || 1), 0);
     const label = document.getElementById('inventorySelectedCount');
     const button = document.getElementById('sellSelectedDiceBtn');
     if (label) label.textContent = inventorySellMode ? `已選擇 ${format(total)} 顆骰子` : '一般模式';
@@ -91,25 +92,26 @@ export function createInventoryUI({
     const dice = D.filter(item => (Number(S.bag[item.id]) || 0) > 0)
       .sort((a, b) => categoryOrder(a) - categoryOrder(b) || Number(a.den) - Number(b.den));
     let html = '';
+    // Render one tile per dice type, not one DOM node per individual die.
+    // This keeps the inventory responsive even when grants or imports exceed bag capacity.
     for (const item of dice) {
       const count = Number(S.bag[item.id]) || 0;
       const halloween = halloweenIds.has(item.id);
       const color = halloween ? '#ff8a3d' : (mutationColors[item.weather] || '#4df27c');
-      for (let n = 0; n < count; n++) {
-        html += `<label class="inventory-tile" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}"><input type="checkbox" data-sell-select="${item.id}" aria-label="選擇出售${escapeHTML(item.name)}第${n + 1}顆"><span class="tile-chance" style="color:${color}">${chanceText(item)}</span><span class="tile-icon" style="color:${color}">${item.icon}</span><span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span><span class="tile-index">#${n + 1}</span></label>`;
-      }
+      html += `<label class="inventory-tile" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}">
+        <input type="checkbox" data-sell-select="${item.id}" data-sell-amount="${count}" aria-label="選擇出售${escapeHTML(item.name)}共${format(count)}顆">
+        <span class="tile-chance" style="color:${color}">${chanceText(item)}</span>
+        <span class="tile-icon" style="color:${color}">${item.icon}</span>
+        <span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span>
+        <span class="tile-index">×${format(count)}</span>
+      </label>`;
     }
     grid.innerHTML = html || '<div class="empty" style="grid-column:1/-1">背包目前沒有骰子。</div>';
     if (inventorySellMode) {
       grid.classList.add('sell-select-mode');
-      const remaining = new Map();
-      for (const id of previouslySelected) remaining.set(id, (remaining.get(id) || 0) + 1);
+      const selectedIds = new Set(previouslySelected);
       grid.querySelectorAll('input[data-sell-select]').forEach(input => {
-        const count = remaining.get(input.dataset.sellSelect) || 0;
-        if (count > 0) {
-          input.checked = true;
-          remaining.set(input.dataset.sellSelect, count - 1);
-        }
+        input.checked = selectedIds.has(input.dataset.sellSelect);
       });
     }
     document.getElementById('bagCount').textContent = format(totalDice()) + ' 顆';
@@ -196,7 +198,10 @@ export function createInventoryUI({
       return;
     }
     const counts = new Map();
-    for (const input of checked) counts.set(input.dataset.sellSelect, (counts.get(input.dataset.sellSelect) || 0) + 1);
+    for (const input of checked) {
+      const amount = Math.max(0, Number(input.dataset.sellAmount) || 1);
+      counts.set(input.dataset.sellSelect, (counts.get(input.dataset.sellSelect) || 0) + amount);
+    }
     const total = checked.length;
     const summary = [...counts.entries()].map(([id, count]) => {
       const dice = byId(id);
