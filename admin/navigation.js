@@ -210,3 +210,5 @@ export function setupAdminNavigation(documentRef = document) {
   page.dataset.adminNavigationReady = 'true';
   applyFilters();
 }
+
+if (typeof document !== 'undefined') setupAdminNavigation(document);
