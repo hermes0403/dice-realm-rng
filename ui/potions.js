@@ -14,14 +14,6 @@ export function createPotionUI(deps) {
     const state = getState();
     state.potions = state.potions || fresh().potions;
     state.potions.materials = state.potions.materials || {};
-    let left = 4;
-    for (const id of Object.keys(state.potions.materials)) {
-      const count = Math.max(0, Number(state.potions.materials[id]) || 0);
-      const keep = Math.min(count, left);
-      if (keep) state.potions.materials[id] = keep;
-      else delete state.potions.materials[id];
-      left -= keep;
-    }
     state.potions.autoAddPotions = Array.isArray(state.potions.autoAddPotions)
       ? state.potions.autoAddPotions.slice(0, 2)
       : [];
