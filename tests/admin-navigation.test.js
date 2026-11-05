@@ -28,6 +28,7 @@ test('既有管理功能會分配到正確分類', () => {
     ['adminDeletedAccountsFold', 'security'],
     ['adminRareRollFold', 'security'],
     ['adminSuspiciousRollFold', 'security'],
+    ['adminClientAuditFold', 'security'],
     ['adminGlobalBoostFold', 'economy'],
     ['adminCoinBoostFold', 'economy'],
     ['adminWeatherControlFold', 'weather'],
