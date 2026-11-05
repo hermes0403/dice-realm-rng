@@ -80,8 +80,10 @@ test('快速操作目標有穩定 ID，避免搬動區塊後失效', () => {
 
 test('管理員頁面的 26 個既有功能區塊全部可分類', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  const section = html.match(/<section class="page" id="page-admin"[\s\S]*?<\/section>/)?.[0] || '';
-  const entries = [...section.matchAll(/<details class="admin-fold"([^>]*)>\s*<summary>([\s\S]*?)<\/summary>/g)];
+  const sectionStart = html.indexOf('<section class="page" id="page-admin"');
+  const sectionEnd = html.indexOf('</section>', sectionStart);
+  const section = html.slice(sectionStart, sectionEnd);
+  const entries = [...section.matchAll(/<details class="admin-fold"([^>]*)>[ ]*<summary>(.*?)<\/summary>/g)];
   assert.equal(entries.length, 26);
   const categories = new Set(['players', 'economy', 'pets', 'weather', 'monitoring', 'security']);
   for (const [, attributes, rawSummary] of entries) {
