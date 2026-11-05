@@ -62,4 +62,8 @@ test('codex sorts all pets by rarity, then ascending income within each rarity',
   for (const pet of EVENT_PETS) {
     assert.ok(entries.some(entry => entry.id === pet.id), pet.name);
   }
+
+  const special = { id: 'test-special-rarity', name: '特殊品質測試寵物', rarity: 'admin' };
+  const withSpecial = getPetCodexEntries([...PETS, special], []);
+  assert.equal(withSpecial.at(-1).id, special.id);
 });
