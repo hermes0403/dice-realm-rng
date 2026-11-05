@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PETS, EVENT_PETS, PET_BASE_INCOME, getPetFusionPool, petById } from '../data/pets.js';
+import { PETS, EVENT_PETS, PET_BASE_INCOME, PET_IMAGE_ASSETS, getPetFusionPool, petById } from '../data/pets.js';
 import { getPetCodexEntries } from '../systems/pets.js';
 
 test('all six limited-event pets appear in the codex with the approved tier and income', () => {
@@ -34,4 +34,11 @@ test('limited-event pets become discovered from saved ownership or discovery rec
   const target = EVENT_PETS[0];
   const entries = getPetCodexEntries(PETS, [target.id]);
   assert.equal(entries.find(item => item.id === target.id)?.discovered, true);
+});
+
+
+test('all limited-event pets resolve to the dedicated sprite-sheet asset', () => {
+  for (const pet of EVENT_PETS) {
+    assert.match(PET_IMAGE_ASSETS[pet.id], /\\/assets\\/pets\\/events\\/event-pets-sprite\\.jpg$/);
+  }
 });
