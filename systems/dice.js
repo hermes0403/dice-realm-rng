@@ -352,7 +352,8 @@ export function createDiceSystem(deps) {
         }
         if (autoCollected) {
           sold = false;
-        } else if (!autoWeatherDeposit && (currentState.autoDeleteDice || []).includes(dice.id)) {
+        } else if (!autoWeatherDeposit && !isHalloweenDice(dice)
+          && (currentState.autoDeleteDice || []).includes(dice.id)) {
           currentState.coins = (Number(currentState.coins) || 0) + 1;
           currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + 1;
           currentState.autoSold = (Number(currentState.autoSold) || 0) + 1;
