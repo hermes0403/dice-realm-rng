@@ -285,11 +285,17 @@ export function createDiceSystem(deps) {
         let sold = false;
         const autoWeatherDeposit = !!(dice.weather && currentState.autoDepositWeatherEnabled
           && (currentState.autoDepositDice || []).includes(dice.id) && getCurrentUser() && supabaseClient);
+        const selectedAutoPotions = (currentState.potions?.autoAddPotions || [])
+          .map(potionId => POTIONS.find(item => item.id === potionId))
+          .filter(Boolean);
+        const requiredPotionMaterial = selectedAutoPotions.reduce((total, potion) => {
+          const recipeItem = potion.recipe.find(([materialId]) => materialId === dice.id);
+          return total + (recipeItem ? Math.max(0, Number(recipeItem[1]) || 0) : 0);
+        }, 0);
+        const alreadyOwnedPotionMaterial = (Number(currentState.bag[dice.id]) || 0)
+          + (Number(currentState.potions?.materials?.[dice.id]) || 0);
         const autoCollected = !!(!dice.weather && currentState.potions?.autoAdd
-          && (currentState.potions.autoAddPotions || []).some(potionId => {
-            const potion = POTIONS.find(item => item.id === potionId);
-            return potion && potion.recipe.some(([materialId]) => materialId === dice.id);
-          }) && potionMaterialTotal() < 4);
+          && requiredPotionMaterial > alreadyOwnedPotionMaterial);
 
         if (autoCollected) {
           currentState.potions.materials = currentState.potions.materials || {};
