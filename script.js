@@ -141,7 +141,7 @@ function activePotion(category='luck'){const a=category==='speed'?S.potions?.act
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
-function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0))}
+function speed(){const weatherBonus=getWeather()?.type==='shark'||(getWeather()?.types||[]).includes('shark')?100:0;return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+weatherBonus)}
 function effectiveDen(d){const w=getWeather(),types=w.types||[w.type];return d&&types.includes('hell')&&Number(d.den)>=700000?Math.floor(Number(d.den)*0.95):Number(d?.den)||0}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I 專屬固定機率。加入天氣限定骰子後，會從原本大於 10% 的項目分配機率，總和仍為 100%。
