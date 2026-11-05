@@ -53,8 +53,9 @@ done_at:
 
 ### 怎麼驗證的
 
-- 回讀 work/chazi 三個修改檔，確認依配方數量判斷、移除 UI 及雲端載入 4 顆上限，合成按鈕仍依配方材料持有量判斷。
-- 已逐一比對 main 與 work/chazi 的相關程式區塊，僅移植本任務必要差異；保留 main 原有萬聖節骰子自動出售排除邏輯。
+- 已回讀整合分支三個程式檔，確認依配方需求數量收集、UI／雲端正規化不再截斷材料，且保留 main 原有萬聖節骰子自動出售排除邏輯。
+- GitHub compare `main...integrate/T-0025-potion-auto-add` 顯示僅 5 個檔案變更（3 個程式檔及 2 個 Board 檔），整合分支 ahead 6、behind 0。
+- 本次使用 GitHub 遠端檔案 API 修改，未使用本機 Git 工作樹；`git diff --check` 未執行。
 - 未進行瀏覽器端實際抽骰測試。
 
 ### 沒做／做不到的
