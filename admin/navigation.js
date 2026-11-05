@@ -61,7 +61,7 @@ export function matchesAdminFold(fold, query) {
   return haystack.includes(needle);
 }
 
-function ensureFoldId(fold, index) {
+export function ensureFoldId(fold, index) {
   if (fold.id) return fold.id;
   const summary = fold.querySelector('summary')?.textContent || '';
   const knownIds = [
