@@ -65,7 +65,7 @@ function ensureFoldId(fold, index) {
   if (fold.id) return fold.id;
   const summary = fold.querySelector('summary')?.textContent || '';
   const knownIds = [
-    [/^全體玩家發放\\s/, 'adminAllGrantFold'],
+    [/^全體玩家發放\s/, 'adminAllGrantFold'],
     [/^全體玩家發放寵物/, 'adminAllPetGrantFold'],
     [/^指定玩家發放/, 'adminSingleGrantFold'],
     [/^玩家停權／解封/, 'adminPlayerBanFold'],
@@ -79,7 +79,7 @@ function ensureFoldId(fold, index) {
     fold.id = known[1];
     return fold.id;
   }
-  const slug = summary.replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
+  const slug = summary.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
   fold.id = `adminNavigationItem-${index}-${slug}`;
   return fold.id;
 }
