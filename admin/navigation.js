@@ -63,6 +63,21 @@ export function matchesAdminFold(fold, query) {
 function ensureFoldId(fold, index) {
   if (fold.id) return fold.id;
   const summary = fold.querySelector('summary')?.textContent || '';
+  const knownIds = [
+    [/^全體玩家發放\\s/, 'adminAllGrantFold'],
+    [/^全體玩家發放寵物/, 'adminAllPetGrantFold'],
+    [/^指定玩家發放/, 'adminSingleGrantFold'],
+    [/^玩家停權／解封/, 'adminPlayerBanFold'],
+    [/^刪除玩家帳號/, 'adminDeletePlayerFold'],
+    [/^玩家在線狀況/, 'adminPlayersFold'],
+    [/^反作弊／客戶端完整性/, 'adminClientAuditFold'],
+    [/^最近合成紀錄/, 'adminCraftLogsFold']
+  ];
+  const known = knownIds.find(([pattern]) => pattern.test(summary));
+  if (known) {
+    fold.id = known[1];
+    return fold.id;
+  }
   const slug = summary.replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
   fold.id = `adminNavigationItem-${index}-${slug}`;
   return fold.id;
