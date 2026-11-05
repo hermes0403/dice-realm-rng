@@ -1,42 +1,22 @@
 const ADMIN_CATEGORIES = [
-  { id: 'all', label: '全部' },
-  { id: 'players', label: '玩家管理' },
-  { id: 'economy', label: '經濟與獎勵' },
-  { id: 'pets', label: '寵物管理' },
-  { id: 'weather', label: '天氣與活動' },
-  { id: 'monitoring', label: '數據監控' },
-  { id: 'security', label: '紀錄與安全' }
+  { id: 'players', label: '玩家管理', icon: '♙', description: '玩家名單、帳號狀態與新玩家' },
+  { id: 'rewards', label: '獎勵發放', icon: '✦', description: '全體／指定玩家獎勵與發放紀錄' },
+  { id: 'pets', label: '寵物管理', icon: '◇', description: '寵物庫存、融合設定與紀錄' },
+  { id: 'weather', label: '天氣與公告', icon: '☄', description: '全服訊息、投票與天氣控制' },
+  { id: 'economy', label: '收益與倍率', icon: '↗', description: '玩家收益、運氣／速度與金錢倍率' },
+  { id: 'stats', label: '玩家統計', icon: '▥', description: '成就統計與近 24 小時造訪資料' },
+  { id: 'records', label: '紀錄與安全', icon: '⌑', description: '稀有擲骰、操作紀錄與安全稽核' },
+  { id: 'all', label: '全部功能', icon: '▦', description: '顯示所有分類' }
 ];
-
-const CATEGORY_TITLES = {
-  players: '玩家管理',
-  economy: '經濟與獎勵',
-  pets: '寵物管理',
-  weather: '天氣與活動',
-  monitoring: '數據監控',
-  security: '紀錄與安全'
-};
-
+const CATEGORY_TITLES = Object.fromEntries(ADMIN_CATEGORIES.filter(item => item.id !== 'all').map(item => [item.id, item.label]));
 const FOLD_CATEGORIES = {
-  adminIncomeMonitorFold: 'economy',
-  adminBroadcastFold: 'weather',
-  adminGrantHistoryFold: 'economy',
-  adminPetFusionLogsFold: 'pets',
-  adminPetInventoryCountsFold: 'pets',
-  adminPetOddsManagementFold: 'pets',
-  adminNewPlayersFold: 'players',
-  adminAchievementCountsFold: 'monitoring',
-  adminOnlineCurveFold: 'monitoring',
-  adminPotionLogsFold: 'security',
-  adminDeletedAccountsFold: 'security',
-  adminRareRollFold: 'security',
-  adminSuspiciousRollFold: 'security',
-  adminClientAuditFold: 'security',
-  adminGlobalBoostFold: 'economy',
-  adminCoinBoostFold: 'economy',
-  adminWeatherControlFold: 'weather',
-  adminPlayerWeatherFold: 'weather',
-  adminWeatherHistoryFold: 'security'
+  adminIncomeMonitorFold: 'economy', adminBroadcastFold: 'weather', adminGrantHistoryFold: 'rewards',
+  adminPetFusionLogsFold: 'pets', adminPetInventoryCountsFold: 'pets', adminPetOddsManagementFold: 'pets',
+  adminNewPlayersFold: 'players', adminAchievementCountsFold: 'stats', adminOnlineCurveFold: 'stats',
+  adminPotionLogsFold: 'records', adminDeletedAccountsFold: 'records', adminRareRollFold: 'records',
+  adminSuspiciousRollFold: 'records', adminClientAuditFold: 'records', adminGlobalBoostFold: 'economy',
+  adminCoinBoostFold: 'economy', adminWeatherControlFold: 'weather', adminPlayerWeatherFold: 'weather',
+  adminWeatherHistoryFold: 'weather'
 };
 
 export function classifyAdminFold(fold) {
@@ -44,172 +24,125 @@ export function classifyAdminFold(fold) {
   if (FOLD_CATEGORIES[id]) return FOLD_CATEGORIES[id];
   const title = (fold?.querySelector('summary')?.textContent || fold?.textContent || '').toLowerCase();
   if (/玩家停權|解除停權|刪除玩家帳號|玩家在線狀況|新加入的玩家/.test(title)) return 'players';
+  if (/全體玩家發放|指定玩家發放/.test(title)) return 'rewards';
   if (/寵物/.test(title) && /持有數量|合成機率|合成紀錄|發放寵物/.test(title)) return 'pets';
-  if (/全體玩家發放|指定玩家發放|發放紀錄|收益監控|運氣／速度加成|金錢收益倍率/.test(title)) return 'economy';
-  if (/天氣|訊息／全服投票|活動/.test(title)) return 'weather';
-  if (/成就|造訪數|完整性|在線/.test(title)) return 'monitoring';
-  return 'security';
+  if (/全服天氣|指定玩家天氣|天氣紀錄|訊息／全服投票/.test(title)) return 'weather';
+  if (/收益監控|運氣／速度加成|金錢收益倍率/.test(title)) return 'economy';
+  if (/成就|造訪數/.test(title)) return 'stats';
+  return 'records';
 }
-
 export function matchesAdminFold(fold, query) {
   const needle = String(query || '').trim().toLocaleLowerCase();
   if (!needle) return true;
-  const haystack = [
-    fold?.querySelector('summary')?.textContent || '',
-    fold?.textContent || ''
-  ].join(' ').toLocaleLowerCase();
-  return haystack.includes(needle);
+  return [fold?.querySelector('summary')?.textContent || '', fold?.textContent || ''].join(' ').toLocaleLowerCase().includes(needle);
 }
-
 export function ensureFoldId(fold, index) {
   if (fold.id) return fold.id;
   const summary = fold.querySelector('summary')?.textContent || '';
   const knownIds = [
-    [/^全體玩家發放\s/, 'adminAllGrantFold'],
-    [/^全體玩家發放寵物/, 'adminAllPetGrantFold'],
-    [/^指定玩家發放/, 'adminSingleGrantFold'],
-    [/^玩家停權／解封/, 'adminPlayerBanFold'],
-    [/^刪除玩家帳號/, 'adminDeletePlayerFold'],
-    [/^玩家在線狀況/, 'adminPlayersFold'],
-    [/^反作弊／客戶端完整性/, 'adminClientAuditFold'],
-    [/^最近合成紀錄/, 'adminCraftLogsFold']
+    [/^全體玩家發放\s/, 'adminAllGrantFold'], [/^全體玩家發放寵物/, 'adminAllPetGrantFold'],
+    [/^指定玩家發放/, 'adminSingleGrantFold'], [/^玩家停權／解封/, 'adminPlayerBanFold'],
+    [/^刪除玩家帳號/, 'adminDeletePlayerFold'], [/^玩家在線狀況/, 'adminPlayersFold'],
+    [/^反作弊／客戶端完整性/, 'adminClientAuditFold'], [/^最近合成紀錄/, 'adminCraftLogsFold']
   ];
   const known = knownIds.find(([pattern]) => pattern.test(summary));
-  if (known) {
-    fold.id = known[1];
-    return fold.id;
-  }
+  if (known) { fold.id = known[1]; return fold.id; }
   const slug = summary.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
   fold.id = `adminNavigationItem-${index}-${slug}`;
   return fold.id;
 }
-
 export function setupAdminNavigation(documentRef = document) {
   const page = documentRef?.getElementById('page-admin');
   if (!page || page.dataset.adminNavigationReady === 'true') return;
   const notice = page.querySelector(':scope > .notice');
   if (!notice) return;
-
   const folds = [...page.querySelectorAll(':scope > details.admin-fold')];
   if (!folds.length) return;
 
   const shell = documentRef.createElement('div');
   shell.className = 'admin-navigation';
   shell.innerHTML = `
-    <div class="admin-quick-actions" aria-label="常用管理操作">
-      <span class="admin-quick-label">常用操作</span>
-      <button type="button" data-admin-open="adminCoinBoostFold">金錢倍率</button>
-      <button type="button" data-admin-open="adminAllGrantFold">發放獎勵</button>
-      <button type="button" data-admin-open="adminWeatherControlFold">全服天氣</button>
-      <button type="button" data-admin-open="adminBroadcastFold">全服訊息</button>
-    </div>
-    <div class="admin-tools">
+    <div class="admin-navigation-head">
+      <div class="admin-navigation-heading">
+        <span class="admin-navigation-eyebrow">DICE REALM · CONTROL CENTER</span>
+        <strong>管理控制台</strong>
+        <span>選擇分類，右側只顯示該類管理功能</span>
+      </div>
       <label class="admin-search">
-        <span class="sr-only">搜尋管理員功能</span>
-        <span aria-hidden="true">⌕</span>
-        <input type="search" data-admin-search placeholder="搜尋功能或關鍵字…" autocomplete="off">
+        <span aria-hidden="true">⌕</span><span class="sr-only">搜尋管理員功能</span>
+        <input type="search" data-admin-search placeholder="搜尋功能名稱或關鍵字…" autocomplete="off">
         <button type="button" data-admin-clear aria-label="清除搜尋" hidden>清除</button>
       </label>
-      <div class="admin-category-tabs" role="group" aria-label="管理功能分類"></div>
-      <p class="admin-result-count" data-admin-count aria-live="polite"></p>
     </div>
-    <div class="admin-category-groups"></div>
-  `;
-
-  const tabs = shell.querySelector('.admin-category-tabs');
+    <div class="admin-navigation-layout">
+      <nav class="admin-category-nav" aria-label="管理功能分類"></nav>
+      <div class="admin-category-content">
+        <div class="admin-navigation-status"><span data-admin-active-title>玩家管理</span><span data-admin-count aria-live="polite"></span></div>
+        <div class="admin-category-groups"></div>
+        <div class="admin-empty-state" data-admin-empty hidden>找不到符合的管理功能，請更換關鍵字。</div>
+      </div>
+    </div>`;
+  const nav = shell.querySelector('.admin-category-nav');
+  const navButtons = new Map();
   for (const category of ADMIN_CATEGORIES) {
     const button = documentRef.createElement('button');
-    button.type = 'button';
-    button.className = 'admin-category-tab';
-    button.dataset.adminCategory = category.id;
-    button.textContent = category.label;
-    button.setAttribute('aria-pressed', category.id === 'all' ? 'true' : 'false');
-    tabs.append(button);
+    button.type = 'button'; button.className = 'admin-category-tab'; button.dataset.adminCategory = category.id;
+    button.innerHTML = `<span class="admin-category-icon" aria-hidden="true">${category.icon}</span><span class="admin-category-copy"><strong>${category.label}</strong><small>${category.description}</small></span><span class="admin-category-count" data-category-count="${category.id}">0</span>`;
+    button.setAttribute('aria-pressed', 'false'); nav.append(button); navButtons.set(category.id, button);
   }
-
   const groupsRoot = shell.querySelector('.admin-category-groups');
   const groups = new Map();
   for (const category of ADMIN_CATEGORIES.filter(item => item.id !== 'all')) {
-    const group = documentRef.createElement('section');
-    group.className = 'admin-category-group';
-    group.dataset.adminGroup = category.id;
-    const heading = documentRef.createElement('h3');
-    heading.className = 'admin-category-title';
-    heading.textContent = CATEGORY_TITLES[category.id];
-    group.append(heading);
-    groupsRoot.append(group);
-    groups.set(category.id, group);
+    const group = documentRef.createElement('section'); group.className = 'admin-category-group'; group.dataset.adminGroup = category.id;
+    const heading = documentRef.createElement('div'); heading.className = 'admin-category-title';
+    heading.innerHTML = `<span>${category.icon}</span><div><strong>${CATEGORY_TITLES[category.id]}</strong><small>${category.description}</small></div>`;
+    group.append(heading); groupsRoot.append(group); groups.set(category.id, group);
   }
-
-  folds.forEach((fold, index) => {
-    ensureFoldId(fold, index);
-    fold.dataset.adminCategory = classifyAdminFold(fold);
-    groups.get(fold.dataset.adminCategory).append(fold);
-  });
-
+  folds.forEach((fold, index) => { ensureFoldId(fold, index); fold.dataset.adminCategory = classifyAdminFold(fold); groups.get(fold.dataset.adminCategory).append(fold); });
   const activityButton = page.querySelector(':scope > #adminActivityButton');
-  if (activityButton) {
-    activityButton.classList.add('admin-activity-entry');
-    groups.get('economy').prepend(activityButton);
-  }
-
+  if (activityButton) { activityButton.classList.add('admin-activity-entry'); groups.get('economy').prepend(activityButton); }
   page.querySelectorAll(':scope > .admin-category-title').forEach(node => node.remove());
   page.insertBefore(shell, notice.nextSibling);
-  const search = shell.querySelector('[data-admin-search]');
-  const clear = shell.querySelector('[data-admin-clear]');
-  const count = shell.querySelector('[data-admin-count]');
-  let activeCategory = 'all';
 
+  const search = shell.querySelector('[data-admin-search]'), clear = shell.querySelector('[data-admin-clear]');
+  const count = shell.querySelector('[data-admin-count]'), activeTitle = shell.querySelector('[data-admin-active-title]');
+  const empty = shell.querySelector('[data-admin-empty]');
+  let activeCategory = 'players';
   const applyFilters = () => {
-    const query = search.value.trim();
-    let visible = 0;
+    const query = search.value.trim(); let visible = 0;
     for (const [categoryId, group] of groups) {
       let groupVisible = 0;
       for (const fold of group.querySelectorAll('.admin-fold')) {
-        const match = (activeCategory === 'all' || activeCategory === categoryId) && matchesAdminFold(fold, query);
-        fold.hidden = !match;
-        if (match) {
-          visible += 1;
-          groupVisible += 1;
-        }
+        const match = matchesAdminFold(fold, query);
+        const show = match && (activeCategory === 'all' || activeCategory === categoryId);
+        fold.hidden = !show; if (show) { visible++; groupVisible++; }
       }
-      const hasActivity = categoryId === 'economy' && activityButton && !query && (activeCategory === 'all' || activeCategory === 'economy');
+      const activityMatch = activityButton && (!query || activityButton.textContent.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+      const hasActivity = categoryId === 'economy' && activityMatch && (activeCategory === 'all' || activeCategory === 'economy');
       if (activityButton && categoryId === 'economy') activityButton.hidden = !hasActivity;
-      group.hidden = groupVisible === 0 && !hasActivity;
+      group.hidden = activeCategory !== 'all' && activeCategory !== categoryId;
+      if (activeCategory === 'all' && groupVisible === 0 && !hasActivity) group.hidden = true;
+    }
+    for (const category of ADMIN_CATEGORIES) {
+      const button = navButtons.get(category.id);
+      button.setAttribute('aria-pressed', String(category.id === activeCategory));
+      const amount = category.id === 'all'
+        ? folds.filter(fold => matchesAdminFold(fold, query)).length
+        : [...groups.get(category.id).querySelectorAll('.admin-fold')].filter(fold => matchesAdminFold(fold, query)).length;
+      button.querySelector('[data-category-count]').textContent = String(amount);
     }
     clear.hidden = !query;
-    count.textContent = query || activeCategory !== 'all' ? `顯示 ${visible} 項管理功能` : `共 ${visible} 項管理功能`;
+    activeTitle.textContent = activeCategory === 'all' ? '全部功能' : CATEGORY_TITLES[activeCategory];
+    count.textContent = query ? `符合 ${visible} 項` : `${visible} 項功能`;
+    empty.hidden = visible > 0 || Boolean(activityButton && !activityButton.hidden);
   };
-
-  tabs.addEventListener('click', event => {
+  nav.addEventListener('click', event => {
     const button = event.target.closest('[data-admin-category]');
     if (!button) return;
-    activeCategory = button.dataset.adminCategory;
-    tabs.querySelectorAll('[data-admin-category]').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
-    applyFilters();
+    activeCategory = button.dataset.adminCategory; applyFilters();
   });
   search.addEventListener('input', applyFilters);
-  clear.addEventListener('click', () => {
-    search.value = '';
-    search.focus();
-    applyFilters();
-  });
-  shell.querySelectorAll('[data-admin-open]').forEach(button => {
-    button.addEventListener('click', () => {
-      const fold = documentRef.getElementById(button.dataset.adminOpen);
-      if (!fold) return;
-      activeCategory = fold.dataset.adminCategory || 'all';
-      tabs.querySelectorAll('[data-admin-category]').forEach(tab => tab.setAttribute('aria-pressed', String(tab.dataset.adminCategory === activeCategory)));
-      search.value = '';
-      applyFilters();
-      fold.open = true;
-      fold.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      fold.querySelector('summary')?.focus({ preventScroll: true });
-    });
-  });
-
-  page.dataset.adminNavigationReady = 'true';
-  applyFilters();
+  clear.addEventListener('click', () => { search.value = ''; applyFilters(); search.focus({ preventScroll: true }); });
+  page.dataset.adminNavigationReady = 'true'; applyFilters();
 }
-
 if (typeof document !== 'undefined') setupAdminNavigation(document);
