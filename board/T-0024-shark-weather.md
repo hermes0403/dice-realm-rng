@@ -38,9 +38,9 @@ done_at:
 ## 紀錄
 
 - 2026-11-06 06:53 [叉子] 接手棒子提出的鯊鯊天氣需求，確認沿用既有全服管理員天氣 RPC 與 1–1440 分鐘時長控制。
-- 2026-11-06 07:10 [叉子] 已修改 config.js、systems/weather.js、systems/dice.js、index.html、admin/ui-bindings.js、script.js；全服天氣狀態加入 shark，速度計算固定額外增加 100 個百分點。修改提交於 work/chazi。
-- 2026-11-06 07:10 [叉子] 已更新正式 Supabase realm_weather_state 天氣類型 CHECK constraint，並更新 admin_set_realm_weather_pair RPC 的允許清單；SQL 查詢確認 constraint 包含 shark，RPC 定義包含 shark。
-- 2026-11-06 07:10 [叉子] 尚未部署 GitHub Pages。main 與 work/chazi 分歧，禁止直接整支合併；等待棒子決定後續整合與驗收。
+- 2026-11-06 06:53 [叉子] 已修改 config.js、systems/weather.js、systems/dice.js、index.html、admin/ui-bindings.js、script.js；全服天氣狀態加入 shark，速度計算固定額外增加 100 個百分點。修改提交於 work/chazi。
+- 2026-11-06 06:53 [叉子] 已更新正式 Supabase realm_weather_state 天氣類型 CHECK constraint，並更新 admin_set_realm_weather_pair RPC 的允許清單；SQL 查詢確認 constraint 包含 shark，RPC 定義包含 shark。
+- 2026-11-06 06:53 [叉子] 尚未部署 GitHub Pages。main 與 work/chazi 分歧，禁止直接整支合併；等待棒子決定後續整合與驗收。
 
 ## 完工回報
 
