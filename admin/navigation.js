@@ -43,8 +43,8 @@ export function classifyAdminFold(fold) {
   if (FOLD_CATEGORIES[id]) return FOLD_CATEGORIES[id];
   const title = (fold?.querySelector('summary')?.textContent || fold?.textContent || '').toLowerCase();
   if (/玩家停權|解除停權|刪除玩家帳號|玩家在線狀況|新加入的玩家/.test(title)) return 'players';
-  if (/全體玩家發放|指定玩家發放|發放紀錄|收益監控|運氣／速度加成|金錢收益倍率/.test(title)) return 'economy';
   if (/寵物/.test(title) && /持有數量|合成機率|合成紀錄|發放寵物/.test(title)) return 'pets';
+  if (/全體玩家發放|指定玩家發放|發放紀錄|收益監控|運氣／速度加成|金錢收益倍率/.test(title)) return 'economy';
   if (/天氣|訊息／全服投票|活動/.test(title)) return 'weather';
   if (/成就|造訪數|完整性|在線/.test(title)) return 'monitoring';
   return 'security';
@@ -153,7 +153,7 @@ export function setupAdminNavigation(documentRef = document) {
   }
 
   page.querySelectorAll(':scope > .admin-category-title').forEach(node => node.remove());
-  page.insertBefore(shell, folds[0]);
+  page.insertBefore(shell, notice.nextSibling);
   const search = shell.querySelector('[data-admin-search]');
   const clear = shell.querySelector('[data-admin-clear]');
   const count = shell.querySelector('[data-admin-count]');
