@@ -31,6 +31,7 @@ const FOLD_CATEGORIES = {
   adminDeletedAccountsFold: 'security',
   adminRareRollFold: 'security',
   adminSuspiciousRollFold: 'security',
+  adminClientAuditFold: 'security',
   adminGlobalBoostFold: 'economy',
   adminCoinBoostFold: 'economy',
   adminWeatherControlFold: 'weather',
