@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { classifyAdminFold, matchesAdminFold } from '../admin/navigation.js';
+import { classifyAdminFold, ensureFoldId, matchesAdminFold } from '../admin/navigation.js';
 
 function fold(id, summary, content = summary) {
   return {
@@ -69,4 +69,24 @@ test('管理員面板載入導覽模組，且既有事件 ID 均保留', () => {
     'adminGrantBtn', 'adminSingleGrantBtn', 'adminDeletePlayerBtn'
   ];
   for (const id of ids) assert.ok(html.includes(`id="${id}"`), `missing existing id: ${id}`);
+});
+
+test('快速操作目標有穩定 ID，避免搬動區塊後失效', () => {
+  const grant = fold('', '全體玩家發放 發放遊戲幣或藥水');
+  const petGrant = fold('', '全體玩家發放寵物');
+  assert.equal(ensureFoldId(grant, 0), 'adminAllGrantFold');
+  assert.equal(ensureFoldId(petGrant, 1), 'adminAllPetGrantFold');
+});
+
+test('管理員頁面的 26 個既有功能區塊全部可分類', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const section = html.match(/<section class="page" id="page-admin"[\\s\\S]*?<\\/section>/)?.[0] || '';
+  const entries = [...section.matchAll(/<details class="admin-fold"([^>]*)>\\s*<summary>([\\s\\S]*?)<\\/summary>/g)];
+  assert.equal(entries.length, 26);
+  const categories = new Set(['players', 'economy', 'pets', 'weather', 'monitoring', 'security']);
+  for (const [, attributes, rawSummary] of entries) {
+    const id = attributes.match(/id="([^"]+)"/)?.[1] || '';
+    const summary = rawSummary.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+    assert.ok(categories.has(classifyAdminFold(fold(id, summary))), summary);
+  }
 });
