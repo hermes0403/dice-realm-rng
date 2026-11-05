@@ -150,6 +150,9 @@ export function createCloudSaveService(dependencies) {
         throw new Error(syncResult?.message || 'Cloud save version check failed');
       }
       cloudSaveVersion = syncResult.updated_at || null;
+      if (Number.isFinite(Number(syncResult.total_rolls))) {
+        S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
+      }
       S.petIncomePending = 0;
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
