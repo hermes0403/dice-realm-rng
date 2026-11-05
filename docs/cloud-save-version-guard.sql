@@ -260,3 +260,36 @@ $$;
 
 revoke all on function public.sync_player_game_save(timestamptz, jsonb, jsonb) from public, anon, authenticated;
 grant execute on function public.sync_player_game_save(timestamptz, jsonb, jsonb) to authenticated;
+
+
+-- Keep profile projections synchronized with the canonical game_saves counters.
+create or replace function public.prevent_profile_projection_mismatch()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $$
+declare
+  v_save jsonb;
+  v_save_rolls bigint;
+  v_save_coins bigint;
+begin
+  select save_data into v_save
+    from public.game_saves
+   where user_id = new.user_id;
+
+  if found then
+    v_save_rolls := coalesce(nullif(v_save->>'rolls','')::bigint,0);
+    v_save_coins := coalesce(nullif(v_save->>'coins','')::bigint,0);
+    if new.total_rolls <> v_save_rolls or new.coins <> v_save_coins then
+      raise exception 'Stale profile projection rejected: profile counters must match the current cloud save'
+        using errcode = '40001';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_prevent_profile_projection_mismatch on public.player_profiles;
+create trigger trg_prevent_profile_projection_mismatch
+before insert or update of total_rolls, coins on public.player_profiles
+for each row execute function public.prevent_profile_projection_mismatch();
