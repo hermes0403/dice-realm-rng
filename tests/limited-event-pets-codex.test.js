@@ -39,6 +39,6 @@ test('limited-event pets become discovered from saved ownership or discovery rec
 
 test('all limited-event pets resolve to the dedicated sprite-sheet asset', () => {
   for (const pet of EVENT_PETS) {
-    assert.match(PET_IMAGE_ASSETS[pet.id], /\\/assets\\/pets\\/events\\/event-pets-sprite\\.jpg$/);
+    assert.ok(PET_IMAGE_ASSETS[pet.id].endsWith('/assets/pets/events/event-pets-sprite.jpg'));
   }
 });
