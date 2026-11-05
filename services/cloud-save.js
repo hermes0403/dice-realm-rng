@@ -13,6 +13,8 @@ export function createCloudSaveService(dependencies) {
 
   let cloudSyncTimer = null;
   let cloudSyncBusy = false;
+  // Version captured when this client loads the cloud save; stale tabs cannot overwrite newer saves.
+  let cloudSaveVersion = null;
 
   function userSaveKey(userId = getCurrentUser()?.id) {
     return userId ? KEY + '_user_' + String(userId) : null;
@@ -124,22 +126,30 @@ export function createCloudSaveService(dependencies) {
       const S = getState();
       const payload = savePayload();
       const now = new Date().toISOString();
-      const { error } = await supabaseClient.from('game_saves')
-        .upsert({ user_id: syncingUserId, save_data: payload, updated_at: now }, { onConflict: 'user_id' });
-      if (error) throw error;
-      if (getCurrentUser()?.id !== syncingUserId) return;
-      const { error: profileError } = await supabaseClient.from('player_profiles').upsert({
-        user_id: syncingUserId,
+      const profilePayload = {
         username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
         total_rolls: Number(S.rolls) || 0,
         unique_dice: totalUnique(),
         rarest_den: Number(S.best?.den) || 0,
         coins: Number(S.coins) || 0,
-        ...achievementStats(),
-        last_seen: now,
-        updated_at: now
-      }, { onConflict: 'user_id' });
-      if (profileError) throw profileError;
+        ...achievementStats()
+      };
+      const { data: syncResult, error } = await supabaseClient.rpc('sync_player_game_save', {
+        p_expected_updated_at: cloudSaveVersion,
+        p_save_data: payload,
+        p_profile: profilePayload
+      });
+      if (error) throw error;
+      if (!syncResult?.ok) {
+        if (syncResult?.conflict) {
+          document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在載入最新存檔…';
+          await loadCloudSave({ syncAfterLoad: false });
+          toast('偵測到其他分頁或裝置已更新存檔，已載入最新雲端資料；請確認剛才的操作是否需要重做。');
+          return;
+        }
+        throw new Error(syncResult?.message || 'Cloud save version check failed');
+      }
+      cloudSaveVersion = syncResult.updated_at || null;
       S.petIncomePending = 0;
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
@@ -189,7 +199,7 @@ export function createCloudSaveService(dependencies) {
     while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
   }
 
-  async function loadCloudSave() {
+  async function loadCloudSave({ syncAfterLoad = true } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
     try {
@@ -199,8 +209,9 @@ export function createCloudSaveService(dependencies) {
         catch { return null; }
       })();
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
-      const { data, error } = await supabaseClient.from('game_saves').select('save_data').eq('user_id', user.id).maybeSingle();
+      const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
+      cloudSaveVersion = data?.updated_at || null;
       if (getCurrentUser()?.id !== user.id) return;
       let S;
       if (data?.save_data?.bag) {
@@ -260,10 +271,9 @@ export function createCloudSaveService(dependencies) {
         if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
         localStorage.setItem(KEY, JSON.stringify(S));
         render();
-        await syncCloudSave();
       }
-      await applyPendingGrants();
-      await syncCloudSave();
+      const grantsChanged = await applyPendingGrants();
+      if (syncAfterLoad && (!data?.save_data?.bag || grantsChanged)) await syncCloudSave();
       await refreshLeaderboards();
     } catch (e) {
       console.error(e);
