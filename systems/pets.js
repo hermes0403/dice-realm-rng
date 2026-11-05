@@ -10,7 +10,9 @@ export function getPetCodexEntries(petDefinitions = [], discoveredIds = []) {
   return [...definitions, ...EVENT_PETS.filter(pet => !knownIds.has(pet.id))]
     .filter(pet => pet && pet.unobtainable !== true)
     .sort((a, b) => {
-      const rarityDiff = rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
+      const rankA = rarityOrder.indexOf(a.rarity);
+      const rankB = rarityOrder.indexOf(b.rarity);
+      const rarityDiff = (rankA < 0 ? rarityOrder.length : rankA) - (rankB < 0 ? rarityOrder.length : rankB);
       if (rarityDiff !== 0) return rarityDiff;
       const incomeA = Number(PET_BASE_INCOME[a.id]) || 0;
       const incomeB = Number(PET_BASE_INCOME[b.id]) || 0;
