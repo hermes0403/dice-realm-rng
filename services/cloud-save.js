@@ -143,7 +143,7 @@ export function createCloudSaveService(dependencies) {
       if (!syncResult?.ok) {
         if (syncResult?.conflict) {
           document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在載入最新存檔…';
-          await loadCloudSave({ syncAfterLoad: false });
+          await loadCloudSave();
           toast('偵測到其他分頁或裝置已更新存檔，已載入最新雲端資料；請確認剛才的操作是否需要重做。');
           return;
         }
