@@ -202,7 +202,7 @@ export function createInventoryUI({
       const amount = Math.max(0, Number(input.dataset.sellAmount) || 1);
       counts.set(input.dataset.sellSelect, (counts.get(input.dataset.sellSelect) || 0) + amount);
     }
-    const total = checked.length;
+    const total = [...counts.values()].reduce((sum, amount) => sum + amount, 0);
     const summary = [...counts.entries()].map(([id, count]) => {
       const dice = byId(id);
       return dice ? `${dice.name} ×${count}` : null;
