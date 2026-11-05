@@ -179,7 +179,7 @@ export function createPetSystem({
       event_shark_emperor: '100% 100%'
     })[pet.id];
     if (!src) return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};font-size:${small ? '42px' : '64px'};filter:drop-shadow(${special})">${pet.icon || '◈'}</span>`;
-    if (eventPosition) return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:block;width:100%;height:${small ? '82px' : '120px'};min-height:${small ? '72px' : '100px'};overflow:hidden;filter:drop-shadow(${special});user-select:none;background-image:url('${src}');background-repeat:no-repeat;background-size:300% auto;background-position:${eventPosition}"></span>`;
+    if (eventPosition) return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:block;width:100%;height:${small ? '82px' : '120px'};min-height:${small ? '72px' : '100px'};overflow:hidden;filter:drop-shadow(${special});user-select:none;background-image:url('${src}');background-repeat:no-repeat;background-size:300% 200%;background-position:${eventPosition}"></span>`;
     return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};overflow:hidden;filter:drop-shadow(${special});user-select:none"><img src="${src}" alt="${pet.name}" loading="lazy" style="display:block;width:100%;height:${small ? '82px' : '120px'};object-fit:contain;border-radius:8px;background:transparent"></span>`;
   }
 
