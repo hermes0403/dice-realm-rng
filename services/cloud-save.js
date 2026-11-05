@@ -233,15 +233,6 @@ export function createCloudSaveService(dependencies) {
         S.potions.materials = S.potions.materials || {};
         S.potions.autoAddPotions = Array.isArray(S.potions.autoAddPotions) ? S.potions.autoAddPotions.slice(0, 2) : [];
         S.halloweenUnlocked = S.halloweenUnlocked || { d33: false, d34: false };
-        {
-          let left = 4;
-          for (const id of Object.keys(S.potions.materials)) {
-            const n = Math.max(0, Number(S.potions.materials[id]) || 0), keep = Math.min(n, left);
-            if (keep) S.potions.materials[id] = keep;
-            else delete S.potions.materials[id];
-            left -= keep;
-          }
-        }
         S.potions.autoAddPotions = Array.isArray(S.potions.autoAddPotions) ? S.potions.autoAddPotions.slice(0, 2) : [];
         S.bag = S.bag || {};
         S.first = S.first || {};
