@@ -1,7 +1,7 @@
 ---
 id: T-0036
 title: 依稀有度與每秒收益排序活動寵物圖鑑
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -38,7 +38,8 @@ done_at:
 ## 紀錄
 
 - 2026-11-05 18:50 [叉子] 接手 T-0036；排序程式與專項測試已在任務分支，從 main 的 T-0035 活動寵物資料延續。因 work/chazi 與 main 分歧且尚未包含 T-0035 活動寵物資料，本次不將任務分支直接合入 work/chazi，也不修改 main。
-- 2026-11-05 18:50 [叉子] 以隔離測試夾具執行排序及活動寵物圖鑑測試，5 項通過；尚未在完整 repository 環境執行原始 Node 測試，亦尚未執行正式 git diff --check。
+- 2026-11-05 18:50 [叉子] 以隔離測試夾具執行排序及活動寵物圖鑑測試，5 項通過；完整 repository CI 後續已補跑。
+- 2026-11-05 18:55 [叉子] T-0036 PR #21 已合併至 main。GitHub Actions 的 pet-removal-and-admin-counts 工作成功執行 `node --test tests/pet-removal-admin-counts.test.js tests/limited-event-pets-codex.test.js`，並且 `git diff --check origin/main...HEAD` 成功；另外三個既有回歸工作亦全部成功。GitHub Pages 部署工作仍在執行，待確認部署完成。
 
 ## 完工回報
 
@@ -51,7 +52,7 @@ done_at:
 
 - 隔離 Node 測試夾具：`node --test tests/limited-event-pets-codex.test.js`，5/5 通過。此為隔離夾具結果，並非完整 repository 執行結果。
 - 已檢查兩個任務 commit 的新增 diff，未發現新增行尾空白。
-- 完整 repository Node 測試及正式 `git diff --check` 尚未執行。
+- 完整 repository 的活動寵物圖鑑專項 Node 測試及 CI `git diff --check` 均已成功；GitHub Pages 部署完成狀態待確認。
 
 ### 沒做／做不到的
 
