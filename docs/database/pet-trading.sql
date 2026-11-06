@@ -134,7 +134,7 @@ begin
   if v_user_id is null then
     raise exception 'authentication_required' using errcode = '28000';
   end if;
-  if p_action not in ('accept','reject','cancel') then
+  if p_action is null or p_action not in ('accept','reject','cancel') then
     raise exception 'invalid_action' using errcode = '22023';
   end if;
 
