@@ -37,8 +37,11 @@
     <p class="mini" id="petTradeSearchHint" role="status">輸入至少 2 個字的玩家名稱，或完整玩家 UUID。</p>
     <div id="petTradeSearchResults" class="pet-trade-search-results" aria-live="polite"></div>
     <div id="petTradeSelectedTarget" class="pet-trade-selected-target" hidden></div>
-    <button class="primary" type="button" id="petTradeInviteBtn" disabled>發送交易邀請（建置中）</button>
+    <button class="primary" type="button" id="petTradeInviteBtn" disabled>發送交易邀請</button>
   </div>
+  <div class="pet-trade-divider"><span>INVITATIONS</span></div>
+  <div class="pet-trade-invitations-head"><span>交易邀請</span><button type="button" class="quiet" id="petTradeRefreshInvites">重新整理</button></div>
+  <div id="petTradeInvitations" class="pet-trade-invitations" aria-live="polite">登入後顯示你的交易邀請。</div>
   <div class="pet-trade-divider"><span>TRADE ROOM PREVIEW</span></div>
   <div class="pet-trade-room">
     <div class="pet-trade-room-head"><span>交易房間</span><span class="pet-trade-room-code">等待建立</span></div>
@@ -54,7 +57,7 @@
     <div class="pet-trade-confirm-row"><button type="button" disabled>確認交易</button><span>雙方確認後才會交換</span></div>
   </div>
   <div class="pet-trade-lock-note"><span>◇</span> 寵物將由伺服器驗證所有權，交易完成前不會移動。</div>
-  <div class="pet-trade-build-note">交易介面預覽 · 安全交易服務尚在建置</div>
+  <div class="pet-trade-build-note">邀請服務已啟用 · 寵物交換房間仍在建置</div>
 </aside>
 </div>
 <div class="card" style="margin-top:12px"><div class="section-head"><h3 style="margin:0">我的寵物</h3><span class="pill" id="petInventoryCount">0 隻</span></div><p class="mini" style="margin:0 0 10px">可選擇裝備最多 3 隻寵物；裝備狀態會保存至帳號。</p><div class="pet-income-panel"><div><span class="mini">帳號在線時裝備寵物每秒收益</span><strong id="petIncomeRate">+0$/秒</strong></div><span class="mini" id="petIncomeEquipped">目前裝備 0/3 隻</span></div><div class="pet-sell-controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px"><button type="button" class="danger" id="petSellBtn">出售寵物</button><button type="button" class="quiet" id="petAutoEquipBestBtn">自動裝備最佳</button><label class="mini" for="petSortMode" style="display:flex;align-items:center;gap:6px">排序<select id="petSortMode" class="field" style="width:auto;min-width:150px"><option value="rarity-desc">稀有度高到低</option><option value="rarity-asc">稀有度低到高</option><option value="income-asc">賺錢度低到高</option></select></label><button type="button" class="quiet" id="petAutoSellBtn">自動出售</button></div><div id="petInventoryGrid" class="pet-catalog-grid"><div class="empty">尚未擁有寵物，先使用兩顆骰子合成。</div></div></div></section>
