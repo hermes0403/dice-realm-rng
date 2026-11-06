@@ -159,6 +159,14 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         .limit(20);
       if (error) throw error;
       const rows = Array.isArray(data) ? data : [];
+      const acceptedIds = rows.filter(row => row.status === 'accepted').map(row => row.id);
+      let sessionsByInvitation = new Map();
+      if (acceptedIds.length) {
+        const sessions = await supabaseClient.from('pet_trade_sessions')
+          .select('id,invitation_id,status,expires_at')
+          .in('invitation_id', acceptedIds);
+        if (!sessions.error) sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
+      }
       const otherIds = [...new Set(rows.map(row => row.sender_id === user.id ? row.recipient_id : row.sender_id))];
       let names = new Map();
       if (otherIds.length) {
@@ -184,6 +192,12 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
           : '狀態：' + ({accepted:'已接受',rejected:'已拒絕',cancelled:'已取消',expired:'已逾期'}[row.status] || row.status);
         summary.append(title, meta);
         item.append(summary);
+        const session = sessionsByInvitation.get(row.id);
+        if (session?.status === 'active' && new Date(session.expires_at).getTime() > Date.now()) {
+          const roomStatus = doc.createElement('small');
+          roomStatus.textContent = '交易房間已建立 · 15 分鐘內有效 · 寵物交換尚未開放';
+          item.append(roomStatus);
+        }
         if (row.status === 'pending' && incoming) {
           item.append(makeActionButton('接受', row.id, 'accept', '已接受邀請'));
           item.append(makeActionButton('拒絕', row.id, 'reject', '已拒絕邀請'));
