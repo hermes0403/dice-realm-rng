@@ -1,6 +1,7 @@
 export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeHTML, documentRef = document, toast = () => {} }) {
   const doc = documentRef;
   let selectedPlayer = null;
+  let searchResults = [];
   let searching = false;
   let refreshing = false;
   let refreshQueued = false;
@@ -51,7 +52,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       invite.disabled = false;
       invite.textContent = '發送交易邀請';
     }
-    renderResults([row]);
+    renderResults(searchResults);
     setStatus('玩家已選擇，可以發送交易邀請。邀請有效時間為 2 分鐘。');
   }
 
@@ -71,6 +72,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
     if (searching) return;
     searching = true;
     selectedPlayer = null;
+    searchResults = [];
     const panel = doc.getElementById('petTradeSelectedTarget');
     const invite = doc.getElementById('petTradeInviteBtn');
     if (panel) panel.hidden = true;
@@ -87,6 +89,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       const { data, error } = await request;
       if (error) throw error;
       const rows = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
+      searchResults = rows;
       renderResults(rows);
       setStatus(rows.length ? '找到 ' + rows.length + ' 位玩家，選擇一位作為交易對象。' : '沒有找到符合條件的玩家。');
     } catch (error) {
@@ -248,7 +251,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         const sessions = await supabaseClient.from('pet_trade_sessions')
           .select('id,invitation_id,status,created_at,expires_at')
           .in('invitation_id', acceptedIds);
-        if (!sessions.error) sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
+        if (sessions.error) throw sessions.error;
+        sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
       }
       syncRealtimeChannels(user, [...sessionsByInvitation.values()]);
       const otherIds = [...new Set(rows.map(row => row.sender_id === user.id ? row.recipient_id : row.sender_id))];
@@ -337,6 +341,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         if (nextUserId !== observedAuthUserId) {
           observedAuthUserId = nextUserId;
           selectedPlayer = null;
+          searchResults = [];
+          renderResults([]);
           const selected = doc.getElementById('petTradeSelectedTarget');
           const inviteButton = doc.getElementById('petTradeInviteBtn');
           if (selected) {
