@@ -32,8 +32,12 @@
   <p class="muted">尋找另一位旅人，交換彼此珍藏的寵物。</p>
   <div class="pet-trade-player-picker">
     <label for="petTradeTarget">選擇交易對象</label>
-    <div class="pet-trade-search"><span>⌕</span><input id="petTradeTarget" type="text" placeholder="輸入玩家名稱或識別碼" disabled></div>
-    <button class="primary" type="button" disabled>發送交易邀請</button>
+    <div class="pet-trade-search"><span>⌕</span><input id="petTradeTarget" type="search" placeholder="輸入玩家名稱或識別碼" autocomplete="off" aria-describedby="petTradeSearchHint"></div>
+    <button class="primary" type="button" id="petTradeSearchBtn">搜尋玩家</button>
+    <p class="mini" id="petTradeSearchHint" role="status">輸入至少 2 個字的玩家名稱，或完整玩家 UUID。</p>
+    <div id="petTradeSearchResults" class="pet-trade-search-results" aria-live="polite"></div>
+    <div id="petTradeSelectedTarget" class="pet-trade-selected-target" hidden></div>
+    <button class="primary" type="button" id="petTradeInviteBtn" disabled>發送交易邀請（建置中）</button>
   </div>
   <div class="pet-trade-divider"><span>TRADE ROOM PREVIEW</span></div>
   <div class="pet-trade-room">
