@@ -71,6 +71,8 @@ done_at:
 
 - 2026-11-06 [叉子] 依棒子指示採用獨立移植方式，不合併 work/chazi。建立 task/T-0026-pet-trading，基於 main HEAD 1e7021c。將交易入口、玩家搜尋／邀請／收件匣 service 與樣式獨立移植至任務分支；未改 main、未碰 T-0012、未修改寵物資產。尚未執行本機 git diff --check、瀏覽器測試或部署；邀請 RPC 依賴先前已套用的 Supabase migration，需在正式版驗證。交易房間及寵物交換仍未完成。
 
+- 2026-11-06 [叉子] 追加安全交易房間前置：Supabase 新增 pet_trade_sessions，僅交易雙方可讀、客戶端不可寫；接受邀請時由 respond_pet_trade_invitation 同一資料庫交易建立 15 分鐘 session，拒絕／取消／逾期不建立房間。前端邀請清單會顯示已建立房間狀態，但不提供寵物資產選擇或交換。未建立 Realtime channel、未實作資產鎖／原子交換（仍依賴 T-0012）；未部署或瀏覽器驗收。
+
 ## 完工回報
 
 ### 改了什麼
