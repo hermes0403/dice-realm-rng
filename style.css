@@ -264,3 +264,48 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 @media(max-width:360px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}}
 
 .pet-mutation{margin-top:3px;color:#b9a5ff;font-size:12px;font-weight:750;overflow-wrap:anywhere;line-height:1.4}
+
+
+/* Pet trading panel — visual shell; actions remain disabled until the server transaction is ready. */
+.pet-core-layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(280px,.92fr);gap:12px;align-items:stretch;margin-top:12px}
+.pet-core-layout>.card{margin-top:0!important;min-width:0}
+.pet-trade-panel{position:relative;overflow:hidden;min-width:0;padding:18px;border:1px solid #454b7d;border-radius:17px;background:radial-gradient(ellipse at 80% 0%,#6b55b833,transparent 45%),linear-gradient(155deg,#171d36,#101525 70%);box-shadow:inset 0 1px 0 #ffffff0b,0 12px 34px #05071355}
+.pet-trade-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(130deg,transparent 35%,#9e8cff08 50%,transparent 66%)}
+.pet-trade-topline{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pet-trade-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #5c6c9a;border-radius:99px;padding:4px 8px;color:#a9b9e9;font-size:9px;letter-spacing:1px;font-weight:900}
+.pet-trade-status i{width:6px;height:6px;border-radius:50%;background:#e6b86b;box-shadow:0 0 9px #e6b86b}
+.pet-trade-emblem{width:58px;height:58px;display:grid;place-items:center;margin:18px auto 8px;border:1px solid #7774c5;border-radius:18px;background:linear-gradient(145deg,#292d59,#181c37);color:#c5bdff;font-size:34px;box-shadow:0 0 28px #7769ff30,inset 0 0 18px #ffffff0a}
+.pet-trade-panel h3{text-align:center;font-size:21px;margin:4px 0}
+.pet-trade-panel>p{text-align:center;font-size:12px;margin:0 auto 16px;max-width:270px}
+.pet-trade-player-picker{padding:12px;border:1px solid #343d60;border-radius:12px;background:#0d1324aa}
+.pet-trade-player-picker label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#cbd3f1}
+.pet-trade-search{display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid #343d5b;border-radius:9px;background:#090e1c;color:#8d9ac2}
+.pet-trade-search span{font-size:20px}
+.pet-trade-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#edf0ff;padding:9px 0;font-size:12px}
+.pet-trade-player-picker button{width:100%;margin-top:9px;font-size:12px;padding:8px}
+.pet-trade-player-picker button:disabled,.pet-trade-panel button:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.65)}
+.pet-trade-divider{display:flex;align-items:center;gap:8px;margin:16px 0 10px;color:#7e89b1;font-size:9px;letter-spacing:1.3px;font-weight:900}
+.pet-trade-divider:before,.pet-trade-divider:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#41496d)}
+.pet-trade-divider:after{transform:scaleX(-1)}
+.pet-trade-room{padding:12px;border:1px solid #333d60;border-radius:13px;background:linear-gradient(145deg,#111a30,#101525)}
+.pet-trade-room-head{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:850}
+.pet-trade-room-code{color:#e2b96f;font-size:10px}
+.pet-trade-players{display:grid;grid-template-columns:1fr 24px 1fr;align-items:center;gap:6px;margin:14px 0}
+.pet-trade-player{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center}
+.pet-trade-avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;border:1px solid #6972b5;background:linear-gradient(145deg,#39477d,#202746);font-size:10px;font-weight:900;color:#e4e9ff}
+.pet-trade-avatar.guest{border-style:dashed;background:#171d30;color:#8d98bb;font-size:20px}
+.pet-trade-player b{font-size:11px}
+.pet-trade-player small{font-size:9px;color:#8994b7}
+.pet-trade-link{text-align:center;color:#b6a8ff;font-size:20px;text-shadow:0 0 12px #8879ff88}
+.pet-trade-offers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pet-trade-offer{display:flex;flex-direction:column;gap:4px;min-width:0;padding:9px;border:1px solid #343e62;border-radius:10px;background:#0b1120}
+.pet-trade-offer>span{font-size:9px;color:#9ba8d0}
+.pet-trade-offer strong{font-size:12px;color:#e6eaff;overflow-wrap:anywhere}
+.pet-trade-offer small{font-size:9px;color:#7e89aa}
+.pet-trade-confirm-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.pet-trade-confirm-row button{padding:7px 10px;font-size:11px;white-space:nowrap}
+.pet-trade-confirm-row span{font-size:9px;color:#929cbd}
+.pet-trade-lock-note{display:flex;gap:7px;align-items:flex-start;margin-top:12px;color:#aab4d2;font-size:10px;line-height:1.5}
+.pet-trade-lock-note span{color:#8fd5ff;font-size:14px}
+.pet-trade-build-note{margin-top:12px;padding-top:9px;border-top:1px solid #303957;text-align:center;color:#8993b5;font-size:9px;letter-spacing:.4px}
+@media(max-width:760px){.pet-core-layout{grid-template-columns:minmax(0,1fr)}.pet-trade-panel{padding:16px}.pet-trade-emblem{margin-top:13px}}
