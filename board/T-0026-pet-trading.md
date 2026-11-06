@@ -84,3 +84,5 @@ done_at:
 ### 衍生任務／影響任務
 
 - 2026-11-06 [叉子] 追加交易房間安全關閉流程：新增 `cancel_pet_trade_session(uuid)` SECURITY DEFINER RPC，固定 search_path、驗證登入及房間參與者、使用 row lock 防止併發狀態覆寫；參與者可取消有效房間，過期房間可由參與者觸發標記為 expired，其他狀態採冪等回傳。前端已加入「取消交易房間／更新逾期狀態」，並顯示 active、cancelled、expired 等狀態。Supabase migration `add_pet_trade_session_cancellation` 已套用；查核確認 anon 無 EXECUTE、authenticated 有 EXECUTE，session table RLS 開啟，authenticated 僅 SELECT、無 INSERT／UPDATE／DELETE。GitHub commit：`6813595`（service）。靜態檢查確認新增 RPC 呼叫、狀態判斷及括號配對；未執行本機 `git diff --check`、`git status --short`、瀏覽器測試或雙帳號端到端測試。未接 Realtime、未做寵物資產鎖定或交換；T-0012 保持未觸碰，任務仍為 blocked。
+
+- 2026-11-06 [叉子] 安全審查邀請併發時發現反向邀請競態：玩家 A 邀請 B 與 B 同時邀請 A 原本可能因各自只鎖發送者而同時通過 pending 檢查。已新增 migration `serialize_pet_trade_invites_by_player_pair`，以雙方 UUID 排序組成固定 pair key 並取得 transaction advisory lock，確保同一對玩家無論邀請方向都序列化；原有發送者頻率鎖仍保留。已查核正式 Supabase 函式定義含 pair lock，固定 search_path，anon EXECUTE=false、authenticated EXECUTE=true。未建立測試帳號或寫入測試邀請，因此併發行為尚未完成雙帳號端到端驗證。
