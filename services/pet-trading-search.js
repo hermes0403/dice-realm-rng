@@ -246,7 +246,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       let sessionsByInvitation = new Map();
       if (acceptedIds.length) {
         const sessions = await supabaseClient.from('pet_trade_sessions')
-          .select('id,invitation_id,status,expires_at')
+          .select('id,invitation_id,status,created_at,expires_at')
           .in('invitation_id', acceptedIds);
         if (!sessions.error) sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
       }
@@ -282,10 +282,16 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         const session = sessionsByInvitation.get(row.id);
         if (session) {
           const roomStatus = doc.createElement('small');
-          const sessionExpired = new Date(session.expires_at).getTime() <= Date.now();
+          const expiryTime = Date.parse(session.expires_at);
+          const sessionExpired = !Number.isFinite(expiryTime) || expiryTime <= Date.now();
+          const createdTime = Date.parse(session.created_at);
           const sessionLabels = { active: sessionExpired ? '交易房間已逾期' : '交易房間已建立', cancelled: '交易房間已取消', expired: '交易房間已逾期', completed: '交易已完成' };
+          const roomId = String(session.id || '').slice(0, 8).toUpperCase();
+          const createdLabel = Number.isFinite(createdTime) ? ' · 建立於 ' + new Date(createdTime).toLocaleTimeString() : '';
           roomStatus.textContent = (sessionLabels[session.status] || '交易房間狀態：' + session.status)
-            + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘內有效 · 寵物交換尚未開放' : '');
+            + (roomId ? ' · 房間 ' + roomId : '')
+            + createdLabel
+            + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘有效 · 寵物交換尚未開放' : '');
           item.append(roomStatus);
           if (session.status === 'active') {
             item.append(makeSessionActionButton(session.id, sessionExpired ? '更新逾期狀態' : '取消交易房間'));
