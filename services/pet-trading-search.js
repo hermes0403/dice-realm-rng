@@ -3,6 +3,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
   let selectedPlayer = null;
   let searching = false;
   let refreshing = false;
+  let refreshQueued = false;
+  const realtimeChannels = new Map();
 
   function setStatus(message) {
     const node = doc.getElementById('petTradeSearchHint');
@@ -168,10 +170,67 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
     return button;
   }
 
+  function removeRealtimeChannels() {
+    for (const channel of realtimeChannels.values()) {
+      if (supabaseClient?.removeChannel) supabaseClient.removeChannel(channel);
+      else channel.unsubscribe?.();
+    }
+    realtimeChannels.clear();
+  }
+
+  function ensureRealtimeChannel(key, table, filter) {
+    if (!supabaseClient?.channel || realtimeChannels.has(key)) return;
+    const channel = supabaseClient.channel(key)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table,
+        filter
+      }, () => {
+        if (refreshing) refreshQueued = true;
+        else void refreshInvitations();
+      })
+      .subscribe();
+    realtimeChannels.set(key, channel);
+  }
+
+  function syncRealtimeChannels(user, sessions) {
+    const wanted = new Set();
+    const sentKey = 'pet-trade-invites-sent-' + user.id;
+    const receivedKey = 'pet-trade-invites-received-' + user.id;
+    wanted.add(sentKey);
+    wanted.add(receivedKey);
+    ensureRealtimeChannel(sentKey, 'pet_trade_invitations', 'sender_id=eq.' + user.id);
+    ensureRealtimeChannel(receivedKey, 'pet_trade_invitations', 'recipient_id=eq.' + user.id);
+
+    for (const session of sessions) {
+      if (session.status !== 'active') continue;
+      const key = 'pet-trade-session-' + session.id;
+      wanted.add(key);
+      ensureRealtimeChannel(key, 'pet_trade_sessions', 'id=eq.' + session.id);
+    }
+
+    for (const [key, channel] of realtimeChannels) {
+      if (wanted.has(key)) continue;
+      if (supabaseClient?.removeChannel) supabaseClient.removeChannel(channel);
+      else channel.unsubscribe?.();
+      realtimeChannels.delete(key);
+    }
+  }
+
   async function refreshInvitations() {
     const host = doc.getElementById('petTradeInvitations');
     const user = getCurrentUser();
-    if (!host || !user || refreshing) return;
+    if (!host) return;
+    if (!user) {
+      removeRealtimeChannels();
+      host.textContent = '登入後載入邀請。';
+      return;
+    }
+    if (refreshing) {
+      refreshQueued = true;
+      return;
+    }
     refreshing = true;
     host.textContent = '正在讀取邀請…';
     try {
@@ -190,6 +249,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
           .in('invitation_id', acceptedIds);
         if (!sessions.error) sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
       }
+      syncRealtimeChannels(user, [...sessionsByInvitation.values()]);
       const otherIds = [...new Set(rows.map(row => row.sender_id === user.id ? row.recipient_id : row.sender_id))];
       let names = new Map();
       if (otherIds.length) {
@@ -240,6 +300,10 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       host.textContent = '邀請清單載入失敗，請稍後重試。';
     } finally {
       refreshing = false;
+      if (refreshQueued) {
+        refreshQueued = false;
+        void refreshInvitations();
+      }
     }
   }
 
