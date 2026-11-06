@@ -96,3 +96,5 @@ done_at:
 - 2026-11-06 [叉子] 進行交易邀請 UI／狀態處理複查並修正兩項問題：選取搜尋結果後原本會把其他搜尋候選項目整批清掉，現在保留完整結果並標示已選玩家；接受邀請後若 session 查詢失敗，原本會靜默當成「沒有房間」，現在會明確進入載入錯誤處理，避免顯示不完整狀態。另調整邀請卡片為可換行排列，避免房間資訊與多個操作按鈕擠在同一列。GitHub commits：`e6b181b`、`a8714ac`。未執行本機 git diff --check、git status、瀏覽器或雙帳號端到端測試；未碰 T-0012、未涉及寵物資產所有權，未部署，T-0026 維持 blocked。
 
 - 2026-11-06 [叉子] 檢查正式 Supabase 邀請回應 RPC 時發現 `p_action = NULL` 會因 SQL 三值邏輯未觸發原本的 `NOT IN` 驗證，發件者可能因此把邀請意外轉成 cancelled。已在正式資料庫函式加上 `p_action IS NULL OR ...` 防護，並同步更新 `docs/database/pet-trading.sql` 基準。驗證查詢確認 null guard 存在、anon EXECUTE=false、authenticated EXECUTE=true、仍為 SECURITY DEFINER，固定 search_path 未變。沒有建立邀請或修改玩家資料；未接觸 T-0012，未部署，T-0026 維持 blocked。GitHub commit：`038eca0`。
+
+- 2026-11-06 [叉子] 追加玩家搜尋輸入與識別資訊保護：搜尋名稱會先移除 PostgREST／ILIKE 特殊字元，並以清理後的有效字元數重新檢查最短長度，避免只輸入萬用字元就擴大成非預期搜尋；結果卡片不再顯示完整 auth UUID，改顯示前 8 碼玩家代碼。GitHub commit：`7ec3371`。未修改玩家資料，未碰 T-0012，未部署；T-0026 維持 blocked。
