@@ -32,6 +32,7 @@ import { createGameStateService } from './core/game-state.js';
 import { createPresenceService } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
+import { createPetTradingSearch } from './services/pet-trading-search.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js';
@@ -198,6 +199,8 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
+const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, documentRef: document, toast });
+petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage
 });
