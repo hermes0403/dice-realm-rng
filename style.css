@@ -283,6 +283,13 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 .pet-trade-search span{font-size:20px}
 .pet-trade-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#edf0ff;padding:9px 0;font-size:12px}
 .pet-trade-player-picker button{width:100%;margin-top:9px;font-size:12px;padding:8px}
+.pet-trade-search-results{display:grid;gap:6px;margin-top:8px}
+.pet-trade-search-result{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:9px 10px;border:1px solid #39466d;border-radius:9px;background:#111a30;color:#e5eaff;text-align:left}
+.pet-trade-search-result strong{font-size:12px;overflow-wrap:anywhere}
+.pet-trade-search-result small{display:block;color:#8f9cbe;font-size:9px;margin-top:3px}
+.pet-trade-search-result[aria-pressed="true"]{border-color:#9d8bff;background:#29264b}
+.pet-trade-selected-target{margin-top:8px;padding:9px 10px;border:1px solid #786ac0;border-radius:9px;background:#201d3c;color:#dcd5ff;font-size:11px}
+.pet-trade-search-results:empty{display:none}
 .pet-trade-player-picker button:disabled,.pet-trade-panel button:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.65)}
 .pet-trade-divider{display:flex;align-items:center;gap:8px;margin:16px 0 10px;color:#7e89b1;font-size:9px;letter-spacing:1.3px;font-weight:900}
 .pet-trade-divider:before,.pet-trade-divider:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#41496d)}
