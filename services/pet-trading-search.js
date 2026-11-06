@@ -145,6 +145,29 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
     return button;
   }
 
+  function makeSessionActionButton(sessionId, label) {
+    const button = doc.createElement('button');
+    button.type = 'button';
+    button.className = 'quiet pet-trade-invitation-action';
+    button.textContent = label;
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        const { error } = await supabaseClient.rpc('cancel_pet_trade_session', {
+          p_session_id: sessionId
+        });
+        if (error) throw error;
+        toast(label === '取消交易房間' ? '交易房間已取消' : '逾期房間狀態已更新');
+        await refreshInvitations();
+      } catch (error) {
+        console.warn('Pet trade session cancellation failed', error);
+        button.disabled = false;
+        setStatus('交易房間狀態更新失敗，請重新整理後再試。');
+      }
+    });
+    return button;
+  }
+
   async function refreshInvitations() {
     const host = doc.getElementById('petTradeInvitations');
     const user = getCurrentUser();
@@ -193,10 +216,16 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         summary.append(title, meta);
         item.append(summary);
         const session = sessionsByInvitation.get(row.id);
-        if (session?.status === 'active' && new Date(session.expires_at).getTime() > Date.now()) {
+        if (session) {
           const roomStatus = doc.createElement('small');
-          roomStatus.textContent = '交易房間已建立 · 15 分鐘內有效 · 寵物交換尚未開放';
+          const sessionExpired = new Date(session.expires_at).getTime() <= Date.now();
+          const sessionLabels = { active: sessionExpired ? '交易房間已逾期' : '交易房間已建立', cancelled: '交易房間已取消', expired: '交易房間已逾期', completed: '交易已完成' };
+          roomStatus.textContent = (sessionLabels[session.status] || '交易房間狀態：' + session.status)
+            + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘內有效 · 寵物交換尚未開放' : '');
           item.append(roomStatus);
+          if (session.status === 'active') {
+            item.append(makeSessionActionButton(session.id, sessionExpired ? '更新逾期狀態' : '取消交易房間'));
+          }
         }
         if (row.status === 'pending' && incoming) {
           item.append(makeActionButton('接受', row.id, 'accept', '已接受邀請'));
