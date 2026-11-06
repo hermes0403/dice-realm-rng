@@ -347,7 +347,12 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
             inviteButton.disabled = true;
             inviteButton.textContent = '發送交易邀請';
           }
-          if (!nextUserId) removeRealtimeChannels();
+          if (!nextUserId) {
+            removeRealtimeChannels();
+            const host = doc.getElementById('petTradeInvitations');
+            if (host) host.textContent = '登入後載入邀請。';
+            return;
+          }
         }
         queueMicrotask(() => {
           void refreshInvitations();
