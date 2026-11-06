@@ -4,6 +4,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
   let searching = false;
   let refreshing = false;
   let refreshQueued = false;
+  let observedAuthUserId = null;
   const realtimeChannels = new Map();
 
   function setStatus(message) {
@@ -270,8 +271,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         title.textContent = (incoming ? '收到邀請：' : '已邀請：') + (names.get(incoming ? row.sender_id : row.recipient_id) || '玩家');
         const meta = doc.createElement('small');
         const expiry = new Date(row.expires_at);
+        const invitationExpired = row.status === 'pending'
+          && !Number.isNaN(expiry.getTime())
+          && expiry.getTime() <= Date.now();
         meta.textContent = row.status === 'pending'
-          ? '等待回覆 · ' + (Number.isNaN(expiry.getTime()) ? '有效期限 2 分鐘' : '期限 ' + expiry.toLocaleTimeString())
+          ? (invitationExpired ? '邀請已逾期' : '等待回覆 · ' + (Number.isNaN(expiry.getTime()) ? '有效期限 2 分鐘' : '期限 ' + expiry.toLocaleTimeString()))
           : '狀態：' + ({accepted:'已接受',rejected:'已拒絕',cancelled:'已取消',expired:'已逾期'}[row.status] || row.status);
         summary.append(title, meta);
         item.append(summary);
@@ -287,10 +291,10 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
             item.append(makeSessionActionButton(session.id, sessionExpired ? '更新逾期狀態' : '取消交易房間'));
           }
         }
-        if (row.status === 'pending' && incoming) {
+        if (row.status === 'pending' && !invitationExpired && incoming) {
           item.append(makeActionButton('接受', row.id, 'accept', '已接受邀請'));
           item.append(makeActionButton('拒絕', row.id, 'reject', '已拒絕邀請'));
-        } else if (row.status === 'pending' && !incoming) {
+        } else if (row.status === 'pending' && !invitationExpired && !incoming) {
           item.append(makeActionButton('取消邀請', row.id, 'cancel', '已取消邀請'));
         }
         host.append(item);
@@ -322,7 +326,27 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       }
     });
     if (supabaseClient?.auth?.onAuthStateChange) {
-      supabaseClient.auth.onAuthStateChange(() => refreshInvitations());
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        const nextUserId = session?.user?.id || null;
+        if (nextUserId !== observedAuthUserId) {
+          observedAuthUserId = nextUserId;
+          selectedPlayer = null;
+          const selected = doc.getElementById('petTradeSelectedTarget');
+          const inviteButton = doc.getElementById('petTradeInviteBtn');
+          if (selected) {
+            selected.hidden = true;
+            selected.textContent = '';
+          }
+          if (inviteButton) {
+            inviteButton.disabled = true;
+            inviteButton.textContent = '發送交易邀請';
+          }
+          if (!nextUserId) removeRealtimeChannels();
+        }
+        queueMicrotask(() => {
+          void refreshInvitations();
+        });
+      });
     }
     refreshInvitations();
   }
