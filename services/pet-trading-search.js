@@ -83,7 +83,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
     setStatus('正在搜尋雲端玩家資料…');
     try {
       let request = supabaseClient.from('player_profiles')
-        .select('user_id,username,last_seen')
+        .select('user_id,username')
         .neq('user_id', user.id)
         .limit(10);
       request = uuid ? request.eq('user_id', query) : request.ilike('username', '%' + safeNameQuery + '%');
