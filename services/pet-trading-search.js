@@ -30,7 +30,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       const strong = doc.createElement('strong');
       strong.textContent = row.username || '未命名玩家';
       const small = doc.createElement('small');
-      small.textContent = '玩家識別碼：' + row.user_id;
+      small.textContent = '玩家代碼：' + String(row.user_id).slice(0, 8).toUpperCase();
       name.append(strong, small);
       const action = doc.createElement('span');
       action.textContent = selectedPlayer?.user_id === row.user_id ? '已選擇' : '選擇';
@@ -65,8 +65,10 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       setStatus('請先登入雲端帳號，再搜尋玩家。');
       return;
     }
-    if (query.length < 2) {
-      setStatus('請至少輸入 2 個字的玩家名稱，或完整玩家 UUID。');
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(query);
+    const safeNameQuery = query.replace(/[\\%_(),]/g, '').trim();
+    if (!uuid && safeNameQuery.length < 2) {
+      setStatus('請輸入至少 2 個有效字元的玩家名稱，或完整玩家 UUID。');
       return;
     }
     if (searching) return;
@@ -84,8 +86,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
         .select('user_id,username,last_seen')
         .neq('user_id', user.id)
         .limit(10);
-      const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(query);
-      request = uuid ? request.eq('user_id', query) : request.ilike('username', '%' + query.replace(/[%,()]/g, '') + '%');
+      request = uuid ? request.eq('user_id', query) : request.ilike('username', '%' + safeNameQuery + '%');
       const { data, error } = await request;
       if (error) throw error;
       const rows = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
