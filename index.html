@@ -24,7 +24,35 @@
 <section class="page" id="page-pets"><div class="section-head"><h2>寵物合成</h2><span class="pill">43 種寵物 · 5 個品質</span></div>
 
 <div class="hero"><div class="eyebrow">PET SYNTHESIS CORE</div><h1>投入兩顆骰子，合成一隻寵物。</h1><p class="muted">可選擇兩種相同或不同的骰子合成；兩種骰子不可超過 1,000 倍，骰子越稀有，能合成出的寵物品質越高。</p></div>
-<div class="card" style="margin-top:12px"><div class="section-head"><h3 style="margin:0">合成材料</h3><span class="pill" id="petOwnedCount">持有 0 隻寵物</span></div><div class="pet-slots"><div class="pet-slot"><div class="eyebrow">DICE SLOT A</div><div class="pet-art" id="petDiceArtA">🎲</div><select class="pet-select" id="petDiceSlotA" aria-label="選擇第一顆骰子"><option value="">選擇第一顆骰子</option></select><div class="mini" id="petDiceInfoA" style="margin-top:7px">尚未選擇</div></div><div class="pet-slot"><div class="eyebrow">DICE SLOT B</div><div class="pet-art" id="petDiceArtB">🎲</div><select class="pet-select" id="petDiceSlotB" aria-label="選擇第二顆骰子"><option value="">選擇第二顆骰子</option></select><div class="mini" id="petDiceInfoB" style="margin-top:7px">尚未選擇</div></div></div><div style="margin-top:16px"><b>寵物品質機率</b><div id="petChanceRows"><div class="empty">選擇兩顆骰子後顯示機率。</div></div></div><button class="primary" id="petDiceCraftBtn" style="width:100%;margin-top:12px" disabled>消耗兩顆骰子，合成寵物</button><p class="mini" id="petDiceCraftInfo" role="status" style="margin-bottom:0">請選擇兩顆骰子。</p></div>
+<div class="pet-core-layout"><div class="card" style="margin-top:12px"><div class="section-head"><h3 style="margin:0">合成材料</h3><span class="pill" id="petOwnedCount">持有 0 隻寵物</span></div><div class="pet-slots"><div class="pet-slot"><div class="eyebrow">DICE SLOT A</div><div class="pet-art" id="petDiceArtA">🎲</div><select class="pet-select" id="petDiceSlotA" aria-label="選擇第一顆骰子"><option value="">選擇第一顆骰子</option></select><div class="mini" id="petDiceInfoA" style="margin-top:7px">尚未選擇</div></div><div class="pet-slot"><div class="eyebrow">DICE SLOT B</div><div class="pet-art" id="petDiceArtB">🎲</div><select class="pet-select" id="petDiceSlotB" aria-label="選擇第二顆骰子"><option value="">選擇第二顆骰子</option></select><div class="mini" id="petDiceInfoB" style="margin-top:7px">尚未選擇</div></div></div><div style="margin-top:16px"><b>寵物品質機率</b><div id="petChanceRows"><div class="empty">選擇兩顆骰子後顯示機率。</div></div></div><button class="primary" id="petDiceCraftBtn" style="width:100%;margin-top:12px" disabled>消耗兩顆骰子，合成寵物</button><p class="mini" id="petDiceCraftInfo" role="status" style="margin-bottom:0">請選擇兩顆骰子。</p></div>
+<aside class="pet-trade-panel" aria-labelledby="petTradeTitle">
+  <div class="pet-trade-topline"><span class="eyebrow">REALM EXCHANGE</span><span class="pet-trade-status"><i></i> SECURE TRADE</span></div>
+  <div class="pet-trade-emblem">⇄</div>
+  <h3 id="petTradeTitle">寵物交易</h3>
+  <p class="muted">尋找另一位旅人，交換彼此珍藏的寵物。</p>
+  <div class="pet-trade-player-picker">
+    <label for="petTradeTarget">選擇交易對象</label>
+    <div class="pet-trade-search"><span>⌕</span><input id="petTradeTarget" type="text" placeholder="輸入玩家名稱或識別碼" disabled></div>
+    <button class="primary" type="button" disabled>發送交易邀請</button>
+  </div>
+  <div class="pet-trade-divider"><span>TRADE ROOM PREVIEW</span></div>
+  <div class="pet-trade-room">
+    <div class="pet-trade-room-head"><span>交易房間</span><span class="pet-trade-room-code">等待建立</span></div>
+    <div class="pet-trade-players">
+      <div class="pet-trade-player"><div class="pet-trade-avatar">YOU</div><b>你</b><small>等待選擇寵物</small></div>
+      <div class="pet-trade-link">⇄</div>
+      <div class="pet-trade-player"><div class="pet-trade-avatar guest">?</div><b>對方玩家</b><small>等待對方加入</small></div>
+    </div>
+    <div class="pet-trade-offers">
+      <div class="pet-trade-offer"><span>你的提供</span><strong>尚未選擇</strong><small>選擇一隻持有寵物</small></div>
+      <div class="pet-trade-offer"><span>對方提供</span><strong>等待加入</strong><small>對方加入後顯示</small></div>
+    </div>
+    <div class="pet-trade-confirm-row"><button type="button" disabled>確認交易</button><span>雙方確認後才會交換</span></div>
+  </div>
+  <div class="pet-trade-lock-note"><span>◇</span> 寵物將由伺服器驗證所有權，交易完成前不會移動。</div>
+  <div class="pet-trade-build-note">交易介面預覽 · 安全交易服務尚在建置</div>
+</aside>
+</div>
 <div class="card" style="margin-top:12px"><div class="section-head"><h3 style="margin:0">我的寵物</h3><span class="pill" id="petInventoryCount">0 隻</span></div><p class="mini" style="margin:0 0 10px">可選擇裝備最多 3 隻寵物；裝備狀態會保存至帳號。</p><div class="pet-income-panel"><div><span class="mini">帳號在線時裝備寵物每秒收益</span><strong id="petIncomeRate">+0$/秒</strong></div><span class="mini" id="petIncomeEquipped">目前裝備 0/3 隻</span></div><div class="pet-sell-controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px"><button type="button" class="danger" id="petSellBtn">出售寵物</button><button type="button" class="quiet" id="petAutoEquipBestBtn">自動裝備最佳</button><label class="mini" for="petSortMode" style="display:flex;align-items:center;gap:6px">排序<select id="petSortMode" class="field" style="width:auto;min-width:150px"><option value="rarity-desc">稀有度高到低</option><option value="rarity-asc">稀有度低到高</option><option value="income-asc">賺錢度低到高</option></select></label><button type="button" class="quiet" id="petAutoSellBtn">自動出售</button></div><div id="petInventoryGrid" class="pet-catalog-grid"><div class="empty">尚未擁有寵物，先使用兩顆骰子合成。</div></div></div></section>
 <section class="page" id="page-gloves"><div class="glove-panel"><div class="section-head"><h2>手套工坊</h2><span class="pill">合成與裝備</span></div><div class="two"><div class="card"><div class="eyebrow">EQUIPPED GLOVE</div><div style="font-size:48px;margin:12px 0">🧤</div><h2 id="equippedName">基礎手套</h2><p class="muted" id="equippedDesc">沒有額外加成，冒險從這裡開始。</p><div class="stats"><div class="stat"><b id="gloveLuck">+0%</b><span>運氣</span></div><div class="stat"><b id="gloveSpeed">+0%</b><span>擲骰速度</span></div><div class="stat"><b id="gloveOwned">1</b><span>持有手套</span></div></div><div id="weatherConvertPanel" hidden style="margin-top:12px;padding:12px;border:1px solid #58649a;border-radius:14px;background:#171a30"><p class="muted" style="margin:0 0 8px">每小時可選擇本伺服器或全伺服器，隨機召喚雨、雪或打雷。</p><label for="weatherConvertScope">影響範圍</label><select id="weatherConvertScope" class="field"><option value="local">本伺服器</option><option value="global">全伺服器</option></select><button class="primary" id="weatherConvertBtn" type="button">🌦️ 隨機召喚天氣</button><p class="mini" id="weatherConvertCooldown" style="margin-bottom:0"></p></div></div><div class="card"><h3 style="margin-top:0">合成配方</h3><p class="muted">收集材料解鎖更強的裝備。</p><div id="recipeList"></div></div></div></div></section>
 <section class="page" id="page-potions"><div class="section-head"><h2>藥水工坊</h2><span class="pill">運氣／速度增幅</span></div><div class="hero"><div class="eyebrow">POTION LAB</div><h1>改變下一次命運。</h1><div class="muted">運氣藥水效果持續 5 分鐘。運氣藥水效果不會互相疊加，使用另一瓶限時藥水會取代目前效果。</div><div class="stats"><div class="stat"><b id="potionLuckNow">+0%</b><span>運氣加成</span></div><div class="stat"><b id="potionTimer">未啟用</b><span>剩餘時間</span></div><div class="stat"><b id="potionSpeedNow">+0%</b><span>速度加成</span></div></div><p id="potionStatus" class="muted">尚未使用藥水。</p></div><div id="potionList" style="margin-top:12px"></div><p class="mini">運氣會改變骰子抽取權重，因此加成期間實際中獎率會不同於骰子原始標示機率。所有擲骰（手動與自動）都使用同一套計算。</p></section>
