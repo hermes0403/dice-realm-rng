@@ -5,7 +5,7 @@
 - **A 部分：老查** — barry 的 GPT／Chat On Steroids 對話助理。
 - **B 部分：叉子** — 棒子的 GPT。
 
-兩方都必須遵守本文件開頭的共同規則，以及 `board/README.md` 的唯一任務流程規範。每次接手任務，必須讀取 `board/README.md` 和該任務完整檔案。若無法確認自己的角色，先停止並向委託者確認。
+兩方都必須遵守本文件開頭的共同規則，以及 `board/README.md` 的唯一任務流程規範。每次接手任務，必須讀取 `board/README.md` 和該任務完整檔案，並依 Board §15 執行八階段生命週期；不得只挑選方便的階段或以建立工作環境繞過准入限制。若無法確認自己的角色，先停止並向委託者確認。
 
 ## 共同規則（A、B 均適用）
 
@@ -18,17 +18,25 @@
 - 跨方影響依 `board/README.md` §4.2 留 `[impact][角色]` 紀錄。不得藉影響註記接手另一方任務。
 - 需要跨方代理操作時，依 `board/README.md` §1.3 明確記錄任務 ID、允許動作、代理角色及有效範圍；不得自行推定一次性授權是永久授權。
 
+### 任務生命週期與雙重啟動閘門
+
+- 老查與叉子都必須依 `board/README.md` §15 執行八階段流程；共同檢查目標相同，只有本機 Git／Worktree 與 GitHub App 線上工作環境的操作方式不同。
+- 接手既有任務前，以及建立新需求前，分別檢查兩道獨立閘門：①我方 `from` 歸屬的有效 `in_progress` + `review` 任務達五張（含五張）時，不得啟動其他 `open` 任務；②我方有有效且 `in_progress` 的 `communicate task` 時，該委派工作優先，其他 `open` 任務不得啟動。兩道閘門不可互相取代。
+- 容量按 `from` 權限群組計算，不按 `owner`、`to` 或實際執行者混算。五單已滿時，必須列出占用任務 ID、狀態及負責人，並提出建議先完成哪一張及理由。
+- 新需求可先建立並保持 `open`；不得透過建立 Task Branch、Worktree、GitHub App 工作環境或先修改檔案繞過任一閘門。每次 `open` → `in_progress` 前重新檢查。
+- `impact` 僅作通知，不派工作、不喚醒任務、不追蹤待辦。需要另一方實際執行工作時，依 Board §15.9 建立正式 `communicate task`。
+
 ### 2. Git、分支與同步
 
 - 不得直接在 `main` 實作。分支生命週期、角色整合分支及任務分支規則，唯一依據為 `board/README.md` §7、§13。
-- 開工前確認目前工作目錄、branch、HEAD、`git status --short --branch`、`git branch -vv`、所有 worktree 及 upstream；先讀取本次工作涉及的文件與任務，不得覆蓋未提交或未追蹤的修改。
-- 新對話接續時先 `git fetch origin`，分別檢查 `work/laocha`、`origin/work/laocha` 與 `origin/main`。只有工作區乾淨、upstream 正確且提交關係可安全快轉時，才執行 `git pull --ff-only` 或 `git merge --ff-only origin/main`；fetch 不等於 pull／merge。若有修改、分歧、無 upstream 或可能衝突，停止同步並說明，不得擅自 stash、丟棄、reset 或 rebase。
-- `work/laocha` 是老查的長期角色整合分支，不是直接撰寫每張任務的工作分支。每張任務使用獨立短期 `task/T-xxxx-short-name` 分支及對應 worktree；完成後依 Board §7 整合回角色分支。
-- **禁止 Push 的範圍只有：`supabase/` 目錄內的所有檔案，以及所有 `.csv` 檔案（不論位於哪個目錄）。** 其他檔案不因檔案類型而禁止 push。Push 前明確檢查 staged files；不得未檢查就使用 `git add -A` 或 `git add .`。
-- Push、PR 建立／合併、release 或任何遠端分支修改，必須有本次任務的明確指示；使用者只授權修改文件，不代表自動授權遠端操作。Board §7／§13 規定的標準本機流程（任務分支完成後整合回本人角色分支）已由任務指派預先授權，完成驗證後不需逐次詢問；不得因此直接整合到 `main`。
+- 開工前確認實際工作環境、branch、HEAD／commit SHA、提交關係及是否有未保存修改。**老查：**檢查本機目錄、`git status --short --branch`、`git branch -vv`、所有 worktree 及 upstream。**叉子：**檢查 GitHub 線上 branch、commit SHA、compare／PR base 及 GitHub App 自身工作環境；不得要求叉子提供 Barry 本機路徑、Worktree 或 upstream。
+- **老查新對話接續：**先 `git fetch origin`，分別檢查 `work/laocha` 對 `origin/work/laocha`，以及 `work/laocha` 對 `origin/main`；再比較 task branch 與本機 `work/laocha`。只有工作區乾淨、upstream 正確且提交關係可安全快轉時，才執行 `git pull --ff-only` 或 `git merge --ff-only origin/main`；fetch 不等於 pull／merge。**叉子新對話接續：**以 GitHub 線上 Repository 為準，檢查 `work/chazi`、`main`、task branch 的 commit compare／PR base 及 App 工作環境，不執行或假設 Barry 本機 Git 操作。雙方遇到修改、分歧、來源不明或可能衝突時，停止受影響的同步／寫入並說明，不得 stash、丟棄、reset、rebase 或改寫歷史。
+- `work/laocha` 是老查、`work/chazi` 是叉子的長期角色整合分支；兩者都不是直接撰寫單張任務的工作分支。每張任務使用獨立短期 `task/T-xxxx-short-name` 分支及對應工作環境：老查使用本機 Worktree，叉子使用 GitHub App 獨立任務工作環境；完成後依 Board §7 整合回本人角色分支。
+- **禁止 Push 的範圍只有：`supabase/` 目錄內的所有檔案，以及所有 `.csv` 檔案（不論位於哪個目錄）。** 其他檔案不因檔案類型而禁止交付。老查本機 Push 前逐一檢查 staged files，不得未檢查就使用 `git add -A` 或 `git add .`；叉子依 GitHub App 可取得的檔案差異及提交預覽檢查，不要求虛構本機 staged files。
+- Push、PR 建立／合併、release 或任何遠端分支修改，必須有本次任務的明確指示；使用者只授權修改文件，不代表自動授權遠端操作。Board §7／§13 規定的標準本機流程（任務分支完成後整合回本人角色分支）已由任務指派預先授權，完成驗證後不需逐次詢問；不得因此直接整合到 `main`。唯一限定預先授權例外為 Board §15.4 的新開單任務紀錄／索引同步，僅限該次 Board 檔案，不包含程式碼、其他任務成果或部署。
 - 不得使用 `git restore`、`git reset`、`git checkout .`、`git clean` 等破壞性回復指令；不得丟棄、改寫或格式化與本次任務無關的修改。
 - `.gitignore` 命中不代表檔案已停止追蹤；若 `.csv` 或 `supabase/` 內容已被 Git 追蹤，必須先檢查追蹤狀態及任務授權，不得用忽略規則掩蓋已追蹤變更。禁止以 `git add -f` 將這些檔案加入提交。
-- 修改前後執行 `git diff --check` 及 `git status --short`；回報實際命令、exit code 與未執行項目。
+- 修改前後都要檢查差異及工作區：老查執行 `git diff --check`、`git status --short` 並檢查 staged／untracked files；叉子使用 GitHub App 可取得的差異、提交預覽及工作環境狀態。回報實際檢查方式、結果及未執行項目。
 
 ### 3. 安全、證據與回報
 
