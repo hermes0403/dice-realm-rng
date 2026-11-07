@@ -13,6 +13,11 @@ export function createCloudSaveService(dependencies) {
 
   let cloudSyncTimer = null;
   let cloudSyncBusy = false;
+  let cloudSyncPending = false;
+  let lastCloudSyncAt = 0;
+  const grantCheckAtByUser = new Map();
+  const CLOUD_SYNC_MIN_INTERVAL = 15000;
+  const GRANT_CHECK_INTERVAL = 60000;
 
   function userSaveKey(userId = getCurrentUser()?.id) {
     return userId ? KEY + '_user_' + String(userId) : null;
@@ -49,9 +54,11 @@ export function createCloudSaveService(dependencies) {
     return { achievement_count: entries.length, achievement_reached_at: times.length ? times[times.length - 1] : null };
   }
 
-  async function applyPendingGrants() {
+  async function applyPendingGrants(force = false) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return false;
+    const lastCheckAt = grantCheckAtByUser.get(user.id) || 0;
+    if (!force && Date.now() - lastCheckAt < GRANT_CHECK_INTERVAL) return false;
     const S = getState();
     S.adminGrantApplied = S.adminGrantApplied || {};
     S.potions = S.potions || fresh().potions;
@@ -61,7 +68,9 @@ export function createCloudSaveService(dependencies) {
         .select('coins_total,luck1_total,luck2_total,luck3_total,angel1_total,angel2_total,dice_grants')
         .eq('user_id', user.id).maybeSingle();
       if (error) throw error;
-      if (!data || getCurrentUser()?.id !== user.id) return false;
+      if (getCurrentUser()?.id !== user.id) return false;
+      grantCheckAtByUser.set(user.id, Date.now());
+      if (!data) return false;
       let changed = false;
       for (const col of ['coins_total', 'luck1_total', 'luck2_total', 'luck3_total', 'angel1_total', 'angel2_total']) {
         const total = Math.max(0, Number(data[col]) || 0);
@@ -113,10 +122,12 @@ export function createCloudSaveService(dependencies) {
     const initialUser = getCurrentUser();
     if (!initialUser || !supabaseClient) return;
     if (cloudSyncBusy) {
-      scheduleCloudSync(1200);
+      cloudSyncPending = true;
       return;
     }
+    cloudSyncPending = false;
     cloudSyncBusy = true;
+    lastCloudSyncAt = Date.now();
     const syncingUserId = initialUser.id;
     try {
       await applyPendingGrants();
@@ -128,18 +139,6 @@ export function createCloudSaveService(dependencies) {
         .upsert({ user_id: syncingUserId, save_data: payload, updated_at: now }, { onConflict: 'user_id' });
       if (error) throw error;
       if (getCurrentUser()?.id !== syncingUserId) return;
-      const { error: profileError } = await supabaseClient.from('player_profiles').upsert({
-        user_id: syncingUserId,
-        username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
-        total_rolls: Number(S.rolls) || 0,
-        unique_dice: totalUnique(),
-        rarest_den: Number(S.best?.den) || 0,
-        coins: Number(S.coins) || 0,
-        ...achievementStats(),
-        last_seen: now,
-        updated_at: now
-      }, { onConflict: 'user_id' });
-      if (profileError) throw profileError;
       S.petIncomePending = 0;
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
@@ -152,22 +151,28 @@ export function createCloudSaveService(dependencies) {
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
     } finally {
       cloudSyncBusy = false;
+      if (cloudSyncPending) scheduleCloudSync();
     }
   }
 
-  function scheduleCloudSync(delay) {
-    timerManager.clearTimeout(cloudSyncTimer);
+  function scheduleCloudSync() {
+    cloudSyncPending = true;
+    if (!getCurrentUser() || !supabaseClient || cloudSyncBusy || cloudSyncTimer) return;
+    const elapsed = Date.now() - lastCloudSyncAt;
+    const delay = lastCloudSyncAt ? Math.max(700, CLOUD_SYNC_MIN_INTERVAL - elapsed) : 700;
     const timer = timerManager.setTimeout(() => {
       if (cloudSyncTimer !== timer) return;
       cloudSyncTimer = null;
+      if (!cloudSyncPending) return;
+      cloudSyncPending = false;
       syncCloudSave();
-    }, delay, 'cloud-save-debounce');
+    }, delay, 'cloud-save-throttle');
     cloudSyncTimer = timer;
   }
 
-  function scheduleSync(delay = 700) {
+  function scheduleSync() {
     if (!getCurrentUser()) return;
-    scheduleCloudSync(delay);
+    scheduleCloudSync();
   }
 
   function save() {
@@ -175,7 +180,7 @@ export function createCloudSaveService(dependencies) {
     try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
     document.getElementById('saveStatus').textContent = getCurrentUser() ? '雲端同步中…' : '本機存檔';
-    if (getCurrentUser()) scheduleSync(700);
+    if (getCurrentUser()) scheduleSync();
   }
 
   async function flushCloudSave() {
@@ -262,7 +267,7 @@ export function createCloudSaveService(dependencies) {
         render();
         await syncCloudSave();
       }
-      await applyPendingGrants();
+      await applyPendingGrants(true);
       await syncCloudSave();
       await refreshLeaderboards();
     } catch (e) {
