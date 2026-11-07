@@ -16,8 +16,8 @@ export function createCloudSaveService(dependencies) {
   let cloudSyncPending = false;
   let lastCloudSyncAt = 0;
   const grantCheckAtByUser = new Map();
-  const CLOUD_SYNC_MIN_INTERVAL = 15000;
-  const GRANT_CHECK_INTERVAL = 60000;
+  const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
+  const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
 
   function userSaveKey(userId = getCurrentUser()?.id) {
     return userId ? KEY + '_user_' + String(userId) : null;
@@ -179,7 +179,7 @@ export function createCloudSaveService(dependencies) {
     const S = getState();
     try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
-    document.getElementById('saveStatus').textContent = getCurrentUser() ? '雲端同步中…' : '本機存檔';
+    document.getElementById('saveStatus').textContent = getCurrentUser() ? '已儲存本機，雲端每 5 分鐘備份' : '本機存檔';
     if (getCurrentUser()) scheduleSync();
   }
 
