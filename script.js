@@ -208,7 +208,7 @@ authService=createAuthService({
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
 });
 authService.registerAuthStateListener();
-timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
+timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
 codexUI = createCodexUI({
   D, getState: () => S, format, chanceText, renderPetCodex,
   weatherDiceStats, loadWeatherDiceExistCounts, documentRef: document
