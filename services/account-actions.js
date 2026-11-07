@@ -125,7 +125,8 @@ export function setupAccountActions(dependencies) {
     if (button) button.disabled = true;
     try {
       // Flush the latest local game state before ending the authenticated session.
-      await syncCloudSave();
+      const saved = await syncCloudSave();
+      if (saved === false) throw new Error('雲端同步失敗，請確認網路後重試');
       const { error } = await supabaseClient.auth.signOut();
       if (error) throw error;
       toast('存檔完成，已登出雲端帳號');
