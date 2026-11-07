@@ -1,7 +1,7 @@
 ---
 id: T-0038
 title: 建立雙角色適用的開單到結案流程與准入規則
-status: in_progress
+status: done
 from: 老查
 to: barry
 owner: 老查
@@ -12,8 +12,8 @@ created: 2026-11-06
 updated: 2026-11-07
 depends_on: []
 branch: task/T-0038-workflow-lifecycle
-done_by:
-done_at:
+done_by: barry
+done_at: 2026-11-07
 ---
 
 ## 任務
@@ -225,28 +225,28 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 八階段順序、目的、進入條件、退出條件及交付內容均完整且互不混淆；第六階段只交付內容，第七階段才交付任務，第八階段提供跨方工作委派機制。
-- [ ] 1.1、1.3 明確適用 Barry／老查與棒子／叉子雙方；1.2 明確區分老查的本機／線上 Repository 檢查，以及叉子的 GitHub／Supabase 外掛與線上環境檢查，並將老查的 Supabase SOP 延後至正式開單後依任務需求執行。
-- [ ] 1.4 分別提供老查本機 Git SOP 與叉子 GitHub 線上 SOP；兩方都檢查角色 `work/<role>` 對 `main`、task branch 對角色分支的提交關係，涵蓋一致、落後、領先、分歧、不同 SHA、衝突及提交來源不明。ahead／behind 不得單獨成為拒絕整個任務的理由；依影響範圍阻擋受影響操作，提供可執行處置與人類選項。同步後重新驗證並記錄結果；老查 push 與叉子線上整合均遵守權限及授權，不得丟棄提交、改寫歷史或強制 push。
-- [ ] 1.5 分別提供老查本機 Worktree SOP 與叉子 GitHub App 工作環境 SOP；兩方都確認任務、分支、基準 SHA、執行者、成果保存位置及未提交／未追蹤／未整合成果。老查實際驗證 branch／Worktree 一對一；叉子驗證 branch／App 任務工作環境一對一，不得要求叉子檢查不存在的 Barry 本機 Worktree。
-- [ ] 1.6 對 READY／BLOCKED／UNKNOWN 有明確定義；UNKNOWN 列出人類才能提供的資訊，BLOCKED 列出原因及解除條件。
-- [ ] 第二階段明確區分 Board metadata 盤點與任務全文閱讀，並檢查 `from`、`to`、`owner`、`reviewer`、`status`、`depends_on`、`branch`、Worktree、執行者及驗收條件。
-- [ ] 第二階段能正確分流既有任務接手與新需求開單，且接手另一方任務、重複開工及跳過未解除依賴均會被阻止。
-- [ ] 第二階段接手前及第三階段建立新需求前，雙方都必須分別檢查兩道閘門：①五單容量閘門，統計我方 `in_progress` + `review` 有效任務，達五張即禁止其他 `open → in_progress`；②Communicate 優先閘門，我方只要有一張有效且 `in_progress` 的 `communicate task`，該委派工作即為最高優先級，禁止其他 `open → in_progress`，即使容量未滿。新需求仍可建立並保持 `open`，不得藉建立工作環境或其他方式繞過；兩道閘門互相獨立、不可互相取代。
-- [ ] 第三階段先建立正式 Board 任務取得 ID，再建立 Task Branch／獨立工作環境；新任務紀錄及索引依限定授權同步至開單方 `work/<role>` 與共同 `main`，並分別回讀驗證其他 AI 可見。此授權不包含程式碼、Supabase 或部署成果。
-- [ ] 所有角色 Worktree 均可見完整 Board；可見性與任務操作權限分開判斷。
-- [ ] 八個階段全部遵守「先完成安全可行檢查、最後一次彙整缺漏與決策」規則。
-- [ ] 每個人類決策都獨立做成 A／B／C／D／E 選擇題，E 為自訂需求；有可靠建議時建議方案必須放在 A，並說明原因及其他方案代價；沒有可靠建議時中立列出優缺點與適用情況。
-- [ ] 所有決策題目以國中生能理解的白話撰寫，不預設使用者懂 Git 或其他技術；必要術語須立即用生活化例子解釋，並說明實際影響。每題只問一個決定，並交代選擇後如何驗證。
-- [ ] 上述階段規則、集中彙整流程及白話 A／B／C／D／E 決策格式明確要求老查與叉子雙方共同遵守；只有因本機 Worktree 與 GitHub App 工作環境不同，才調整實際檢查方式，不得省略共同要求。
-- [ ] 不混淆本機、GitHub、GitHub Pages、Supabase 正式環境及 Edge Function 的證據。
-- [ ] 第六階段明確將 `supabase/` 與 `.csv` 提交排除規則限定為老查本機操作；Push 定義亦限定為老查本機推送 GitHub。叉子在正式指派、棒子方權限歸屬、以 `work/chazi` 為建立基準、無其他執行者、提交只含本任務成果、無未解衝突或來源不明提交，且不覆蓋他人成果／改寫歷史時，可直接整合至線上 `work/chazi`，不必每次再詢問棒子；不包含 `main`、其他角色分支、部署或正式環境操作。任一條件不符或無法確認都必須停止並整理證據。
-- [ ] 第七階段 7.2 分為老查本地驗收與叉子線上驗收；涉及管理員介面的任務才需要隔離管理員介面副本，純文件／一般程式任務以自身驗收條件驗證，不製造無關介面。不得冒用棒子的線上權限。任一適用驗收路徑完整通過即可視為驗收通過並進入 7.3。
-- [ ] 第七階段 7.4 必須以 Board 任務紀錄為對象，再執行任務版 6.2、6.3、6.4；不得與遊戲程式內容提交或部署混淆。
-- [ ] 第八階段已正式落實至 Board 規範及範本：明確區分 `impact` 純通知與 `communicate task` 正式工作委派；委派資訊包含原任務 ID、原需求方及接收方；原任務鎖定／解鎖紀錄可回讀；接收方以 `returned` 交回，原需求方確認後才解鎖並結案；`returned` 不等於 `done`。
-- [ ] Board 驗證工具能檢查任務 frontmatter、`returned` 使用範圍、委派關聯、鎖定／解鎖紀錄、權限角色及雙方容量；自動測試與 GitHub Actions 均已建立。
-- [ ] 本任務不修改遊戲功能程式、Supabase、GitHub Pages 部署內容、Edge Function 或玩家資料。
-- [ ] `git diff --check` 通過，且 `git status --short` 與 staged files 均已檢查。
+- [x] 八階段順序、目的、進入條件、退出條件及交付內容均完整且互不混淆；第六階段只交付內容，第七階段才交付任務，第八階段提供跨方工作委派機制。
+- [x] 1.1、1.3 明確適用 Barry／老查與棒子／叉子雙方；1.2 明確區分老查的本機／線上 Repository 檢查，以及叉子的 GitHub／Supabase 外掛與線上環境檢查，並將老查的 Supabase SOP 延後至正式開單後依任務需求執行。
+- [x] 1.4 分別提供老查本機 Git SOP 與叉子 GitHub 線上 SOP；兩方都檢查角色 `work/<role>` 對 `main`、task branch 對角色分支的提交關係，涵蓋一致、落後、領先、分歧、不同 SHA、衝突及提交來源不明。ahead／behind 不得單獨成為拒絕整個任務的理由；依影響範圍阻擋受影響操作，提供可執行處置與人類選項。同步後重新驗證並記錄結果；老查 push 與叉子線上整合均遵守權限及授權，不得丟棄提交、改寫歷史或強制 push。
+- [x] 1.5 分別提供老查本機 Worktree SOP 與叉子 GitHub App 工作環境 SOP；兩方都確認任務、分支、基準 SHA、執行者、成果保存位置及未提交／未追蹤／未整合成果。老查實際驗證 branch／Worktree 一對一；叉子驗證 branch／App 任務工作環境一對一，不得要求叉子檢查不存在的 Barry 本機 Worktree。
+- [x] 1.6 對 READY／BLOCKED／UNKNOWN 有明確定義；UNKNOWN 列出人類才能提供的資訊，BLOCKED 列出原因及解除條件。
+- [x] 第二階段明確區分 Board metadata 盤點與任務全文閱讀，並檢查 `from`、`to`、`owner`、`reviewer`、`status`、`depends_on`、`branch`、Worktree、執行者及驗收條件。
+- [x] 第二階段能正確分流既有任務接手與新需求開單，且接手另一方任務、重複開工及跳過未解除依賴均會被阻止。
+- [x] 第二階段接手前及第三階段建立新需求前，雙方都必須分別檢查兩道閘門：①五單容量閘門，統計我方 `in_progress` + `review` 有效任務，達五張即禁止其他 `open → in_progress`；②Communicate 優先閘門，我方只要有一張有效且 `in_progress` 的 `communicate task`，該委派工作即為最高優先級，禁止其他 `open → in_progress`，即使容量未滿。新需求仍可建立並保持 `open`，不得藉建立工作環境或其他方式繞過；兩道閘門互相獨立、不可互相取代。
+- [x] 第三階段先建立正式 Board 任務取得 ID，再建立 Task Branch／獨立工作環境；新任務紀錄及索引依限定授權同步至開單方 `work/<role>` 與共同 `main`，並分別回讀驗證其他 AI 可見。此授權不包含程式碼、Supabase 或部署成果。
+- [x] 所有角色 Worktree 均可見完整 Board；可見性與任務操作權限分開判斷。
+- [x] 八個階段全部遵守「先完成安全可行檢查、最後一次彙整缺漏與決策」規則。
+- [x] 每個人類決策都獨立做成 A／B／C／D／E 選擇題，E 為自訂需求；有可靠建議時建議方案必須放在 A，並說明原因及其他方案代價；沒有可靠建議時中立列出優缺點與適用情況。
+- [x] 所有決策題目以國中生能理解的白話撰寫，不預設使用者懂 Git 或其他技術；必要術語須立即用生活化例子解釋，並說明實際影響。每題只問一個決定，並交代選擇後如何驗證。
+- [x] 上述階段規則、集中彙整流程及白話 A／B／C／D／E 決策格式明確要求老查與叉子雙方共同遵守；只有因本機 Worktree 與 GitHub App 工作環境不同，才調整實際檢查方式，不得省略共同要求。
+- [x] 不混淆本機、GitHub、GitHub Pages、Supabase 正式環境及 Edge Function 的證據。
+- [x] 第六階段明確將 `supabase/` 與 `.csv` 提交排除規則限定為老查本機操作；Push 定義亦限定為老查本機推送 GitHub。叉子在正式指派、棒子方權限歸屬、以 `work/chazi` 為建立基準、無其他執行者、提交只含本任務成果、無未解衝突或來源不明提交，且不覆蓋他人成果／改寫歷史時，可直接整合至線上 `work/chazi`，不必每次再詢問棒子；不包含 `main`、其他角色分支、部署或正式環境操作。任一條件不符或無法確認都必須停止並整理證據。
+- [x] 第七階段 7.2 分為老查本地驗收與叉子線上驗收；涉及管理員介面的任務才需要隔離管理員介面副本，純文件／一般程式任務以自身驗收條件驗證，不製造無關介面。不得冒用棒子的線上權限。任一適用驗收路徑完整通過即可視為驗收通過並進入 7.3。
+- [x] 第七階段 7.4 必須以 Board 任務紀錄為對象，再執行任務版 6.2、6.3、6.4；不得與遊戲程式內容提交或部署混淆。
+- [x] 第八階段已正式落實至 Board 規範及範本：明確區分 `impact` 純通知與 `communicate task` 正式工作委派；委派資訊包含原任務 ID、原需求方及接收方；原任務鎖定／解鎖紀錄可回讀；接收方以 `returned` 交回，原需求方確認後才解鎖並結案；`returned` 不等於 `done`。
+- [x] Board 驗證工具能檢查任務 frontmatter、`returned` 使用範圍、委派關聯、鎖定／解鎖紀錄、權限角色及雙方容量；自動測試與 GitHub Actions 均已建立。
+- [x] 本任務不修改遊戲功能程式、Supabase、GitHub Pages 部署內容、Edge Function 或玩家資料。
+- [x] `git diff --check` 通過，且 `git status --short` 與 staged files 均已檢查。
 
 ## 紀錄
 
@@ -281,6 +281,10 @@ done_at:
 
 
 - 2026-11-07 19:02 [老查] Barry 明確授權執行本任務內容交付及任務紀錄交付，包含專屬 commit、推送專屬 task branch、建立及合併僅含 T-0038 成果的 PR 至 `main`，並回讀確認；不包含其他任務成果、手動部署、Supabase 或正式環境操作。重新檢查發現本機 `work/laocha` 相對 `origin/main` 有 14 個獨有提交，且相對 `origin/work/laocha` ahead 149；GitHub 上的 `origin/work/laocha` 又落後 `main` 135 個提交。這些差異含其他任務成果，故不得直接推送／以 `work/laocha` 作為本次 PR head。T-0038 task branch 的共同基準為已包含最新 `origin/main` 的 `14cadf0`，只比本機角色分支少四個 T-0039／T-0040 提交；採用「本機先整合回 `work/laocha`，遠端另以本任務 task branch 作隔離 PR head」的方式，避免把其他任務帶入本次 `main` 交付。GitHub 上尚無 T-0038 任務檔；目前搜尋到的開啟中 PR 僅有 T-0025 #9，沒有與本次相同的 T-0038 PR。另修正 §15.8 7.2 的適用範圍：只有任務實際涉及管理員介面／專屬操作才需要隔離管理員介面副本；純文件及一般程式任務依自身驗收條件驗證，避免為本文件任務製造無關 UI。
+
+- 2026-11-07 19:12 [老查] 依 Barry 19:02「執行內容交付與任務交付，確保 main 生效」的明確指示，完成本任務驗收及結案決定。內容提交 `e2c2996cba4f0185b626652d42cf7a90a726ad6f` 已整合至本機 `work/laocha`（merge commit `0d3f60b1fb7f5d9d90f67e33542f2b3ade1a6276`）；為避免角色分支中其他任務混入 main，另以 `origin/main` 為基底建立隔離交付分支 `delivery/T-0038-content`，僅包含本任務 8 個檔案、2 個提交，經 PR #25 合併至 main。GitHub merge commit 為 `9b3920835fc40dba98a3b0532338c93ab05386da`。已從 GitHub 回讀確認 `AGENTS.md`、`board/README.md`、本任務檔、validator 及 Actions workflow 均存在於 main；main 與 merge SHA 比較結果為 `identical`。GitHub Actions Board lifecycle validation run `42366992154` 的所有步驟成功；GitHub Pages build/deploy run `42366991626` 亦成功，部署版本正是上述 main SHA，部署網址 `https://hermes0403.github.io/dice-realm-rng/`。本機 `node --test tests/board-lifecycle.test.mjs` 9／9 PASS；`node scripts/validate-board.mjs` 36 張任務檔 PASS；兩個 Node 檔案語法檢查及 `git diff --check` 均 PASS。完整 `node --test` 為 72 項中 70 PASS、2 FAIL，兩項均為既有 `tests/pet-image-mapping.test.js` 的活動寵物映射順序及圖片數量（40／45），在未修改工作區已重現，與本任務無關，未擴大範圍修復。依 Barry 上述明確交付指示及本任務所有適用驗收條件均有通過證據，記錄 `done_by: barry`、`done_at: 2026-11-07`；本紀錄將另以獨立任務版提交／PR 交付至 main。容量以 main 當前 Board 快照計算：本任務結案前 collaborator_side 4／5、owner_side 9／5，Communicate 優先閘門 CLEAR；T-0038 結案後 collaborator_side 降為 3／5，owner_side 仍為 9／5，棒子方仍不得啟動其他 open 任務。
+
+- 2026-11-07 19:14 [老查] 任務版第六階段交付：任務紀錄提交 SHA 為 `686ba998f956fef3881de2b1c9bb5e7f46847353`，內容為將 T-0038 移入 `board/archive/` 並將 Board 索引更新為 `done`；已回讀確認提交只包含 `board/README.md` 與該任務檔的 100% rename。任務紀錄亦已整合至本機 `work/laocha`，整合 merge commit 為 `567e1db277ce650c2680d51e12c834b247486cc3`。遠端任務紀錄 PR 將以 `main` 為基底獨立交付，不攜帶角色分支其他任務成果。
 
 ## 目前架構地圖
 
@@ -340,8 +344,25 @@ Board 可見性與權限分離：所有角色 Worktree 都可查看完整 Board�
 
 ### 改了什麼
 
+- 更新 `AGENTS.md`、`README.md`、`board/README.md`、`board/_TEMPLATE.md`，正式落實八階段生命週期、雙重准入閘門、雙方 Git／工作環境 SOP、`returned`／Communicate Task 權限與鎖定接回流程、雙路徑驗收及內容／任務交付分離。
+- 新增 `scripts/validate-board.mjs`、`tests/board-lifecycle.test.mjs`（9 項測試）及 `.github/workflows/board-lifecycle-validation.yml`。
+- 內容 PR #25 已合併 main：`9b3920835fc40dba98a3b0532338c93ab05386da`；內容提交 `e2c2996cba4f0185b626652d42cf7a90a726ad6f`，本機角色分支整合 commit `0d3f60b1fb7f5d9d90f67e33542f2b3ade1a6276`。
+
 ### 怎麼驗證的
+
+- `node --test tests/board-lifecycle.test.mjs`：9／9 PASS。
+- `node scripts/validate-board.mjs`：36 張任務檔 PASS；雙方容量盤點均可正常輸出。
+- `node --check scripts/validate-board.mjs`、`node --check tests/board-lifecycle.test.mjs`：均 PASS。
+- `git diff --check`：exit 0。
+- GitHub Actions Board lifecycle validation run `42366992154`：success。
+- GitHub Pages build/deploy run `42366991626`：success，部署 commit 與 main SHA 相同。
+- 完整 `node --test`：70／72 PASS；2 項既有 pet-image-mapping 測試失敗，與本任務無關且已在未修改工作區重現。
 
 ### 沒做／做不到的
 
+- 未修改遊戲功能程式、Supabase、Edge Function、玩家資料或正式資料庫；未執行手動部署。GitHub Pages 由 main push 自動部署並已成功。
+- 完整專案測試中的兩項既有寵物圖片測試失敗未在本任務修復，避免擴大工作範圍。
+
 ### 衍生任務／影響任務
+
+- 無新增衍生任務；T-0033 的寵物圖片順序／數量驗收仍屬其原任務範圍，不納入 T-0038。
