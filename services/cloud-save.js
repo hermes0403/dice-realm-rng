@@ -146,9 +146,11 @@ export function createCloudSaveService(dependencies) {
         if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
       } catch (e) {}
       document.getElementById('saveStatus').textContent = '雲端已同步';
+      return true;
     } catch (e) {
       console.error('Cloud sync failed', e);
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
+      return false;
     } finally {
       cloudSyncBusy = false;
       if (cloudSyncPending) scheduleCloudSync();
