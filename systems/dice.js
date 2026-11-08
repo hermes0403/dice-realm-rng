@@ -40,6 +40,7 @@ export function createDiceSystem(deps) {
   let rolling = false;
   let rollingStartedAt = 0;
   let rollSequence = 0;
+  const AUTO_ROLL_INTERVAL_MS = 1500;
 
   function withTimeout(promise, timeoutMs, label) {
     let timeoutHandle = null;
@@ -444,7 +445,7 @@ export function createDiceSystem(deps) {
         return;
       }
       if (!rolling) doRoll();
-    }, Math.max(50, 950 / (1 + speed() / 100)), 'auto-roll');
+    }, Math.max(50, AUTO_ROLL_INTERVAL_MS / (1 + speed() / 100)), 'auto-roll');
     startAutoWatchdog();
   }
 
@@ -467,7 +468,7 @@ export function createDiceSystem(deps) {
           return;
         }
         if (!rolling) doRoll();
-      }, Math.max(50, 950 / (1 + speed() / 100)), 'auto-roll');
+      }, Math.max(50, AUTO_ROLL_INTERVAL_MS / (1 + speed() / 100)), 'auto-roll');
       startAutoWatchdog();
       toast('自動擲骰已開始');
     };
