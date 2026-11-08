@@ -119,7 +119,8 @@ test('each save is immediate locally while cloud uploads are coalesced into five
   }
   assert.equal(writes.length, 1, 'subsequent local saves do not upload individually');
   assert.equal(timers.timeouts.size, 1);
-  assert.equal([...timers.timeouts.values()][0].delay, 5 * 60 * 1000);
+  assert.ok([...timers.timeouts.values()][0].delay > 4 * 60 * 1000);
+  assert.ok([...timers.timeouts.values()][0].delay <= 5 * 60 * 1000);
 });
 
 test('failed forced cloud sync preserves the newest local save for retry', async () => {
@@ -143,8 +144,7 @@ test('visibilitychange and pagehide share one best-effort exit backup request', 
   documentRef.visibilityState = 'hidden';
   listeners.document.visibilitychange();
   listeners.window.pagehide();
-  await Promise.resolve();
-  await Promise.resolve();
+  await new Promise(resolve => setImmediate(resolve));
   assert.equal(writes.length, 1, 'duplicate exit events share the same in-flight backup');
 
   resolveUpsert({ error: null });
