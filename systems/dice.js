@@ -361,6 +361,9 @@ export function createDiceSystem(deps) {
         }
         if (dice.den >= 2048) currentState.quest.rare++;
 
+        // Persist the completed roll locally before any optional remote work or reveal animation.
+        try { save(); } catch (saveError) { console.warn('擲骰結果本機存檔失敗', saveError); }
+
         face.classList.remove('rolling');
         face.style.color = dice.color;
         face.style.borderColor = dice.color;
