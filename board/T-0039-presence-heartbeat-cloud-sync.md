@@ -60,6 +60,12 @@ done_at:
 - 2026-11-09 [叉子] 開單前 owner_side 有效 in_progress／review 任務為 3/5：T-0034、T-0035、T-0037；未發現進行中的 owner_side communicate task，兩道啟動閘門均未阻擋。任務可進入 in_progress。
 - 2026-11-09 [叉子] Board 任務紀錄先由獨立 Board 分支提交；程式任務分支另從最新 main 建立。此 Board 紀錄同步不代表程式已修改、測試已執行、PR 已合併或已部署。
 
+
+- 2026-11-09 [叉子] Board 任務紀錄 PR #30 已合併至 main，merge commit `32021022c71ef3eae953dd620b998238b0b89d23`。GitHub Actions 的 Board validator 檢查 37 張任務檔通過、Board lifecycle tests 9/9 通過，`git diff --check` 通過。程式任務分支 `task/T-0039-presence-heartbeat-cloud-sync` 已從此最新 main SHA 建立。
+- 2026-11-09 [叉子] 已修改 `services/presence.js` 與 `script.js`：心跳改為 5 分鐘，並新增共用 7 分鐘在線判定窗口。管理員玩家列表改用同一 helper；管理 API 未提供 `last_seen` 時，前端補查 `player_profiles`，若補查失敗則顯示「狀態未知」而不誤標離線。
+- 2026-11-09 [叉子] 已修改 `systems/dice.js`：自動擲骰基準排程固定為 1,500ms（保留速度加成縮短間隔的行為）；每次抽取結果更新背包與統計後，先呼叫本機 `save()`，再執行公告／揭示等非必要非同步工作。既有雲端同步仍使用 `services/cloud-save.js` 的 5 分鐘批次節流，未改成每抽上傳。
+- 2026-11-09 [叉子] 新增 presence、雲端批次同步／登出／離頁備份及擲骰本機保存測試，並新增 GitHub Actions workflow；另補自動擲骰 1,500ms 排程測試。這些測試目前已提交到任務分支，但尚未執行；尚未建立程式 PR，也未部署。由於目前可用環境無法連線 GitHub 下載工作副本，且未獲本次程式 PR 授權，不能宣稱 Node 測試或真實瀏覽器測試通過。
+
 ## 完工回報
 
 ### 改了什麼
