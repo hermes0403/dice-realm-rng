@@ -94,7 +94,7 @@ function makeCloudService({ upsert = async () => ({ error: null }) } = {}) {
     openAuth() {}, showAuthMessage() {}, timerManager: timers,
     localStorageRef: storage, documentRef, windowRef
   });
-  return { service, storage, timers, writes, listeners, state, KEY };
+  return { service, storage, timers, writes, listeners, documentRef, windowRef, state, KEY };
 }
 
 test('each save is immediate locally while cloud uploads are coalesced into five-minute batches', async () => {
@@ -138,8 +138,9 @@ test('failed forced cloud sync preserves the newest local save for retry', async
 test('visibilitychange and pagehide share one best-effort exit backup request', async () => {
   let resolveUpsert;
   const pendingUpsert = new Promise(resolve => { resolveUpsert = resolve; });
-  const { listeners, writes } = makeCloudService({ upsert: () => pendingUpsert });
+  const { listeners, writes, documentRef } = makeCloudService({ upsert: () => pendingUpsert });
 
+  documentRef.visibilityState = 'hidden';
   listeners.document.visibilitychange();
   listeners.window.pagehide();
   await Promise.resolve();
