@@ -1,7 +1,7 @@
 ---
 id: T-0033
 title: 依原始順序移除退役寵物圖片並修正配對
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-04
-updated: 2026-11-05
+updated: 2026-11-09
 depends_on: []
 branch: task/T-0033-correct-pet-image-order
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -85,3 +85,5 @@ done_at:
 - 2026-11-04 16:00 [叉子] 原始 43 張圖片移除 4 張後與 39 張 ID 對應表的逐筆核對已有紀錄；圖片映射專屬 Node 測試及線上圖鑑／背包實際顯示仍未完成，維持 review。
 
 - 2026-11-05 [叉子] 棒子已完成線上人工驗收：39 隻寵物在圖鑑、背包及其他顯示位置的圖片均正確，重新整理後仍正確。另從 GitHub main 靜態重查，現役 39 個 pet ID 與 39 張圖片 key 一對一且順序完全相同，圖片內容無重複，4 個退場 ID（c9、r4、l1、m2）均無映射；petArt 依穩定 ID 取圖並有缺圖 fallback。新增測試包含 key 順序斷言。11 項等價靜態斷言全部通過；PR #15/#16 新增 patch 逐行空白掃描未發現尾端空白或空白後接 tab。因執行環境無法解析 github.com（`git clone` 回報 `Could not resolve host: github.com`），`node --test tests/pet-image-mapping.test.js` 與正式 `git diff --check` 命令仍未能執行；patch 空白掃描僅作替代檢查，不冒稱為原命令通過。維持 review，待 Node 測試可執行後再結案。
+
+- 2026-11-09 [棒子] 使用者明確確認此任務先前已由其完成實際驗收，並指示直接驗收成功；本任務依 reviewer 的人工驗收確認結案。未實際執行的自動化測試或額外測量仍以既有紀錄為準，不另行宣稱已執行。

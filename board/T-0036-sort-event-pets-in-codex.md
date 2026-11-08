@@ -1,7 +1,7 @@
 ---
 id: T-0036
 title: 依稀有度與每秒收益排序活動寵物圖鑑
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-05
-updated: 2026-11-05
+updated: 2026-11-09
 depends_on: [T-0035]
 branch: task/T-0036-sort-event-pets-in-codex
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -62,3 +62,5 @@ done_at:
 ### 衍生任務／影響任務
 
 - 無。
+
+- 2026-11-09 [棒子] 使用者明確確認此任務先前已由其完成實際驗收，並指示直接驗收成功；本任務依 reviewer 的人工驗收確認結案。未實際執行的自動化測試或額外測量仍以既有紀錄為準，不另行宣稱已執行。
