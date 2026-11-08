@@ -192,8 +192,9 @@ export function createCloudSaveService(dependencies) {
       cloudSyncTimer = null;
     }
     while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
-    await syncCloudSave();
+    const saved = await syncCloudSave();
     while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    return saved === true;
   }
 
   async function loadCloudSave() {
@@ -267,7 +268,6 @@ export function createCloudSaveService(dependencies) {
         if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
         localStorage.setItem(KEY, JSON.stringify(S));
         render();
-        await syncCloudSave();
       }
       await applyPendingGrants(true);
       await syncCloudSave();
