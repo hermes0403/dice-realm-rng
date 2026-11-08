@@ -29,7 +29,7 @@ import { createEquipmentUI } from './ui/equipment.js';
 import { createAdminPlayerManagement } from './admin/player-management.js';
 import { createAdminMonitoringSystem } from './admin/monitoring.js';
 import { createGameStateService } from './core/game-state.js';
-import { createPresenceService } from './services/presence.js';
+import { createPresenceService, PRESENCE_HEARTBEAT_INTERVAL } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
@@ -208,7 +208,7 @@ authService=createAuthService({
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
 });
 authService.registerAuthStateListener();
-timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
+timerManager.setInterval(heartbeat,PRESENCE_HEARTBEAT_INTERVAL,'presence-heartbeat');
 codexUI = createCodexUI({
   D, getState: () => S, format, chanceText, renderPetCodex,
   weatherDiceStats, loadWeatherDiceExistCounts, documentRef: document
