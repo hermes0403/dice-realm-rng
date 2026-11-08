@@ -2,7 +2,7 @@
 export function createPresenceService(dependencies) {
   const {
     supabaseClient, getCurrentUser, getState, totalUnique,
-    achievementStats, applyPendingGrants, syncCloudSave
+    achievementStats, applyPendingGrants, scheduleSync
   } = dependencies;
   let heartbeatBusy = false;
   let lastHeartbeatAt = 0;
@@ -30,7 +30,7 @@ export function createPresenceService(dependencies) {
       if (error) throw error;
       lastHeartbeatAt = Date.now();
       const grantChanged = await applyPendingGrants();
-      if (grantChanged) await syncCloudSave();
+      if (grantChanged) scheduleSync();
     } catch (error) {
       console.debug('Presence update skipped', error);
     } finally {
