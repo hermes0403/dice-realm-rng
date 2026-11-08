@@ -6,10 +6,12 @@ export function createCloudSaveService(dependencies) {
     restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
     toast, openAuth, showAuthMessage, timerManager,
     localStorageRef = globalThis.localStorage,
-    documentRef = globalThis.document
+    documentRef = globalThis.document,
+    windowRef = globalThis.window
   } = dependencies;
   const localStorage = localStorageRef;
   const document = documentRef;
+  const windowObject = windowRef;
 
   let cloudSyncTimer = null;
   let cloudSyncBusy = false;
@@ -197,6 +199,26 @@ export function createCloudSaveService(dependencies) {
     return saved === true;
   }
 
+  let exitFlushPromise = null;
+  let lastExitFlushAt = 0;
+  async function flushOnExit(reason) {
+    if (!getCurrentUser() || !supabaseClient) return false;
+    // visibilitychange and pagehide can fire together; share one final backup request.
+    if (exitFlushPromise) return exitFlushPromise;
+    if (Date.now() - lastExitFlushAt < 1500) return false;
+    lastExitFlushAt = Date.now();
+    exitFlushPromise = flushCloudSave().finally(() => { exitFlushPromise = null; });
+    const saved = await exitFlushPromise;
+    if (saved !== true) console.warn('Final cloud backup did not complete:', reason);
+    return saved === true;
+  }
+
+  // Backup as soon as the player backgrounds or closes the game page.
+  document?.addEventListener?.('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') void flushOnExit('visibilitychange');
+  });
+  windowObject?.addEventListener?.('pagehide', () => { void flushOnExit('pagehide'); });
+
   async function loadCloudSave() {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
@@ -283,5 +305,5 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit };
 }
