@@ -1,7 +1,7 @@
 ---
 id: T-0027
 title: 修復長時間自動擲骰意外暫停
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-09
 depends_on: []
 branch: task/T-0027-auto-roll-watchdog
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -73,3 +73,5 @@ done_at:
 
 - 2026-11-04 16:00 [叉子] 更正先前完工回報：PR #10 已合併至 main，merge commit `552d66f3da42e931d46e3cc061f6443f43325fa5`；GitHub Actions run `41743809651` 的自動擲骰 watchdog 回歸測試與 `git diff --check` 均成功。Pages 部署 run `41751525021` success，已包含此修正。
 - 2026-11-04 16:00 [叉子] 尚未以筆電連續運行自動擲骰 30～60 分鐘，故保留 review，等待實際長時間觀察。
+
+- 2026-11-09 [棒子] 使用者明確確認此任務先前已由其完成實際驗收，並指示直接驗收成功；本任務依 reviewer 的人工驗收確認結案。未實際執行的自動化測試或額外測量仍以既有紀錄為準，不另行宣稱已執行。
