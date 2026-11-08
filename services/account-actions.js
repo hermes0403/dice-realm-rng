@@ -13,7 +13,7 @@ export function setupAccountActions(dependencies) {
     achievementStats,
     save,
     render,
-    syncCloudSave,
+    flushCloudSave,
     toast,
     stopAuto,
     KEY,
@@ -121,8 +121,19 @@ export function setupAccountActions(dependencies) {
 
   document.getElementById('profileLogoutBtn')?.addEventListener('click', async () => {
     if (!getCurrentUser()) { toast('目前沒有登入雲端帳號'); return; }
-    const { error } = await supabaseClient.auth.signOut();
-    if (error) { toast('登出失敗：' + error.message); return; }
-    toast('已登出雲端帳號');
+    const button = document.getElementById('profileLogoutBtn');
+    if (button) button.disabled = true;
+    try {
+      // Flush the latest local game state before ending the authenticated session.
+      const saved = await flushCloudSave();
+      if (saved === false) throw new Error('雲端同步失敗，請確認網路後重試');
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) throw error;
+      toast('存檔完成，已登出雲端帳號');
+    } catch (error) {
+      toast('雲端存檔未完成，為避免進度遺失，暫時未登出：' + (error?.message || '請稍後重試'));
+    } finally {
+      if (button) button.disabled = false;
+    }
   });
 }

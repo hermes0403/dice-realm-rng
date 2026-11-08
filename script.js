@@ -118,7 +118,7 @@ cloudSaveService=createCloudSaveService({
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
-presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, syncCloudSave });
+presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, scheduleSync });
 function save(){return cloudSaveService.save()}
 function userSaveKey(userId){return cloudSaveService.userSaveKey(userId)}
 function savePayload(){return cloudSaveService.savePayload()}
@@ -208,7 +208,7 @@ authService=createAuthService({
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
 });
 authService.registerAuthStateListener();
-timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
+timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
 codexUI = createCodexUI({
   D, getState: () => S, format, chanceText, renderPetCodex,
   weatherDiceStats, loadWeatherDiceExistCounts, documentRef: document
@@ -287,7 +287,7 @@ setupAccountActions({
   documentRef: document, getState: () => S, setState: value => { S = value; },
   getCurrentUser: () => currentUser, setCurrentUser: value => { currentUser = value; },
   supabaseClient, SUPABASE_URL, SUPABASE_KEY, totalUnique, achievementStats,
-  save, render, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
+  save, render, flushCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
 save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');

@@ -2,12 +2,15 @@
 export function createPresenceService(dependencies) {
   const {
     supabaseClient, getCurrentUser, getState, totalUnique,
-    achievementStats, applyPendingGrants, syncCloudSave
+    achievementStats, applyPendingGrants, scheduleSync
   } = dependencies;
   let heartbeatBusy = false;
+  let lastHeartbeatAt = 0;
+  const HEARTBEAT_INTERVAL = 60000;
 
   async function heartbeat() {
     if (heartbeatBusy || !getCurrentUser() || !supabaseClient) return;
+    if (Date.now() - lastHeartbeatAt < HEARTBEAT_INTERVAL) return;
     heartbeatBusy = true;
     const user = getCurrentUser();
     try {
@@ -25,8 +28,9 @@ export function createPresenceService(dependencies) {
         updated_at: now
       }, { onConflict: 'user_id' });
       if (error) throw error;
+      lastHeartbeatAt = Date.now();
       const grantChanged = await applyPendingGrants();
-      if (grantChanged) await syncCloudSave();
+      if (grantChanged) scheduleSync();
     } catch (error) {
       console.debug('Presence update skipped', error);
     } finally {
