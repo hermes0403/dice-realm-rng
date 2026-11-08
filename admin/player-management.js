@@ -1,3 +1,4 @@
+import { isPlayerOnline } from '../services/presence.js';
 /** Admin player list, rare-roll history, and suspicious-roll review UI. */
 
 /** Format the Auth account creation timestamp in Taiwan local time. */
@@ -25,10 +26,17 @@ async function loadAdminDashboard(){
   if(!playerRows.length){
    const {data:profiles,error}=await supabaseClient.from('player_profiles').select('user_id,username,total_rolls,unique_dice,rarest_den,coins,last_seen,updated_at').order('updated_at',{ascending:false}).limit(5000);
    if(error)throw new Error('管理後端與玩家資料表皆無法讀取：'+(error.message||dashboardError));
-   playerRows=(profiles||[]).map(p=>({...p,online:!!p.last_seen&&(Date.now()-new Date(p.last_seen).getTime()<90000),player_number:null}));
+   playerRows=(profiles||[]).map(p=>({...p,online:isPlayerOnline(p.last_seen),player_number:null}));
   }
+  // Use the same last_seen window for both player badges and the online total.
+  if(playerRows.length&&playerRows.some(p=>!Object.prototype.hasOwnProperty.call(p,'last_seen'))){
+   try{
+    const ids=playerRows.map(p=>p.user_id).filter(Boolean);
+    if(ids.length){const {data:presenceRows,error:presenceError}=await supabaseClient.from('player_profiles').select('user_id,last_seen').in('user_id',ids);if(presenceError)throw presenceError;const seenByUser=new Map((presenceRows||[]).map(p=>[p.user_id,p.last_seen]));playerRows=playerRows.map(p=>({...p,last_seen:Object.prototype.hasOwnProperty.call(p,'last_seen')?p.last_seen:seenByUser.get(p.user_id),online:isPlayerOnline(Object.prototype.hasOwnProperty.call(p,'last_seen')?p.last_seen:seenByUser.get(p.user_id))}));}
+   }catch(presenceError){console.debug('Player presence lookup skipped',presenceError);playerRows=playerRows.map(p=>({...p,online:Object.prototype.hasOwnProperty.call(p,'last_seen')?isPlayerOnline(p.last_seen):!!p.online}));}
+  }else{playerRows=playerRows.map(p=>({...p,online:isPlayerOnline(p.last_seen)}));}
   setOptions('adminTargetPlayer',playerRows);setOptions('adminCoinBoostPlayer',playerRows);setOptions('adminPlayerWeatherTarget',playerRows);setOptions('adminBanTarget',playerRows);setOptions('adminDeleteTarget',playerRows);
-  const count=document.getElementById('adminPlayerCount'),online=document.getElementById('adminOnlineCount');if(count)count.textContent=format(playerRows.length);if(online)online.textContent=format(data.onlineCount??playerRows.filter(p=>p.online).length);
+  const count=document.getElementById('adminPlayerCount'),online=document.getElementById('adminOnlineCount');if(count)count.textContent=format(playerRows.length);if(online)online.textContent=format(playerRows.every(p=>Object.prototype.hasOwnProperty.call(p,'last_seen'))?playerRows.filter(p=>p.online).length:(data.onlineCount??playerRows.filter(p=>p.online).length));
   const usernameCounts={};playerRows.forEach(p=>{const k=String(p.username||'玩家').normalize('NFKC').trim().toLocaleLowerCase();usernameCounts[k]=(usernameCounts[k]||0)+1});
   players.innerHTML=playerRows.map(p=>{const name=String(p.username||'玩家'),duplicate=(usernameCounts[name.normalize('NFKC').trim().toLocaleLowerCase()]||0)>1,num=Number(p.player_number)>0?String(p.player_number).padStart(5,'0'):'待分配';return `<div class="admin-player"><div style="min-width:0"><b>${escapeHTML(name)}</b><div class="mini" style="color:#a8b7ff;font-weight:800">#${num}</div>${duplicate?`<div class="mini">同名帳號識別碼：${escapeHTML(String(p.user_id||'').slice(0,8))}</div>`:''}<div class="mini">擲骰 ${format(p.total_rolls||0)} 次 · 骰子 ${format(p.unique_dice||0)} 種 · ${format(p.coins||0)}$</div><div class="mini">最後活動：${p.last_seen?new Date(p.last_seen).toLocaleString():'尚無紀錄'}</div></div><span class="pill ${p.online?'admin-online':'admin-offline'}">${p.online?'● 在線':'○ 離線'}</span></div>`}).join('')||'<div class="empty">尚無玩家資料</div>';
   const newBox=document.getElementById('adminNewPlayersList');if(newBox){newBox.innerHTML=[...playerRows].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,100).map(p=>`<div class="admin-log"><div><b>${escapeHTML(p.username||'玩家')}</b><div class="mini">加入時間：${formatPlayerJoinTime(p.created_at)}</div><div class="mini">帳號識別碼：${escapeHTML(String(p.user_id||'').slice(0,8))}</div></div><span class="pill">玩家</span></div>`).join('')||'<div class="empty">尚無玩家資料</div>';}
