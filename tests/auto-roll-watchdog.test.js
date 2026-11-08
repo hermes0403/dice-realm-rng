@@ -87,6 +87,18 @@ function makeDiceSystem() {
   return { dice, timers, elements, listeners };
 }
 
+test('auto-roll cadence stays at 1.5 seconds when started and restarted', () => {
+  const { dice, timers, elements } = makeDiceSystem();
+  dice.setupAutoRollUI();
+  elements.get('autoBtn').onclick();
+  const autoTimer = [...timers.intervals.values()].find(timer => timer.delay !== 10000);
+  assert.equal(autoTimer?.delay, 1500);
+  dice.restartAutoInterval();
+  const restartedAutoTimer = [...timers.intervals.values()].find(timer => timer.delay !== 10000);
+  assert.equal(restartedAutoTimer?.delay, 1500);
+  dice.stopAuto();
+});
+
 test('auto-roll watchdog starts with auto-roll and is cleared by manual stop', () => {
   const { dice, timers, elements } = makeDiceSystem();
   assert.equal(dice.setupAutoRollUI(), true);
