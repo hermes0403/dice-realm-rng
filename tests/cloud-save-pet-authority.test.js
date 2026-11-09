@@ -53,6 +53,7 @@ function createService({ localSave, cloudSave, rpcHandler } = {}) {
     }
   };
   let state = { pets: [], equippedPetUids: [], coins: 100, rolls: 10 };
+  let currentUserId = 'user-a';
   const timerManager = {
     clearTimeout() {},
     setTimeout(callback, delay) { scheduled.push({ callback, delay }); return scheduled.length; }
@@ -61,7 +62,7 @@ function createService({ localSave, cloudSave, rpcHandler } = {}) {
     KEY, D: [], POTIONS: [], supabaseClient,
     getState: () => state,
     setState: value => { state = value; },
-    getCurrentUser: () => ({ id: 'user-a' }),
+    getCurrentUser: () => ({ id: currentUserId }),
     fresh: () => ({
       bag: {}, pets: [], equippedPetUids: [], coins: 0, rolls: 0,
       potions: { inventory: {}, active: {}, activeSpeed: {} }
@@ -81,7 +82,7 @@ function createService({ localSave, cloudSave, rpcHandler } = {}) {
     documentRef,
     windowRef: { addEventListener() {} }
   });
-  return { service, storage, writes, scheduled, getState: () => state };
+  return { service, storage, writes, scheduled, getState: () => state, setUserId: value => { currentUserId = value; } };
 }
 
 test('cloud pet inventory does not merge a sold pet from a stale local snapshot', async () => {
@@ -164,4 +165,50 @@ test('failed delta writes do not advance the baseline and can be retried', async
   assert.equal(writes.length, 3);
   assert.deepEqual(Object.keys(writes.at(-1).args.p_save_patch), ['coins']);
   assert.equal(writes.at(-1).args.p_save_patch.coins, 130);
+});
+
+test('manual cloud flush sends pending changes immediately', async () => {
+  const { service, writes, scheduled, getState } = createService({
+    cloudSave: { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 }
+  });
+
+  await service.loadCloudSave();
+  getState().coins = 140;
+  service.save();
+  assert.equal(scheduled.length, 1);
+  const before = writes.length;
+
+  assert.equal(await service.flushCloudSave(), true);
+  assert.equal(writes.length, before + 1);
+  assert.deepEqual(Object.keys(writes.at(-1).args.p_save_patch), ['coins']);
+});
+
+test('page-exit backup callers share one in-flight flush', async () => {
+  const { service, writes, getState } = createService({
+    cloudSave: { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 }
+  });
+
+  await service.loadCloudSave();
+  getState().coins = 150;
+  const before = writes.length;
+  const visibilityFlush = service.flushOnExit('visibilitychange');
+  const pageHideFlush = service.flushOnExit('pagehide');
+
+  const results = await Promise.all([visibilityFlush, pageHideFlush]);
+  assert.deepEqual(results, [true, true]);
+  assert.equal(writes.length, before + 1);
+});
+
+test('a previous account snapshot is never written into a different account', async () => {
+  const { service, writes, setUserId, getState } = createService({
+    cloudSave: { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 }
+  });
+
+  await service.loadCloudSave();
+  const before = writes.length;
+  setUserId('user-b');
+  getState().coins = 999;
+
+  assert.equal(await service.syncCloudSave(), false);
+  assert.equal(writes.length, before);
 });
