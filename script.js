@@ -91,6 +91,8 @@ const weatherSystem = createWeatherSystem({
  D, WEATHER_TYPES, format, escapeHTML, chanceText, byId, supabaseClient,
  timerManager,
  getState: () => S, getCurrentUser: () => currentUser,
+ isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+ markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
  getAnnouncementChannel: () => realmSocialSystem?.getAnnouncementChannel() || null, openAuth, toast, save,
  render, renderCodex, renderGloves, flushCloudSave,
  announceWeatherSummon, triggerWeatherSurge
@@ -252,6 +254,8 @@ mainRenderUI = createMainRenderUI({
 setupAutoRollUI();
 const { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = createGlobalBoostSystem({
  supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
+ isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+ markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
  render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
 });
 setupGlobalBoostUI();
