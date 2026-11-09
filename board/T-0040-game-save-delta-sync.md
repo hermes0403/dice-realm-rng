@@ -55,9 +55,11 @@ done_at:
 ## 紀錄
 
 - 2026-11-09 [叉子] 依棒子本次指示建立任務；owner_side 開工容量盤點為 4/5（T-0034、T-0035、T-0037、T-0039），未發現進行中的 owner_side communicate task，兩道啟動閘門均未阻擋。
-- 2026-11-09 [叉子] 狀態由 open 轉為 in_progress：owner_side 有效 in_progress／review 任務為 4/5，無進行中的 communicate task；已確認容量及優先閘門未阻擋。（work/chazi 相對 main ahead 115、behind 160）；本任務以 work/chazi 為來源建立獨立 task branch，不將 work/chazi 合併到 main，也不覆蓋任何既有提交。
+- 2026-11-09 [叉子] 狀態由 open 轉為 in_progress；已確認 work/chazi 相對 main ahead 115、behind 160，故以 work/chazi HEAD 建立獨立任務分支，不將分歧分支合併到 main。
+- 2026-11-09 [叉子] 已部署 Supabase `sync_player_game_save_delta` RPC；以交易內 rollback 測試確認只更新 coins 時，bag、pets、achievements、rolls 均保留，測試資料已 rollback。
+- 2026-11-09 [叉子] GitHub Actions 專用回歸測試目前 8/8 通過；已補上完整 repository test suite，等待該次 CI 結果。
 
-- 2026-11-09 [叉子] 已確認 work/chazi 與 main 分歧
+## 完工回報
 
 ### 改了什麼
 
