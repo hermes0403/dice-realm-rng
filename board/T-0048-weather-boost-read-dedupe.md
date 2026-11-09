@@ -1,7 +1,7 @@
 ---
 id: T-0048
 title: 合併重複天氣與全服加成讀取
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -13,7 +13,7 @@ updated: 2026-11-09
 depends_on: [T-0042, T-0044, T-0046]
 branch: work/chazi
 done_by: 棒子
-done_at:
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -29,12 +29,12 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 全服加成初始讀取只執行一次。
-- [ ] 天氣骰子統計同時只允許一個 RPC。
-- [ ] 五分鐘內重複開啟圖鑑不重複查詢統計。
-- [ ] Egress blocked 時不發送天氣統計 RPC。
-- [ ] 新增回歸測試並實際執行。
-- [ ] `git diff --check` 通過。
+- [x] 全服加成初始讀取只執行一次。
+- [x] 天氣骰子統計同時只允許一個 RPC。
+- [x] 五分鐘內重複開啟圖鑑不重複查詢統計。
+- [x] Egress blocked 時不發送天氣統計 RPC。
+- [x] 新增回歸測試並實際執行。
+- [x] `git diff --check` 通過。
 
 ## 紀錄
 
@@ -49,3 +49,6 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+
+- 2026-11-09 [棒子] 驗收：GitHub Actions Branch tests（commit 3ab0c024fab13dde3f23d0abb41583dadef1e875）完整測試 58/58 通過，JavaScript syntax check 與 branch whitespace check 通過；本項修改保留在 work/chazi，未部署，main 與玩家資料未修改。
