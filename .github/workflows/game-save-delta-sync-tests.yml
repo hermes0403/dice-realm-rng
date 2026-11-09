@@ -9,7 +9,7 @@ on:
       - 'services/cloud-save.js'
       - 'services/account-actions.js'
       - 'script.js'
-      - 'tests/cloud-save-pet-authority.test.js'
+      - 'tests/**'
       - 'docs/game-save-delta-sync.sql'
       - '.github/workflows/game-save-delta-sync-tests.yml'
   pull_request:
