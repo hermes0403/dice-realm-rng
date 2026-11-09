@@ -127,9 +127,11 @@ export function createRealmPolls(dependencies) {
       if (result.error) throw result.error;
       existing = result.data;
     } catch (error) {
+      const restricted = markCloudSyncBlocked(error);
+      if (restricted || isCloudSyncBlocked()) stopRealmPollSync();
       console.warn('Existing poll vote check failed', error);
     }
-    if (getCurrentUser()?.id !== currentUser.id || realmCurrentPollId !== pollId) return false;
+    if (isCloudSyncBlocked() || getCurrentUser()?.id !== currentUser.id || realmCurrentPollId !== pollId) return false;
     if (existing) {
       voteStatus.textContent = `你已投票：${existing.choice === 'hell' ? (poll.option_a || '選項一') : (poll.option_b || '選項二')}`;
       buttons.style.display = 'none';
