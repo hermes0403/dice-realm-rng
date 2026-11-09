@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 已修改 services/cloud-save.js：首次確認 Egress restriction 時呼叫 supabaseClient.realtime.disconnect()，並清除 weather-refresh／global-boost-refresh 定時器；修改 systems/weather.js 與 systems/global-boost.js，在受限時不建立 channel、不執行 fallback query，且 Realtime error callback 會辨識 402 並觸發共用斷路器；script.js 已注入共用狀態。新增 tests/realtime-egress-circuit-breaker.test.js，涵蓋 global boost 402 斷線及 weather blocked guard。所有修改檔均已重新 fetch 確認 SHA／內容；完整測試尚待執行。
+- 2026-11-09 [叉子] 已修改 services/cloud-save.js：首次確認 Egress restriction 時呼叫 supabaseClient.realtime.disconnect()，並清除 weather-refresh／global-boost-refresh 定時器；修改 systems/weather.js 與 systems/global-boost.js，在受限時不建立 channel、不執行 fallback query，且 Realtime error callback 會辨識 402 並觸發共用斷路器；script.js 已注入共用狀態。新增 tests/realtime-egress-circuit-breaker.test.js，涵蓋 global boost 巢狀 cause 402 斷線及 weather blocked guard。依 Supabase 最新 JavaScript 文件確認 subscribe callback 可接收 status／err，Realtime disconnect 為非同步方法；依 realtime-js 近期 changelog 核對 API 版本資訊，並讓 disconnect rejection 被 catch。所有修改檔均已重新 fetch 確認 SHA／內容；完整測試尚待執行。
 
 ## 完工回報
 
