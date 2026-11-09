@@ -101,3 +101,74 @@ test('HTTP 402 egress restriction pauses cloud retries but keeps local saves wri
   assert.equal(cloudReadCount, 1);
   assert.equal(status.textContent, '本機已保存（雲端服務受限）');
 });
+
+test('local dirty-save recovery counts as a successful session load without overwriting cloud data', async () => {
+  const storage = new Map();
+  const localStorageRef = {
+    getItem(key) { return storage.get(key) ?? null; },
+    setItem(key, value) { storage.set(key, String(value)); },
+    removeItem(key) { storage.delete(key); }
+  };
+  const status = { textContent: '' };
+  const documentRef = {
+    getElementById(id) { return id === 'saveStatus' ? status : { style: {} }; },
+    addEventListener() {}
+  };
+  const timers = createFakeTimers();
+  const localSave = {
+    name: 'Recovered Player',
+    rolls: 321,
+    coins: 654,
+    bag: { d1: 8 },
+    first: {},
+    pets: [],
+    equippedPetUids: [],
+    achievements: {},
+    potions: { inventory: {} }
+  };
+  storage.set('diceRealm_user_user-2', JSON.stringify(localSave));
+  storage.set('diceRealm_cloud_dirty_user-2', JSON.stringify({
+    userId: 'user-2',
+    baseVersion: 'cloud-version-1'
+  }));
+  let cloudReadCount = 0;
+  const supabaseClient = {
+    from() {
+      cloudReadCount++;
+      throw new Error('dirty local recovery must not read cloud data');
+    }
+  };
+  const state = { name: 'Before recovery', rolls: 0, coins: 0, bag: {}, pets: [] };
+  const service = createCloudSaveService({
+    KEY: 'diceRealm',
+    D: [],
+    POTIONS: [],
+    supabaseClient,
+    getState: () => state,
+    setState(value) { Object.assign(state, value); },
+    getCurrentUser: () => ({ id: 'user-2' }),
+    fresh: () => ({ bag: {}, pets: [], potions: { inventory: {} } }),
+    normalizeGloves: value => value,
+    migrateCurrency: value => value,
+    ensurePetData() {},
+    restoreAutoSellPrefs() {},
+    totalUnique: () => 1,
+    render() {},
+    toast() {},
+    openAuth() {},
+    showAuthMessage() {},
+    timerManager: timers.manager,
+    localStorageRef,
+    documentRef,
+    windowRef: { addEventListener() {} }
+  });
+
+  const loaded = await service.loadCloudSave();
+  assert.equal(loaded, true);
+  assert.equal(state.name, 'Recovered Player');
+  assert.equal(state.rolls, 321);
+  assert.equal(state.coins, 654);
+  assert.equal(cloudReadCount, 0);
+  assert.equal(timers.manager.getStats().total, 1);
+  assert.match(status.textContent, /安全檢查雲端版本/);
+});
