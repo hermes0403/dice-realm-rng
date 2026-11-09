@@ -1,7 +1,7 @@
 ---
 id: T-0040
 title: 降低 game_saves 雲端存檔傳輸量並保留完整存檔行為
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -57,14 +57,32 @@ done_at:
 - 2026-11-09 [叉子] 依棒子本次指示建立任務；owner_side 開工容量盤點為 4/5（T-0034、T-0035、T-0037、T-0039），未發現進行中的 owner_side communicate task，兩道啟動閘門均未阻擋。
 - 2026-11-09 [叉子] 狀態由 open 轉為 in_progress；已確認 work/chazi 相對 main ahead 115、behind 160，故以 work/chazi HEAD 建立獨立任務分支，不將分歧分支合併到 main。
 - 2026-11-09 [叉子] 已部署 Supabase `sync_player_game_save_delta` RPC；以交易內 rollback 測試確認只更新 coins 時，bag、pets、achievements、rolls 均保留，測試資料已 rollback。
-- 2026-11-09 [叉子] GitHub Actions 專用回歸測試目前 8/8 通過；已補上完整 repository test suite，等待該次 CI 結果。
+- 2026-11-09 [叉子] GitHub Actions 完整 repository 回歸測試通過：`node --test tests/*.test.js`，34/34 pass、0 fail（run #7）。
+- 2026-11-09 [叉子] Supabase migration `game_save_delta_sync` 與欄位別名修正已套用；rollback transaction 測試確認 bag、pets、achievements、rolls、coins 保留，交易已 rollback；ACL 確認僅 authenticated 可執行，anon／PUBLIC 不可執行。
+- 2026-11-09 [叉子] 狀態由 in_progress 轉為 review，交棒子驗收。程式目前保留在任務分支，尚未整合回 work/chazi、未建立 PR、未合併 main、未部署 GitHub Pages。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `services/cloud-save.js`：加入穩定欄位差異比對；無變更不呼叫存檔 RPC；變更時只傳變更的頂層欄位；5 分鐘雲端批次備份；保留手動強制 flush、離頁 best-effort 備份及失敗重試；依帳號隔離同步基準。
+- `services/account-actions.js`、`script.js`：個人資料登出前必須先完成雲端 flush，失敗時保留本機資料並阻止登出。
+- `docs/game-save-delta-sync.sql`：新增原子 JSONB 差異合併 RPC 文件；正式 Supabase 已套用 migration。
+- `tests/`、`.github/workflows/game-save-delta-sync-tests.yml`：新增差異同步、登出 flush 及完整回歸測試。
+
 ### 怎麼驗證的
+
+- GitHub Actions run #7：執行 `node --test tests/*.test.js`，34 tests、34 pass、0 fail。
+- Supabase rollback transaction：呼叫新 RPC 後確認 bag、pets、achievements、rolls、coins 均未被未變更欄位覆蓋；交易已 rollback，未保留測試資料修改。
+- Supabase ACL 查核：authenticated 可執行；anon 與 PUBLIC 不可執行。
+- 已確認既有 game_saves trigger 仍存在，寵物售出 tombstone、成就保留與 rolls 防回退邏輯未被移除。
 
 ### 沒做／做不到的
 
+- 前端程式尚未整合回 `work/chazi`，也未合併 `main` 或部署 GitHub Pages；目前不會在玩家遊戲頁面生效。
+- 尚未以真實玩家瀏覽器完成登入、擲骰、合成、交易、登出全流程人工驗收；34 項自動化測試及資料庫 rollback 測試不能取代正式頁面驗收。
+- 尚未取得更新後的 Egress 實際用量，不能宣稱已測得節省百分比。
+
 ### 衍生任務／影響任務
+
+- 無。
