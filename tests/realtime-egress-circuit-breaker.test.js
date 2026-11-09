@@ -84,8 +84,11 @@ test('Realtime HTTP 402 trips the shared breaker and prevents refresh or resubsc
   assert.equal(globalBoost.setupGlobalBoostSubscription(), true);
   assert.equal(channelCreations, 1);
   subscribeCallback('CHANNEL_ERROR', {
-    status: 402,
-    message: 'Service for this project is restricted due to exceed_egress_quota'
+    message: 'Realtime transport failed',
+    cause: {
+      status: 402,
+      message: 'Service for this project is restricted due to exceed_egress_quota'
+    }
   });
 
   assert.equal(blocked, true);
