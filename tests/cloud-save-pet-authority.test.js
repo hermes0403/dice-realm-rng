@@ -12,7 +12,7 @@ function createStorage(initial = {}) {
   };
 }
 
-function createService({ localSave, cloudSave, rpcHandler, storage: providedStorage, version: initialVersion } = {}) {
+function createService({ localSave, cloudSave, rpcHandler, storage: providedStorage, version: initialVersion, gameSavePromise } = {}) {
   const KEY = 'diceRealmTest';
   const storage = providedStorage || createStorage({
     [KEY + '_user_user-a']: JSON.stringify(localSave || {})
@@ -39,6 +39,7 @@ function createService({ localSave, cloudSave, rpcHandler, storage: providedStor
           select() { return this; },
           eq() { return this; },
           async maybeSingle() {
+            if (gameSavePromise) return await gameSavePromise;
             return { data: cloudSave ? { save_data: cloudSave, updated_at: version } : null, error: null };
           }
         };
@@ -272,4 +273,55 @@ test('dirty local progress can initialize cloud storage when no remote save exis
   assert.equal(await second.service.loadCloudSave(), false);
   assert.equal(second.getState().coins, 300);
   assert.equal(second.scheduled.length, 1, 'a new cloud save may be created when no remote save exists');
+});
+
+
+test('local changes made while cloud load is pending are not overwritten by its older response', async () => {
+  let resolveCloudRead;
+  const gameSavePromise = new Promise(resolve => { resolveCloudRead = resolve; });
+  const service = createService({ gameSavePromise });
+  const loading = service.service.loadCloudSave();
+
+  service.getState().coins = 350;
+  service.service.save();
+  resolveCloudRead({
+    data: {
+      save_data: { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 },
+      updated_at: '2026-11-09T00:00:00.000Z'
+    },
+    error: null
+  });
+
+  assert.equal(await loading, false);
+  assert.equal(service.getState().coins, 350);
+  assert.ok(service.storage.getItem('diceRealmTest_cloud_dirty_user-a'));
+  assert.equal(service.writes.length, 0);
+});
+
+test('a cloud version conflict keeps dirty local progress instead of replacing it', async () => {
+  const cloudSave = { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 };
+  const first = createService({ cloudSave });
+  await first.service.loadCloudSave();
+  first.service.markCloudSyncBlocked({
+    status: 402,
+    message: 'Service for this project is restricted due to exceed_egress_quota'
+  });
+  first.getState().coins = 180;
+  first.service.save();
+  const marker = JSON.parse(first.storage.getItem('diceRealmTest_cloud_dirty_user-a'));
+
+  const second = createService({
+    storage: first.storage,
+    cloudSave,
+    version: '2026-11-09T00:00:10.000Z',
+    rpcHandler: async (_name, args) => ({
+      data: { ok: false, conflict: true, expected: args.p_expected_updated_at },
+      error: null
+    })
+  });
+  await second.service.loadCloudSave();
+  assert.equal(await second.service.syncCloudSave(), false);
+  assert.equal(second.getState().coins, 180);
+  assert.equal(second.writes[0].args.p_expected_updated_at, marker.baseVersion);
+  assert.ok(second.storage.getItem('diceRealmTest_cloud_dirty_user-a'));
 });
