@@ -43,6 +43,8 @@ export function createCloudSaveService(dependencies) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
     }
+    const status = document?.getElementById?.('saveStatus');
+    if (status) status.textContent = '本機已保存（雲端服務受限）';
     return true;
   }
 
