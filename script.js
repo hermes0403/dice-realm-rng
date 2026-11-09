@@ -95,7 +95,7 @@ const weatherSystem = createWeatherSystem({
  render, renderCodex, renderGloves, flushCloudSave,
  announceWeatherSummon, triggerWeatherSurge
 });
-const { getWeather, activeWeatherDice, applyServerWeatherRow, applyForcedWeather, refreshServerWeather, setupPlayerWeatherSubscription, loadWeatherSummonData, autoDepositRolledWeatherDice, renderWeatherSummon, refreshPlayerWeatherOverride, updateWeatherUI } = weatherSystem;
+const { getWeather, activeWeatherDice, applyServerWeatherRow, applyForcedWeather, refreshServerWeather, setupServerWeatherSubscription, setupPlayerWeatherSubscription, loadWeatherSummonData, autoDepositRolledWeatherDice, renderWeatherSummon, refreshPlayerWeatherOverride, updateWeatherUI } = weatherSystem;
 realmSocialSystem = createRealmSocialSystem({
   getState: () => S,
   getCurrentUser: () => currentUser,
@@ -132,7 +132,7 @@ function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
 function closeAuth(){return authService?.closeAuth()}
 function authAction(mode){return authService?.authAction(mode)}
-setupGlobalAnnouncements();refreshServerWeather(false);loadWeatherSummonData(false);
+setupGlobalAnnouncements();setupServerWeatherSubscription();loadWeatherSummonData(false);
 function byId(id){return D.find(x=>x.id===id)}
 function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
