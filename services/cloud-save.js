@@ -327,10 +327,13 @@ export function createCloudSaveService(dependencies) {
       cloudSaveVersion = syncResult.updated_at || null;
       if (Number.isFinite(Number(syncResult.total_rolls))) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
+        payload.rolls = S.rolls;
       }
       S.petIncomePending = 0;
-      lastSyncedPayload = clonePayload(savePayload());
-      if (!cloudSyncPending) clearLocalSaveDirty(syncingUserId);
+      lastSyncedPayload = clonePayload(payload);
+      if (!cloudSyncPending && stableSerialize(savePayload()) === stableSerialize(lastSyncedPayload)) {
+        clearLocalSaveDirty(syncingUserId);
+      }
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
         const scopedKey = userSaveKey(syncingUserId);
