@@ -46,7 +46,7 @@ test('HTTP 402 egress restriction stops presence heartbeat and clears its interv
 
   await service.heartbeat();
   assert.equal(profileRequests, 1, 'blocked heartbeat must not issue another Supabase request');
-  assert.deepEqual(clearedScopes, ['presence-heartbeat', 'presence-heartbeat']);
+  assert.deepEqual(clearedScopes, ['presence-heartbeat']);
 });
 
 test('ordinary presence errors do not activate the egress circuit breaker', async () => {
