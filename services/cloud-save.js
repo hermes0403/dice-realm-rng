@@ -29,7 +29,7 @@ export function createCloudSaveService(dependencies) {
   function isProjectRestrictionError(error) {
     const candidates = [error, error?.cause, error?.cause?.cause].filter(Boolean);
     const message = candidates.flatMap(candidate => [
-      candidate?.message, candidate?.details, candidate?.hint, candidate?.code
+      candidate?.message, candidate?.details, candidate?.hint, candidate?.reason, candidate?.code
     ]).filter(Boolean).join(' ').toLowerCase();
     return candidates.some(candidate =>
       Number(candidate?.status ?? candidate?.statusCode ?? candidate?.code) === 402
