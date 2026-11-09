@@ -4,6 +4,26 @@
  * The application composition root supplies cross-module services and state
  * accessors. Browser platform APIs remain local to this browser-facing service.
  */
+export async function runCloudSessionInitialization({
+  loadPetFusionOdds,
+  heartbeat,
+  refreshLeaderboards,
+  loadWeatherSummonData,
+  isCloudSyncBlocked = () => false
+}) {
+  const steps = [
+    () => loadPetFusionOdds(),
+    () => heartbeat(),
+    () => refreshLeaderboards(),
+    () => loadWeatherSummonData(false)
+  ];
+  for (const step of steps) {
+    if (isCloudSyncBlocked()) return false;
+    await step();
+    if (isCloudSyncBlocked()) return false;
+  }
+  return true;
+}
 export function createAuthService(deps) {
   const {
     supabaseClient,
@@ -289,13 +309,14 @@ export function createAuthService(deps) {
           // immediately issuing more profile, leaderboard, grant and weather reads.
           if (!cloudLoadSucceeded) return;
           if (getCurrentUser()?.id === user.id) {
-            await loadPetFusionOdds();
-            if (isCloudSyncBlocked()) return;
-            await heartbeat();
-            if (isCloudSyncBlocked()) return;
-            await refreshLeaderboards();
-            if (isCloudSyncBlocked()) return;
-            await loadWeatherSummonData(false);
+            const initializationComplete = await runCloudSessionInitialization({
+              loadPetFusionOdds,
+              heartbeat,
+              refreshLeaderboards,
+              loadWeatherSummonData,
+              isCloudSyncBlocked
+            });
+            if (!initializationComplete) return;
           }
         }, 0, 'auth-session-init');
       } else {
