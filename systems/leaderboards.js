@@ -57,6 +57,7 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
         mine.innerHTML = `<div class="my-rank-card"><span class="my-rank-label">🎲 累積擲骰</span><div class="my-rank-value">${rank(sortRoll)}</div></div><div class="my-rank-card"><span class="my-rank-label">✦ 最佳骰子</span><div class="my-rank-value">${rank(sortRare)}</div></div><div class="my-rank-card"><span class="my-rank-label">🏆 成就</span><div class="my-rank-value">${rank(sortAchievement)}</div></div><div class="my-rank-card"><span class="my-rank-label">💸 賺錢排行榜</span><div class="my-rank-value">待後端開放</div></div>`;
       }
     } catch (error) {
+      markCloudSyncBlocked(error);
       console.error('Leaderboard load failed', error);
       const message = error?.message ? `排行榜載入失敗：${escapeHTML(error.message)}` : '雲端排行榜暫時無法載入。';
       local.innerHTML = rare.innerHTML = money.innerHTML = `<div class="empty">${message}</div>`;
