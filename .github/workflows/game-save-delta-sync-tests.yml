@@ -1,0 +1,39 @@
+name: Game save delta sync tests
+
+on:
+  push:
+    branches:
+      - task/T-0040-game-save-delta-sync-impl
+      - work/chazi
+    paths:
+      - 'services/cloud-save.js'
+      - 'services/account-actions.js'
+      - 'script.js'
+      - 'tests/**'
+      - 'docs/game-save-delta-sync.sql'
+      - '.github/workflows/game-save-delta-sync-tests.yml'
+  pull_request:
+    branches:
+      - main
+      - work/chazi
+    paths:
+      - 'services/cloud-save.js'
+      - 'services/account-actions.js'
+      - 'script.js'
+      - 'tests/cloud-save-pet-authority.test.js'
+      - 'docs/game-save-delta-sync.sql'
+      - '.github/workflows/game-save-delta-sync-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  cloud-save-delta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run all repository regression tests
+        run: node --test tests/*.test.js
