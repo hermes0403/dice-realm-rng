@@ -55,3 +55,64 @@ test('realm activity countdown updates text without rebuilding unchanged cards',
     Date.now = originalNow;
   }
 });
+
+test('global boost realtime waits for login and is removed on logout', async () => {
+  let currentUser = null;
+  let channels = 0;
+  let queries = 0;
+  let removed = 0;
+  const intervals = [];
+  const channel = {
+    on() { return this; },
+    subscribe() { return this; },
+    async unsubscribe() { removed++; return 'ok'; }
+  };
+  const system = createGlobalBoostSystem({
+    supabaseClient: {
+      channel() { channels++; return channel; },
+      removeChannel() { removed++; return Promise.resolve('ok'); },
+      from() {
+        queries++;
+        return {
+          select() { return this; },
+          eq() { return this; },
+          async maybeSingle() { return { data: null, error: null }; }
+        };
+      }
+    },
+    getCurrentUser: () => currentUser,
+    getBoostState: () => null,
+    setBoostState() {},
+    render() {},
+    restartAutoInterval() {},
+    loadAdminIncomeMonitor() {},
+    getCoinBoost: () => null,
+    documentRef: {
+      addEventListener() {},
+      getElementById() { return null; }
+    },
+    timerManager: {
+      clearScope() {},
+      setInterval(_callback, delay, scope) { intervals.push(scope); },
+      clearInterval() {}
+    },
+    isCloudSyncBlocked: () => false
+  });
+
+  system.setupGlobalBoostUI();
+  assert.equal(channels, 0);
+  assert.equal(queries, 0);
+
+  currentUser = { id: 'player-1' };
+  assert.equal(system.startGlobalBoostRealtime(), true);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(channels, 1);
+  assert.equal(queries, 1);
+
+  system.stopGlobalBoostRealtime();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(removed, 1);
+  currentUser = null;
+  await system.refreshGlobalBoost();
+  assert.equal(queries, 1);
+});
