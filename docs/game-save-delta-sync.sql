@@ -26,15 +26,15 @@ begin
     raise exception 'Authentication required' using errcode = '42501';
   end if;
 
-  if jsonb_typeof(p_save_patch) <> 'object'
-     or jsonb_typeof(p_profile) <> 'object' then
+  if jsonb_typeof(p_save_patch) is distinct from 'object'
+     or jsonb_typeof(p_profile) is distinct from 'object' then
     raise exception 'Invalid save patch' using errcode = '22023';
   end if;
 
   if exists (
     select 1
-      from jsonb_object_keys(p_save_patch) as patch_key
-     where patch_key not in (
+      from jsonb_object_keys(p_save_patch) as keys(key)
+     where key not in (
        'dumplingWeatherRewardClaimed', 'pets', 'equippedPetUids',
        'petDiscovered', 'petSkillLuckCharges', 'petSkillDaily',
        'name', 'joined', 'rolls', 'bag', 'bagCapacity', 'first',
@@ -51,8 +51,8 @@ begin
 
   if exists (
     select 1
-      from jsonb_object_keys(p_profile) as profile_key
-     where profile_key not in (
+      from jsonb_object_keys(p_profile) as keys(key)
+     where key not in (
        'username', 'unique_dice', 'rarest_den',
        'achievement_count', 'achievement_reached_at'
      )
@@ -88,7 +88,7 @@ begin
     v_next_save := coalesce(v_current_save, '{}'::jsonb) || p_save_patch;
   end if;
 
-  if jsonb_typeof(v_next_save -> 'bag') <> 'object' then
+  if jsonb_typeof(v_next_save -> 'bag') is distinct from 'object' then
     raise exception 'Invalid bag payload' using errcode = '22023';
   end if;
 
