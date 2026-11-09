@@ -83,8 +83,10 @@ function stopServerWeatherSubscription(){
  serverWeatherChannel=null;
  if(isCloudSyncBlocked())return;
  try{
-  if(typeof supabaseClient?.removeChannel==='function')void supabaseClient.removeChannel(channel).catch?.(()=>{});
-  else void channel.unsubscribe?.();
+  if(typeof supabaseClient?.removeChannel==='function'){
+   const removal=supabaseClient.removeChannel(channel);
+   if(removal?.catch)removal.catch(()=>{});
+  }else void channel.unsubscribe?.();
  }catch{}
 }
 function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
