@@ -144,9 +144,6 @@ export function createGlobalAnnouncements(dependencies) {
       announcementChannel.on('broadcast', { event: 'weather_summoned' }, ({ payload }) => {
         if (payload?.weather_type && payload?.ends_at) weatherApi.applyServerWeatherRow({ weather_type: payload.weather_type, weather_type_2: payload.weather_type_2, ends_at: payload.ends_at, summoned_by: payload.summoned_by, updated_at: payload.updated_at }, true);
       });
-      announcementChannel.on('postgres_changes', { event: '*', schema: 'public', table: 'realm_weather_state' }, ({ new: row }) => {
-        if (row) weatherApi.applyServerWeatherRow(row, true);
-      });
       announcementChannel.subscribe();
     } catch (e) {
       console.warn('Announcement channel unavailable', e);
