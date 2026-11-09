@@ -43,6 +43,8 @@ export function createCloudSaveService(dependencies) {
     if (!wasAlreadyBlocked) {
       try { supabaseClient?.realtime?.disconnect?.(); }
       catch (disconnectError) { console.debug('Realtime disconnect skipped after cloud restriction', disconnectError); }
+      timerManager.clearScope('weather-refresh');
+      timerManager.clearScope('global-boost-refresh');
     }
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
