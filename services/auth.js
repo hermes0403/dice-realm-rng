@@ -44,7 +44,8 @@ export function createAuthService(deps) {
     loadPetFusionOdds,
     heartbeat,
     loadWeatherSummonData,
-    realmPollTick,
+    startRealmPollSync,
+    stopRealmPollSync,
     isCloudSyncBlocked = () => false,
     timerManager
   } = deps;
@@ -261,6 +262,7 @@ export function createAuthService(deps) {
       // On sign-out, clear any previous player's weather subscription.
       // Signed-in tracking/subscriptions start only after cloud load and initialization succeed.
       if (!incomingUser) {
+        stopRealmPollSync?.();
         timerManager.setTimeout(() => recordGameVisit('visit'), 700, 'auth-visit-record');
         setupPlayerWeatherSubscription();
       }
@@ -324,7 +326,7 @@ export function createAuthService(deps) {
                 await recordGameVisit('visit');
                 if (!isCloudSyncBlocked() && getCurrentUser()?.id === user.id) {
                   setupPlayerWeatherSubscription();
-                  realmPollTick?.();
+                  await startRealmPollSync?.();
                 }
               },
               isCloudSyncBlocked
