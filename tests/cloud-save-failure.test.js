@@ -41,8 +41,10 @@ test('HTTP 402 egress restriction pauses cloud retries but keeps local saves wri
     status: 402,
     message: 'Service for this project is restricted due to exceed_egress_quota'
   };
+  let cloudReadCount = 0;
   const supabaseClient = {
     from() {
+      cloudReadCount++;
       return {
         select() { return this; },
         eq() { return this; },
@@ -96,5 +98,6 @@ test('HTTP 402 egress restriction pauses cloud retries but keeps local saves wri
   assert.equal(JSON.parse(storage.get('diceRealm')).coins, 999);
   assert.equal(JSON.parse(storage.get('diceRealm_user_user-1')).coins, 999);
   assert.equal(timers.manager.getStats().total, 0);
+  assert.equal(cloudReadCount, 1);
   assert.equal(status.textContent, '本機已保存（雲端服務受限）');
 });
