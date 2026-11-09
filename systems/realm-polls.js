@@ -204,13 +204,16 @@ export function createRealmPolls(dependencies) {
     btn.disabled = true;
     status.textContent = '正在發送…';
     try {
-      const { data, error } = await supabaseClient.from('realm_admin_messages')
-        .insert({ message, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', expires_at: new Date(Date.now() + 3800).toISOString() })
-        .select('id,message,admin_label,created_at,expires_at').single();
+      const announcement = {
+        message,
+        admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼',
+        expires_at: new Date(Date.now() + 3800).toISOString()
+      };
+      const { error } = await supabaseClient.from('realm_admin_messages').insert(announcement);
       if (error) throw error;
-      receiveRealmAnnouncement(data);
-      await broadcastRealmEvent('admin_message', data);
-      if (!realmPollChannelReady) await realmPollTick();
+      const sent = await broadcastRealmEvent('admin_message', announcement);
+      if (sent) receiveRealmAnnouncement(announcement);
+      else await realmPollTick();
       status.textContent = '已發送；玩家畫面會顯示 3.8 秒。';
       input.value = '';
     } catch (e) {
