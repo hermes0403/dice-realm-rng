@@ -262,10 +262,11 @@ export function createAuthService(deps) {
           if (event === 'SIGNED_IN' && user.email_confirmed_at) {
             toast('信箱驗證成功！可以開始遊玩了。');
           }
+          let cloudLoadSucceeded = false;
           try {
             let cloudLoadTimeout;
             try {
-              await Promise.race([
+              cloudLoadSucceeded = (await Promise.race([
                 loadCloudSave(),
                 new Promise((_, reject) => {
                   cloudLoadTimeout = timerManager.setTimeout(
@@ -274,7 +275,7 @@ export function createAuthService(deps) {
                     'auth-cloud-load-timeout'
                   );
                 })
-              ]);
+              ])) !== false;
             } finally {
               timerManager.clearTimeout(cloudLoadTimeout);
             }
@@ -283,6 +284,9 @@ export function createAuthService(deps) {
             toast(loadError?.message || '雲端存檔載入失敗，請重新整理');
             document.getElementById('saveStatus').textContent = '雲端載入逾時／失敗';
           }
+          // When cloud access is restricted, keep the local game usable and avoid
+          // immediately issuing more profile, leaderboard, grant and weather reads.
+          if (!cloudLoadSucceeded) return;
           if (getCurrentUser()?.id === user.id) {
             await loadPetFusionOdds();
             await heartbeat();
