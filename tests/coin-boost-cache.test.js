@@ -85,6 +85,48 @@ test('HTTP 402 blocks future coin boost requests', async () => {
   assert.equal(blocked, true);
 });
 
+test('personal coin boost cache is isolated when the signed-in player changes', async () => {
+  let user = { id: 'player-one' };
+  let requests = 0;
+  const service = createCoinBoostService({
+    getCurrentUser: () => user,
+    supabaseClient: {
+      auth: {
+        async getSession() {
+          return { data: { session: { access_token: 'test-token' } } };
+        }
+      }
+    },
+    SUPABASE_URL: 'https://example.supabase.co',
+    SUPABASE_KEY: 'publishable-test-key',
+    fetchRef: async () => {
+      requests++;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          global: null,
+          personal: { multiplier: requests === 1 ? 2 : 3, expires_at: 9999999999999 }
+        })
+      };
+    }
+  });
+
+  await service.refreshCoinBoosts();
+  assert.equal(service.coinEarningMultiplier(), 2);
+
+  user = { id: 'player-two' };
+  const nextPlayerRefresh = service.refreshCoinBoosts();
+  assert.equal(service.coinEarningMultiplier(), 1);
+  await nextPlayerRefresh;
+  assert.equal(service.coinEarningMultiplier(), 3);
+  assert.equal(requests, 2);
+
+  user = null;
+  await service.refreshCoinBoosts();
+  assert.equal(service.coinEarningMultiplier(), 1);
+});
+
 test('ordinary failures back off instead of retrying every second', async () => {
   let currentTime = 1000;
   let requests = 0;
