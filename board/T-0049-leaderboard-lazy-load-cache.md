@@ -39,7 +39,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 盤點發現排行榜在 app startup、cloud-save load、auth initialization、使用者開啟排行榜頁面等多個位置重複觸發；navigation.js 已有 leaderboard page 的 on-open refresh，可作為唯一正常讀取入口。
+- 2026-11-09 [叉子] 已移除 script.js 啟動尾端、services/auth.js 登入初始化、services/cloud-save.js 存檔載入完成後的排行榜查詢；ui/navigation.js 原本就有開啟 leaderboard 頁面時 refresh，因此保留為一般玩家唯一讀取入口。systems/leaderboards.js 新增 in-flight 去重、30 秒快取、10 秒失敗退避、force refresh，且 blocked 時只更新 UI 不查詢。script.js 的手動刷新按鈕與管理員更新流程使用 force refresh。新增 tests/leaderboard-refresh-cache.test.js；隔離 Node.js v22.16.0 測試 3/3 pass，git diff --cached --check exit code 0；完整分支測試待 GitHub Actions。
 
 ## 完工回報
 
