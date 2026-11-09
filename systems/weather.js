@@ -57,14 +57,14 @@ function setupPlayerWeatherSubscription(){
  refreshPlayerWeatherOverride(false);
 }
 async function refreshServerWeather(announce=false){
- if(serverWeatherRefreshBusy||!supabaseClient||isCloudSyncBlocked())return;
+ if(serverWeatherRefreshBusy||!supabaseClient||!getCurrentUser()||isCloudSyncBlocked())return;
  serverWeatherRefreshBusy=true;
  try{const {data,error}=await supabaseClient.from('realm_weather_state').select('weather_type,weather_type_2,ends_at,summoned_by,updated_at').eq('singleton',true).maybeSingle();if(error)throw error;if(data)applyServerWeatherRow(data,announce)}
  catch(e){markCloudSyncBlocked(e);console.debug('Shared weather state unavailable',e)}finally{serverWeatherRefreshBusy=false}
 }
 function setupServerWeatherSubscription(){
- if(!supabaseClient||typeof supabaseClient.channel!=='function'||isCloudSyncBlocked())return false;
- if(serverWeatherChannel){try{supabaseClient.removeChannel(serverWeatherChannel)}catch{}serverWeatherChannel=null}
+ if(!supabaseClient||typeof supabaseClient.channel!=='function'||!getCurrentUser()||isCloudSyncBlocked())return false;
+ if(serverWeatherChannel)return true
  try{
   serverWeatherChannel=supabaseClient.channel('realm-weather-state')
    .on('postgres_changes',{event:'*',schema:'public',table:'realm_weather_state',filter:'singleton=eq.true'},payload=>{
@@ -76,6 +76,16 @@ function setupServerWeatherSubscription(){
   refreshServerWeather(false);
   return true;
  }catch(e){const restricted=markCloudSyncBlocked(e);console.debug('Shared weather realtime unavailable; polling fallback remains active',e);serverWeatherChannel=null;if(!restricted&&!isCloudSyncBlocked())refreshServerWeather(false);return false}
+}
+function stopServerWeatherSubscription(){
+ if(!serverWeatherChannel)return;
+ const channel=serverWeatherChannel;
+ serverWeatherChannel=null;
+ if(isCloudSyncBlocked())return;
+ try{
+  if(typeof supabaseClient?.removeChannel==='function')void supabaseClient.removeChannel(channel).catch?.(()=>{});
+  else void channel.unsubscribe?.();
+ }catch{}
 }
 function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
 function minuteSeed(n){let x=(n^0x9e3779b9)>>>0;x=Math.imul(x^(x>>>16),0x21f0aaad);x=Math.imul(x^(x>>>15),0x735a2d97);x=(x^(x>>>15))>>>0;return x/4294967296}
@@ -192,10 +202,10 @@ async function autoDepositRolledWeatherDice(d){
 document.addEventListener('click',e=>{const d=e.target.closest('[data-weather-deposit]');if(d)depositWeatherDice(d.dataset.weatherDeposit);if(e.target.closest('#summonWeatherBtn'))summonSpecialWeather();if(e.target.closest('#autoDepositWeatherBtn'))toggleAutoDepositWeather()});
 // Realtime delivers shared and personal weather changes immediately. Five-minute
 // reconciliation reads recover missed events without the old 12-second polling load.
-timerManager.setInterval(()=>{refreshServerWeather(false);refreshPlayerWeatherOverride(false)},5*60*1000,'weather-refresh');
+timerManager.setInterval(()=>{if(!getCurrentUser()||isCloudSyncBlocked())return;refreshServerWeather(false);refreshPlayerWeatherOverride(false)},5*60*1000,'weather-refresh');
  return {
   getWeather, activeWeatherDice, applyServerWeatherRow, applyForcedWeather,
-  refreshServerWeather, setupServerWeatherSubscription, setupPlayerWeatherSubscription, loadWeatherSummonData,
+  refreshServerWeather, setupServerWeatherSubscription, stopServerWeatherSubscription, setupPlayerWeatherSubscription, loadWeatherSummonData,
   autoDepositRolledWeatherDice, renderWeatherSummon, refreshPlayerWeatherOverride,
   updateWeatherUI
  };
