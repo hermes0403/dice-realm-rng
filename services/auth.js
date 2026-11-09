@@ -44,6 +44,7 @@ export function createAuthService(deps) {
     loadPetFusionOdds,
     heartbeat,
     loadWeatherSummonData,
+    realmPollTick,
     isCloudSyncBlocked = () => false,
     timerManager
   } = deps;
@@ -323,6 +324,7 @@ export function createAuthService(deps) {
                 await recordGameVisit('visit');
                 if (!isCloudSyncBlocked() && getCurrentUser()?.id === user.id) {
                   setupPlayerWeatherSubscription();
+                  realmPollTick?.();
                 }
               },
               isCloudSyncBlocked
