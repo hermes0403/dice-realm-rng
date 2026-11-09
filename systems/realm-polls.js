@@ -14,6 +14,7 @@ export function createRealmPolls(dependencies) {
   let realmSocialUISetup = false;
   let realmPollChannel = null;
   let realmPollChannelReady = false;
+  let realmPollSyncEnabled = false;
   let realmPollSyncIntervalMs = 0;
   const realmPollResultsBusy = new Set();
   function realmUsername() {
@@ -47,8 +48,20 @@ export function createRealmPolls(dependencies) {
   }
 
   function stopRealmPollSync() {
+    realmPollSyncEnabled = false;
     timerManager.clearScope('realm-poll-sync');
     realmPollSyncIntervalMs = 0;
+  }
+
+  async function startRealmPollSync() {
+    if (isCloudSyncBlocked()) {
+      stopRealmPollSync();
+      return false;
+    }
+    realmPollSyncEnabled = true;
+    setRealmPollSyncInterval(realmPollChannelReady ? 60000 : 1500);
+    await realmPollTick();
+    return true;
   }
 
   function setRealmPollSyncInterval(delay) {
@@ -63,7 +76,7 @@ export function createRealmPolls(dependencies) {
   }
 
   function receiveRealmAnnouncement(row) {
-    if (!row || (row.expires_at && Date.parse(row.expires_at) <= Date.now())) return;
+    if (!realmPollSyncEnabled || !getCurrentUser() || !row || (row.expires_at && Date.parse(row.expires_at) <= Date.now())) return;
     const id = Number(row.id) || 0;
     if (id && id <= realmLastMessageId) return;
     if (id) realmLastMessageId = id;
@@ -71,7 +84,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function broadcastRealmEvent(event, payload) {
-    if (isCloudSyncBlocked() || !realmPollChannel || !realmPollChannelReady) return false;
+    if (!realmPollSyncEnabled || isCloudSyncBlocked() || !realmPollChannel || !realmPollChannelReady) return false;
     try {
       const status = await realmPollChannel.send({ type: 'broadcast', event, payload });
       if (status !== 'ok') {
@@ -89,7 +102,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmDisplayPoll(poll) {
-    if (isCloudSyncBlocked()) return false;
+    if (!realmPollSyncEnabled || isCloudSyncBlocked()) return false;
     const currentUser = getCurrentUser();
     const pollId = Number(poll?.id) || 0;
     const expiry = Date.parse(poll?.ends_at) || 0;
@@ -149,7 +162,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmRefreshPollResults(pollId) {
-    if (isCloudSyncBlocked() || !isAdmin() || !pollId || realmPollResultsBusy.has(pollId)) return;
+    if (!realmPollSyncEnabled || isCloudSyncBlocked() || !isAdmin() || !pollId || realmPollResultsBusy.has(pollId)) return;
     const box = documentRef.getElementById('adminPollResults');
     if (!box) return;
     realmPollResultsBusy.add(pollId);
@@ -178,6 +191,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmPollTick() {
+    if (!realmPollSyncEnabled) return;
     if (isCloudSyncBlocked()) {
       stopRealmPollSync();
       return;
@@ -218,7 +232,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmSendMessage() {
-    if (isCloudSyncBlocked() || !isAdmin()) return;
+    if (!realmPollSyncEnabled || isCloudSyncBlocked() || !isAdmin()) return;
     const input = documentRef.getElementById('adminBroadcastText'), status = documentRef.getElementById('adminBroadcastStatus'), rawMessage = input.value.trim(), color = documentRef.getElementById('adminBroadcastColor')?.value || '#ffffff', message = `[[color:${color}]]${rawMessage}`;
     if (!rawMessage) { status.textContent = '請先輸入訊息。'; return; }
     const btn = documentRef.getElementById('adminBroadcastSendBtn');
@@ -247,7 +261,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmStartPoll() {
-    if (isCloudSyncBlocked() || !isAdmin()) return;
+    if (!realmPollSyncEnabled || isCloudSyncBlocked() || !isAdmin()) return;
     const question = documentRef.getElementById('adminPollQuestion').value.trim(), optionA = documentRef.getElementById('adminPollOptionA').value.trim(), optionB = documentRef.getElementById('adminPollOptionB').value.trim(), duration = Number(documentRef.getElementById('adminPollDuration').value) || 60, status = documentRef.getElementById('adminPollStatus'), btn = documentRef.getElementById('adminPollStartBtn');
     if (!question) { status.textContent = '請先輸入投票問題。'; return; }
     if (!optionA || !optionB) { status.textContent = '請分別填寫選項一與選項二。'; return; }
@@ -284,7 +298,7 @@ export function createRealmPolls(dependencies) {
     documentRef.getElementById('realmPollButtons')?.addEventListener('click', async e => {
       const btn = e.target.closest('[data-poll-choice]');
       const currentUser = getCurrentUser();
-      if (isCloudSyncBlocked() || !btn || !realmCurrentPollId || !currentUser) return;
+      if (!realmPollSyncEnabled || isCloudSyncBlocked() || !btn || !realmCurrentPollId || !currentUser) return;
       const choice = btn.dataset.pollChoice;
       documentRef.querySelectorAll('#realmPollButtons button').forEach(b => b.disabled = true);
       try {
@@ -318,11 +332,11 @@ export function createRealmPolls(dependencies) {
           .subscribe(status => {
             if (status === 'SUBSCRIBED') {
               realmPollChannelReady = true;
-              if (getCurrentUser()) void realmPollTick();
+              if (realmPollSyncEnabled && getCurrentUser()) void realmPollTick();
             } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
               realmPollChannelReady = false;
               if (isCloudSyncBlocked()) stopRealmPollSync();
-              else setRealmPollSyncInterval(1500);
+              else if (realmPollSyncEnabled) setRealmPollSyncInterval(1500);
             }
           });
       } catch (error) {
@@ -338,6 +352,8 @@ export function createRealmPolls(dependencies) {
     realmHidePoll,
     realmRefreshPollResults,
     realmPollTick,
+    startRealmPollSync,
+    stopRealmPollSync,
     realmSendMessage,
     realmStartPoll,
     setupRealmSocialUI
