@@ -27,14 +27,16 @@ export function createCloudSaveService(dependencies) {
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
 
   function isProjectRestrictionError(error) {
-    const message = [error?.message, error?.details, error?.hint, error?.code]
-      .filter(Boolean).join(' ').toLowerCase();
-    return Number(error?.status) === 402
-      || message.includes('exceed_egress_quota')
+    const candidates = [error, error?.cause, error?.cause?.cause].filter(Boolean);
+    const message = candidates.flatMap(candidate => [
+      candidate?.message, candidate?.details, candidate?.hint, candidate?.code
+    ]).filter(Boolean).join(' ').toLowerCase();
+    return candidates.some(candidate =>
+      Number(candidate?.status ?? candidate?.statusCode) === 402
+    ) || message.includes('exceed_egress_quota')
       || message.includes('project is restricted')
       || message.includes('egress quota');
   }
-
   function markCloudSyncBlocked(error) {
     if (!isProjectRestrictionError(error)) return false;
     const wasAlreadyBlocked = cloudSyncBlocked;
