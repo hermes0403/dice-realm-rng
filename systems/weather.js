@@ -136,13 +136,13 @@ function renderWeatherSummon(){
  list.innerHTML=weatherDice.map(d=>{const have=Math.max(0,Number(getState().bag[d.id])||0),contributed=Number(weatherContributionDeposits[d.id])||0;return `<div class="summon-dice-row"><div class="summon-dice-meta"><b style="color:${d.weather==='crystal'?'#ed75ff':d.weather==='hell'?'#ff6038':d.weather==='rain'?'#75baff':d.weather==='snow'?'#f4fbff':'#fff000'}">${d.icon} ${escapeHTML(d.name)}</b><small>${chanceText(d)} · 持有 ${format(have)} · 已投入 ${format(contributed)} 顆 · 每顆 +${format(d.den)} 點</small></div><input class="field summon-qty" type="number" min="1" max="${have}" value="1" data-weather-deposit-qty="${d.id}" aria-label="投入${escapeHTML(d.name)}數量"><button class="primary" type="button" data-weather-deposit="${d.id}">投入</button></div>`}).join('');
 }
 async function loadWeatherSummonData(refreshState=true){
- if(summonDataLoadBusy)return;
+ if(summonDataLoadBusy||isCloudSyncBlocked())return;
  summonDataLoadBusy=true;
  try {
  if(refreshState)await refreshServerWeather(false);
  if(!getCurrentUser()||!supabaseClient){weatherContributionPoints=0;weatherContributionDeposits={};renderWeatherSummon();return}
  try{const {data,error}=await supabaseClient.from('realm_weather_contributions').select('points,deposits').eq('user_id',getCurrentUser().id).maybeSingle();if(error)throw error;weatherContributionPoints=Number(data?.points)||0;weatherContributionDeposits=data?.deposits||{};renderWeatherSummon()}
- catch(e){console.error('Weather contribution read failed',e);renderWeatherSummon();document.getElementById('summonStatus').textContent='讀取召喚資料失敗：'+(e.message||'請稍後重試')}
+ catch(e){markCloudSyncBlocked(e);console.error('Weather contribution read failed',e);renderWeatherSummon();document.getElementById('summonStatus').textContent='讀取召喚資料失敗：'+(e.message||'請稍後重試')}
  } finally { summonDataLoadBusy=false; }
 }
 async function depositWeatherDice(id){
