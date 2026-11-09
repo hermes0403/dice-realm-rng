@@ -103,6 +103,7 @@ test('Realtime HTTP 402 trips the shared breaker and prevents refresh or resubsc
 
 test('weather realtime and refresh methods do not connect or query while blocked', async () => {
   const previousStorage = globalThis.localStorage;
+  const previousDocument = globalThis.document;
   globalThis.localStorage = {
     getItem() { return null; },
     setItem() {},
@@ -126,6 +127,7 @@ test('weather realtime and refresh methods do not connect or query while blocked
     createElement() { return makeElement(); },
     addEventListener() {}
   };
+  globalThis.document = documentRef;
   const timerManager = { setInterval() { return 1; } };
   const supabaseClient = {
     channel() { channelCreations++; return { on() { return this; }, subscribe() { return this; } }; },
@@ -169,5 +171,7 @@ test('weather realtime and refresh methods do not connect or query while blocked
   } finally {
     if (previousStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previousStorage;
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
   }
 });
