@@ -543,7 +543,6 @@ export function createCloudSaveService(dependencies) {
           document.getElementById('saveStatus').textContent = '雲端存檔已載入';
         }
       }
-      if (!cloudSyncBlocked) await refreshLeaderboards();
       return !cloudSyncBlocked;
     } catch (e) {
       console.error(e);
