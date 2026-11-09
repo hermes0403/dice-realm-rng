@@ -75,4 +75,22 @@ test('global announcement realtime is not opened before login or while cloud is 
   currentUser = { id: 'player-1' };
   system.setupGlobalAnnouncements();
   assert.equal(channels, 1);
+
+  const blockedSystem = createGlobalAnnouncements({
+    getState: () => ({}),
+    getCurrentUser: () => currentUser,
+    weatherApi: { applyForcedWeather() {}, applyServerWeatherRow() {} },
+    supabaseClient: { channel() { channels++; return { on() { return this; }, subscribe() { return this; } }; } },
+    toast() {},
+    isAdmin: () => false,
+    petById: () => null,
+    escapeHTML: value => String(value),
+    format: value => String(value),
+    WEATHER_TYPES: {},
+    documentRef: {},
+    timerManager: { clearTimeout() {}, setTimeout() {} },
+    isCloudSyncBlocked: () => true
+  });
+  blockedSystem.setupGlobalAnnouncements();
+  assert.equal(channels, 1);
 });
