@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 開始處理第五項；目前 loadCloudSave 會先讀 localSaveBeforeCloud，再無條件將 cloud save 套入 state，僅保留少數欄位，可能覆蓋離線期間的新進度。
+- 2026-11-09 [叉子] 已修改 services/cloud-save.js：每位玩家新增持久化 dirty marker，保存未同步本機進度及最後確認的雲端版本；save() 在雲端不同步／載入期間或與已同步快照不同時建立 marker；loadCloudSave 偵測 marker 時先恢復本機存檔，不再直接套用雲端快照；有已知基準版本時排程既有版本檢查 RPC，版本衝突則保留本機；沒有基準版本但雲端已有存檔時不自動上傳；無雲端存檔時才允許建立新存檔；成功同步後才清除 marker。另修正同步期間本機再次變更時，lastSyncedPayload 只記錄實際送出的快照，避免誤認未送出的變更已同步。新增 4 項 recovery 測試（dirty reload、無基準且遠端存在、無遠端存檔、載入中本機變更）及 1 項版本衝突測試；測試已寫入 tests/cloud-save-pet-authority.test.js，尚未能在完整 repo 執行。
 
 ## 完工回報
 
