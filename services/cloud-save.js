@@ -6,18 +6,49 @@ export function createCloudSaveService(dependencies) {
     restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
     toast, openAuth, showAuthMessage, timerManager,
     localStorageRef = globalThis.localStorage,
-    documentRef = globalThis.document
+    documentRef = globalThis.document,
+    windowRef = globalThis.window
   } = dependencies;
   const localStorage = localStorageRef;
   const document = documentRef;
+  const windowObject = windowRef;
 
   let cloudSyncTimer = null;
   let cloudSyncBusy = false;
-  // Version captured when this client loads the cloud save; stale tabs cannot overwrite newer saves.
+  let cloudSyncPending = false;
+  let lastCloudSyncAt = 0;
+  let exitFlushPromise = null;
+  let lastExitFlushAt = 0;
+  // Optimistic version + last acknowledged snapshot prevent stale writes and no-op uploads.
   let cloudSaveVersion = null;
+  let lastSyncedPayload = null;
+  const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
 
   function userSaveKey(userId = getCurrentUser()?.id) {
     return userId ? KEY + '_user_' + String(userId) : null;
+  }
+
+  function stableSerialize(value) {
+    if (Array.isArray(value)) return '[' + value.map(stableSerialize).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stableSerialize(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  }
+
+  function clonePayload(value) {
+    return value == null ? null : JSON.parse(JSON.stringify(value));
+  }
+
+  function diffPayload(previous, current) {
+    if (!previous) return clonePayload(current) || {};
+    const patch = {};
+    for (const key of Object.keys(current)) {
+      if (stableSerialize(previous[key]) !== stableSerialize(current[key])) {
+        patch[key] = clonePayload(current[key]);
+      }
+    }
+    return patch;
   }
 
   function savePayload() {
@@ -113,74 +144,94 @@ export function createCloudSaveService(dependencies) {
       cloudSyncTimer = null;
     }
     const initialUser = getCurrentUser();
-    if (!initialUser || !supabaseClient) return;
+    if (!initialUser || !supabaseClient) return false;
     if (cloudSyncBusy) {
-      scheduleCloudSync(1200);
-      return;
+      cloudSyncPending = true;
+      return false;
     }
+    cloudSyncPending = false;
     cloudSyncBusy = true;
     const syncingUserId = initialUser.id;
     try {
       await applyPendingGrants();
-      if (getCurrentUser()?.id !== syncingUserId) return;
+      if (getCurrentUser()?.id !== syncingUserId) return false;
       const S = getState();
       const payload = savePayload();
+      const patch = diffPayload(lastSyncedPayload, payload);
+
+      // No changed save fields means no game_saves request at all.
+      if (Object.keys(patch).length === 0) {
+        document.getElementById('saveStatus').textContent = '雲端已同步';
+        return true;
+      }
+
       const now = new Date().toISOString();
       const profilePayload = {
         username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
-        total_rolls: Number(S.rolls) || 0,
         unique_dice: totalUnique(),
         rarest_den: Number(S.best?.den) || 0,
-        coins: Number(S.coins) || 0,
         ...achievementStats()
       };
-      const { data: syncResult, error } = await supabaseClient.rpc('sync_player_game_save', {
+      const { data: syncResult, error } = await supabaseClient.rpc('sync_player_game_save_delta', {
         p_expected_updated_at: cloudSaveVersion,
-        p_save_data: payload,
+        p_save_patch: patch,
         p_profile: profilePayload
       });
       if (error) throw error;
       if (!syncResult?.ok) {
         if (syncResult?.conflict) {
           document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在載入最新存檔…';
-          await loadCloudSave();
+          await loadCloudSave({ syncAfterLoad: false });
           toast('偵測到其他分頁或裝置已更新存檔，已載入最新雲端資料；請確認剛才的操作是否需要重做。');
-          return;
+          return false;
         }
         throw new Error(syncResult?.message || 'Cloud save version check failed');
       }
+      if (getCurrentUser()?.id !== syncingUserId) return false;
       cloudSaveVersion = syncResult.updated_at || null;
+      lastSyncedPayload = clonePayload(payload);
       if (Number.isFinite(Number(syncResult.total_rolls))) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
       }
       S.petIncomePending = 0;
+      lastCloudSyncAt = Date.now();
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
         const scopedKey = userSaveKey(syncingUserId);
         if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
       } catch (e) {}
       document.getElementById('saveStatus').textContent = '雲端已同步';
+      return true;
     } catch (e) {
       console.error('Cloud sync failed', e);
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
+      return false;
     } finally {
       cloudSyncBusy = false;
+      if (cloudSyncPending) scheduleCloudSync();
     }
   }
 
-  function scheduleCloudSync(delay) {
-    timerManager.clearTimeout(cloudSyncTimer);
+  function scheduleCloudSync() {
+    cloudSyncPending = true;
+    if (!getCurrentUser() || !supabaseClient || cloudSyncBusy || cloudSyncTimer) return;
+    const elapsed = Date.now() - lastCloudSyncAt;
+    const delay = lastCloudSyncAt
+      ? Math.max(700, CLOUD_SYNC_MIN_INTERVAL - elapsed)
+      : 700;
     const timer = timerManager.setTimeout(() => {
       if (cloudSyncTimer !== timer) return;
       cloudSyncTimer = null;
-      syncCloudSave();
-    }, delay, 'cloud-save-debounce');
+      if (!cloudSyncPending) return;
+      cloudSyncPending = false;
+      void syncCloudSave();
+    }, delay, 'cloud-save-throttle');
     cloudSyncTimer = timer;
   }
 
-  function scheduleSync(delay = 700) {
+  function scheduleSync() {
     if (!getCurrentUser()) return;
-    scheduleCloudSync(delay);
+    scheduleCloudSync();
   }
 
   function save() {
@@ -188,19 +239,37 @@ export function createCloudSaveService(dependencies) {
     try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
     document.getElementById('saveStatus').textContent = getCurrentUser() ? '雲端同步中…' : '本機存檔';
-    if (getCurrentUser()) scheduleSync(700);
+    if (getCurrentUser()) scheduleSync();
   }
 
   async function flushCloudSave() {
-    if (!getCurrentUser() || !supabaseClient) return;
+    if (!getCurrentUser() || !supabaseClient) return false;
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
     }
-    while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
-    await syncCloudSave();
-    while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    cloudSyncPending = false;
+    while (cloudSyncBusy) {
+      await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    }
+    return await syncCloudSave() === true;
   }
+
+  async function flushOnExit(reason) {
+    if (!getCurrentUser() || !supabaseClient) return false;
+    if (exitFlushPromise) return exitFlushPromise;
+    if (Date.now() - lastExitFlushAt < 1500) return false;
+    lastExitFlushAt = Date.now();
+    exitFlushPromise = flushCloudSave().finally(() => { exitFlushPromise = null; });
+    const saved = await exitFlushPromise;
+    if (saved !== true) console.warn('Final cloud backup did not complete:', reason);
+    return saved === true;
+  }
+
+  document?.addEventListener?.('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') void flushOnExit('visibilitychange');
+  });
+  windowObject?.addEventListener?.('pagehide', () => { void flushOnExit('pagehide'); });
 
   async function loadCloudSave({ syncAfterLoad = true } = {}) {
     const user = getCurrentUser();
@@ -215,6 +284,7 @@ export function createCloudSaveService(dependencies) {
       const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
       cloudSaveVersion = data?.updated_at || null;
+      lastSyncedPayload = clonePayload(data?.save_data || null);
       if (getCurrentUser()?.id !== user.id) return;
       let S;
       if (data?.save_data?.bag) {
@@ -266,8 +336,15 @@ export function createCloudSaveService(dependencies) {
         localStorage.setItem(KEY, JSON.stringify(S));
         render();
       }
-      const grantsChanged = await applyPendingGrants();
-      if (syncAfterLoad && (!data?.save_data?.bag || grantsChanged)) await syncCloudSave();
+      await applyPendingGrants();
+      if (syncAfterLoad) {
+        const currentPayload = savePayload();
+        if (!lastSyncedPayload || Object.keys(diffPayload(lastSyncedPayload, currentPayload)).length > 0) {
+          await syncCloudSave();
+        } else {
+          document.getElementById('saveStatus').textContent = '雲端存檔已載入';
+        }
+      }
       await refreshLeaderboards();
     } catch (e) {
       console.error(e);
@@ -280,5 +357,5 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit };
 }
