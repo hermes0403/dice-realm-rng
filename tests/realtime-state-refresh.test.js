@@ -22,9 +22,11 @@ function fakeTimers() {
 
 function realtimeClient() {
   const handlers = new Map();
+  const statusHandlers = new Map();
   const tables = [];
   const client = {
     handlers,
+    statusHandlers,
     tables,
     from(table) {
       const query = {
@@ -42,6 +44,7 @@ function realtimeClient() {
           return channel;
         },
         subscribe(callback) {
+          if (callback) statusHandlers.set(name, callback);
           callback?.('SUBSCRIBED');
           return channel;
         }
@@ -92,6 +95,11 @@ test('global boost uses Realtime and keeps a five-minute fallback plus live UI t
   assert.equal(system.activeGlobalBoost().speed_percent, 10);
   assert.equal(renders, 1);
   assert.equal(restarts, 1);
+
+  const beforeErrorRecovery = client.tables.filter(table => table === 'realm_global_boost').length;
+  client.statusHandlers.get('realm-global-boost')('CHANNEL_ERROR');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.ok(client.tables.filter(table => table === 'realm_global_boost').length > beforeErrorRecovery);
 });
 
 test('shared weather uses Realtime and retains local countdown plus five-minute reconciliation', async () => {
@@ -159,6 +167,11 @@ test('shared weather uses Realtime and retains local countdown plus five-minute 
     });
 
     assert.equal(system.getWeather().type, 'rain');
+
+    const beforeErrorRecovery = client.tables.filter(table => table === 'realm_weather_state').length;
+    client.statusHandlers.get('realm-weather-state')('TIMED_OUT');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.ok(client.tables.filter(table => table === 'realm_weather_state').length > beforeErrorRecovery);
   } finally {
     if (originalDocument === undefined) delete globalThis.document;
     else globalThis.document = originalDocument;
