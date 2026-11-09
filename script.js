@@ -79,6 +79,7 @@ S=load();
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
 const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
+const forceRefreshLeaderboards = () => refreshLeaderboards({ force: true });
 const { releaseDeviceLock, isLockHeld, isHeartbeatActive, scheduleUnlock } = createDeviceLockService({ getCurrentUser: () => currentUser, supabaseClient, toast, timerManager });
 const { recordGameVisit, startGameVisitTracking } = createVisitTrackingService({ getCurrentUser: () => currentUser, getState: () => S, supabaseClient, timerManager, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
 const { checkAchievements, checkDailyReward, renderQuests, renderProfile, closeAchievementPopup, rewardText, grantAchievementReward, showAchievementPopup } = createProgressionSystem({
@@ -118,7 +119,7 @@ cloudSaveService=createCloudSaveService({
  getState:()=>S, setState:value=>{S=value}, getCurrentUser:()=>currentUser,
  timerManager,
  fresh, normalizeGloves, migrateCurrency, ensurePetData,
- restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
+ restoreAutoSellPrefs, totalUnique, render,
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
@@ -215,7 +216,7 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
@@ -272,7 +273,7 @@ setupAdminUIBindings({
   loadAdminDeletedAccounts, loadAdminIncomeMonitor, loadAdminWeatherHistory,
   loadAdminGrantHistory, adminApi, isAdmin, toast, applyServerWeatherRow,
   supabaseClient, format, escapeHTML, D, populateAdminPetSelects, petById,
-  writeAdminGrantLog, refreshLeaderboards, refreshCoinBoosts,
+  writeAdminGrantLog, refreshLeaderboards: forceRefreshLeaderboards, refreshCoinBoosts,
   updateGlobalBoostStatus, renderRealmActivity, render, restartAutoInterval,
   setGlobalBoostState: value => { globalBoostState = value; }, updateAdminVisibility,
   setPlayerBan, getCurrentUser: () => currentUser
@@ -284,7 +285,7 @@ function analyzeSuspiciousRolls(){return adminPlayerManagement?.analyzeSuspiciou
 
 document.getElementById('upgradeBagBtn').onclick=()=>{const cap=Number(S.bagCapacity)||35;if(cap>=200){toast('背包已達目前上限 200 顆');return}const cost=bagUpgradeCost(cap);if((Number(S.coins)||0)<cost){toast(`$ 不足，擴充需要 ${format(cost)}$`);return}S.coins-=cost;S.bagCapacity=cap+1;save();render();toast(`背包容量已擴充至 ${S.bagCapacity} 顆`)};
 document.getElementById('rollBtn').onclick=doRoll;
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
+document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=forceRefreshLeaderboards;
 
 function loadAdminOnlineCurve(){return adminMonitoringSystem?.loadAdminOnlineCurve()}
 
@@ -299,7 +300,7 @@ setupAccountActions({
   getCurrentUser: () => currentUser, setCurrentUser: value => { currentUser = value; },
   supabaseClient, SUPABASE_URL, SUPABASE_KEY, totalUnique, achievementStats,
   save, render, syncCloudSave, flushCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
-  fresh, refreshLeaderboards
+  fresh, refreshLeaderboards: forceRefreshLeaderboards
 });
 save();render();renderRealmActivity();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
