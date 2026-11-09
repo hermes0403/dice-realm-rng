@@ -59,6 +59,7 @@ export function createRealmPolls(dependencies) {
       return false;
     }
     realmPollSyncEnabled = true;
+    setupRealmPollChannel();
     setRealmPollSyncInterval(realmPollChannelReady ? 60000 : 1500);
     await realmPollTick();
     return true;
@@ -290,6 +291,37 @@ export function createRealmPolls(dependencies) {
     }
   }
 
+  function setupRealmPollChannel() {
+    if (isCloudSyncBlocked() || !supabaseClient?.channel || realmPollChannel) return false;
+    {
+      try {
+        realmPollChannel = supabaseClient.channel('dice-realm-polls-live')
+          .on('broadcast', { event: 'admin_message' }, ({ payload }) => receiveRealmAnnouncement(payload))
+          .on('broadcast', { event: 'poll_started' }, ({ payload }) => { void realmDisplayPoll(payload); })
+          .on('broadcast', { event: 'poll_vote' }, ({ payload }) => {
+            if (isAdmin() && Number(payload?.pollId) === realmCurrentPollId) {
+              void realmRefreshPollResults(realmCurrentPollId);
+            }
+          })
+          .subscribe(status => {
+            if (status === 'SUBSCRIBED') {
+              realmPollChannelReady = true;
+              if (realmPollSyncEnabled && getCurrentUser()) void realmPollTick();
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+              realmPollChannelReady = false;
+              if (isCloudSyncBlocked()) stopRealmPollSync();
+              else if (realmPollSyncEnabled) setRealmPollSyncInterval(1500);
+            }
+          });
+      } catch (error) {
+        realmPollChannelReady = false;
+        console.warn('Realm poll realtime unavailable; fast fallback enabled', error);
+      }
+    }
+
+    return !!realmPollChannel;
+  }
+
   function setupRealmSocialUI() {
     if (realmSocialUISetup) return false;
     realmSocialUISetup = true;
@@ -319,31 +351,6 @@ export function createRealmPolls(dependencies) {
       }
     });
     setRealmPollSyncInterval(1500);
-    if (!isCloudSyncBlocked() && supabaseClient?.channel) {
-      try {
-        realmPollChannel = supabaseClient.channel('dice-realm-polls-live')
-          .on('broadcast', { event: 'admin_message' }, ({ payload }) => receiveRealmAnnouncement(payload))
-          .on('broadcast', { event: 'poll_started' }, ({ payload }) => { void realmDisplayPoll(payload); })
-          .on('broadcast', { event: 'poll_vote' }, ({ payload }) => {
-            if (isAdmin() && Number(payload?.pollId) === realmCurrentPollId) {
-              void realmRefreshPollResults(realmCurrentPollId);
-            }
-          })
-          .subscribe(status => {
-            if (status === 'SUBSCRIBED') {
-              realmPollChannelReady = true;
-              if (realmPollSyncEnabled && getCurrentUser()) void realmPollTick();
-            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-              realmPollChannelReady = false;
-              if (isCloudSyncBlocked()) stopRealmPollSync();
-              else if (realmPollSyncEnabled) setRealmPollSyncInterval(1500);
-            }
-          });
-      } catch (error) {
-        realmPollChannelReady = false;
-        console.warn('Realm poll realtime unavailable; fast fallback enabled', error);
-      }
-    }
     return true;
   }
   return {
