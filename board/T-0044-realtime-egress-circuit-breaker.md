@@ -1,7 +1,7 @@
 ---
 id: T-0044
 title: Egress 受限時中止 Realtime WebSocket 重連
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -13,7 +13,7 @@ updated: 2026-11-09
 depends_on: [T-0042]
 branch: work/chazi
 done_by: 棒子
-done_at:
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -29,12 +29,12 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 進入 Egress blocked 狀態時，Realtime client disconnect 被呼叫。
-- [ ] Weather／global boost 在 blocked 狀態不再建立 Realtime channel 或觸發 fallback query。
-- [ ] Realtime error callback 不會在 blocked 狀態再次讀取雲端。
-- [ ] 一般非 402 的 channel error 仍可使用既有 fallback。
-- [ ] 新增回歸測試並實際執行。
-- [ ] `git diff --check` 通過。
+- [x] 進入 Egress blocked 狀態時，Realtime client disconnect 被呼叫。
+- [x] Weather／global boost 在 blocked 狀態不再建立 Realtime channel 或觸發 fallback query。
+- [x] Realtime error callback 不會在 blocked 狀態再次讀取雲端。
+- [x] 一般非 402 的 channel error 仍可使用既有 fallback。
+- [x] 新增回歸測試並實際執行。
+- [x] `git diff --check` 通過。
 
 ## 紀錄
 
@@ -49,3 +49,6 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+
+- 2026-11-09 [棒子] 驗收：GitHub Actions Branch tests（commit 3ab0c024fab13dde3f23d0abb41583dadef1e875）完整測試 58/58 通過，JavaScript syntax check 與 branch whitespace check 通過；本項修改保留在 work/chazi，未部署，main 與玩家資料未修改。
