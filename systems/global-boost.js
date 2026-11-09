@@ -164,8 +164,8 @@ export function createGlobalBoostSystem({
     timerManager.setInterval(updateGlobalBoostStatus, 1000, 'global-boost-status');
     timerManager.setInterval(renderRealmActivity, 1000, 'realm-activity-render');
     timerManager.setInterval(() => {
-      if (documentRef.getElementById('adminIncomeMonitorFold')?.open) loadAdminIncomeMonitor();
-    }, 15000, 'admin-income-monitor');
+      if (!isCloudSyncBlocked() && documentRef.getElementById('adminIncomeMonitorFold')?.open) loadAdminIncomeMonitor();
+    }, 60000, 'admin-income-monitor');
     return true;
   }
 
