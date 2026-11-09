@@ -289,7 +289,7 @@ setupAccountActions({
   documentRef: document, getState: () => S, setState: value => { S = value; },
   getCurrentUser: () => currentUser, setCurrentUser: value => { currentUser = value; },
   supabaseClient, SUPABASE_URL, SUPABASE_KEY, totalUnique, achievementStats,
-  save, render, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
+  save, render, syncCloudSave, flushCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
 save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
