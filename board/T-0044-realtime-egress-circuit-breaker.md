@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 接續處理第二項；T-0042 的共用限制旗標已可供其他服務讀取。開始盤點 weather 與 global boost Realtime channel 的 subscribe error callback 及自動重連來源。
+- 2026-11-09 [叉子] 已修改 services/cloud-save.js：首次確認 Egress restriction 時呼叫 supabaseClient.realtime.disconnect()，並清除 weather-refresh／global-boost-refresh 定時器；修改 systems/weather.js 與 systems/global-boost.js，在受限時不建立 channel、不執行 fallback query，且 Realtime error callback 會辨識 402 並觸發共用斷路器；script.js 已注入共用狀態。新增 tests/realtime-egress-circuit-breaker.test.js，涵蓋 global boost 402 斷線及 weather blocked guard。所有修改檔均已重新 fetch 確認 SHA／內容；完整測試尚待執行。
 
 ## 完工回報
 
