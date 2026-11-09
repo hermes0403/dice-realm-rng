@@ -81,3 +81,29 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
   await system.realmPollTick();
   assert.deepEqual(queries, ['realm_admin_messages', 'realm_polls']);
 });
+
+test('realm poll setup sends no requests or subscriptions while cloud is restricted', () => {
+  let channels = 0;
+  const intervals = [];
+  const system = createRealmPolls({
+    getState: () => ({}),
+    getCurrentUser: () => ({ id: 'player-1' }),
+    supabaseClient: { channel() { channels++; return {}; } },
+    isAdmin: () => false,
+    escapeHTML: value => String(value),
+    format: value => String(value),
+    documentRef: { getElementById() { return { addEventListener() {} }; } },
+    timerManager: {
+      clearScope() {},
+      setInterval(_callback, delay, scope) { if (scope === 'realm-poll-sync') intervals.push(delay); },
+      clearInterval() {},
+      setTimeout() {},
+      clearTimeout() {}
+    },
+    isCloudSyncBlocked: () => true
+  });
+
+  system.setupRealmSocialUI();
+  assert.equal(channels, 0);
+  assert.deepEqual(intervals, []);
+});
