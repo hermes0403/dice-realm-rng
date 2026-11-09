@@ -6,10 +6,14 @@ export function createPresenceService(dependencies) {
     timerManager, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false
   } = dependencies;
   let heartbeatBusy = false;
+  let heartbeatStopped = false;
 
   function stopHeartbeatWhenRestricted() {
     if (!isCloudSyncBlocked()) return false;
-    timerManager?.clearScope?.('presence-heartbeat');
+    if (!heartbeatStopped) {
+      heartbeatStopped = true;
+      timerManager?.clearScope?.('presence-heartbeat');
+    }
     return true;
   }
 
@@ -39,9 +43,7 @@ export function createPresenceService(dependencies) {
       stopHeartbeatWhenRestricted();
     } catch (error) {
       const restricted = markCloudSyncBlocked(error);
-      if (restricted || isCloudSyncBlocked()) {
-        timerManager?.clearScope?.('presence-heartbeat');
-      }
+      if (restricted || isCloudSyncBlocked()) stopHeartbeatWhenRestricted();
       console.debug('Presence update skipped', error);
     } finally {
       heartbeatBusy = false;
