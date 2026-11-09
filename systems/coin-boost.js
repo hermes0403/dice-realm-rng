@@ -1,7 +1,19 @@
 /** Reads the effective personal/global coin multiplier from the admin API. */
-export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY }) {
+export function createCoinBoostService({
+  getCurrentUser,
+  supabaseClient,
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  fetchRef = globalThis.fetch,
+  now = () => Date.now(),
+  cacheMs = 60 * 1000,
+  failureCooldownMs = 30 * 1000,
+  isCloudSyncBlocked = () => false,
+  markCloudSyncBlocked = () => false
+}) {
   let activeCoinBoosts = { global: null, personal: null, lastFetch: 0 };
   let refreshBusy = false;
+  let lastFailedAt = 0;
 
   function coinEarningMultiplier() {
     const now = Date.now();
@@ -21,14 +33,18 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
   }
 
   async function refreshCoinBoosts(force = false) {
-    if (refreshBusy || !getCurrentUser() || !supabaseClient) return false;
-    if (!force && Date.now() - activeCoinBoosts.lastFetch < 5000) return;
+    if (isCloudSyncBlocked() || refreshBusy || !getCurrentUser() || !supabaseClient) return false;
+    const currentTime = now();
+    if (!force && activeCoinBoosts.lastFetch && currentTime - activeCoinBoosts.lastFetch < cacheMs) return false;
+    if (!force && lastFailedAt && currentTime - lastFailedAt < failureCooldownMs) return false;
     refreshBusy = true;
-    activeCoinBoosts.lastFetch = Date.now();
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session?.access_token) return false;
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/dice-rng-admin`, {
+      if (!session?.access_token) {
+        lastFailedAt = now();
+        return false;
+      }
+      const response = await fetchRef(`${SUPABASE_URL}/functions/v1/dice-rng-admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,10 +54,17 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
         body: JSON.stringify({ action: 'coin_boost_status' })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || '讀取倍率失敗');
-      activeCoinBoosts = { global: data.global || null, personal: data.personal || null, lastFetch: Date.now() };
+      if (!response.ok) {
+        const error = new Error(data.error || `讀取倍率失敗（HTTP ${response.status}）`);
+        error.status = response.status;
+        throw error;
+      }
+      activeCoinBoosts = { global: data.global || null, personal: data.personal || null, lastFetch: now() };
+      lastFailedAt = 0;
       return true;
     } catch (error) {
+      lastFailedAt = now();
+      markCloudSyncBlocked(error);
       console.warn('Coin boost refresh failed', error);
       return false;
     } finally {
