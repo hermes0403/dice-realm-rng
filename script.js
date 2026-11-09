@@ -77,7 +77,7 @@ const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, res
 S=load();
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
 const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
-const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum });
+const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
 const { releaseDeviceLock, isLockHeld, isHeartbeatActive, scheduleUnlock } = createDeviceLockService({ getCurrentUser: () => currentUser, supabaseClient, toast, timerManager });
 const { recordGameVisit, startGameVisitTracking } = createVisitTrackingService({ getCurrentUser: () => currentUser, getState: () => S, supabaseClient, timerManager, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
 const { checkAchievements, checkDailyReward, renderQuests, renderProfile, closeAchievementPopup, rewardText, grantAchievementReward, showAchievementPopup } = createProgressionSystem({
@@ -210,7 +210,7 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
@@ -220,7 +220,7 @@ codexUI = createCodexUI({
 });
 codexUI.setupCodexUI();
 adminPetOddsUI = setupAdminPetOddsUI({
-  PET_TIER_RATES, PET_TIER_CONFIG, PET_RARITIES, supabaseClient, isAdmin, toast,
+  PET_TIER_RATES, PET_TIER_CONFIG, PET_RARITIES, supabaseClient, isAdmin, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false, toast,
   loadAdminPetFusionLogs, renderPetChance, dicePairTier, byId, escapeHTML
 });
 adminMonitoringSystem = createAdminMonitoringSystem({
