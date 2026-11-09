@@ -3,7 +3,7 @@ export function createCloudSaveService(dependencies) {
     KEY, D, POTIONS, supabaseClient,
     getState, setState, getCurrentUser,
     fresh, normalizeGloves, migrateCurrency, ensurePetData,
-    restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
+    restoreAutoSellPrefs, totalUnique, render,
     toast, openAuth, showAuthMessage, timerManager,
     localStorageRef = globalThis.localStorage,
     documentRef = globalThis.document,
