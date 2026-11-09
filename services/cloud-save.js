@@ -16,6 +16,7 @@ export function createCloudSaveService(dependencies) {
   let cloudSyncTimer = null;
   let cloudSyncBusy = false;
   let cloudSyncPending = false;
+  let cloudSyncBlocked = false;
   let lastCloudSyncAt = 0;
   let exitFlushPromise = null;
   let lastExitFlushAt = 0;
@@ -24,6 +25,26 @@ export function createCloudSaveService(dependencies) {
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
+
+  function isProjectRestrictionError(error) {
+    const message = [error?.message, error?.details, error?.hint, error?.code]
+      .filter(Boolean).join(' ').toLowerCase();
+    return Number(error?.status) === 402
+      || message.includes('exceed_egress_quota')
+      || message.includes('project is restricted')
+      || message.includes('egress quota');
+  }
+
+  function markCloudSyncBlocked(error) {
+    if (!isProjectRestrictionError(error)) return false;
+    cloudSyncBlocked = true;
+    cloudSyncPending = false;
+    if (cloudSyncTimer) {
+      timerManager.clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = null;
+    }
+    return true;
+  }
 
   function userSaveKey(userId = getCurrentUser()?.id) {
     return userId ? KEY + '_user_' + String(userId) : null;
@@ -85,7 +106,7 @@ export function createCloudSaveService(dependencies) {
 
   async function applyPendingGrants() {
     const user = getCurrentUser();
-    if (!user || !supabaseClient) return false;
+    if (!user || !supabaseClient || cloudSyncBlocked) return false;
     const S = getState();
     S.adminGrantApplied = S.adminGrantApplied || {};
     S.potions = S.potions || fresh().potions;
@@ -134,6 +155,7 @@ export function createCloudSaveService(dependencies) {
       }
       return changed;
     } catch (e) {
+      markCloudSyncBlocked(e);
       console.warn('Admin grant sync failed', e);
       return false;
     }
@@ -145,7 +167,7 @@ export function createCloudSaveService(dependencies) {
       cloudSyncTimer = null;
     }
     const initialUser = getCurrentUser();
-    if (!initialUser || !supabaseClient) return false;
+    if (!initialUser || !supabaseClient || cloudSyncBlocked) return false;
     if (lastSyncedUserId !== initialUser.id) {
       document.getElementById('saveStatus').textContent = '雲端存檔尚未載入';
       return false;
@@ -208,18 +230,21 @@ export function createCloudSaveService(dependencies) {
       return true;
     } catch (e) {
       console.error('Cloud sync failed', e);
-      cloudSyncPending = getCurrentUser()?.id === syncingUserId;
-      document.getElementById('saveStatus').textContent = '雲端同步失敗';
+      const restricted = markCloudSyncBlocked(e);
+      cloudSyncPending = !restricted && getCurrentUser()?.id === syncingUserId;
+      document.getElementById('saveStatus').textContent = restricted
+        ? '本機已保存（雲端服務受限）'
+        : '雲端同步失敗';
       return false;
     } finally {
       cloudSyncBusy = false;
-      if (cloudSyncPending) scheduleCloudSync();
+      if (cloudSyncPending && !cloudSyncBlocked) scheduleCloudSync();
     }
   }
 
   function scheduleCloudSync() {
     cloudSyncPending = true;
-    if (!getCurrentUser() || !supabaseClient || cloudSyncBusy || cloudSyncTimer) return;
+    if (!getCurrentUser() || !supabaseClient || cloudSyncBlocked || cloudSyncBusy || cloudSyncTimer) return;
     const elapsed = Date.now() - lastCloudSyncAt;
     const delay = lastCloudSyncAt
       ? Math.max(700, CLOUD_SYNC_MIN_INTERVAL - elapsed)
@@ -243,12 +268,14 @@ export function createCloudSaveService(dependencies) {
     const S = getState();
     try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
-    document.getElementById('saveStatus').textContent = getCurrentUser() ? '雲端同步中…' : '本機存檔';
+    document.getElementById('saveStatus').textContent = getCurrentUser()
+      ? (cloudSyncBlocked ? '本機已保存（雲端服務受限）' : '雲端同步中…')
+      : '本機存檔';
     if (getCurrentUser()) scheduleSync();
   }
 
   async function flushCloudSave() {
-    if (!getCurrentUser() || !supabaseClient) return false;
+    if (!getCurrentUser() || !supabaseClient || cloudSyncBlocked) return false;
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
@@ -278,7 +305,7 @@ export function createCloudSaveService(dependencies) {
 
   async function loadCloudSave({ syncAfterLoad = true } = {}) {
     const user = getCurrentUser();
-    if (!user || !supabaseClient) return;
+    if (!user || !supabaseClient || cloudSyncBlocked) return false;
     try {
       const scopedKey = userSaveKey(user.id);
       const localSaveBeforeCloud = (() => {
@@ -346,20 +373,28 @@ export function createCloudSaveService(dependencies) {
       if (syncAfterLoad) {
         const currentPayload = savePayload();
         if (!lastSyncedPayload || Object.keys(diffPayload(lastSyncedPayload, currentPayload)).length > 0) {
-          await syncCloudSave();
+          if (!(await syncCloudSave())) return false;
         } else {
           document.getElementById('saveStatus').textContent = '雲端存檔已載入';
         }
       }
-      await refreshLeaderboards();
+      if (!cloudSyncBlocked) await refreshLeaderboards();
+      return !cloudSyncBlocked;
     } catch (e) {
       console.error(e);
+      const restricted = markCloudSyncBlocked(e);
       if (/user.?banned|banned|被停權|已停權/i.test(String(e?.message || ''))) {
         await supabaseClient?.auth.signOut().catch(() => {});
         openAuth();
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
-      } else toast('讀取雲端存檔失敗，請重新登入');
+      } else if (restricted) {
+        document.getElementById('saveStatus').textContent = '本機存檔（雲端服務受限）';
+        toast('雲端服務目前受限，遊戲資料已保留在本機；雲端恢復後請重新載入。');
+      } else {
+        toast('讀取雲端存檔失敗，請重新登入');
+      }
+      return false;
     }
   }
 
