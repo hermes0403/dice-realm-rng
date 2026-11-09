@@ -77,7 +77,14 @@ const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetD
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
-const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
+const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({
+  getCurrentUser: () => currentUser,
+  supabaseClient,
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
+});
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
 const forceRefreshLeaderboards = () => refreshLeaderboards({ force: true });
 const { releaseDeviceLock, isLockHeld, isHeartbeatActive, scheduleUnlock } = createDeviceLockService({ getCurrentUser: () => currentUser, supabaseClient, toast, timerManager });
