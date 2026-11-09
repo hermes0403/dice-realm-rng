@@ -7,24 +7,37 @@ export function createAdminGrantService({
   D,
   ADMIN_GRANT_LABELS,
   escapeHTML,
-  format
+  format,
+  fetchRef = globalThis.fetch,
+  isCloudSyncBlocked = () => false,
+  markCloudSyncBlocked = () => false
 }) {
   async function adminApi(payload) {
     if (!isAdmin()) throw new Error('沒有管理員權限');
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session?.access_token) throw new Error('登入狀態已失效，請重新登入');
-    const response = await fetch(SUPABASE_URL + '/functions/v1/dice-rng-admin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: SUPABASE_KEY,
-        Authorization: 'Bearer ' + session.access_token
-      },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json().catch(() => ({ error: '伺服器回應格式錯誤' }));
-    if (!response.ok) throw new Error((data.error || '管理操作失敗') + '（HTTP ' + response.status + '）');
-    return data;
+    if (isCloudSyncBlocked()) throw new Error('雲端服務受限，管理功能暫停。');
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session?.access_token) throw new Error('登入狀態已失效，請重新登入');
+      const response = await fetchRef(SUPABASE_URL + '/functions/v1/dice-rng-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_KEY,
+          Authorization: 'Bearer ' + session.access_token
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json().catch(() => ({ error: '伺服器回應格式錯誤' }));
+      if (!response.ok) {
+        const error = new Error((data.error || '管理操作失敗') + '（HTTP ' + response.status + '）');
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      markCloudSyncBlocked(error);
+      throw error;
+    }
   }
 
   async function writeAdminGrantLog() {
@@ -33,6 +46,7 @@ export function createAdminGrantService({
   }
 
   async function loadAdminGrantHistory() {
+    if (isCloudSyncBlocked()) return;
     const list = document.getElementById('adminGrantHistoryList');
     const status = document.getElementById('adminGrantHistoryStatus');
     if (!isAdmin()) {
@@ -67,6 +81,7 @@ export function createAdminGrantService({
       }).join('');
       status.textContent = `已從雲端載入 ${rows.length} 筆發放紀錄（最多顯示最近 200 筆）。`;
     } catch (error) {
+      markCloudSyncBlocked(error);
       list.innerHTML = '<div class="empty">讀取失敗：' + escapeHTML(error.message || '請確認管理員是否有權限讀取 admin_actions') + '</div>';
       status.textContent = '無法讀取雲端發放紀錄。';
     }
