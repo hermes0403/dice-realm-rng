@@ -119,7 +119,9 @@ realmSocialSystem = createRealmSocialSystem({
   escapeHTML,
   format,
   WEATHER_TYPES,
-  documentRef: document
+  documentRef: document,
+  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
 });
 cloudSaveService=createCloudSaveService({
  KEY, D, POTIONS, supabaseClient,
