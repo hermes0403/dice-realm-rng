@@ -1,22 +1,26 @@
 /** Cloud leaderboard queries and rendering. */
-export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escapeHTML, format, compactNum, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false }) {
-  async function refreshLeaderboards() {
+export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escapeHTML, format, compactNum, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false, now = () => Date.now(), cacheMs = 30 * 1000, failureCooldownMs = 10 * 1000 }) {
+  let refreshInFlight = null;
+  let lastRefreshAt = 0;
+  let lastFailedAt = 0;
+
+  async function performLeaderboardRefresh() {
     const local = document.getElementById('localRank');
     const rare = document.getElementById('rareRank');
     const money = document.getElementById('moneyRank');
     const income = document.getElementById('incomeRank');
     const mine = document.getElementById('myRankStrip');
-    if (!local || !rare || !money) return;
+    if (!local || !rare || !money) return false;
     if (isCloudSyncBlocked()) {
       const blockedMessage = '<div class="empty">雲端服務受限，排行榜暫不可用。</div>';
       local.innerHTML = rare.innerHTML = money.innerHTML = blockedMessage;
       if (income) income.innerHTML = blockedMessage;
-      return;
+      return false;
     }
     if (!supabaseClient) {
       local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">雲端服務尚未載入，請重新整理。</div>';
       if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
-      return;
+      return false;
     }
     local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">正在更新排行榜…</div>';
     if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
@@ -56,6 +60,7 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
         };
         mine.innerHTML = `<div class="my-rank-card"><span class="my-rank-label">🎲 累積擲骰</span><div class="my-rank-value">${rank(sortRoll)}</div></div><div class="my-rank-card"><span class="my-rank-label">✦ 最佳骰子</span><div class="my-rank-value">${rank(sortRare)}</div></div><div class="my-rank-card"><span class="my-rank-label">🏆 成就</span><div class="my-rank-value">${rank(sortAchievement)}</div></div><div class="my-rank-card"><span class="my-rank-label">💸 賺錢排行榜</span><div class="my-rank-value">待後端開放</div></div>`;
       }
+      return true;
     } catch (error) {
       markCloudSyncBlocked(error);
       console.error('Leaderboard load failed', error);
@@ -63,7 +68,27 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
       local.innerHTML = rare.innerHTML = money.innerHTML = `<div class="empty">${message}</div>`;
       if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
       if (mine) mine.querySelectorAll('.my-rank-value').forEach((x, i) => { x.textContent = i === 3 ? '待後端開放' : '—'; });
+      return false;
     }
+  }
+
+  async function refreshLeaderboards({ force = false } = {}) {
+    if (refreshInFlight) return refreshInFlight;
+    if (isCloudSyncBlocked()) return performLeaderboardRefresh();
+    const currentTime = now();
+    if (!force && lastRefreshAt && currentTime - lastRefreshAt < cacheMs) return true;
+    if (!force && lastFailedAt && currentTime - lastFailedAt < failureCooldownMs) return false;
+    refreshInFlight = (async () => {
+      try {
+        const succeeded = await performLeaderboardRefresh();
+        if (succeeded) lastRefreshAt = now();
+        else lastFailedAt = now();
+        return succeeded;
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+    return refreshInFlight;
   }
 
   return { refreshLeaderboards };
