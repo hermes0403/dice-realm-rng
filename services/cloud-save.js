@@ -357,7 +357,12 @@ export function createCloudSaveService(dependencies) {
   }
 
   function scheduleCloudSync() {
-    if (!getCurrentUser() || !supabaseClient) return;
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) return;
+    if (lastSyncedUserId !== user.id) {
+      cloudSyncPending = false;
+      return;
+    }
     if (cloudSyncBlocked) {
       cloudSyncPending = false;
       return;
