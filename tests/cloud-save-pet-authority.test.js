@@ -98,7 +98,7 @@ test('cloud pet inventory does not merge a sold pet from a stale local snapshot'
   assert.deepEqual(getState().equippedPetUids, [currentPet.uid]);
   assert.equal(writes.length, 1);
   assert.equal(writes[0].name, 'sync_player_game_save_delta');
-  assert.deepEqual(writes[0].args.p_save_patch.pets.map(pet => pet.uid), [currentPet.uid]);
+  assert.equal(Object.hasOwn(writes[0].args.p_save_patch, 'pets'), false, 'unchanged authoritative pets should not be resent');
 
   await service.syncCloudSave();
   assert.equal(writes.length, 1, 'unchanged state must not issue another save RPC');
@@ -116,7 +116,7 @@ test('an empty authoritative cloud pet inventory stays empty despite old local p
   assert.deepEqual(getState().pets, []);
   assert.deepEqual(getState().equippedPetUids, []);
   assert.equal(writes.length, 1);
-  assert.deepEqual(writes[0].args.p_save_patch.pets, []);
+  assert.equal(Object.hasOwn(writes[0].args.p_save_patch, 'pets'), false, 'unchanged empty pet inventory should not be resent');
 });
 
 test('a single changed save field sends only that field', async () => {
