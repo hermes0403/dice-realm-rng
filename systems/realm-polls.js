@@ -51,6 +51,12 @@ export function createRealmPolls(dependencies) {
     realmPollSyncEnabled = false;
     timerManager.clearScope('realm-poll-sync');
     realmPollSyncIntervalMs = 0;
+    if (realmPollChannel && !isCloudSyncBlocked()) {
+      const channel = realmPollChannel;
+      realmPollChannel = null;
+      realmPollChannelReady = false;
+      void channel.unsubscribe?.();
+    }
   }
 
   async function startRealmPollSync() {
