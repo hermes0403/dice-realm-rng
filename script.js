@@ -223,7 +223,7 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, realmPollTick: () => realmSocialSystem?.realmPollTick(), isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
