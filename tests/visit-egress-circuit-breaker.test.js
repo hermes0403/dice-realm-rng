@@ -126,7 +126,7 @@ test('ordinary visit tracking errors do not stop tracking', async () => {
     await service.recordGameVisit('visible');
     assert.equal(blocked, false);
     assert.equal(inserts, 2);
-    assert.deepEqual(clearedScopes, []);
+    assert.deepEqual(clearedScopes, ['visit-tracking'], 'only the initial timer-scope reset should occur');
     assert.equal(typeof browser.visibilityHandler, 'function');
   } finally {
     service.stopGameVisitTracking();
