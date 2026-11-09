@@ -77,7 +77,7 @@ export function createGlobalAnnouncements(dependencies) {
 
   async function recordPetFusion(d, p, rarity) {
     const currentUser = getCurrentUser();
-    if (!currentUser || !supabaseClient || isCloudSyncBlocked()) return;
+    if (!currentUser || !supabaseClient) return;
     const state = getState();
     const row = {
       user_id: currentUser.id,
@@ -89,18 +89,20 @@ export function createGlobalAnnouncements(dependencies) {
       rarity: String(rarity || ''),
       created_at: new Date().toISOString()
     };
-    try {
-      const { error } = await supabaseClient.from('pet_fusion_logs').insert(row);
-      if (error) throw error;
-    } catch (e) {
-      markCloudSyncBlocked(e);
-      console.warn('Pet fusion log write failed (pet_fusion_logs table/policies may need setup):', e.message || e);
+    if (!isCloudSyncBlocked()) {
+      try {
+        const { error } = await supabaseClient.from('pet_fusion_logs').insert(row);
+        if (error) throw error;
+      } catch (e) {
+        markCloudSyncBlocked(e);
+        console.warn('Pet fusion log write failed (pet_fusion_logs table/policies may need setup):', e.message || e);
+      }
     }
     if (rarity === 'secret') {
       const payload = { name: row.username, petName: row.pet_name, at: Date.now() };
       showSecretPetMarquee(payload.name, payload.petName, payload.at);
       try {
-        if (announcementChannel) await announcementChannel.send({ type: 'broadcast', event: 'secret_pet', payload });
+        if (announcementChannel && !isCloudSyncBlocked()) await announcementChannel.send({ type: 'broadcast', event: 'secret_pet', payload });
       } catch (e) {
         console.debug('Secret pet announcement broadcast unavailable', e);
       }
