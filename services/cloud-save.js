@@ -245,8 +245,13 @@ export function createCloudSaveService(dependencies) {
   }
 
   function scheduleCloudSync() {
+    if (!getCurrentUser() || !supabaseClient) return;
+    if (cloudSyncBlocked) {
+      cloudSyncPending = false;
+      return;
+    }
     cloudSyncPending = true;
-    if (!getCurrentUser() || !supabaseClient || cloudSyncBlocked || cloudSyncBusy || cloudSyncTimer) return;
+    if (cloudSyncBusy || cloudSyncTimer) return;
     const elapsed = Date.now() - lastCloudSyncAt;
     const delay = lastCloudSyncAt
       ? Math.max(700, CLOUD_SYNC_MIN_INTERVAL - elapsed)
