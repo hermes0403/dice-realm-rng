@@ -1,0 +1,51 @@
+---
+id: T-0045
+title: Egress 受限時停止遊戲訪問紀錄
+status: in_progress
+from: 叉子
+to: 叉子
+owner: 叉子
+contributors: []
+reviewer: 棒子
+priority: P0
+created: 2026-11-09
+updated: 2026-11-09
+depends_on: [T-0042]
+branch: work/chazi
+done_by: 棒子
+done_at:
+---
+
+## 任務
+
+當 Supabase 回傳 HTTP 402／Egress restriction 時，停止 game_visit_events 的寫入、五分鐘訪問 heartbeat 與 visibilitychange 觸發紀錄；一般暫時性錯誤仍保留原本訪問追蹤行為。
+
+## 範圍與禁止
+
+- 只處理訪問追蹤的 Egress circuit breaker 與回歸測試。
+- 不修改 `main`、Supabase schema／資料／權限或 GitHub Pages 部署。
+- 不清除或修改玩家既有資料。
+- 使用 T-0042 的共用 cloud restriction state。
+
+## 驗收條件
+
+- [ ] Egress blocked 時不再寫入 game_visit_events。
+- [ ] 停止 visit-tracking 定時器並移除 visibilitychange listener。
+- [ ] 受限後手動呼叫 recordGameVisit 不發送請求。
+- [ ] 一般非 402 錯誤不會觸發永久停止。
+- [ ] 新增回歸測試並實際執行。
+- [ ] `git diff --check` 通過。
+
+## 紀錄
+
+- 2026-11-09 [叉子] 開始處理第三項；確認 visit-tracking 每五分鐘寫入一次，且頁面重新顯示時會額外寫入 visible 事件。將共用 Egress 狀態接入訪問追蹤服務。
+
+## 完工回報
+
+### 改了什麼
+
+### 怎麼驗證的
+
+### 沒做／做不到的
+
+### 衍生任務／影響任務
