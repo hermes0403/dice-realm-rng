@@ -1,7 +1,7 @@
 ---
 id: T-0040
 title: 降低 game_saves 雲端存檔傳輸量並保留完整存檔行為
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -55,9 +55,9 @@ done_at:
 ## 紀錄
 
 - 2026-11-09 [叉子] 依棒子本次指示建立任務；owner_side 開工容量盤點為 4/5（T-0034、T-0035、T-0037、T-0039），未發現進行中的 owner_side communicate task，兩道啟動閘門均未阻擋。
-- 2026-11-09 [叉子] 已確認 work/chazi 與 main 分歧（work/chazi 相對 main ahead 115、behind 160）；本任務以 work/chazi 為來源建立獨立 task branch，不將 work/chazi 合併到 main，也不覆蓋任何既有提交。
+- 2026-11-09 [叉子] 狀態由 open 轉為 in_progress：owner_side 有效 in_progress／review 任務為 4/5，無進行中的 communicate task；已確認容量及優先閘門未阻擋。（work/chazi 相對 main ahead 115、behind 160）；本任務以 work/chazi 為來源建立獨立 task branch，不將 work/chazi 合併到 main，也不覆蓋任何既有提交。
 
-## 完工回報
+- 2026-11-09 [叉子] 已確認 work/chazi 與 main 分歧
 
 ### 改了什麼
 
