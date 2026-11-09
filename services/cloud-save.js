@@ -469,7 +469,11 @@ export function createCloudSaveService(dependencies) {
       })();
       const existingDirtyMarker = readLocalDirtyMarker(user.id);
       if (existingDirtyMarker) {
-        return await recoverLocalSave(user, existingDirtyMarker, localSaveBeforeCloud, undefined, skipLocalRecovery);
+        await recoverLocalSave(user, existingDirtyMarker, localSaveBeforeCloud, undefined, skipLocalRecovery);
+        // Local recovery is a successful game-load path even when the save is
+        // intentionally not synchronized yet. Only a cloud restriction blocks
+        // the remaining session initialization.
+        return !cloudSyncBlocked;
       }
       cloudLoadRegistered = true;
       cloudLoadInProgressUserCounts.set(user.id, (cloudLoadInProgressUserCounts.get(user.id) || 0) + 1);
@@ -481,7 +485,8 @@ export function createCloudSaveService(dependencies) {
       if (dirtyDuringLoad) {
         let latestLocalSave = localSaveBeforeCloud;
         try { latestLocalSave = JSON.parse(localStorage.getItem(scopedKey) || 'null') || localSaveBeforeCloud; } catch {}
-        return await recoverLocalSave(user, dirtyDuringLoad, latestLocalSave, data, skipLocalRecovery);
+        await recoverLocalSave(user, dirtyDuringLoad, latestLocalSave, data, skipLocalRecovery);
+        return !cloudSyncBlocked;
       }
       cloudSaveVersion = data?.updated_at || null;
       lastSyncedPayload = clonePayload(data?.save_data || null);
