@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createCloudSaveService } from '../services/cloud-save.js';
 import { createGlobalBoostSystem } from '../systems/global-boost.js';
+import { createWeatherSystem } from '../systems/weather.js';
 
 test('Realtime HTTP 402 trips the shared breaker and prevents refresh or resubscribe', async () => {
   let blocked = false;
@@ -97,4 +98,76 @@ test('Realtime HTTP 402 trips the shared breaker and prevents refresh or resubsc
   assert.equal(refreshQueries, 0);
   assert.equal(channelCreations, 1);
   assert.equal(disconnectCalls, 1, 'the shared realtime socket is disconnected only once');
+});
+
+
+test('weather realtime and refresh methods do not connect or query while blocked', async () => {
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = {
+    getItem() { return null; },
+    setItem() {},
+    removeItem() {}
+  };
+  let channelCreations = 0;
+  let reads = 0;
+  const makeElement = () => ({
+    textContent: '',
+    hidden: false,
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    setAttribute() {}
+  });
+  const elements = new Map();
+  const documentRef = {
+    body: { classList: { add() {}, remove() {}, toggle() {} }, appendChild() {} },
+    getElementById(id) {
+      if (!elements.has(id)) elements.set(id, makeElement());
+      return elements.get(id);
+    },
+    createElement() { return makeElement(); },
+    addEventListener() {}
+  };
+  const timerManager = { setInterval() { return 1; } };
+  const supabaseClient = {
+    channel() { channelCreations++; return { on() { return this; }, subscribe() { return this; } }; },
+    from() {
+      reads++;
+      return { select() { return this; }, eq() { return this; }, async maybeSingle() { return { data: null, error: null }; } };
+    }
+  };
+  try {
+    const weather = createWeatherSystem({
+      D: [],
+      WEATHER_TYPES: {},
+      format: String,
+      escapeHTML: value => String(value),
+      chanceText: () => '',
+      byId: () => null,
+      supabaseClient,
+      timerManager,
+      getState: () => ({}),
+      getCurrentUser: () => ({ id: 'user-1' }),
+      getAnnouncementChannel: () => null,
+      openAuth() {},
+      toast() {},
+      save() {},
+      isCloudSyncBlocked: () => true,
+      markCloudSyncBlocked: () => false,
+      render() {},
+      renderCodex() {},
+      renderGloves() {},
+      flushCloudSave: async () => false,
+      announceWeatherSummon() {},
+      triggerWeatherSurge() {},
+      documentRef
+    });
+    assert.equal(weather.setupServerWeatherSubscription(), false);
+    weather.setupPlayerWeatherSubscription();
+    await weather.refreshServerWeather(false);
+    await weather.refreshPlayerWeatherOverride(false);
+    assert.equal(channelCreations, 0);
+    assert.equal(reads, 0);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
 });
