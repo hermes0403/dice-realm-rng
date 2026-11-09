@@ -22,6 +22,7 @@ export function createAuthService(deps) {
     heartbeat,
     refreshLeaderboards,
     loadWeatherSummonData,
+    isCloudSyncBlocked = () => false,
     timerManager
   } = deps;
 
@@ -289,8 +290,11 @@ export function createAuthService(deps) {
           if (!cloudLoadSucceeded) return;
           if (getCurrentUser()?.id === user.id) {
             await loadPetFusionOdds();
+            if (isCloudSyncBlocked()) return;
             await heartbeat();
+            if (isCloudSyncBlocked()) return;
             await refreshLeaderboards();
+            if (isCloudSyncBlocked()) return;
             await loadWeatherSummonData(false);
           }
         }, 0, 'auth-session-init');
