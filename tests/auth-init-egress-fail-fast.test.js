@@ -11,7 +11,6 @@ test('auth cloud initialization stops immediately when a step activates the egre
       blocked = true;
     },
     heartbeat: async () => calls.push('heartbeat'),
-    refreshLeaderboards: async () => calls.push('leaderboards'),
     loadWeatherSummonData: async () => calls.push('weather'),
     isCloudSyncBlocked: () => blocked
   });
@@ -25,7 +24,6 @@ test('auth cloud initialization completes all steps when cloud access remains av
   const result = await runCloudSessionInitialization({
     loadPetFusionOdds: async () => calls.push('pet-odds'),
     heartbeat: async () => calls.push('heartbeat'),
-    refreshLeaderboards: async () => calls.push('leaderboards'),
     loadWeatherSummonData: async refreshState => {
       assert.equal(refreshState, false);
       calls.push('weather');
@@ -34,7 +32,7 @@ test('auth cloud initialization completes all steps when cloud access remains av
   });
 
   assert.equal(result, true);
-  assert.deepEqual(calls, ['pet-odds', 'heartbeat', 'leaderboards', 'weather']);
+  assert.deepEqual(calls, ['pet-odds', 'heartbeat', 'weather']);
 });
 
 test('auth cloud initialization stops after heartbeat activates the egress breaker', async () => {
@@ -46,7 +44,6 @@ test('auth cloud initialization stops after heartbeat activates the egress break
       calls.push('heartbeat');
       blocked = true;
     },
-    refreshLeaderboards: async () => calls.push('leaderboards'),
     loadWeatherSummonData: async () => calls.push('weather'),
     isCloudSyncBlocked: () => blocked
   });
