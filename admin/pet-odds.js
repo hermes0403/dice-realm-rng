@@ -5,6 +5,8 @@ export function setupAdminPetOddsUI({
   PET_RARITIES,
   supabaseClient,
   isAdmin,
+  isCloudSyncBlocked = () => false,
+  markCloudSyncBlocked = () => false,
   toast,
   loadAdminPetFusionLogs,
   renderPetChance,
@@ -73,7 +75,7 @@ export function setupAdminPetOddsUI({
   }
 
   async function loadPetFusionOdds() {
-    if (!supabaseClient) return;
+    if (!supabaseClient || isCloudSyncBlocked()) return;
     try {
       const { data, error } = await supabaseClient.from('pet_fusion_odds')
         .select('tier,min_den,max_den,rates').order('min_den', { ascending: true });
@@ -92,6 +94,7 @@ export function setupAdminPetOddsUI({
       renderAdminPetTierOdds();
       if (isAdmin()) fillAdminPetOddsEditor();
     } catch (error) {
+      markCloudSyncBlocked(error);
       console.warn('讀取全服寵物機率失敗，暫用內建預設值：', error.message || error);
     }
   }
