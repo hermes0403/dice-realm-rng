@@ -24,7 +24,7 @@ export function createCloudSaveService(dependencies) {
   let cloudSaveVersion = null;
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
-  const cloudLoadInProgressUserIds = new Set();
+  const cloudLoadInProgressUserCounts = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
 
   function isProjectRestrictionError(error) {
@@ -416,7 +416,7 @@ export function createCloudSaveService(dependencies) {
       const localChanged = previousLocal !== currentLocal;
       const hasCloudChanges = lastSyncedUserId === user.id
         && Object.keys(diffPayload(lastSyncedPayload, savePayload())).length > 0;
-      if (hasCloudChanges || ((cloudSyncBlocked || cloudLoadInProgressUserIds.has(user.id)) && localChanged)) {
+      if (hasCloudChanges || ((cloudSyncBlocked || cloudLoadInProgressUserCounts.has(user.id)) && localChanged)) {
         markLocalSaveDirty(user.id);
       }
     }
@@ -460,6 +460,7 @@ export function createCloudSaveService(dependencies) {
   async function loadCloudSave({ syncAfterLoad = true, skipLocalRecovery = false } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient || cloudSyncBlocked) return false;
+    let cloudLoadRegistered = false;
     try {
       const scopedKey = userSaveKey(user.id);
       const localSaveBeforeCloud = (() => {
@@ -470,7 +471,8 @@ export function createCloudSaveService(dependencies) {
       if (existingDirtyMarker) {
         return await recoverLocalSave(user, existingDirtyMarker, localSaveBeforeCloud, undefined, skipLocalRecovery);
       }
-      cloudLoadInProgressUserIds.add(user.id);
+      cloudLoadRegistered = true;
+      cloudLoadInProgressUserCounts.set(user.id, (cloudLoadInProgressUserCounts.get(user.id) || 0) + 1);
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
@@ -560,7 +562,11 @@ export function createCloudSaveService(dependencies) {
       }
       return false;
     } finally {
-      cloudLoadInProgressUserIds.delete(user.id);
+      if (cloudLoadRegistered) {
+        const remaining = (cloudLoadInProgressUserCounts.get(user.id) || 1) - 1;
+        if (remaining > 0) cloudLoadInProgressUserCounts.set(user.id, remaining);
+        else cloudLoadInProgressUserCounts.delete(user.id);
+      }
     }
   }
 
