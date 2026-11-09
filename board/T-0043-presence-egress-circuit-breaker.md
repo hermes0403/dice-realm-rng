@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 接續 T-0042；檢查發現 script.js 的 30 秒 heartbeat 在雲端受限後仍會持續呼叫 player_profiles。先處理此第一項，逐檔寫入並逐檔回讀確認。
+- 2026-11-09 [叉子] 接續 T-0042；檢查發現 script.js 的 30 秒 heartbeat 在雲端受限後仍會持續呼叫 player_profiles。已修改 services/cloud-save.js 暴露共用受限狀態與標記函式、services/presence.js 在 402 後清除 presence-heartbeat timer 並拒絕後續請求、script.js 注入共用閘門；新增 tests/presence-egress-failure.test.js（涵蓋 402 與一般 503）。逐檔寫入後均重新 fetch，SHA 與內容確認成功。Node 測試及 git diff --check 尚未執行。
 
 ## 完工回報
 
