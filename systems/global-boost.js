@@ -12,11 +12,24 @@ export function createGlobalBoostSystem({
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
+  let globalBoostChannel = null;
   function activeGlobalBoost() {
     const boost = getBoostState();
     return boost && Number.isFinite(new Date(boost.ends_at).getTime()) && new Date(boost.ends_at).getTime() > Date.now()
       ? boost
       : { luck_percent: 0, speed_percent: 0, ends_at: null };
+  }
+
+  function applyGlobalBoostRow(data) {
+    const before = JSON.stringify(activeGlobalBoost());
+    setBoostState(data || null);
+    const changed = before !== JSON.stringify(activeGlobalBoost());
+    if (changed) {
+      if (typeof render === 'function') render();
+      if (typeof restartAutoInterval === 'function') restartAutoInterval();
+    }
+    updateGlobalBoostStatus();
+    return changed;
   }
 
   async function refreshGlobalBoost() {
@@ -27,17 +40,35 @@ export function createGlobalBoostSystem({
         .select('luck_percent,speed_percent,starts_at,ends_at,updated_at')
         .eq('singleton', true).maybeSingle();
       if (error) throw error;
-      const before = JSON.stringify(activeGlobalBoost());
-      setBoostState(data || null);
-      if (before !== JSON.stringify(activeGlobalBoost())) {
-        if (typeof render === 'function') render();
-        if (typeof restartAutoInterval === 'function') restartAutoInterval();
-      }
-      if (typeof updateGlobalBoostStatus === 'function') updateGlobalBoostStatus();
+      applyGlobalBoostRow(data);
     } catch (error) {
       console.debug('Global timed boost unavailable', error);
     } finally {
       refreshBusy = false;
+    }
+  }
+
+  function setupGlobalBoostSubscription() {
+    if (!supabaseClient || typeof supabaseClient.channel !== 'function') return false;
+    if (globalBoostChannel) {
+      try { supabaseClient.removeChannel(globalBoostChannel); } catch {}
+      globalBoostChannel = null;
+    }
+    try {
+      globalBoostChannel = supabaseClient.channel('realm-global-boost')
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'realm_global_boost', filter: 'singleton=eq.true'
+        }, payload => {
+          applyGlobalBoostRow(payload?.eventType === 'DELETE' ? null : payload?.new || null);
+        })
+        .subscribe(status => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') refreshGlobalBoost();
+        });
+      return true;
+    } catch (error) {
+      console.debug('Global boost realtime unavailable; polling fallback remains active', error);
+      globalBoostChannel = null;
+      return false;
     }
   }
 
@@ -110,7 +141,12 @@ export function createGlobalBoostSystem({
     timerManager.clearScope('global-boost-refresh');
     timerManager.clearScope('realm-activity-render');
     timerManager.clearScope('admin-income-monitor');
-    timerManager.setInterval(() => { refreshGlobalBoost(); updateGlobalBoostStatus(); }, 3000, 'global-boost-refresh');
+    setupGlobalBoostSubscription();
+    refreshGlobalBoost();
+    // Realtime handles normal changes; a five-minute read repairs missed events or outages.
+    timerManager.setInterval(refreshGlobalBoost, 5 * 60 * 1000, 'global-boost-refresh');
+    // Countdown text remains live without querying Supabase every second.
+    timerManager.setInterval(updateGlobalBoostStatus, 1000, 'global-boost-status');
     timerManager.setInterval(renderRealmActivity, 1000, 'realm-activity-render');
     timerManager.setInterval(() => {
       if (documentRef.getElementById('adminIncomeMonitorFold')?.open) loadAdminIncomeMonitor();
@@ -118,5 +154,5 @@ export function createGlobalBoostSystem({
     return true;
   }
 
-  return { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI };
+  return { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI, setupGlobalBoostSubscription };
 }
