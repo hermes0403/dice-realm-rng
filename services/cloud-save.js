@@ -43,8 +43,14 @@ export function createCloudSaveService(dependencies) {
     cloudSyncBlocked = true;
     cloudSyncPending = false;
     if (!wasAlreadyBlocked) {
-      try { supabaseClient?.realtime?.disconnect?.(); }
-      catch (disconnectError) { console.debug('Realtime disconnect skipped after cloud restriction', disconnectError); }
+      try {
+        const disconnectResult = supabaseClient?.realtime?.disconnect?.();
+        if (disconnectResult && typeof disconnectResult.catch === 'function') {
+          disconnectResult.catch(disconnectError => console.debug('Realtime disconnect skipped after cloud restriction', disconnectError));
+        }
+      } catch (disconnectError) {
+        console.debug('Realtime disconnect skipped after cloud restriction', disconnectError);
+      }
       timerManager.clearScope('weather-refresh');
       timerManager.clearScope('global-boost-refresh');
     }
