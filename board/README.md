@@ -227,3 +227,4 @@
 | T-0041 | 降低全服加成與天氣狀態輪詢流量並保留即時顯示 | review | — |
 | T-0042 | 雲端服務受限時停止重複同步並保留本機遊戲存檔 | in_progress | — |
 | T-0043 | Egress 受限時停止玩家心跳請求 | in_progress | T-0042 |
+| T-0044 | Egress 受限時中止 Realtime WebSocket 重連 | in_progress | T-0042 |
