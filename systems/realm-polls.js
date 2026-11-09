@@ -1,7 +1,8 @@
 /** Realm admin messages, player polls, voting, and poll result display. */
 export function createRealmPolls(dependencies) {
   const {
-    getState, getCurrentUser, supabaseClient, isAdmin, escapeHTML, format, documentRef, timerManager
+    getState, getCurrentUser, supabaseClient, isAdmin, escapeHTML, format, documentRef, timerManager,
+    isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false
   } = dependencies;
   let realmLastMessageId = 0;
   let realmCurrentPollId = null;
@@ -45,7 +46,16 @@ export function createRealmPolls(dependencies) {
     realmCurrentPollId = null;
   }
 
+  function stopRealmPollSync() {
+    timerManager.clearScope('realm-poll-sync');
+    realmPollSyncIntervalMs = 0;
+  }
+
   function setRealmPollSyncInterval(delay) {
+    if (isCloudSyncBlocked()) {
+      stopRealmPollSync();
+      return;
+    }
     if (realmPollSyncIntervalMs === delay) return;
     timerManager.clearScope('realm-poll-sync');
     timerManager.setInterval(realmPollTick, delay, 'realm-poll-sync');
@@ -61,7 +71,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function broadcastRealmEvent(event, payload) {
-    if (!realmPollChannel || !realmPollChannelReady) return false;
+    if (isCloudSyncBlocked() || !realmPollChannel || !realmPollChannelReady) return false;
     try {
       const status = await realmPollChannel.send({ type: 'broadcast', event, payload });
       if (status !== 'ok') {
@@ -79,6 +89,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmDisplayPoll(poll) {
+    if (isCloudSyncBlocked()) return false;
     const currentUser = getCurrentUser();
     const pollId = Number(poll?.id) || 0;
     const expiry = Date.parse(poll?.ends_at) || 0;
@@ -136,7 +147,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmRefreshPollResults(pollId) {
-    if (!isAdmin() || !pollId || realmPollResultsBusy.has(pollId)) return;
+    if (isCloudSyncBlocked() || !isAdmin() || !pollId || realmPollResultsBusy.has(pollId)) return;
     const box = documentRef.getElementById('adminPollResults');
     if (!box) return;
     realmPollResultsBusy.add(pollId);
@@ -156,6 +167,8 @@ export function createRealmPolls(dependencies) {
       const labelA = poll?.option_a || '選項一', labelB = poll?.option_b || '選項二', safeA = escapeHTML(labelA), safeB = escapeHTML(labelB);
       box.innerHTML = `<div class="card" style="padding:12px"><b>${escapeHTML(poll?.question || '投票結果')}</b><div style="display:flex;justify-content:space-between;margin-top:8px"><span>${safeA}</span><b>${a} 票</b></div><div style="height:7px;background:#272c43;border-radius:9px;overflow:hidden;margin:5px 0 10px"><div style="height:100%;width:${rows.length ? a / rows.length * 100 : 0}%;background:#f34d60"></div></div><div style="display:flex;justify-content:space-between"><span>${safeB}</span><b>${b} 票</b></div><div style="height:7px;background:#272c43;border-radius:9px;overflow:hidden;margin:5px 0 10px"><div style="height:100%;width:${rows.length ? b / rows.length * 100 : 0}%;background:#b57bff"></div></div><div class="mini">總投票：${rows.length} 人</div><details style="margin-top:8px" open><summary>投票玩家名稱與選擇</summary>${rows.length ? rows.map(v => `<div class="admin-log"><span>${escapeHTML((v.username && v.username !== '玩家' ? v.username : null) || profileMap[v.user_id] || ('玩家 ' + String(v.user_id || '').slice(0, 6)))}</span><b>${v.choice === 'hell' ? safeA : safeB}</b></div>`).join('') : '<div class="empty">目前還沒有人投票。</div>'}</details></div>`;
     } catch (e) {
+      const restricted = markCloudSyncBlocked(e);
+      if (restricted || isCloudSyncBlocked()) stopRealmPollSync();
       box.innerHTML = '<div class="empty">讀取投票結果失敗：' + escapeHTML(e.message || '未知錯誤') + '</div>';
     } finally {
       realmPollResultsBusy.delete(pollId);
@@ -163,6 +176,10 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmPollTick() {
+    if (isCloudSyncBlocked()) {
+      stopRealmPollSync();
+      return;
+    }
     if (realmPollTickBusy) return;
     const currentUser = getCurrentUser();
     if (!currentUser || !supabaseClient) return;
@@ -189,15 +206,17 @@ export function createRealmPolls(dependencies) {
       }
       setRealmPollSyncInterval(realmPollChannelReady ? 60000 : 1500);
     } catch (error) {
+      const restricted = markCloudSyncBlocked(error);
       console.warn('全服訊息／投票同步失敗', error);
-      if (!realmPollChannelReady) setRealmPollSyncInterval(1500);
+      if (restricted || isCloudSyncBlocked()) stopRealmPollSync();
+      else if (!realmPollChannelReady) setRealmPollSyncInterval(30000);
     } finally {
       realmPollTickBusy = false;
     }
   }
 
   async function realmSendMessage() {
-    if (!isAdmin()) return;
+    if (isCloudSyncBlocked() || !isAdmin()) return;
     const input = documentRef.getElementById('adminBroadcastText'), status = documentRef.getElementById('adminBroadcastStatus'), rawMessage = input.value.trim(), color = documentRef.getElementById('adminBroadcastColor')?.value || '#ffffff', message = `[[color:${color}]]${rawMessage}`;
     if (!rawMessage) { status.textContent = '請先輸入訊息。'; return; }
     const btn = documentRef.getElementById('adminBroadcastSendBtn');
@@ -217,6 +236,8 @@ export function createRealmPolls(dependencies) {
       status.textContent = '已發送；玩家畫面會顯示 3.8 秒。';
       input.value = '';
     } catch (e) {
+      const restricted = markCloudSyncBlocked(e);
+      if (restricted || isCloudSyncBlocked()) stopRealmPollSync();
       status.textContent = '發送失敗：' + (e.message || '請稍後重試');
     } finally {
       btn.disabled = false;
@@ -224,7 +245,7 @@ export function createRealmPolls(dependencies) {
   }
 
   async function realmStartPoll() {
-    if (!isAdmin()) return;
+    if (isCloudSyncBlocked() || !isAdmin()) return;
     const question = documentRef.getElementById('adminPollQuestion').value.trim(), optionA = documentRef.getElementById('adminPollOptionA').value.trim(), optionB = documentRef.getElementById('adminPollOptionB').value.trim(), duration = Number(documentRef.getElementById('adminPollDuration').value) || 60, status = documentRef.getElementById('adminPollStatus'), btn = documentRef.getElementById('adminPollStartBtn');
     if (!question) { status.textContent = '請先輸入投票問題。'; return; }
     if (!optionA || !optionB) { status.textContent = '請分別填寫選項一與選項二。'; return; }
@@ -245,6 +266,8 @@ export function createRealmPolls(dependencies) {
       await broadcastRealmEvent('poll_started', data);
       if (!realmPollChannelReady) await realmPollTick();
     } catch (e) {
+      const restricted = markCloudSyncBlocked(e);
+      if (restricted || isCloudSyncBlocked()) stopRealmPollSync();
       status.textContent = '發起失敗：' + (e.message || '請稍後重試');
     } finally {
       btn.disabled = false;
@@ -259,7 +282,7 @@ export function createRealmPolls(dependencies) {
     documentRef.getElementById('realmPollButtons')?.addEventListener('click', async e => {
       const btn = e.target.closest('[data-poll-choice]');
       const currentUser = getCurrentUser();
-      if (!btn || !realmCurrentPollId || !currentUser) return;
+      if (isCloudSyncBlocked() || !btn || !realmCurrentPollId || !currentUser) return;
       const choice = btn.dataset.pollChoice;
       documentRef.querySelectorAll('#realmPollButtons button').forEach(b => b.disabled = true);
       try {
@@ -273,12 +296,14 @@ export function createRealmPolls(dependencies) {
         await broadcastRealmEvent('poll_vote', { pollId: realmCurrentPollId });
         if (isAdmin()) await realmRefreshPollResults(realmCurrentPollId);
       } catch (err) {
+        const restricted = markCloudSyncBlocked(err);
+        if (restricted || isCloudSyncBlocked()) stopRealmPollSync();
         documentRef.getElementById('realmPollVoteStatus').textContent = err.message || '投票失敗';
         documentRef.querySelectorAll('#realmPollButtons button').forEach(b => b.disabled = false);
       }
     });
     setRealmPollSyncInterval(1500);
-    if (supabaseClient?.channel) {
+    if (!isCloudSyncBlocked() && supabaseClient?.channel) {
       try {
         realmPollChannel = supabaseClient.channel('dice-realm-polls-live')
           .on('broadcast', { event: 'admin_message' }, ({ payload }) => receiveRealmAnnouncement(payload))
@@ -294,7 +319,8 @@ export function createRealmPolls(dependencies) {
               if (getCurrentUser()) void realmPollTick();
             } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
               realmPollChannelReady = false;
-              setRealmPollSyncInterval(1500);
+              if (isCloudSyncBlocked()) stopRealmPollSync();
+              else setRealmPollSyncInterval(1500);
             }
           });
       } catch (error) {
