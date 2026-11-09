@@ -78,7 +78,7 @@ export function createGlobalBoostSystem({
         });
       return true;
     } catch (error) {
-      const restricted = markCloudSyncBlocked(error);
+      markCloudSyncBlocked(error);
       console.debug('Global boost realtime unavailable; polling fallback remains active', error);
       globalBoostChannel = null;
       return false;
