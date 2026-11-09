@@ -42,6 +42,9 @@ done_at:
 
 - 2026-11-09 14:10 [叉子] 已移除頁面啟動時的全服公告／天氣 Realtime 建立；改為登入雲端存檔與初始化成功後建立。登出會解除公告、全服天氣、個人天氣與投票頻道；天氣 5 分鐘補查在未登入或受限時不發請求。新增公告與天氣生命週期測試；目前隔離 Node 測試共 16/16 通過。完整 repository 測試與 GitHub CI 尚未執行，任務維持 in_progress。
 
+
+- 2026-11-09 [叉子] 追加檢查發現 `systems/global-boost.js` 的全服加成 Realtime 仍在 `setupGlobalBoostUI()` 頁面初始化時提前建立，且立即讀取 `realm_global_boost`。已改為新增 `startGlobalBoostRealtime()`／`stopGlobalBoostRealtime()`，登入初始化成功後由 `services/auth.js` 注入的全服啟動流程呼叫，登出解除頻道；未登入時不讀取、不訂閱，管理收益監控計時器也加上登入判斷。新增 `tests/global-boost-render.test.js` 生命週期回歸測試。GitHub 回讀確認 `systems/global-boost.js`、`script.js`、測試檔均已寫入 `work/chazi`；測試尚未實際執行，完整 CI 未執行，故仍維持 in_progress。
+
 ## 完工回報
 
 ### 改了什麼
