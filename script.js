@@ -301,7 +301,7 @@ setupAccountActions({
   save, render, syncCloudSave, flushCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
-save();render();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
+save();render();renderRealmActivity();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
 
 /* ---- merged from script2.js: achievement popup controls ---- */
