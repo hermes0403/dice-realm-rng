@@ -317,8 +317,8 @@ export function createCloudSaveService(dependencies) {
       if (!syncResult?.ok) {
         if (syncResult?.conflict) {
           document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在載入最新存檔…';
-          await loadCloudSave({ syncAfterLoad: false });
-          toast('偵測到其他分頁或裝置已更新存檔，已載入最新雲端資料；請確認剛才的操作是否需要重做。');
+          await loadCloudSave({ syncAfterLoad: false, skipLocalRecovery: true });
+          toast('偵測到其他裝置已更新雲端存檔；為避免覆蓋，本機尚未同步的進度已保留，請先確認兩邊資料。');
           return false;
         }
         throw new Error(syncResult?.message || 'Cloud save version check failed');
@@ -431,7 +431,7 @@ export function createCloudSaveService(dependencies) {
   });
   windowObject?.addEventListener?.('pagehide', () => { void flushOnExit('pagehide'); });
 
-  async function loadCloudSave({ syncAfterLoad = true } = {}) {
+  async function loadCloudSave({ syncAfterLoad = true, skipLocalRecovery = false } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient || cloudSyncBlocked) return false;
     try {
@@ -440,10 +440,21 @@ export function createCloudSaveService(dependencies) {
         try { return JSON.parse(scopedKey ? localStorage.getItem(scopedKey) || 'null' : 'null'); }
         catch { return null; }
       })();
+      const existingDirtyMarker = readLocalDirtyMarker(user.id);
+      if (existingDirtyMarker) {
+        return await recoverLocalSave(user, existingDirtyMarker, localSaveBeforeCloud, undefined, skipLocalRecovery);
+      }
+      cloudLoadInProgressUserId = user.id;
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
       if (getCurrentUser()?.id !== user.id) return;
+      const dirtyDuringLoad = readLocalDirtyMarker(user.id);
+      if (dirtyDuringLoad) {
+        let latestLocalSave = localSaveBeforeCloud;
+        try { latestLocalSave = JSON.parse(localStorage.getItem(scopedKey) || 'null') || localSaveBeforeCloud; } catch {}
+        return await recoverLocalSave(user, dirtyDuringLoad, latestLocalSave, data, skipLocalRecovery);
+      }
       cloudSaveVersion = data?.updated_at || null;
       lastSyncedPayload = clonePayload(data?.save_data || null);
       lastSyncedUserId = user.id;
@@ -523,6 +534,8 @@ export function createCloudSaveService(dependencies) {
         toast('讀取雲端存檔失敗，請重新登入');
       }
       return false;
+    } finally {
+      if (cloudLoadInProgressUserId === user.id) cloudLoadInProgressUserId = null;
     }
   }
 
