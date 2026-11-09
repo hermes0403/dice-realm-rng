@@ -2,6 +2,7 @@ export function createWeatherSystem(dependencies) {
  const {
   D, WEATHER_TYPES, format, escapeHTML, chanceText, byId, supabaseClient, timerManager,
   getState, getCurrentUser, getAnnouncementChannel, openAuth, toast, save,
+  isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false,
   render, renderCodex, renderGloves, flushCloudSave,
   announceWeatherSummon, triggerWeatherSurge
  } = dependencies;
@@ -44,25 +45,25 @@ function applyPlayerWeatherRow(row,announce=false){
  cachedWeatherMinute=-1;updateWeatherUI();renderCodex();
 }
 async function refreshPlayerWeatherOverride(announce=false){
- if(playerWeatherRefreshBusy)return;
+ if(playerWeatherRefreshBusy||isCloudSyncBlocked())return;
  if(!supabaseClient||!getCurrentUser()){if(playerWeatherOverride){playerWeatherOverride=null;lastPlayerWeatherKey='';cachedWeatherMinute=-1;updateWeatherUI();renderCodex()}return}
  playerWeatherRefreshBusy=true;
- try{const {data,error}=await supabaseClient.from('player_weather_overrides').select('weather_type,ends_at,set_by,updated_at').eq('user_id',getCurrentUser().id).maybeSingle();if(error)throw error;applyPlayerWeatherRow(data,announce)}catch(e){console.debug('Personal weather override unavailable',e)}finally{playerWeatherRefreshBusy=false}
+ try{const {data,error}=await supabaseClient.from('player_weather_overrides').select('weather_type,ends_at,set_by,updated_at').eq('user_id',getCurrentUser().id).maybeSingle();if(error)throw error;applyPlayerWeatherRow(data,announce)}catch(e){markCloudSyncBlocked(e);console.debug('Personal weather override unavailable',e)}finally{playerWeatherRefreshBusy=false}
 }
 function setupPlayerWeatherSubscription(){
  if(playerWeatherChannel){try{supabaseClient?.removeChannel(playerWeatherChannel)}catch{}playerWeatherChannel=null}
- if(!supabaseClient||!getCurrentUser())return;
- try{playerWeatherChannel=supabaseClient.channel('player-weather-'+getCurrentUser().id).on('postgres_changes',{event:'*',schema:'public',table:'player_weather_overrides',filter:'user_id=eq.'+getCurrentUser().id},payload=>{applyPlayerWeatherRow(payload.new||null,true)}).subscribe();}catch(e){console.debug('Personal weather realtime unavailable',e)}
+ if(!supabaseClient||!getCurrentUser()||isCloudSyncBlocked())return;
+ try{playerWeatherChannel=supabaseClient.channel('player-weather-'+getCurrentUser().id).on('postgres_changes',{event:'*',schema:'public',table:'player_weather_overrides',filter:'user_id=eq.'+getCurrentUser().id},payload=>{applyPlayerWeatherRow(payload.new||null,true)}).subscribe((status,error)=>{if(markCloudSyncBlocked(error))playerWeatherChannel=null;});}catch(e){markCloudSyncBlocked(e);console.debug('Personal weather realtime unavailable',e)}
  refreshPlayerWeatherOverride(false);
 }
 async function refreshServerWeather(announce=false){
- if(serverWeatherRefreshBusy||!supabaseClient)return;
+ if(serverWeatherRefreshBusy||!supabaseClient||isCloudSyncBlocked())return;
  serverWeatherRefreshBusy=true;
  try{const {data,error}=await supabaseClient.from('realm_weather_state').select('weather_type,weather_type_2,ends_at,summoned_by,updated_at').eq('singleton',true).maybeSingle();if(error)throw error;if(data)applyServerWeatherRow(data,announce)}
- catch(e){console.debug('Shared weather state unavailable',e)}finally{serverWeatherRefreshBusy=false}
+ catch(e){markCloudSyncBlocked(e);console.debug('Shared weather state unavailable',e)}finally{serverWeatherRefreshBusy=false}
 }
 function setupServerWeatherSubscription(){
- if(!supabaseClient||typeof supabaseClient.channel!=='function')return false;
+ if(!supabaseClient||typeof supabaseClient.channel!=='function'||isCloudSyncBlocked())return false;
  if(serverWeatherChannel){try{supabaseClient.removeChannel(serverWeatherChannel)}catch{}serverWeatherChannel=null}
  try{
   serverWeatherChannel=supabaseClient.channel('realm-weather-state')
@@ -70,11 +71,11 @@ function setupServerWeatherSubscription(){
     if(payload?.eventType==='DELETE'){serverWeatherState=null;cachedWeatherMinute=-1;updateWeatherUI();renderCodex();return}
     applyServerWeatherRow(payload?.new||null,true);
    })
-   .subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')refreshServerWeather(false)});
+   .subscribe((status,error)=>{if(markCloudSyncBlocked(error)){serverWeatherChannel=null;return;}if((status==='CHANNEL_ERROR'||status==='TIMED_OUT')&&!isCloudSyncBlocked())refreshServerWeather(false);});
   // Initial state is loaded immediately; subsequent changes arrive through Realtime.
   refreshServerWeather(false);
   return true;
- }catch(e){console.debug('Shared weather realtime unavailable; polling fallback remains active',e);serverWeatherChannel=null;refreshServerWeather(false);return false}
+ }catch(e){const restricted=markCloudSyncBlocked(e);console.debug('Shared weather realtime unavailable; polling fallback remains active',e);serverWeatherChannel=null;if(!restricted&&!isCloudSyncBlocked())refreshServerWeather(false);return false}
 }
 function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
 function minuteSeed(n){let x=(n^0x9e3779b9)>>>0;x=Math.imul(x^(x>>>16),0x21f0aaad);x=Math.imul(x^(x>>>15),0x735a2d97);x=(x^(x>>>15))>>>0;return x/4294967296}
