@@ -229,3 +229,4 @@
 | T-0043 | Egress 受限時停止玩家心跳請求 | in_progress | T-0042 |
 | T-0044 | Egress 受限時中止 Realtime WebSocket 重連 | in_progress | T-0042 |
 | T-0045 | Egress 受限時停止遊戲訪問紀錄 | in_progress | T-0042 |
+| T-0046 | 登入初始化遇 Egress 受限時立即中止後續雲端讀取 | in_progress | T-0042、T-0043、T-0044、T-0045 |
