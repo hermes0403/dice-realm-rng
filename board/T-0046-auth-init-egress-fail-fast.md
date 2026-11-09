@@ -1,7 +1,7 @@
 ---
 id: T-0046
 title: 登入初始化遇 Egress 受限時立即中止後續雲端讀取
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -13,7 +13,7 @@ updated: 2026-11-09
 depends_on: [T-0042, T-0043, T-0044, T-0045]
 branch: work/chazi
 done_by: 棒子
-done_at:
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -29,12 +29,12 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 寵物融合機率讀取遇 402 會標記共用斷路器。
-- [ ] 排行榜與天氣召喚資料遇 402 會標記共用斷路器。
-- [ ] 登入初始化每完成一個雲端步驟都檢查 blocked 狀態。
-- [ ] 任一步驟受限後不再呼叫後續雲端初始化。
-- [ ] 新增回歸測試並實際執行。
-- [ ] `git diff --check` 通過。
+- [x] 寵物融合機率讀取遇 402 會標記共用斷路器。
+- [x] 排行榜與天氣召喚資料遇 402 會標記共用斷路器。
+- [x] 登入初始化每完成一個雲端步驟都檢查 blocked 狀態。
+- [x] 任一步驟受限後不再呼叫後續雲端初始化。
+- [x] 新增回歸測試並實際執行。
+- [x] `git diff --check` 通過。
 
 ## 紀錄
 
@@ -49,3 +49,6 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+
+- 2026-11-09 [棒子] 驗收：GitHub Actions Branch tests（commit 3ab0c024fab13dde3f23d0abb41583dadef1e875）完整測試 58/58 通過，JavaScript syntax check 與 branch whitespace check 通過；本項修改保留在 work/chazi，未部署，main 與玩家資料未修改。
