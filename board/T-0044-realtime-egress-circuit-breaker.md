@@ -1,0 +1,51 @@
+---
+id: T-0044
+title: Egress 受限時中止 Realtime WebSocket 重連
+status: in_progress
+from: 叉子
+to: 叉子
+owner: 叉子
+contributors: []
+reviewer: 棒子
+priority: P0
+created: 2026-11-09
+updated: 2026-11-09
+depends_on: [T-0042]
+branch: work/chazi
+done_by: 棒子
+done_at:
+---
+
+## 任務
+
+當任何雲端請求確認 Supabase HTTP 402／Egress restriction 時，停止 Supabase Realtime WebSocket 自動重連，並避免 weather／global boost 的 Realtime error callback 再觸發讀取請求。一般暫時性斷線仍保留原有 fallback 行為。
+
+## 範圍與禁止
+
+- 只處理 Egress circuit breaker 與 Realtime channel 的停止／防重連行為及測試。
+- 不修改 `main`、Supabase schema／資料／權限或 GitHub Pages 部署。
+- 不清除或修改玩家資料。
+- 使用 T-0042 的共用 cloud restriction state。
+
+## 驗收條件
+
+- [ ] 進入 Egress blocked 狀態時，Realtime client disconnect 被呼叫。
+- [ ] Weather／global boost 在 blocked 狀態不再建立 Realtime channel 或觸發 fallback query。
+- [ ] Realtime error callback 不會在 blocked 狀態再次讀取雲端。
+- [ ] 一般非 402 的 channel error 仍可使用既有 fallback。
+- [ ] 新增回歸測試並實際執行。
+- [ ] `git diff --check` 通過。
+
+## 紀錄
+
+- 2026-11-09 [叉子] 接續處理第二項；T-0042 的共用限制旗標已可供其他服務讀取。開始盤點 weather 與 global boost Realtime channel 的 subscribe error callback 及自動重連來源。
+
+## 完工回報
+
+### 改了什麼
+
+### 怎麼驗證的
+
+### 沒做／做不到的
+
+### 衍生任務／影響任務
