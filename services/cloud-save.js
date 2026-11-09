@@ -24,6 +24,7 @@ export function createCloudSaveService(dependencies) {
   let cloudSaveVersion = null;
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
+  let cloudLoadInProgressUserId = null;
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
 
   function isProjectRestrictionError(error) {
@@ -66,6 +67,95 @@ export function createCloudSaveService(dependencies) {
 
   function userSaveKey(userId = getCurrentUser()?.id) {
     return userId ? KEY + '_user_' + String(userId) : null;
+  }
+
+  function localDirtyMarkerKey(userId) {
+    return KEY + '_cloud_dirty_' + encodeURIComponent(String(userId));
+  }
+
+  function readLocalDirtyMarker(userId) {
+    try {
+      const raw = localStorage.getItem(localDirtyMarkerKey(userId));
+      if (!raw) return null;
+      const marker = JSON.parse(raw);
+      return marker && typeof marker === 'object'
+        ? marker
+        : { userId: String(userId), baseVersion: null };
+    } catch {
+      return { userId: String(userId), baseVersion: null };
+    }
+  }
+
+  function markLocalSaveDirty(userId) {
+    if (!userId) return;
+    const existing = readLocalDirtyMarker(userId);
+    const marker = existing || {
+      userId: String(userId),
+      baseVersion: lastSyncedUserId === userId ? cloudSaveVersion : null,
+      createdAt: Date.now()
+    };
+    marker.updatedAt = Date.now();
+    try { localStorage.setItem(localDirtyMarkerKey(userId), JSON.stringify(marker)); }
+    catch (error) { console.warn('Could not persist local save recovery marker', error); }
+  }
+
+  function clearLocalSaveDirty(userId) {
+    if (!userId) return;
+    try { localStorage.removeItem(localDirtyMarkerKey(userId)); } catch {}
+  }
+
+  function restoreLocalSaveForRecovery(localSave) {
+    if (!localSave || typeof localSave !== 'object') return false;
+    const S = migrateCurrency(normalizeGloves({ ...fresh(), ...localSave }));
+    S.pets = Array.isArray(S.pets) ? S.pets.slice(0, 20) : [];
+    ensurePetData(S.pets);
+    S.equippedPetUids = Array.isArray(S.equippedPetUids)
+      ? [...new Set(S.equippedPetUids)].filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
+      : [];
+    S.potions = S.potions || fresh().potions;
+    setState(S);
+    restoreAutoSellPrefs();
+    render();
+    return true;
+  }
+
+  async function recoverLocalSave(user, marker, localSave, remoteData, skipSync = false) {
+    const latestLocalSave = (() => {
+      try {
+        return JSON.parse(localStorage.getItem(userSaveKey(user.id)) || 'null') || localSave;
+      } catch {
+        return localSave;
+      }
+    })();
+    restoreLocalSaveForRecovery(latestLocalSave);
+
+    let canSafelySync = marker?.baseVersion != null;
+    if (!canSafelySync && !skipSync) {
+      let remote = remoteData;
+      if (remote === undefined) {
+        const { data, error } = await supabaseClient.from('game_saves')
+          .select('updated_at').eq('user_id', user.id).maybeSingle();
+        if (error) throw error;
+        remote = data;
+      }
+      canSafelySync = !remote;
+    }
+
+    if (canSafelySync && !skipSync && !cloudSyncBlocked) {
+      cloudSaveVersion = marker?.baseVersion ?? null;
+      lastSyncedPayload = null;
+      lastSyncedUserId = user.id;
+      document.getElementById('saveStatus').textContent = '本機進度已保留，正在安全檢查雲端版本…';
+      scheduleCloudSync();
+      return false;
+    }
+
+    cloudSaveVersion = null;
+    lastSyncedPayload = null;
+    lastSyncedUserId = null;
+    document.getElementById('saveStatus').textContent = '本機進度已保留（雲端另有版本，尚未同步）';
+    toast('偵測到尚未同步的本機進度，已保留本機資料；為避免覆蓋其他裝置的新存檔，暫不載入雲端版本。');
+    return false;
   }
 
   function stableSerialize(value) {
