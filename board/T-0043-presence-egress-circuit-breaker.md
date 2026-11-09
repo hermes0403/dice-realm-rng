@@ -1,0 +1,51 @@
+---
+id: T-0043
+title: Egress 受限時停止玩家心跳請求
+status: in_progress
+from: 叉子
+to: 叉子
+owner: 叉子
+contributors: []
+reviewer: 棒子
+priority: P0
+created: 2026-11-09
+updated: 2026-11-09
+depends_on: [T-0042]
+branch: work/chazi
+done_by: 棒子
+done_at:
+---
+
+## 任務
+
+當 Supabase 回傳 HTTP 402／Egress restriction 時，立即停止玩家 presence heartbeat 的後續雲端請求與 30 秒定時器；本機遊戲狀態不受影響。一般網路錯誤不應永久停用 heartbeat。
+
+## 範圍與禁止
+
+- 只處理玩家 heartbeat 的 Egress circuit breaker 與回歸測試。
+- 不修改 `main`、Supabase schema／資料／權限或 GitHub Pages 部署。
+- 不清除或修改玩家既有資料。
+- T-0042 的 cloud-save circuit breaker 作為共同限制狀態來源。
+
+## 驗收條件
+
+- [ ] heartbeat 發生 HTTP 402／Egress restriction 後，標記共用雲端受限狀態。
+- [ ] 停止 `presence-heartbeat` 定時器。
+- [ ] 後續 heartbeat 呼叫不再發出 Supabase 請求。
+- [ ] 一般非 402 錯誤不會觸發永久停止。
+- [ ] 新增回歸測試並實際執行。
+- [ ] `git diff --check` 通過。
+
+## 紀錄
+
+- 2026-11-09 [叉子] 接續 T-0042；檢查發現 script.js 的 30 秒 heartbeat 在雲端受限後仍會持續呼叫 player_profiles。先處理此第一項，逐檔寫入並逐檔回讀確認。
+
+## 完工回報
+
+### 改了什麼
+
+### 怎麼驗證的
+
+### 沒做／做不到的
+
+### 衍生任務／影響任務
