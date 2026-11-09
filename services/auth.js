@@ -8,6 +8,7 @@ export async function runCloudSessionInitialization({
   loadPetFusionOdds,
   heartbeat,
   loadWeatherSummonData,
+  afterInitialization,
   isCloudSyncBlocked = () => false
 }) {
   const steps = [
@@ -18,6 +19,10 @@ export async function runCloudSessionInitialization({
   for (const step of steps) {
     if (isCloudSyncBlocked()) return false;
     await step();
+    if (isCloudSyncBlocked()) return false;
+  }
+  if (typeof afterInitialization === 'function') {
+    await afterInitialization();
     if (isCloudSyncBlocked()) return false;
   }
   return true;
@@ -252,8 +257,12 @@ export function createAuthService(deps) {
       if (!incomingUser && previousUser) await releaseDeviceLock(previousUser.id);
 
       setCurrentUser(incomingUser);
-      timerManager.setTimeout(() => recordGameVisit('visit'), 700, 'auth-visit-record');
-      setupPlayerWeatherSubscription();
+      // On sign-out, clear any previous player's weather subscription.
+      // Signed-in tracking/subscriptions start only after cloud load and initialization succeed.
+      if (!incomingUser) {
+        timerManager.setTimeout(() => recordGameVisit('visit'), 700, 'auth-visit-record');
+        setupPlayerWeatherSubscription();
+      }
       document.getElementById('authOpenBtn').hidden = !!getCurrentUser();
       document.body.classList.toggle('auth-required', !getCurrentUser());
       if (!getCurrentUser()) {
@@ -310,6 +319,12 @@ export function createAuthService(deps) {
               loadPetFusionOdds,
               heartbeat,
               loadWeatherSummonData,
+              afterInitialization: async () => {
+                await recordGameVisit('visit');
+                if (!isCloudSyncBlocked() && getCurrentUser()?.id === user.id) {
+                  setupPlayerWeatherSubscription();
+                }
+              },
               isCloudSyncBlocked
             });
             if (!initializationComplete) return;
