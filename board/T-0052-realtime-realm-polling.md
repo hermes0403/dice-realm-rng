@@ -44,6 +44,9 @@ done_at:
 
 - 2026-11-09 14:10 [叉子] 補強登入時序：Realtime 頻道也延後到雲端存檔與登入初始化成功後才建立；登出停止輪詢，402 時停止輪詢與頻道。更新測試涵蓋延後建立、Broadcast 事件、60 秒 healthy interval、1.5 秒斷線 fallback 與受限時零訂閱／零輪詢。隔離 Node 測試 14/14 通過（含本輪其他任務測試）；完整 repository 測試與 GitHub CI 尚未執行，任務維持 in_progress。
 
+
+- 2026-11-09 [叉子] 追加驗收時發現 `setupRealmSocialUI()` 雖未建立 Realtime 或發送雲端查詢，仍會在未登入時啟動 1.5 秒本機輪詢計時器，與測試預期的「登入前零輪詢」不一致。已移除這個過早啟動；輪詢只由登入初始化成功後的 `startRealmPollSync()` 建立。對應測試原本已斷言登入前 interval 清單為空，程式現已對齊該條件。GitHub 回讀確認修改寫入；尚未在本機執行測試，任務維持 in_progress。
+
 ## 完工回報
 
 ### 改了什麼
