@@ -2,12 +2,19 @@
 export function createPresenceService(dependencies) {
   const {
     supabaseClient, getCurrentUser, getState, totalUnique,
-    achievementStats, applyPendingGrants, syncCloudSave
+    achievementStats, applyPendingGrants, syncCloudSave,
+    timerManager, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false
   } = dependencies;
   let heartbeatBusy = false;
 
+  function stopHeartbeatWhenRestricted() {
+    if (!isCloudSyncBlocked()) return false;
+    timerManager?.clearScope?.('presence-heartbeat');
+    return true;
+  }
+
   async function heartbeat() {
-    if (heartbeatBusy || !getCurrentUser() || !supabaseClient) return;
+    if (stopHeartbeatWhenRestricted() || heartbeatBusy || !getCurrentUser() || !supabaseClient) return;
     heartbeatBusy = true;
     const user = getCurrentUser();
     try {
@@ -25,9 +32,16 @@ export function createPresenceService(dependencies) {
         updated_at: now
       }, { onConflict: 'user_id' });
       if (error) throw error;
+
       const grantChanged = await applyPendingGrants();
+      if (stopHeartbeatWhenRestricted()) return;
       if (grantChanged) await syncCloudSave();
+      stopHeartbeatWhenRestricted();
     } catch (error) {
+      const restricted = markCloudSyncBlocked(error);
+      if (restricted || isCloudSyncBlocked()) {
+        timerManager?.clearScope?.('presence-heartbeat');
+      }
       console.debug('Presence update skipped', error);
     } finally {
       heartbeatBusy = false;
