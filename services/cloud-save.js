@@ -181,7 +181,7 @@ export function createCloudSaveService(dependencies) {
     const syncingUserId = initialUser.id;
     try {
       await applyPendingGrants();
-      if (getCurrentUser()?.id !== syncingUserId) return false;
+      if (cloudSyncBlocked || getCurrentUser()?.id !== syncingUserId) return false;
       const S = getState();
       const payload = savePayload();
       const patch = diffPayload(lastSyncedPayload, payload);
