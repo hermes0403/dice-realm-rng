@@ -62,15 +62,16 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
   });
 
   system.setupRealmSocialUI();
-  assert.equal(intervalDelays.at(-1), 1500);
+  assert.deepEqual(intervalDelays, []);
   assert.deepEqual(
     registered.filter(item => item.type === 'broadcast').map(item => item.event).sort(),
     ['admin_message', 'poll_started', 'poll_vote']
   );
 
   subscriptionCallback('SUBSCRIBED');
+  assert.deepEqual(intervalDelays, []);
   currentUser = { id: 'player-1' };
-  await system.realmPollTick();
+  await system.startRealmPollSync();
 
   assert.deepEqual(queries, ['realm_polls']);
   assert.equal(intervalDelays.at(-1), 60000);
