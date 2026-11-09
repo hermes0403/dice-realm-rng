@@ -1,5 +1,5 @@
 /** Cloud leaderboard queries and rendering. */
-export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escapeHTML, format, compactNum }) {
+export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escapeHTML, format, compactNum, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false }) {
   async function refreshLeaderboards() {
     const local = document.getElementById('localRank');
     const rare = document.getElementById('rareRank');
@@ -7,6 +7,12 @@ export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escape
     const income = document.getElementById('incomeRank');
     const mine = document.getElementById('myRankStrip');
     if (!local || !rare || !money) return;
+    if (isCloudSyncBlocked()) {
+      const blockedMessage = '<div class="empty">雲端服務受限，排行榜暫不可用。</div>';
+      local.innerHTML = rare.innerHTML = money.innerHTML = blockedMessage;
+      if (income) income.innerHTML = blockedMessage;
+      return;
+    }
     if (!supabaseClient) {
       local.innerHTML = rare.innerHTML = money.innerHTML = '<div class="empty">雲端服務尚未載入，請重新整理。</div>';
       if (income) income.innerHTML = '<div class="empty">每秒收益排行榜尚未開放；等待伺服器權威資料完成。</div>';
