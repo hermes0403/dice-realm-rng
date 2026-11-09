@@ -19,6 +19,7 @@ test('shared weather realtime and refresh wait for login and unsubscribe on logo
 
   try {
     let currentUser = null;
+    let blocked = false;
     let channelCount = 0;
     let queryCount = 0;
     let removedCount = 0;
@@ -71,7 +72,7 @@ test('shared weather realtime and refresh wait for login and unsubscribe on logo
       flushCloudSave: async () => {},
       announceWeatherSummon() {},
       triggerWeatherSurge() {},
-      isCloudSyncBlocked: () => false,
+      isCloudSyncBlocked: () => blocked,
       markCloudSyncBlocked: () => false
     });
 
@@ -95,9 +96,12 @@ test('shared weather realtime and refresh wait for login and unsubscribe on logo
     weather.stopServerWeatherSubscription();
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(removedCount, 1);
-    currentUser = null;
+    blocked = true;
+    assert.equal(weather.setupServerWeatherSubscription(), false);
     await weather.refreshServerWeather(false);
+    assert.equal(channelCount, 1);
     assert.equal(queryCount, 1);
+    currentUser = null;
   } finally {
     if (originalDocument === undefined) delete globalThis.document;
     else globalThis.document = originalDocument;
