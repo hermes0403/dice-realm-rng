@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 盤點發現 setupGlobalBoostUI() 已執行 refreshGlobalBoost()，script.js 啟動尾端又額外呼叫一次；loadWeatherDiceExistCounts() 每次呼叫都直接 RPC，缺少 in-flight 去重與快取。
+- 2026-11-09 [叉子] 已移除 script.js 啟動尾端重複的 refreshGlobalBoost()（setupGlobalBoostUI 已執行首次讀取）；新增 services/weather-dice-stats.js，提供 5 分鐘快取、in-flight 去重、失敗 30 秒退避與 Egress blocked guard，script.js 已改用新 loader。新增 tests/weather-dice-stats.test.js；在隔離 Node.js v22.16.0 環境以相同服務檔與測試內容執行 node --test：4/4 pass；git diff --cached --check exit code 0。完整分支測試等待 GitHub Actions 新版 workflow 驗證。
 
 ## 完工回報
 
