@@ -32,7 +32,7 @@ export function createCloudSaveService(dependencies) {
       candidate?.message, candidate?.details, candidate?.hint, candidate?.code
     ]).filter(Boolean).join(' ').toLowerCase();
     return candidates.some(candidate =>
-      Number(candidate?.status ?? candidate?.statusCode) === 402
+      Number(candidate?.status ?? candidate?.statusCode ?? candidate?.code) === 402
     ) || message.includes('exceed_egress_quota')
       || message.includes('project is restricted')
       || message.includes('egress quota');
