@@ -112,9 +112,27 @@ export function createCloudSaveService(dependencies) {
     S.equippedPetUids = Array.isArray(S.equippedPetUids)
       ? [...new Set(S.equippedPetUids)].filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
       : [];
+    S.bagCapacity = Math.min(200, Math.max(35, Math.floor(Number(S.bagCapacity) || 35)));
     S.potions = S.potions || fresh().potions;
+    S.potions.inventory = Object.assign({ luck1: 0, luck2: 0, luck3: 0, speed1: 0, speed2: 0, angel1: 0, angel2: 0 }, S.potions.inventory || {});
+    S.potions.active = S.potions.active || { type: '', expiresAt: 0 };
+    S.potions.activeSpeed = S.potions.activeSpeed || { type: '', expiresAt: 0 };
+    S.potions.angelCharges = Number(S.potions.angelCharges) || 0;
+    S.potions.materials = S.potions.materials || {};
+    S.potions.autoAddPotions = Array.isArray(S.potions.autoAddPotions) ? S.potions.autoAddPotions.slice(0, 2) : [];
+    S.bag = S.bag || {};
+    S.first = S.first || {};
+    S.quest = S.quest || { rolls: 0, rare: 0, craft: 0 };
+    S.achievements = S.achievements || {};
+    S.adminGrantApplied = S.adminGrantApplied || {};
+    S.halloweenUnlocked = S.halloweenUnlocked || { d33: false, d34: false };
     setState(S);
     restoreAutoSellPrefs();
+    try {
+      const scopedKey = userSaveKey(getCurrentUser()?.id);
+      if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
+      localStorage.setItem(KEY, JSON.stringify(S));
+    } catch {}
     render();
     return true;
   }
