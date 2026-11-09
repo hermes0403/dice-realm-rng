@@ -6,6 +6,7 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
   let currentUser = null;
   let subscriptionCallback = null;
   let channels = 0;
+  let unsubscribed = 0;
   const registered = [];
   const queries = [];
   const intervalDelays = [];
@@ -18,7 +19,8 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
       subscriptionCallback = callback;
       return this;
     },
-    async send() { return 'ok'; }
+    async send() { return 'ok'; },
+    async unsubscribe() { unsubscribed++; return 'ok'; }
   };
   const timerManager = {
     clearScope(scope) {
@@ -87,6 +89,10 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
   queries.length = 0;
   await system.realmPollTick();
   assert.deepEqual(queries, ['realm_admin_messages', 'realm_polls']);
+
+  system.stopRealmPollSync();
+  assert.equal(unsubscribed, 1);
+  assert.deepEqual(intervalDelays, []);
 });
 
 test('realm poll setup sends no requests or subscriptions while cloud is restricted', () => {
