@@ -22,6 +22,7 @@ export function createCloudSaveService(dependencies) {
   // Optimistic version + last acknowledged snapshot prevent stale writes and no-op uploads.
   let cloudSaveVersion = null;
   let lastSyncedPayload = null;
+  let lastSyncedUserId = null;
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
 
   function userSaveKey(userId = getCurrentUser()?.id) {
@@ -145,6 +146,10 @@ export function createCloudSaveService(dependencies) {
     }
     const initialUser = getCurrentUser();
     if (!initialUser || !supabaseClient) return false;
+    if (lastSyncedUserId !== initialUser.id) {
+      document.getElementById('saveStatus').textContent = '雲端存檔尚未載入';
+      return false;
+    }
     if (cloudSyncBusy) {
       cloudSyncPending = true;
       return false;
@@ -165,13 +170,13 @@ export function createCloudSaveService(dependencies) {
         return true;
       }
 
-      const now = new Date().toISOString();
       const profilePayload = {
         username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
         unique_dice: totalUnique(),
         rarest_den: Number(S.best?.den) || 0,
         ...achievementStats()
       };
+      lastCloudSyncAt = Date.now();
       const { data: syncResult, error } = await supabaseClient.rpc('sync_player_game_save_delta', {
         p_expected_updated_at: cloudSaveVersion,
         p_save_patch: patch,
@@ -194,7 +199,6 @@ export function createCloudSaveService(dependencies) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
       }
       S.petIncomePending = 0;
-      lastCloudSyncAt = Date.now();
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
         const scopedKey = userSaveKey(syncingUserId);
@@ -204,6 +208,7 @@ export function createCloudSaveService(dependencies) {
       return true;
     } catch (e) {
       console.error('Cloud sync failed', e);
+      cloudSyncPending = getCurrentUser()?.id === syncingUserId;
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
       return false;
     } finally {
@@ -283,9 +288,10 @@ export function createCloudSaveService(dependencies) {
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
+      if (getCurrentUser()?.id !== user.id) return;
       cloudSaveVersion = data?.updated_at || null;
       lastSyncedPayload = clonePayload(data?.save_data || null);
-      if (getCurrentUser()?.id !== user.id) return;
+      lastSyncedUserId = user.id;
       let S;
       if (data?.save_data?.bag) {
         S = migrateCurrency(normalizeGloves({ ...fresh(), ...data.save_data }));
