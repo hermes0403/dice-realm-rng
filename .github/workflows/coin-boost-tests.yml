@@ -7,6 +7,10 @@ on:
     paths:
       - 'systems/coin-boost.js'
       - 'systems/global-boost.js'
+      - 'systems/weather.js'
+      - 'script.js'
+      - 'systems/weather.js'
+      - 'script.js'
       - 'systems/pet-income.js'
       - 'admin/ui-bindings.js'
       - 'tests/**'
@@ -34,4 +38,4 @@ jobs:
         with:
           node-version: 22
       - name: Run coin boost regression tests
-        run: node --test tests/global-coin-boost-activity.test.js tests/admin-coin-boost-ui.test.js
+        run: node --test tests/*.test.js
