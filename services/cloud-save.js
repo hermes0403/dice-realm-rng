@@ -24,7 +24,7 @@ export function createCloudSaveService(dependencies) {
   let cloudSaveVersion = null;
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
-  let cloudLoadInProgressUserId = null;
+  const cloudLoadInProgressUserIds = new Set();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
 
   function isProjectRestrictionError(error) {
@@ -416,7 +416,7 @@ export function createCloudSaveService(dependencies) {
       const localChanged = previousLocal !== currentLocal;
       const hasCloudChanges = lastSyncedUserId === user.id
         && Object.keys(diffPayload(lastSyncedPayload, savePayload())).length > 0;
-      if (hasCloudChanges || ((cloudSyncBlocked || cloudLoadInProgressUserId === user.id) && localChanged)) {
+      if (hasCloudChanges || ((cloudSyncBlocked || cloudLoadInProgressUserIds.has(user.id)) && localChanged)) {
         markLocalSaveDirty(user.id);
       }
     }
@@ -470,7 +470,7 @@ export function createCloudSaveService(dependencies) {
       if (existingDirtyMarker) {
         return await recoverLocalSave(user, existingDirtyMarker, localSaveBeforeCloud, undefined, skipLocalRecovery);
       }
-      cloudLoadInProgressUserId = user.id;
+      cloudLoadInProgressUserIds.add(user.id);
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
@@ -560,7 +560,7 @@ export function createCloudSaveService(dependencies) {
       }
       return false;
     } finally {
-      if (cloudLoadInProgressUserId === user.id) cloudLoadInProgressUserId = null;
+      cloudLoadInProgressUserIds.delete(user.id);
     }
   }
 
