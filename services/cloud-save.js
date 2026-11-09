@@ -37,8 +37,13 @@ export function createCloudSaveService(dependencies) {
 
   function markCloudSyncBlocked(error) {
     if (!isProjectRestrictionError(error)) return false;
+    const wasAlreadyBlocked = cloudSyncBlocked;
     cloudSyncBlocked = true;
     cloudSyncPending = false;
+    if (!wasAlreadyBlocked) {
+      try { supabaseClient?.realtime?.disconnect?.(); }
+      catch (disconnectError) { console.debug('Realtime disconnect skipped after cloud restriction', disconnectError); }
+    }
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
