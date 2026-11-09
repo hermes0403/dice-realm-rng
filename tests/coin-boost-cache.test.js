@@ -30,7 +30,7 @@ test('coin boost status is cached for at least 60 seconds', async () => {
     now: () => currentTime,
     fetchRef: async () => {
       requests++;
-      return { ok: true, status: 200, json: async () => ({ global: { multiplier: 2 }, personal: null }) };
+      return { ok: true, status: 200, json: async () => ({ global: { multiplier: 2, expires_at: 9999999999999 }, personal: null }) };
     }
   });
 
