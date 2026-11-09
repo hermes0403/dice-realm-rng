@@ -119,7 +119,7 @@ cloudSaveService=createCloudSaveService({
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
-presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, syncCloudSave });
+presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, syncCloudSave, timerManager, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
 function save(){return cloudSaveService.save()}
 function userSaveKey(userId){return cloudSaveService.userSaveKey(userId)}
 function savePayload(){return cloudSaveService.savePayload()}
