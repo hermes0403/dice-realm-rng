@@ -1,7 +1,7 @@
 ---
 id: T-0045
 title: Egress 受限時停止遊戲訪問紀錄
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -13,7 +13,7 @@ updated: 2026-11-09
 depends_on: [T-0042]
 branch: work/chazi
 done_by: 棒子
-done_at:
+done_at: 2026-11-09
 ---
 
 ## 任務
@@ -29,12 +29,12 @@ done_at:
 
 ## 驗收條件
 
-- [ ] Egress blocked 時不再寫入 game_visit_events。
-- [ ] 停止 visit-tracking 定時器並移除 visibilitychange listener。
-- [ ] 受限後手動呼叫 recordGameVisit 不發送請求。
-- [ ] 一般非 402 錯誤不會觸發永久停止。
-- [ ] 新增回歸測試並實際執行。
-- [ ] `git diff --check` 通過。
+- [x] Egress blocked 時不再寫入 game_visit_events。
+- [x] 停止 visit-tracking 定時器並移除 visibilitychange listener。
+- [x] 受限後手動呼叫 recordGameVisit 不發送請求。
+- [x] 一般非 402 錯誤不會觸發永久停止。
+- [x] 新增回歸測試並實際執行。
+- [x] `git diff --check` 通過。
 
 ## 紀錄
 
@@ -49,3 +49,6 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+
+- 2026-11-09 [棒子] 驗收：GitHub Actions Branch tests（commit 3ab0c024fab13dde3f23d0abb41583dadef1e875）完整測試 58/58 通過，JavaScript syntax check 與 branch whitespace check 通過；本項修改保留在 work/chazi，未部署，main 與玩家資料未修改。
