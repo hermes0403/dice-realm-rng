@@ -14,6 +14,7 @@ export function setupAccountActions(dependencies) {
     save,
     render,
     syncCloudSave,
+    flushCloudSave,
     toast,
     stopAuto,
     KEY,
@@ -121,6 +122,11 @@ export function setupAccountActions(dependencies) {
 
   document.getElementById('profileLogoutBtn')?.addEventListener('click', async () => {
     if (!getCurrentUser()) { toast('目前沒有登入雲端帳號'); return; }
+    const saved = await flushCloudSave?.();
+    if (saved !== true) {
+      toast('雲端存檔尚未確認成功，已保留本機資料，暫不登出');
+      return;
+    }
     const { error } = await supabaseClient.auth.signOut();
     if (error) { toast('登出失敗：' + error.message); return; }
     toast('已登出雲端帳號');
