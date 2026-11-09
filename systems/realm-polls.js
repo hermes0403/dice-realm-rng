@@ -11,6 +11,9 @@ export function createRealmPolls(dependencies) {
   let realmLastPollId = 0;
   let realmPollTickBusy = false;
   let realmSocialUISetup = false;
+  let realmPollChannel = null;
+  let realmPollChannelReady = false;
+  let realmPollSyncIntervalMs = 0;
   const realmPollResultsBusy = new Set();
   function realmUsername() {
     const state = getState();
@@ -40,6 +43,96 @@ export function createRealmPolls(dependencies) {
     if (el) el.style.display = 'none';
     if (realmPollTimer) { timerManager.clearInterval(realmPollTimer); realmPollTimer = null; }
     realmCurrentPollId = null;
+  }
+
+  function setRealmPollSyncInterval(delay) {
+    if (realmPollSyncIntervalMs === delay) return;
+    timerManager.clearScope('realm-poll-sync');
+    timerManager.setInterval(realmPollTick, delay, 'realm-poll-sync');
+    realmPollSyncIntervalMs = delay;
+  }
+
+  function receiveRealmAnnouncement(row) {
+    if (!row || (row.expires_at && Date.parse(row.expires_at) <= Date.now())) return;
+    const id = Number(row.id) || 0;
+    if (id && id <= realmLastMessageId) return;
+    if (id) realmLastMessageId = id;
+    realmShowAnnouncement(row);
+  }
+
+  async function broadcastRealmEvent(event, payload) {
+    if (!realmPollChannel || !realmPollChannelReady) return false;
+    try {
+      const status = await realmPollChannel.send({ type: 'broadcast', event, payload });
+      if (status !== 'ok') {
+        realmPollChannelReady = false;
+        setRealmPollSyncInterval(1500);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      realmPollChannelReady = false;
+      setRealmPollSyncInterval(1500);
+      console.warn('Realm poll broadcast unavailable; fast fallback enabled', error);
+      return false;
+    }
+  }
+
+  async function realmDisplayPoll(poll) {
+    const currentUser = getCurrentUser();
+    const pollId = Number(poll?.id) || 0;
+    const expiry = Date.parse(poll?.ends_at) || 0;
+    if (!currentUser || !pollId || expiry <= Date.now()) {
+      if (realmCurrentPollId === pollId) realmHidePoll();
+      return false;
+    }
+    if (pollId === realmCurrentPollId) {
+      if (isAdmin()) void realmRefreshPollResults(pollId);
+      return true;
+    }
+
+    realmCurrentPollId = pollId;
+    realmLastPollId = pollId;
+    realmPollExpiry = expiry;
+    const popup = documentRef.getElementById('realmPollPopup');
+    const headline = documentRef.getElementById('realmPollHeadline');
+    const buttons = documentRef.getElementById('realmPollButtons');
+    const voteStatus = documentRef.getElementById('realmPollVoteStatus');
+    const optionA = documentRef.querySelector('#realmPollButtons [data-poll-choice="hell"]');
+    const optionB = documentRef.querySelector('#realmPollButtons [data-poll-choice="crystal"]');
+    if (!popup || !headline || !buttons || !voteStatus || !optionA || !optionB) return false;
+
+    headline.textContent = `【${poll.admin_label || '𝓗𝓮𝓻𝓶𝓮𝓼'}】: ${poll.question}`;
+    optionA.textContent = poll.option_a || '選項一';
+    optionB.textContent = poll.option_b || '選項二';
+    buttons.style.display = 'grid';
+    voteStatus.textContent = '每位玩家只能投票一次';
+    popup.style.display = 'block';
+
+    let existing = null;
+    try {
+      const result = await supabaseClient.from('realm_poll_votes')
+        .select('id,choice').eq('poll_id', pollId).eq('user_id', currentUser.id).maybeSingle();
+      if (result.error) throw result.error;
+      existing = result.data;
+    } catch (error) {
+      console.warn('Existing poll vote check failed', error);
+    }
+    if (getCurrentUser()?.id !== currentUser.id || realmCurrentPollId !== pollId) return false;
+    if (existing) {
+      voteStatus.textContent = `你已投票：${existing.choice === 'hell' ? (poll.option_a || '選項一') : (poll.option_b || '選項二')}`;
+      buttons.style.display = 'none';
+    }
+
+    if (realmPollTimer) timerManager.clearInterval(realmPollTimer);
+    realmPollTimer = timerManager.setInterval(() => {
+      const remain = Math.max(0, Math.ceil((realmPollExpiry - Date.now()) / 1000));
+      const countdown = documentRef.getElementById('realmPollCountdown');
+      if (countdown) countdown.textContent = remain > 0 ? `剩餘 ${remain} 秒` : '投票已結束';
+      if (remain <= 0) realmHidePoll();
+    }, 1000, 'realm-poll-countdown');
+    if (isAdmin()) void realmRefreshPollResults(pollId);
+    return true;
   }
 
   async function realmRefreshPollResults(pollId) {
@@ -75,44 +168,29 @@ export function createRealmPolls(dependencies) {
     if (!currentUser || !supabaseClient) return;
     realmPollTickBusy = true;
     try {
+      if (!realmPollChannelReady) {
+        const now = new Date().toISOString();
+        const { data: messages, error: messageError } = await supabaseClient.from('realm_admin_messages')
+          .select('id,message,admin_label,created_at,expires_at')
+          .gt('expires_at', now).order('id', { ascending: false }).limit(1);
+        if (messageError) throw messageError;
+        if (messages?.length) receiveRealmAnnouncement(messages[0]);
+      }
+
       const now = new Date().toISOString();
-      const { data: messages, error: msgErr } = await supabaseClient.from('realm_admin_messages').select('id,message,admin_label,created_at,expires_at').gt('expires_at', now).order('id', { ascending: false }).limit(1);
-      if (!msgErr && messages?.length && Number(messages[0].id) > realmLastMessageId) {
-        realmLastMessageId = Number(messages[0].id);
-        realmShowAnnouncement(messages[0]);
-      }
-      const { data: polls, error: pollErr } = await supabaseClient.from('realm_polls').select('id,question,option_a,option_b,admin_label,created_at,ends_at,is_active').eq('is_active', true).gt('ends_at', now).order('id', { ascending: false }).limit(1);
-      if (pollErr || !polls?.length) {
+      const { data: polls, error: pollError } = await supabaseClient.from('realm_polls')
+        .select('id,question,option_a,option_b,admin_label,created_at,ends_at,is_active')
+        .eq('is_active', true).gt('ends_at', now).order('id', { ascending: false }).limit(1);
+      if (pollError) throw pollError;
+      if (!polls?.length) {
         if (realmCurrentPollId && Date.now() >= realmPollExpiry) realmHidePoll();
-        return;
+      } else {
+        await realmDisplayPoll(polls[0]);
       }
-      const poll = polls[0];
-      if (Number(poll.id) !== realmCurrentPollId) {
-        realmCurrentPollId = Number(poll.id);
-        realmLastPollId = realmCurrentPollId;
-        realmPollExpiry = Date.parse(poll.ends_at) || Date.now();
-        const popup = documentRef.getElementById('realmPollPopup');
-        documentRef.getElementById('realmPollHeadline').textContent = `【${poll.admin_label || '𝓗𝓮𝓻𝓶𝓮𝓼'}】: ${poll.question}`;
-        documentRef.querySelector('#realmPollButtons [data-poll-choice="hell"]').textContent = poll.option_a || '選項一';
-        documentRef.querySelector('#realmPollButtons [data-poll-choice="crystal"]').textContent = poll.option_b || '選項二';
-        documentRef.getElementById('realmPollButtons').style.display = 'grid';
-        documentRef.getElementById('realmPollVoteStatus').textContent = '每位玩家只能投票一次';
-        popup.style.display = 'block';
-        const { data: existing } = await supabaseClient.from('realm_poll_votes').select('id,choice').eq('poll_id', poll.id).eq('user_id', currentUser.id).maybeSingle();
-        if (existing) {
-          documentRef.getElementById('realmPollVoteStatus').textContent = `你已投票：${existing.choice === 'hell' ? (poll.option_a || '選項一') : (poll.option_b || '選項二')}`;
-          documentRef.getElementById('realmPollButtons').style.display = 'none';
-        }
-        if (realmPollTimer) timerManager.clearInterval(realmPollTimer);
-        realmPollTimer = timerManager.setInterval(() => {
-          const remain = Math.max(0, Math.ceil((realmPollExpiry - Date.now()) / 1000));
-          documentRef.getElementById('realmPollCountdown').textContent = remain > 0 ? `剩餘 ${remain} 秒` : '投票已結束';
-          if (remain <= 0) realmHidePoll();
-        }, 250, 'realm-poll-countdown');
-      }
-      if (isAdmin()) realmRefreshPollResults(Number(poll.id));
-    } catch (e) {
-      console.warn('全服訊息／投票同步失敗', e);
+      setRealmPollSyncInterval(realmPollChannelReady ? 60000 : 1500);
+    } catch (error) {
+      console.warn('全服訊息／投票同步失敗', error);
+      if (!realmPollChannelReady) setRealmPollSyncInterval(1500);
     } finally {
       realmPollTickBusy = false;
     }
@@ -126,12 +204,15 @@ export function createRealmPolls(dependencies) {
     btn.disabled = true;
     status.textContent = '正在發送…';
     try {
-      const { error } = await supabaseClient.from('realm_admin_messages').insert({ message, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', expires_at: new Date(Date.now() + 3800).toISOString() });
+      const { data, error } = await supabaseClient.from('realm_admin_messages')
+        .insert({ message, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', expires_at: new Date(Date.now() + 3800).toISOString() })
+        .select('id,message,admin_label,created_at,expires_at').single();
       if (error) throw error;
+      receiveRealmAnnouncement(data);
+      await broadcastRealmEvent('admin_message', data);
+      if (!realmPollChannelReady) await realmPollTick();
       status.textContent = '已發送；玩家畫面會顯示 3.8 秒。';
       input.value = '';
-      realmLastMessageId = 0;
-      await realmPollTick();
     } catch (e) {
       status.textContent = '發送失敗：' + (e.message || '請稍後重試');
     } finally {
@@ -151,12 +232,15 @@ export function createRealmPolls(dependencies) {
     try {
       const { error: closeErr } = await supabaseClient.from('realm_polls').update({ is_active: false }).eq('is_active', true);
       if (closeErr) throw closeErr;
-      const { data, error } = await supabaseClient.from('realm_polls').insert({ question, option_a: optionA, option_b: optionB, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', ends_at: new Date(Date.now() + duration * 1000).toISOString(), is_active: true }).select('id').single();
+      const { data, error } = await supabaseClient.from('realm_polls')
+        .insert({ question, option_a: optionA, option_b: optionB, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', ends_at: new Date(Date.now() + duration * 1000).toISOString(), is_active: true })
+        .select('id,question,option_a,option_b,admin_label,created_at,ends_at,is_active').single();
       if (error) throw error;
       status.textContent = `投票已發起：「${optionA}」與「${optionB}」，持續 ${duration} 秒；系統會自動統計票數。`;
       realmCurrentPollId = null;
-      await realmPollTick();
-      await realmRefreshPollResults(data.id);
+      await realmDisplayPoll(data);
+      await broadcastRealmEvent('poll_started', data);
+      if (!realmPollChannelReady) await realmPollTick();
     } catch (e) {
       status.textContent = '發起失敗：' + (e.message || '請稍後重試');
     } finally {
@@ -183,14 +267,38 @@ export function createRealmPolls(dependencies) {
         }
         documentRef.getElementById('realmPollVoteStatus').textContent = `投票成功：${documentRef.querySelector(`#realmPollButtons [data-poll-choice=\"${choice}\"]`)?.textContent || '已投票'}`;
         documentRef.getElementById('realmPollButtons').style.display = 'none';
+        await broadcastRealmEvent('poll_vote', { pollId: realmCurrentPollId });
         if (isAdmin()) await realmRefreshPollResults(realmCurrentPollId);
       } catch (err) {
         documentRef.getElementById('realmPollVoteStatus').textContent = err.message || '投票失敗';
         documentRef.querySelectorAll('#realmPollButtons button').forEach(b => b.disabled = false);
       }
     });
-    timerManager.clearScope('realm-poll-sync');
-    timerManager.setInterval(realmPollTick, 1500, 'realm-poll-sync');
+    setRealmPollSyncInterval(1500);
+    if (supabaseClient?.channel) {
+      try {
+        realmPollChannel = supabaseClient.channel('dice-realm-polls-live')
+          .on('broadcast', { event: 'admin_message' }, ({ payload }) => receiveRealmAnnouncement(payload))
+          .on('broadcast', { event: 'poll_started' }, ({ payload }) => { void realmDisplayPoll(payload); })
+          .on('broadcast', { event: 'poll_vote' }, ({ payload }) => {
+            if (isAdmin() && Number(payload?.pollId) === realmCurrentPollId) {
+              void realmRefreshPollResults(realmCurrentPollId);
+            }
+          })
+          .subscribe(status => {
+            if (status === 'SUBSCRIBED') {
+              realmPollChannelReady = true;
+              if (getCurrentUser()) void realmPollTick();
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+              realmPollChannelReady = false;
+              setRealmPollSyncInterval(1500);
+            }
+          });
+      } catch (error) {
+        realmPollChannelReady = false;
+        console.warn('Realm poll realtime unavailable; fast fallback enabled', error);
+      }
+    }
     return true;
   }
   return {
