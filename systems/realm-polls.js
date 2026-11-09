@@ -356,7 +356,7 @@ export function createRealmPolls(dependencies) {
         documentRef.querySelectorAll('#realmPollButtons button').forEach(b => b.disabled = false);
       }
     });
-    setRealmPollSyncInterval(1500);
+    // Polling starts only after the authenticated session finishes initialization.
     return true;
   }
   return {
