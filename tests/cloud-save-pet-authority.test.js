@@ -12,14 +12,14 @@ function createStorage(initial = {}) {
   };
 }
 
-function createService({ localSave, cloudSave, rpcHandler } = {}) {
+function createService({ localSave, cloudSave, rpcHandler, storage: providedStorage, version: initialVersion } = {}) {
   const KEY = 'diceRealmTest';
-  const storage = createStorage({
+  const storage = providedStorage || createStorage({
     [KEY + '_user_user-a']: JSON.stringify(localSave || {})
   });
   const writes = [];
   const scheduled = [];
-  let version = '2026-11-09T00:00:00.000Z';
+  let version = initialVersion || '2026-11-09T00:00:00.000Z';
   const documentRef = {
     visibilityState: 'visible',
     addEventListener() {},
@@ -211,4 +211,65 @@ test('a previous account snapshot is never written into a different account', as
 
   assert.equal(await service.syncCloudSave(), false);
   assert.equal(writes.length, before);
+});
+
+
+test('dirty local progress survives reload and uses the saved cloud version as a safe sync baseline', async () => {
+  const cloudSave = { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 };
+  const first = createService({ cloudSave });
+  await first.service.loadCloudSave();
+  first.service.markCloudSyncBlocked({
+    status: 402,
+    message: 'Service for this project is restricted due to exceed_egress_quota'
+  });
+  first.getState().coins = 175;
+  first.service.save();
+
+  const dirtyKey = 'diceRealmTest_cloud_dirty_user-a';
+  const marker = JSON.parse(first.storage.getItem(dirtyKey));
+  assert.equal(marker.baseVersion, '2026-11-09T00:00:00.000Z');
+
+  const second = createService({
+    storage: first.storage,
+    cloudSave,
+    version: '2026-11-09T00:00:00.000Z'
+  });
+  assert.equal(await second.service.loadCloudSave(), false);
+  assert.equal(second.getState().coins, 175, 'the newer local state must not be replaced by the cloud snapshot');
+  assert.equal(second.scheduled.length, 1, 'a version-checked local recovery sync should be scheduled');
+  assert.equal(second.writes.length, 0, 'recovery should not overwrite the cloud before the version check');
+});
+
+test('dirty local progress is preserved without upload when no cloud baseline exists but a remote save is present', async () => {
+  const first = createService();
+  first.service.markCloudSyncBlocked({
+    status: 402,
+    message: 'Service for this project is restricted due to exceed_egress_quota'
+  });
+  first.getState().coins = 250;
+  first.service.save();
+
+  const second = createService({
+    storage: first.storage,
+    cloudSave: { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 }
+  });
+  assert.equal(await second.service.loadCloudSave(), false);
+  assert.equal(second.getState().coins, 250, 'local progress must remain active');
+  assert.equal(second.scheduled.length, 0, 'without a known baseline, do not upload over an existing cloud save');
+  assert.equal(second.writes.length, 0);
+});
+
+test('dirty local progress can initialize cloud storage when no remote save exists', async () => {
+  const first = createService();
+  first.service.markCloudSyncBlocked({
+    status: 402,
+    message: 'Service for this project is restricted due to exceed_egress_quota'
+  });
+  first.getState().coins = 300;
+  first.service.save();
+
+  const second = createService({ storage: first.storage });
+  assert.equal(await second.service.loadCloudSave(), false);
+  assert.equal(second.getState().coins, 300);
+  assert.equal(second.scheduled.length, 1, 'a new cloud save may be created when no remote save exists');
 });
