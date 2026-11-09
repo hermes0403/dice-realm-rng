@@ -42,6 +42,7 @@ import { createTimerManager } from './core/timer-manager.js';
 
 const timerManager = createTimerManager();
 let globalBoostState=null;
+let globalBoostSystem=null;
 let realmSocialSystem=null;
 let equipmentUI=null;
 let adminPetOddsUI=null;
@@ -232,7 +233,7 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, startRealmPollSync: () => realmSocialSystem?.startRealmPollSync(), stopRealmPollSync: () => realmSocialSystem?.stopRealmPollSync(), startGlobalRealtime: () => { setupGlobalAnnouncements(); weatherApi.setupServerWeatherSubscription(); }, stopGlobalRealtime: () => { realmSocialSystem?.stopGlobalAnnouncements(); weatherApi.stopServerWeatherSubscription(); }, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, startRealmPollSync: () => realmSocialSystem?.startRealmPollSync(), stopRealmPollSync: () => realmSocialSystem?.stopRealmPollSync(), startGlobalRealtime: () => { setupGlobalAnnouncements(); weatherApi.setupServerWeatherSubscription(); globalBoostSystem?.startGlobalBoostRealtime(); }, stopGlobalRealtime: () => { realmSocialSystem?.stopGlobalAnnouncements(); weatherApi.stopServerWeatherSubscription(); globalBoostSystem?.stopGlobalBoostRealtime(); }, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
@@ -276,12 +277,13 @@ mainRenderUI = createMainRenderUI({
   renderCodex, renderGloves, renderPotions, renderQuests, renderProfile, D
 });
 setupAutoRollUI();
-const { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = createGlobalBoostSystem({
- supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
+globalBoostSystem = createGlobalBoostSystem({
+ supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
  render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
 });
+const { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
 setupGlobalBoostUI();
 ensurePetData(S.pets);
 petSystem.setupPetSystemUI();
