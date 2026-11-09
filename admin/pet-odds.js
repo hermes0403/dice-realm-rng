@@ -131,6 +131,7 @@ export function setupAdminPetOddsUI({
     const rates = Object.fromEntries(['common', 'rare', 'legendary', 'mythic', 'secret'].map(key => [key, Number(document.getElementById('adminPetOdds_' + key)?.value)]));
     const sum = Object.values(rates).reduce((total, value) => total + value, 0);
     if (!isAdmin()) { status.textContent = '沒有管理員權限'; return; }
+    if (isCloudSyncBlocked()) { status.textContent = '雲端服務受限，暫時無法儲存。'; return; }
     if (!Number.isSafeInteger(min) || min < 2 || (max !== null && (!Number.isSafeInteger(max) || max < min))) {
       status.textContent = '骰子分母範圍格式錯誤';
       return;
@@ -155,6 +156,7 @@ export function setupAdminPetOddsUI({
       status.textContent = `第 ${tier} 區範圍與機率已儲存並套用全服。`;
       toast(`第 ${tier} 區寵物合成設定已更新`);
     } catch (error) {
+      markCloudSyncBlocked(error);
       status.textContent = '儲存失敗：' + (error.message || '未知錯誤');
     } finally {
       button.disabled = false;
