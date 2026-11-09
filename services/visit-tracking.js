@@ -1,7 +1,7 @@
 import { VISITOR_KEY } from '../config.js';
 
 /** Anonymous/browser and signed-in visit event tracking. */
-export function createVisitTrackingService({ getCurrentUser, getState, supabaseClient, timerManager }) {
+export function createVisitTrackingService({ getCurrentUser, getState, supabaseClient, timerManager, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false }) {
   let eventBusy = false;
   let lastEventAt = 0;
   let visitTrackingStarted = false;
@@ -22,8 +22,14 @@ export function createVisitTrackingService({ getCurrentUser, getState, supabaseC
     }
   }
 
+  function stopWhenRestricted() {
+    if (!isCloudSyncBlocked()) return false;
+    stopGameVisitTracking();
+    return true;
+  }
+
   async function recordGameVisit(eventType = 'heartbeat') {
-    if (!supabaseClient || eventBusy) return;
+    if (stopWhenRestricted() || !supabaseClient || eventBusy) return;
     const now = Date.now();
     if (eventType === 'heartbeat' && now - lastEventAt < 240000) return;
     eventBusy = true;
@@ -43,6 +49,8 @@ export function createVisitTrackingService({ getCurrentUser, getState, supabaseC
       if (error) throw error;
       lastEventAt = now;
     } catch (error) {
+      const restricted = markCloudSyncBlocked(error);
+      if (restricted || isCloudSyncBlocked()) stopGameVisitTracking();
       console.debug('Visit tracking skipped', error);
     } finally {
       eventBusy = false;
@@ -50,7 +58,7 @@ export function createVisitTrackingService({ getCurrentUser, getState, supabaseC
   }
 
   function startGameVisitTracking() {
-    if (visitTrackingStarted) return false;
+    if (isCloudSyncBlocked() || visitTrackingStarted) return false;
     visitTrackingStarted = true;
     recordGameVisit('visit');
     timerManager.clearScope('visit-tracking');
