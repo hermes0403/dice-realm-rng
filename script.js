@@ -79,7 +79,7 @@ activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: 
 const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum });
 const { releaseDeviceLock, isLockHeld, isHeartbeatActive, scheduleUnlock } = createDeviceLockService({ getCurrentUser: () => currentUser, supabaseClient, toast, timerManager });
-const { recordGameVisit, startGameVisitTracking } = createVisitTrackingService({ getCurrentUser: () => currentUser, getState: () => S, supabaseClient, timerManager });
+const { recordGameVisit, startGameVisitTracking } = createVisitTrackingService({ getCurrentUser: () => currentUser, getState: () => S, supabaseClient, timerManager, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false });
 const { checkAchievements, checkDailyReward, renderQuests, renderProfile, closeAchievementPopup, rewardText, grantAchievementReward, showAchievementPopup } = createProgressionSystem({
   getState: () => S, D, DAILY_TASKS, POTIONS, format, compactNum, totalUnique,
   coinEarningMultiplier, fresh, save, toast, timerManager
