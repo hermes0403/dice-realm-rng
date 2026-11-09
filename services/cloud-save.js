@@ -51,8 +51,9 @@ export function createCloudSaveService(dependencies) {
       } catch (disconnectError) {
         console.debug('Realtime disconnect skipped after cloud restriction', disconnectError);
       }
-      timerManager?.clearScope?.('weather-refresh');
-      timerManager?.clearScope?.('global-boost-refresh');
+      for (const scope of ['presence-heartbeat', 'visit-tracking', 'weather-refresh', 'global-boost-refresh']) {
+        timerManager?.clearScope?.(scope);
+      }
     }
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
