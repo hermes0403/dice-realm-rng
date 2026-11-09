@@ -2,7 +2,8 @@
 export function createGlobalAnnouncements(dependencies) {
   const {
     getState, getCurrentUser, weatherApi, supabaseClient, toast, isAdmin,
-    petById, escapeHTML, format, WEATHER_TYPES, documentRef, timerManager
+    petById, escapeHTML, format, WEATHER_TYPES, documentRef, timerManager,
+    isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false
   } = dependencies;
   let announcementChannel = null;
   let weatherSurgeTimer = null;
@@ -76,7 +77,7 @@ export function createGlobalAnnouncements(dependencies) {
 
   async function recordPetFusion(d, p, rarity) {
     const currentUser = getCurrentUser();
-    if (!currentUser || !supabaseClient) return;
+    if (!currentUser || !supabaseClient || isCloudSyncBlocked()) return;
     const state = getState();
     const row = {
       user_id: currentUser.id,
@@ -92,6 +93,7 @@ export function createGlobalAnnouncements(dependencies) {
       const { error } = await supabaseClient.from('pet_fusion_logs').insert(row);
       if (error) throw error;
     } catch (e) {
+      markCloudSyncBlocked(e);
       console.warn('Pet fusion log write failed (pet_fusion_logs table/policies may need setup):', e.message || e);
     }
     if (rarity === 'secret') {
@@ -106,7 +108,7 @@ export function createGlobalAnnouncements(dependencies) {
   }
 
   async function loadAdminPetFusionLogs() {
-    if (!isAdmin()) return;
+    if (!isAdmin() || isCloudSyncBlocked()) return;
     const box = documentRef.getElementById('adminPetFusionLogsList');
     if (!box) return;
     box.innerHTML = '<div class="empty">正在載入所有玩家的合成紀錄…</div>';
@@ -121,6 +123,7 @@ export function createGlobalAnnouncements(dependencies) {
       const labels = { common: '普通', rare: '稀有', legendary: '傳奇', mythic: '神話', secret: '秘密' };
       box.innerHTML = rows.map(r => `<div class="admin-player"><div><b>${escapeHTML(r.username || '玩家')}　<span class="${r.rarity === 'secret' ? 'pet-rarity-secret' : ''}">${escapeHTML(labels[r.rarity] || r.rarity || '未知')} · ${escapeHTML(r.pet_name || '未知寵物')}</span></b><div class="mini">材料：${escapeHTML(r.dice_name || '未知骰子')}（1/${format(Number(r.dice_den) || 0)}）</div></div><time class="mini">${escapeHTML(r.created_at ? new Date(r.created_at).toLocaleString('zh-TW') : '時間未知')}</time></div>`).join('');
     } catch (e) {
+      markCloudSyncBlocked(e);
       box.innerHTML = `<div class="empty">讀取失敗：${escapeHTML(e.message || '未知錯誤')}<br>若顯示資料表不存在，需先在 Supabase 建立 pet_fusion_logs 資料表與存取政策。</div>`;
     }
   }
@@ -155,6 +158,7 @@ export function createGlobalAnnouncements(dependencies) {
     const currentUser = getCurrentUser();
     if (!d || d.den < 2048) return;
     addGlobalAnnouncement(state.name, d.den, Date.now());
+    if (isCloudSyncBlocked()) return;
     if (announcementChannel) announcementChannel.send({ type: 'broadcast', event: 'rare_roll', payload: { name: state.name || '玩家', den: d.den, diceName: d.name, at: Date.now() } }).catch?.(() => {});
     if (d.den >= 4096 && currentUser && supabaseClient) {
       const record = { user_id: currentUser.id, username: (state.name || '玩家').slice(0, 20), dice_name: d.name, den: Number(d.den) };
@@ -162,6 +166,7 @@ export function createGlobalAnnouncements(dependencies) {
         const { error } = await supabaseClient.from('roll_announcements').insert(record);
         if (error) throw error;
       } catch (error) {
+        markCloudSyncBlocked(error);
         console.error('Rare roll history insert failed', error);
         toast('稀有擲骰紀錄未能寫入雲端：' + (error.message || '請檢查資料表權限'));
       }
