@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 已修改 admin/pet-odds.js、systems/leaderboards.js、systems/weather.js：各讀取服務在 blocked 時不再查詢，遇 402 會標記共用斷路器；修改 services/auth.js，新增可獨立測試的 runCloudSessionInitialization，依序執行 pet odds → heartbeat → leaderboard → weather，每一步後檢查 blocked，失敗即中止；script.js 已注入共用狀態。新增 tests/auth-init-egress-fail-fast.test.js。在隔離 Node.js v22.16.0 測試目錄，以相同 helper 與測試內容執行 node --test：3/3 pass；git diff --cached --check exit code 0。完整分支測試仍因執行環境無法解析 github.com 而未能執行。
+- 2026-11-09 [叉子] 後續 T-0049 將排行榜改為玩家開啟排行榜頁面時才讀取，因此登入初始化流程已調整為 pet odds → heartbeat → weather summon data，並在每一步後檢查 Egress blocked。排行榜不再於登入時預載；其 402 標記仍由 leaderboard service 自行處理。更新 auth 初始化測試，隔離 Node.js v22.16.0 3/3 pass。
 
 ## 完工回報
 
