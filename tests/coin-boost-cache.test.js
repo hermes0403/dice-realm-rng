@@ -52,21 +52,18 @@ test('coin boost status is cached for at least 60 seconds', async () => {
 test('HTTP 402 blocks future coin boost requests', async () => {
   let blocked = false;
   let requests = 0;
+  let sessionReads = 0;
   let marked = 0;
-  const { service, getSessionReads } = createService({
-    fetchRef: async () => {
-      requests++;
-      return { ok: false, status: 402, json: async () => ({ error: 'exceed_egress_quota' }) };
-    },
-    onBlocked: error => {
-      marked++;
-      if (error.status === 402) blocked = true;
-    }
-  });
-  // Recreate with the shared blocked state wired to the service's guard.
-  const guarded = createCoinBoostService({
+  const service = createCoinBoostService({
     getCurrentUser: () => ({ id: 'player-1' }),
-    supabaseClient: { auth: { async getSession() { return { data: { session: { access_token: 'test-token' } } }; } } },
+    supabaseClient: {
+      auth: {
+        async getSession() {
+          sessionReads++;
+          return { data: { session: { access_token: 'test-token' } } };
+        }
+      }
+    },
     SUPABASE_URL: 'https://example.supabase.co',
     SUPABASE_KEY: 'publishable-test-key',
     fetchRef: async () => {
@@ -74,16 +71,18 @@ test('HTTP 402 blocks future coin boost requests', async () => {
       return { ok: false, status: 402, json: async () => ({ error: 'exceed_egress_quota' }) };
     },
     isCloudSyncBlocked: () => blocked,
-    markCloudSyncBlocked: error => { marked++; if (error.status === 402) blocked = true; }
+    markCloudSyncBlocked: error => {
+      marked++;
+      if (error.status === 402) blocked = true;
+    }
   });
 
-  await guarded.refreshCoinBoosts();
-  await guarded.refreshCoinBoosts();
+  await service.refreshCoinBoosts();
+  await service.refreshCoinBoosts();
   assert.equal(requests, 1);
+  assert.equal(sessionReads, 1);
   assert.equal(marked, 1);
   assert.equal(blocked, true);
-  assert.equal(getSessionReads(), 0);
-  assert.equal(service !== null, true);
 });
 
 test('ordinary failures back off instead of retrying every second', async () => {
