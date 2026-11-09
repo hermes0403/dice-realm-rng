@@ -12,6 +12,7 @@ let summonedWeatherGuardUntil=(()=>{try{return Number(JSON.parse(localStorage.ge
 let lastServerWeatherUpdatedAt=0;
 let serverWeatherState=null,lastWeatherAnnouncementKey='';
 let playerWeatherOverride=null,playerWeatherChannel=null,lastPlayerWeatherKey='';
+let serverWeatherChannel=null;
 let serverWeatherRefreshBusy=false,playerWeatherRefreshBusy=false,summonDataLoadBusy=false;
 let forcedWeatherState=(()=>{try{const v=JSON.parse(localStorage.getItem('diceRealmForcedWeather')||'null');return v&&Number(v.until)>Date.now()?v:null}catch{return null}})();
 function specialWeatherLocked(now=Date.now()){return false}
@@ -59,6 +60,21 @@ async function refreshServerWeather(announce=false){
  serverWeatherRefreshBusy=true;
  try{const {data,error}=await supabaseClient.from('realm_weather_state').select('weather_type,weather_type_2,ends_at,summoned_by,updated_at').eq('singleton',true).maybeSingle();if(error)throw error;if(data)applyServerWeatherRow(data,announce)}
  catch(e){console.debug('Shared weather state unavailable',e)}finally{serverWeatherRefreshBusy=false}
+}
+function setupServerWeatherSubscription(){
+ if(!supabaseClient||typeof supabaseClient.channel!=='function')return false;
+ if(serverWeatherChannel){try{supabaseClient.removeChannel(serverWeatherChannel)}catch{}serverWeatherChannel=null}
+ try{
+  serverWeatherChannel=supabaseClient.channel('realm-weather-state')
+   .on('postgres_changes',{event:'*',schema:'public',table:'realm_weather_state',filter:'singleton=eq.true'},payload=>{
+    if(payload?.eventType==='DELETE'){serverWeatherState=null;cachedWeatherMinute=-1;updateWeatherUI();renderCodex();return}
+    applyServerWeatherRow(payload?.new||null,true);
+   })
+   .subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')refreshServerWeather(false)});
+  // Initial state is loaded immediately; subsequent changes arrive through Realtime.
+  refreshServerWeather(false);
+  return true;
+ }catch(e){console.debug('Shared weather realtime unavailable; polling fallback remains active',e);serverWeatherChannel=null;refreshServerWeather(false);return false}
 }
 function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
 function minuteSeed(n){let x=(n^0x9e3779b9)>>>0;x=Math.imul(x^(x>>>16),0x21f0aaad);x=Math.imul(x^(x>>>15),0x735a2d97);x=(x^(x>>>15))>>>0;return x/4294967296}
@@ -173,10 +189,12 @@ async function autoDepositRolledWeatherDice(d){
  }catch(e){console.error('Auto deposit rolled weather die failed',e);toast('自動添加失敗，骰子已保留在背包：'+(e.message||'請稍後重試'));return false}
 }
 document.addEventListener('click',e=>{const d=e.target.closest('[data-weather-deposit]');if(d)depositWeatherDice(d.dataset.weatherDeposit);if(e.target.closest('#summonWeatherBtn'))summonSpecialWeather();if(e.target.closest('#autoDepositWeatherBtn'))toggleAutoDepositWeather()});
-timerManager.setInterval(()=>{refreshServerWeather(false);refreshPlayerWeatherOverride(false)},12000,'weather-refresh');
+// Realtime delivers shared and personal weather changes immediately. Five-minute
+// reconciliation reads recover missed events without the old 12-second polling load.
+timerManager.setInterval(()=>{refreshServerWeather(false);refreshPlayerWeatherOverride(false)},5*60*1000,'weather-refresh');
  return {
   getWeather, activeWeatherDice, applyServerWeatherRow, applyForcedWeather,
-  refreshServerWeather, setupPlayerWeatherSubscription, loadWeatherSummonData,
+  refreshServerWeather, setupServerWeatherSubscription, setupPlayerWeatherSubscription, loadWeatherSummonData,
   autoDepositRolledWeatherDice, renderWeatherSummon, refreshPlayerWeatherOverride,
   updateWeatherUI
  };
