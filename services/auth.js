@@ -309,7 +309,6 @@ export function createAuthService(deps) {
             const initializationComplete = await runCloudSessionInitialization({
               loadPetFusionOdds,
               heartbeat,
-              refreshLeaderboards,
               loadWeatherSummonData,
               isCloudSyncBlocked
             });
