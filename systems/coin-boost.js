@@ -14,6 +14,7 @@ export function createCoinBoostService({
   let activeCoinBoosts = { global: null, personal: null, lastFetch: 0 };
   let refreshBusy = false;
   let lastFailedAt = 0;
+  let lastFetchedUserId = null;
 
   function coinEarningMultiplier() {
     const now = Date.now();
@@ -33,13 +34,28 @@ export function createCoinBoostService({
   }
 
   async function refreshCoinBoosts(force = false) {
-    if (isCloudSyncBlocked() || refreshBusy || !getCurrentUser() || !supabaseClient) return false;
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) {
+      if (!user && lastFetchedUserId) {
+        activeCoinBoosts = { global: null, personal: null, lastFetch: 0 };
+        lastFetchedUserId = null;
+        lastFailedAt = 0;
+      }
+      return false;
+    }
+    if (lastFetchedUserId !== user.id) {
+      activeCoinBoosts = { global: null, personal: null, lastFetch: 0 };
+      lastFetchedUserId = user.id;
+      lastFailedAt = 0;
+    }
+    if (isCloudSyncBlocked() || refreshBusy) return false;
     const currentTime = now();
     if (!force && activeCoinBoosts.lastFetch && currentTime - activeCoinBoosts.lastFetch < cacheMs) return false;
     if (!force && lastFailedAt && currentTime - lastFailedAt < failureCooldownMs) return false;
     refreshBusy = true;
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
+      if (getCurrentUser()?.id !== user.id) return false;
       if (!session?.access_token) {
         lastFailedAt = now();
         return false;
@@ -59,6 +75,7 @@ export function createCoinBoostService({
         error.status = response.status;
         throw error;
       }
+      if (getCurrentUser()?.id !== user.id) return false;
       activeCoinBoosts = { global: data.global || null, personal: data.personal || null, lastFetch: now() };
       lastFailedAt = 0;
       return true;
