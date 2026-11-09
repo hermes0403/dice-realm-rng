@@ -16,6 +16,7 @@ export function createGlobalBoostSystem({
   let globalBoostUISetup = false;
   let globalBoostChannel = null;
   let globalBoostRealtimeRevision = 0;
+  let realmActivitySignature = '';
   function activeGlobalBoost() {
     const boost = getBoostState();
     return boost && Number.isFinite(new Date(boost.ends_at).getTime()) && new Date(boost.ends_at).getTime() > Date.now()
@@ -113,22 +114,47 @@ export function createGlobalBoostSystem({
     welcome.hidden = hasBoost;
     panel.hidden = !hasBoost;
     if (!hasBoost) {
-      panel.innerHTML = '';
+      if (realmActivitySignature || panel.innerHTML) panel.innerHTML = '';
+      realmActivitySignature = '';
       return;
     }
-    const remaining = Math.max(0, Math.ceil((new Date(boost.ends_at).getTime() - Date.now()) / 1000));
-    const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
-    const seconds = String(remaining % 60).padStart(2, '0');
-    const cards = [];
-    if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small>剩餘 ${minutes}:${seconds}</small></span></button>`);
-    if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small>剩餘 ${minutes}:${seconds}</small></span></button>`);
+
+    const signature = JSON.stringify({
+      luckPercent,
+      speedPercent,
+      boostEndsAt: boost.ends_at || null,
+      coinMultiplier: coinBoost ? Number(coinBoost.multiplier) || 1 : null,
+      coinExpiresAt: coinBoost ? Number(coinBoost.expires_at) || 0 : null
+    });
+    if (signature !== realmActivitySignature) {
+      const cards = [];
+      if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small data-activity-countdown="luck"></small></span></button>`);
+      if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small data-activity-countdown="speed"></small></span></button>`);
+      if (coinBoost) {
+        cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small data-activity-countdown="coin"></small></span></button>`);
+      }
+      panel.innerHTML = `<div class="eyebrow">REALM LIVE EVENT</div><h1>管理員活動</h1><div class="realm-activity-grid">${cards.join('')}</div>`;
+      realmActivitySignature = signature;
+    }
+
+    const formatCountdown = seconds => {
+      const remaining = Math.max(0, Math.ceil(seconds));
+      return `剩餘 ${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
+    };
+    const globalRemaining = Math.max(0, Math.ceil((new Date(boost.ends_at).getTime() - Date.now()) / 1000));
+    if (luckPercent > 0) {
+      const node = panel.querySelector('[data-activity-countdown="luck"]');
+      if (node) node.textContent = formatCountdown(globalRemaining);
+    }
+    if (speedPercent > 0) {
+      const node = panel.querySelector('[data-activity-countdown="speed"]');
+      if (node) node.textContent = formatCountdown(globalRemaining);
+    }
     if (coinBoost) {
       const coinRemaining = Math.max(0, Math.ceil((Number(coinBoost.expires_at) - Date.now()) / 1000));
-      const coinMinutes = String(Math.floor(coinRemaining / 60)).padStart(2, '0');
-      const coinSeconds = String(coinRemaining % 60).padStart(2, '0');
-      cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>剩餘 ${coinMinutes}:${coinSeconds}</small></span></button>`);
+      const node = panel.querySelector('[data-activity-countdown="coin"]');
+      if (node) node.textContent = formatCountdown(coinRemaining);
     }
-    panel.innerHTML = `<div class="eyebrow">REALM LIVE EVENT</div><h1>管理員活動</h1><div class="realm-activity-grid">${cards.join('')}</div>`;
   }
 
   function setupGlobalBoostUI() {
