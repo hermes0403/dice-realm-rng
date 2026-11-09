@@ -53,6 +53,7 @@ export function createAuthService(deps) {
   } = deps;
 
   let authBusy = false;
+  let authServiceRestricted = false;
   let authStateSubscription = null;
 
   function showAuthMessage(message) {
@@ -88,6 +89,18 @@ export function createAuthService(deps) {
       || message.includes('rate limit exceeded')
       || message.includes('too many requests')
       || error?.status === 429;
+  }
+
+  function isProjectRestrictionError(error) {
+    const candidates = [error, error?.cause, error?.cause?.cause].filter(Boolean);
+    const message = candidates.flatMap(candidate => [
+      candidate?.message, candidate?.details, candidate?.hint, candidate?.code
+    ]).filter(Boolean).join(' ').toLowerCase();
+    return candidates.some(candidate =>
+      Number(candidate?.status ?? candidate?.statusCode ?? candidate?.code) === 402
+    ) || message.includes('exceed_egress_quota')
+      || message.includes('project is restricted')
+      || message.includes('egress quota');
   }
 
   function taipeiDayKey() {
@@ -143,6 +156,10 @@ export function createAuthService(deps) {
 
   async function authAction(mode) {
     if (authBusy) return;
+    if (authServiceRestricted) {
+      showAuthMessage('Supabase 雲端服務目前因流量額度限制而暫停，暫時無法登入。請待專案服務恢復後重新整理頁面；本機已保存的遊戲資料不會因這個提示而被清除。');
+      return;
+    }
     if (!supabaseClient) {
       showAuthMessage('登入模組載入失敗，請重新整理網頁。');
       return;
@@ -217,7 +234,10 @@ export function createAuthService(deps) {
       showAuthMessage('登入成功，正在載入雲端存檔…');
     } catch (error) {
       const message = String(error?.message || error?.msg || error?.error_description || '');
-      if (/user.?banned|banned|被停權|已停權/i.test(message)) {
+      if (isProjectRestrictionError(error)) {
+        authServiceRestricted = true;
+        showAuthMessage('Supabase 雲端服務目前因流量額度限制而暫停，暫時無法登入。請待專案服務恢復後重新整理頁面；本機已保存的遊戲資料不會因這個提示而被清除。');
+      } else if (/user.?banned|banned|被停權|已停權/i.test(message)) {
         await supabaseClient.auth.signOut().catch(() => {});
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
