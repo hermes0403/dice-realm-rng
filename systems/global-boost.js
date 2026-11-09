@@ -13,6 +13,7 @@ export function createGlobalBoostSystem({
   let refreshBusy = false;
   let globalBoostUISetup = false;
   let globalBoostChannel = null;
+  let globalBoostRealtimeRevision = 0;
   function activeGlobalBoost() {
     const boost = getBoostState();
     return boost && Number.isFinite(new Date(boost.ends_at).getTime()) && new Date(boost.ends_at).getTime() > Date.now()
@@ -35,11 +36,14 @@ export function createGlobalBoostSystem({
   async function refreshGlobalBoost() {
     if (refreshBusy || !supabaseClient) return;
     refreshBusy = true;
+    const revisionAtStart = globalBoostRealtimeRevision;
     try {
       const { data, error } = await supabaseClient.from('realm_global_boost')
         .select('luck_percent,speed_percent,starts_at,ends_at,updated_at')
         .eq('singleton', true).maybeSingle();
       if (error) throw error;
+      // A Realtime event received while this read was in flight is newer than its snapshot.
+      if (revisionAtStart !== globalBoostRealtimeRevision) return;
       applyGlobalBoostRow(data);
     } catch (error) {
       console.debug('Global timed boost unavailable', error);
@@ -59,6 +63,7 @@ export function createGlobalBoostSystem({
         .on('postgres_changes', {
           event: '*', schema: 'public', table: 'realm_global_boost', filter: 'singleton=eq.true'
         }, payload => {
+          globalBoostRealtimeRevision++;
           applyGlobalBoostRow(payload?.eventType === 'DELETE' ? null : payload?.new || null);
         })
         .subscribe(status => {
