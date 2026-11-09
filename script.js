@@ -152,7 +152,7 @@ function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
 function closeAuth(){return authService?.closeAuth()}
 function authAction(mode){return authService?.authAction(mode)}
-setupGlobalAnnouncements();setupServerWeatherSubscription();loadWeatherSummonData(false);
+
 function byId(id){return D.find(x=>x.id===id)}
 function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
@@ -232,7 +232,7 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, startRealmPollSync: () => realmSocialSystem?.startRealmPollSync(), stopRealmPollSync: () => realmSocialSystem?.stopRealmPollSync(), isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, loadWeatherSummonData, startRealmPollSync: () => realmSocialSystem?.startRealmPollSync(), stopRealmPollSync: () => realmSocialSystem?.stopRealmPollSync(), startGlobalRealtime: () => { setupGlobalAnnouncements(); weatherApi.setupServerWeatherSubscription(); }, stopGlobalRealtime: () => { realmSocialSystem?.stopGlobalAnnouncements(); weatherApi.stopServerWeatherSubscription(); }, isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false, timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,30000,'presence-heartbeat');
