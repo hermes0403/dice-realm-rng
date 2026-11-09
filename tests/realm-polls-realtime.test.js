@@ -5,6 +5,7 @@ import { createRealmPolls } from '../systems/realm-polls.js';
 test('realm poll sync uses broadcasts and lowers fallback polling after realtime connects', async () => {
   let currentUser = null;
   let subscriptionCallback = null;
+  let channels = 0;
   const registered = [];
   const queries = [];
   const intervalDelays = [];
@@ -37,7 +38,7 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
     querySelectorAll() { return []; }
   };
   const supabaseClient = {
-    channel() { return channel; },
+    channel() { channels++; return channel; },
     from(table) {
       queries.push(table);
       const builder = {
@@ -62,17 +63,22 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
   });
 
   system.setupRealmSocialUI();
+  assert.equal(channels, 0);
   assert.deepEqual(intervalDelays, []);
+
+  currentUser = { id: 'player-1' };
+  await system.startRealmPollSync();
+  assert.equal(channels, 1);
   assert.deepEqual(
     registered.filter(item => item.type === 'broadcast').map(item => item.event).sort(),
     ['admin_message', 'poll_started', 'poll_vote']
   );
+  assert.deepEqual(queries, ['realm_admin_messages', 'realm_polls']);
+  assert.equal(intervalDelays.at(-1), 1500);
 
+  queries.length = 0;
   subscriptionCallback('SUBSCRIBED');
-  assert.deepEqual(intervalDelays, []);
-  currentUser = { id: 'player-1' };
-  await system.startRealmPollSync();
-
+  await new Promise(resolve => setImmediate(resolve));
   assert.deepEqual(queries, ['realm_polls']);
   assert.equal(intervalDelays.at(-1), 60000);
 
@@ -105,6 +111,7 @@ test('realm poll setup sends no requests or subscriptions while cloud is restric
   });
 
   system.setupRealmSocialUI();
+  await system.startRealmPollSync();
   assert.equal(channels, 0);
   assert.deepEqual(intervals, []);
 });
