@@ -131,7 +131,7 @@ export function createGlobalAnnouncements(dependencies) {
   }
 
   function setupGlobalAnnouncements() {
-    if (!supabaseClient || announcementChannel) return;
+    if (!supabaseClient || !getCurrentUser() || isCloudSyncBlocked() || announcementChannel) return;
     try {
       announcementChannel = supabaseClient.channel('dice-realm-global-announcements');
       announcementChannel.on('broadcast', { event: 'rare_roll' }, ({ payload }) => {
@@ -153,6 +153,21 @@ export function createGlobalAnnouncements(dependencies) {
     } catch (e) {
       console.warn('Announcement channel unavailable', e);
     }
+  }
+
+  function stopGlobalAnnouncements() {
+    if (!announcementChannel) return;
+    const channel = announcementChannel;
+    announcementChannel = null;
+    if (isCloudSyncBlocked()) return;
+    try {
+      if (typeof supabaseClient?.removeChannel === 'function') {
+        const removal = supabaseClient.removeChannel(channel);
+        if (removal?.catch) removal.catch(() => {});
+      } else {
+        void channel.unsubscribe?.();
+      }
+    } catch {}
   }
 
   async function broadcastRareRoll(d) {
@@ -184,6 +199,7 @@ export function createGlobalAnnouncements(dependencies) {
     recordPetFusion,
     loadAdminPetFusionLogs,
     setupGlobalAnnouncements,
+    stopGlobalAnnouncements,
     broadcastRareRoll,
     getAnnouncementChannel
   };
