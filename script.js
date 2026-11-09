@@ -17,6 +17,7 @@ import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js';
 import { createCloudSaveService } from './services/cloud-save.js';
+import { createWeatherDiceStatsLoader } from './services/weather-dice-stats.js';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
@@ -169,10 +170,14 @@ const { itemHTML, renderAutoSellOptions, renderAutoDepositOptions, updateInvento
 
 
 
-async function loadWeatherDiceExistCounts(){
- weatherDiceStats.loadedAt=Date.now();if(!supabaseClient){weatherDiceStats.counts={};return}
- try{const {data,error}=await supabaseClient.rpc('get_weather_dice_exist_counts');if(error)throw error;const normalized={};if(Array.isArray(data)){for(const row of data){const id=row.dice_id||row.die_id||row.id;if(id)normalized[id]=Number(row.player_count??row.exist_count??row.count??row.total)||0}}else if(data&&typeof data==='object'){for(const [id,value] of Object.entries(data))normalized[id]=Number(typeof value==='object'?(value.player_count??value.exist_count??value.count??value.total):value)||0}weatherDiceStats.counts=normalized;renderCodex()}catch(e){console.warn('Weather dice exist counts unavailable',e);weatherDiceStats.counts=null;renderCodex()}
-}
+const weatherDiceStatsLoader = createWeatherDiceStatsLoader({
+ supabaseClient,
+ stats: weatherDiceStats,
+ isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+ markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
+ renderCodex
+});
+const { loadWeatherDiceExistCounts } = weatherDiceStatsLoader;
 function loadAdminWeatherHistory(){return adminMonitoringSystem?.loadAdminWeatherHistory()}
 const { petIncomeMultiplier, rollPetVariant, petIncomePerSecond, equippedPetIncomePerSecond, renderPetIncome } = createPetIncomeSystem({
   getState: () => S,
@@ -296,7 +301,7 @@ setupAccountActions({
   save, render, syncCloudSave, flushCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
-save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
+save();render();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
 
 /* ---- merged from script2.js: achievement popup controls ---- */
