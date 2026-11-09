@@ -1,6 +1,7 @@
 /** Global timed boost state, status rendering, and refresh lifecycle. */
 export function createGlobalBoostSystem({
   supabaseClient,
+  getCurrentUser = () => null,
   getBoostState,
   setBoostState,
   render,
@@ -37,7 +38,7 @@ export function createGlobalBoostSystem({
   }
 
   async function refreshGlobalBoost() {
-    if (refreshBusy || !supabaseClient || isCloudSyncBlocked()) return;
+    if (refreshBusy || !supabaseClient || !getCurrentUser() || isCloudSyncBlocked()) return;
     refreshBusy = true;
     const revisionAtStart = globalBoostRealtimeRevision;
     try {
@@ -57,11 +58,8 @@ export function createGlobalBoostSystem({
   }
 
   function setupGlobalBoostSubscription() {
-    if (!supabaseClient || typeof supabaseClient.channel !== 'function' || isCloudSyncBlocked()) return false;
-    if (globalBoostChannel) {
-      try { supabaseClient.removeChannel(globalBoostChannel); } catch {}
-      globalBoostChannel = null;
-    }
+    if (!supabaseClient || typeof supabaseClient.channel !== 'function' || !getCurrentUser() || isCloudSyncBlocked()) return false;
+    if (globalBoostChannel) return true;
     try {
       globalBoostChannel = supabaseClient.channel('realm-global-boost')
         .on('postgres_changes', {
@@ -84,6 +82,32 @@ export function createGlobalBoostSystem({
       globalBoostChannel = null;
       return false;
     }
+  }
+
+  function startGlobalBoostRealtime() {
+    if (!getCurrentUser() || isCloudSyncBlocked()) return false;
+    const subscribed = setupGlobalBoostSubscription();
+    void refreshGlobalBoost();
+    timerManager.clearScope('global-boost-refresh');
+    timerManager.setInterval(refreshGlobalBoost, 5 * 60 * 1000, 'global-boost-refresh');
+    return subscribed;
+  }
+
+  function stopGlobalBoostRealtime() {
+    timerManager.clearScope('global-boost-refresh');
+    if (!globalBoostChannel) return false;
+    const channel = globalBoostChannel;
+    globalBoostChannel = null;
+    if (isCloudSyncBlocked()) return true;
+    try {
+      if (typeof supabaseClient?.removeChannel === 'function') {
+        const removal = supabaseClient.removeChannel(channel);
+        if (removal?.catch) removal.catch(() => {});
+      } else {
+        void channel.unsubscribe?.();
+      }
+    } catch {}
+    return true;
   }
 
   function updateGlobalBoostStatus() {
@@ -180,20 +204,15 @@ export function createGlobalBoostSystem({
     timerManager.clearScope('global-boost-refresh');
     timerManager.clearScope('realm-activity-render');
     timerManager.clearScope('admin-income-monitor');
-    if (!isCloudSyncBlocked()) {
-      setupGlobalBoostSubscription();
-      refreshGlobalBoost();
-      // Realtime handles normal changes; a five-minute read repairs missed events or outages.
-      timerManager.setInterval(refreshGlobalBoost, 5 * 60 * 1000, 'global-boost-refresh');
-    }
+    // Supabase reads and Realtime start only after a user session has loaded successfully.
     // Countdown text remains live without querying Supabase every second.
     timerManager.setInterval(updateGlobalBoostStatus, 1000, 'global-boost-status');
     timerManager.setInterval(renderRealmActivity, 1000, 'realm-activity-render');
     timerManager.setInterval(() => {
-      if (!isCloudSyncBlocked() && documentRef.getElementById('adminIncomeMonitorFold')?.open) loadAdminIncomeMonitor();
+      if (getCurrentUser() && !isCloudSyncBlocked() && documentRef.getElementById('adminIncomeMonitorFold')?.open) loadAdminIncomeMonitor();
     }, 60000, 'admin-income-monitor');
     return true;
   }
 
-  return { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI, setupGlobalBoostSubscription };
+  return { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI, setupGlobalBoostSubscription, startGlobalBoostRealtime, stopGlobalBoostRealtime };
 }
