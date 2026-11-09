@@ -294,7 +294,9 @@ setupAdminUIBindings({
   writeAdminGrantLog, refreshLeaderboards: forceRefreshLeaderboards, refreshCoinBoosts,
   updateGlobalBoostStatus, renderRealmActivity, render, restartAutoInterval,
   setGlobalBoostState: value => { globalBoostState = value; }, updateAdminVisibility,
-  setPlayerBan, getCurrentUser: () => currentUser
+  setPlayerBan, getCurrentUser: () => currentUser,
+  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
 });
 
 function loadAdminDashboard(){return adminPlayerManagement?.loadAdminDashboard()}
