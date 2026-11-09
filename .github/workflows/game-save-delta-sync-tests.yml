@@ -35,5 +35,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run cloud save regression tests
-        run: node --test tests/cloud-save-pet-authority.test.js
+      - name: Run all repository regression tests
+        run: node --test tests/*.test.js
