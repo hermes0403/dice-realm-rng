@@ -38,6 +38,8 @@ done_at:
 
 - 2026-11-09 14:10 [叉子] 開單；檢查 Realtime 時發現 weather system 與 global announcements 同時監聽 `realm_weather_state`，造成每個玩家重複訂閱。
 
+- 2026-11-09 14:10 [叉子] 已移除公告頻道對 `realm_weather_state` 的重複 postgres_changes 訂閱，保留四種 broadcast；專用天氣 Realtime 仍由 `systems/weather.js` 負責。新增測試 1/1 通過；與本輪登入閘門及倍率服務測試合計隔離 Node 測試 8/8 通過。完整 repository 測試及 GitHub CI 尚未執行，任務維持 in_progress。
+
 ## 完工回報
 
 ### 改了什麼
