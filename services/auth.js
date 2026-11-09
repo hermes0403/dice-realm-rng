@@ -7,14 +7,12 @@
 export async function runCloudSessionInitialization({
   loadPetFusionOdds,
   heartbeat,
-  refreshLeaderboards,
   loadWeatherSummonData,
   isCloudSyncBlocked = () => false
 }) {
   const steps = [
     () => loadPetFusionOdds(),
     () => heartbeat(),
-    () => refreshLeaderboards(),
     () => loadWeatherSummonData(false)
   ];
   for (const step of steps) {
@@ -40,7 +38,6 @@ export function createAuthService(deps) {
     loadCloudSave,
     loadPetFusionOdds,
     heartbeat,
-    refreshLeaderboards,
     loadWeatherSummonData,
     isCloudSyncBlocked = () => false,
     timerManager
