@@ -8,6 +8,8 @@ export function createNavigationUI({
   loadWeatherSummonData,
   renderPetsPage
 }) {
+  let leaderboardRefreshTimer = null;
+
   function updateAdminVisibility() {
     const allowed = isAdmin();
     document.body.classList.toggle('admin-pets-unlocked', allowed);
@@ -38,8 +40,21 @@ export function createNavigationUI({
     document.querySelectorAll('[data-page]').forEach(button => {
       button.classList.toggle('active', button.dataset.page === id);
     });
+    if (id !== 'leaderboard' && leaderboardRefreshTimer !== null) {
+      window.clearInterval(leaderboardRefreshTimer);
+      leaderboardRefreshTimer = null;
+    }
     if (id === 'admin') loadAdminDashboard();
-    if (id === 'leaderboard') refreshLeaderboards();
+    if (id === 'leaderboard') {
+      refreshLeaderboards();
+      if (leaderboardRefreshTimer === null) {
+        leaderboardRefreshTimer = window.setInterval(() => {
+          if (document.getElementById('page-leaderboard')?.classList.contains('active')) {
+            refreshLeaderboards({ force: true });
+          }
+        }, 60 * 1000);
+      }
+    }
     if (id === 'weather-summon') loadWeatherSummonData();
     if (id === 'pets') renderPetsPage();
     window.scrollTo({ top: 0, behavior: 'smooth' });
