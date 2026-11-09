@@ -8,7 +8,9 @@ export function createGlobalBoostSystem({
   loadAdminIncomeMonitor,
   getCoinBoost = () => null,
   documentRef,
-  timerManager
+  timerManager,
+  isCloudSyncBlocked = () => false,
+  markCloudSyncBlocked = () => false
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
@@ -34,7 +36,7 @@ export function createGlobalBoostSystem({
   }
 
   async function refreshGlobalBoost() {
-    if (refreshBusy || !supabaseClient) return;
+    if (refreshBusy || !supabaseClient || isCloudSyncBlocked()) return;
     refreshBusy = true;
     const revisionAtStart = globalBoostRealtimeRevision;
     try {
@@ -46,6 +48,7 @@ export function createGlobalBoostSystem({
       if (revisionAtStart !== globalBoostRealtimeRevision) return;
       applyGlobalBoostRow(data);
     } catch (error) {
+      markCloudSyncBlocked(error);
       console.debug('Global timed boost unavailable', error);
     } finally {
       refreshBusy = false;
@@ -53,7 +56,7 @@ export function createGlobalBoostSystem({
   }
 
   function setupGlobalBoostSubscription() {
-    if (!supabaseClient || typeof supabaseClient.channel !== 'function') return false;
+    if (!supabaseClient || typeof supabaseClient.channel !== 'function' || isCloudSyncBlocked()) return false;
     if (globalBoostChannel) {
       try { supabaseClient.removeChannel(globalBoostChannel); } catch {}
       globalBoostChannel = null;
@@ -66,11 +69,16 @@ export function createGlobalBoostSystem({
           globalBoostRealtimeRevision++;
           applyGlobalBoostRow(payload?.eventType === 'DELETE' ? null : payload?.new || null);
         })
-        .subscribe(status => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') refreshGlobalBoost();
+        .subscribe((status, error) => {
+          if (markCloudSyncBlocked(error)) {
+            globalBoostChannel = null;
+            return;
+          }
+          if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && !isCloudSyncBlocked()) refreshGlobalBoost();
         });
       return true;
     } catch (error) {
+      const restricted = markCloudSyncBlocked(error);
       console.debug('Global boost realtime unavailable; polling fallback remains active', error);
       globalBoostChannel = null;
       return false;
@@ -146,10 +154,12 @@ export function createGlobalBoostSystem({
     timerManager.clearScope('global-boost-refresh');
     timerManager.clearScope('realm-activity-render');
     timerManager.clearScope('admin-income-monitor');
-    setupGlobalBoostSubscription();
-    refreshGlobalBoost();
-    // Realtime handles normal changes; a five-minute read repairs missed events or outages.
-    timerManager.setInterval(refreshGlobalBoost, 5 * 60 * 1000, 'global-boost-refresh');
+    if (!isCloudSyncBlocked()) {
+      setupGlobalBoostSubscription();
+      refreshGlobalBoost();
+      // Realtime handles normal changes; a five-minute read repairs missed events or outages.
+      timerManager.setInterval(refreshGlobalBoost, 5 * 60 * 1000, 'global-boost-refresh');
+    }
     // Countdown text remains live without querying Supabase every second.
     timerManager.setInterval(updateGlobalBoostStatus, 1000, 'global-boost-status');
     timerManager.setInterval(renderRealmActivity, 1000, 'realm-activity-render');
