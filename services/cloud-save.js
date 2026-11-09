@@ -297,6 +297,7 @@ export function createCloudSaveService(dependencies) {
       // No changed save fields means no game_saves request at all.
       if (Object.keys(patch).length === 0) {
         document.getElementById('saveStatus').textContent = '雲端已同步';
+        if (!cloudSyncPending) clearLocalSaveDirty(syncingUserId);
         return true;
       }
 
@@ -324,11 +325,12 @@ export function createCloudSaveService(dependencies) {
       }
       if (getCurrentUser()?.id !== syncingUserId) return false;
       cloudSaveVersion = syncResult.updated_at || null;
-      lastSyncedPayload = clonePayload(payload);
       if (Number.isFinite(Number(syncResult.total_rolls))) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
       }
       S.petIncomePending = 0;
+      lastSyncedPayload = clonePayload(savePayload());
+      if (!cloudSyncPending) clearLocalSaveDirty(syncingUserId);
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
         const scopedKey = userSaveKey(syncingUserId);
@@ -338,6 +340,7 @@ export function createCloudSaveService(dependencies) {
       return true;
     } catch (e) {
       console.error('Cloud sync failed', e);
+      markLocalSaveDirty(syncingUserId);
       const restricted = markCloudSyncBlocked(e);
       cloudSyncPending = !restricted && getCurrentUser()?.id === syncingUserId;
       document.getElementById('saveStatus').textContent = restricted
@@ -379,6 +382,18 @@ export function createCloudSaveService(dependencies) {
 
   function save() {
     const S = getState();
+    const user = getCurrentUser();
+    if (user) {
+      let previousLocal = null;
+      try { previousLocal = localStorage.getItem(userSaveKey(user.id)); } catch {}
+      const currentLocal = JSON.stringify(S);
+      const localChanged = previousLocal !== currentLocal;
+      const hasCloudChanges = lastSyncedUserId === user.id
+        && Object.keys(diffPayload(lastSyncedPayload, savePayload())).length > 0;
+      if (hasCloudChanges || ((cloudSyncBlocked || cloudLoadInProgressUserId === user.id) && localChanged)) {
+        markLocalSaveDirty(user.id);
+      }
+    }
     try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
     document.getElementById('saveStatus').textContent = getCurrentUser()
