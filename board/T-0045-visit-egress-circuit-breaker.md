@@ -38,7 +38,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-09 [叉子] 開始處理第三項；確認 visit-tracking 每五分鐘寫入一次，且頁面重新顯示時會額外寫入 visible 事件。將共用 Egress 狀態接入訪問追蹤服務。
+- 2026-11-09 [叉子] 已修改 services/visit-tracking.js：共用 Egress blocked 狀態下拒絕寫入、停止五分鐘 interval 並移除 visibilitychange listener；自身 insert 遇 402 會標記共用斷路器並立即停止追蹤；一般 503 不會停用追蹤。script.js 已注入 cloud-save 共用狀態。新增 tests/visit-egress-circuit-breaker.test.js；在隔離 Node.js v22.16.0 環境以相同 services/visit-tracking.js 與測試內容執行 node --test，2/2 pass；git diff --cached --check exit code 0。完整分支測試仍因執行環境無法解析 github.com 而未能執行。
 
 ## 完工回報
 
