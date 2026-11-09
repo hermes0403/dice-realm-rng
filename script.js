@@ -93,8 +93,15 @@ const { checkAchievements, checkDailyReward, renderQuests, renderProfile, closeA
   getState: () => S, D, DAILY_TASKS, POTIONS, format, compactNum, totalUnique,
   coinEarningMultiplier, fresh, save, toast, timerManager
 });
-const { adminApi, writeAdminGrantLog, loadAdminGrantHistory } = createAdminGrantService({ supabaseClient, isAdmin, SUPABASE_URL, SUPABASE_KEY, D, ADMIN_GRANT_LABELS, escapeHTML, format });
-adminPlayerManagement = createAdminPlayerManagement({ adminApi, supabaseClient, isAdmin, format, escapeHTML, documentRef: document });
+const { adminApi, writeAdminGrantLog, loadAdminGrantHistory } = createAdminGrantService({
+  supabaseClient, isAdmin, SUPABASE_URL, SUPABASE_KEY, D, ADMIN_GRANT_LABELS, escapeHTML, format,
+  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
+});
+adminPlayerManagement = createAdminPlayerManagement({
+  adminApi, supabaseClient, isAdmin, format, escapeHTML, documentRef: document,
+  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false
+});
 async function flushCloudSave(){if(cloudSaveService)return cloudSaveService.flushCloudSave()}
 const weatherSystem = createWeatherSystem({
  D, WEATHER_TYPES, format, escapeHTML, chanceText, byId, supabaseClient,
@@ -240,7 +247,9 @@ adminPetOddsUI = setupAdminPetOddsUI({
 });
 adminMonitoringSystem = createAdminMonitoringSystem({
   adminApi, supabaseClient, isAdmin, format, formatWalletScientific, escapeHTML,
-  toast, petIncomePerSecond, loadAdminDashboard, documentRef: document
+  toast, petIncomePerSecond, loadAdminDashboard, documentRef: document,
+  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
+  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
 });
 const { doRoll, stopAuto, restartAutoInterval: restartAutoIntervalImpl, isRolling, isAutoRolling, setupAutoRollUI } = createDiceSystem({
  D, ANGEL_ODDS, POTIONS, KEY, supabaseClient, timerManager, getState:()=>S, getCurrentUser:()=>currentUser,
