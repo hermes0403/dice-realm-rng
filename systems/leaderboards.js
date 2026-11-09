@@ -1,5 +1,5 @@
 /** Cloud leaderboard queries and rendering. */
-export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escapeHTML, format, compactNum, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false, now = () => Date.now(), cacheMs = 30 * 1000, failureCooldownMs = 10 * 1000 }) {
+export function createLeaderboardSystem({ supabaseClient, getCurrentUser, escapeHTML, format, compactNum, isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false, now = () => Date.now(), cacheMs = 60 * 1000, failureCooldownMs = 10 * 1000 }) {
   let refreshInFlight = null;
   let lastRefreshAt = 0;
   let lastFailedAt = 0;
