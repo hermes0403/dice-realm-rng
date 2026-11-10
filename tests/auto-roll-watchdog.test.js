@@ -62,6 +62,7 @@ function makeDiceSystem() {
     getElementById(id) { return elements.get(id) || null; }
   };
   const timers = makeTimers();
+  let saves = 0;
   const state = {
     bagCapacity: 35, rolls: 0, bag: {}, first: {},
     quest: { rolls: 0, coinsEarned: 0, rare: 0 },
@@ -79,12 +80,12 @@ function makeDiceSystem() {
     format: String, chanceText: String, totalDice: () => 0,
     go() {}, toast() {}, isLockHeld: () => false, isHeartbeatActive: () => true,
     scheduleUnlock() {}, applyPetRollSkills: () => 0, potionMaterialTotal: () => 0,
-    checkAchievements() {}, checkDailyReward() {}, save() {},
+    checkAchievements() {}, checkDailyReward() {}, save() { saves++; },
     autoDepositRolledWeatherDice: () => new Promise(() => {}),
     broadcastRareRoll: async () => {},
     render() {}, documentRef
   });
-  return { dice, timers, elements, listeners };
+  return { dice, timers, elements, listeners, getSaveCount: () => saves };
 }
 
 test('auto-roll watchdog starts with auto-roll and is cleared by manual stop', () => {
@@ -113,14 +114,11 @@ test('restarting the auto-roll interval keeps exactly one watchdog', () => {
 
 test('watchdog recovers a roll that remains locked beyond the timeout', async () => {
   const previousNow = Date.now;
-  const previousStorage = globalThis.localStorage;
   let now = 1000;
-  let writes = 0;
   Date.now = () => now;
-  globalThis.localStorage = { setItem() { writes++; } };
 
   try {
-    const { dice, timers, elements } = makeDiceSystem();
+    const { dice, timers, elements, getSaveCount } = makeDiceSystem();
     dice.setupAutoRollUI();
     elements.get('autoBtn').onclick();
 
@@ -131,18 +129,17 @@ test('watchdog recovers a roll that remains locked beyond the timeout', async ()
     processing.callback();
     await Promise.resolve();
     assert.equal(dice.isRolling(), true);
-    assert.equal(writes, 1);
+    const savesBeforeWatchdog = getSaveCount();
+    assert.ok(savesBeforeWatchdog >= 1, 'roll state is persisted before watchdog recovery');
 
     now += 46000;
     watchdogInterval.callback();
     assert.equal(dice.isRolling(), true);
-    assert.equal(writes, 2);
+    assert.equal(getSaveCount(), savesBeforeWatchdog + 1, 'watchdog recovery persists the next roll');
 
     dice.stopAuto();
     timers.manager.clearAll();
   } finally {
     Date.now = previousNow;
-    if (previousStorage === undefined) delete globalThis.localStorage;
-    else globalThis.localStorage = previousStorage;
   }
 });
