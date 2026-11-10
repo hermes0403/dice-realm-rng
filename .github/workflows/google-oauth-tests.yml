@@ -35,5 +35,7 @@ jobs:
         run: |
           node --check services/auth.js
           node --check script.js
+      - name: Check whitespace for the complete task diff
+        run: git diff --check 3b1d1bccde3f986a87f5baa87988cbed9784b20a...HEAD
       - name: Run Google OAuth tests
         run: node --test tests/google-oauth.test.js
