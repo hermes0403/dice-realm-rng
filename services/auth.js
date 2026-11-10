@@ -308,6 +308,8 @@ export function createAuthService(deps) {
         showAuthMessage(getAuthEmailRateLimitMessage(mode, error));
       } else if (mode === 'signup' && /database error saving new user/i.test(message)) {
         showAuthMessage('此 Gmail 可能曾用於被管理員刪除的帳號，無法再次註冊。');
+      } else if (mode === 'login') {
+        showAuthMessage(getLoginFailureMessage(error));
       } else {
         showAuthMessage(error.message || '操作失敗，請稍後重試。');
       }
