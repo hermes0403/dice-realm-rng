@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getAuthEmailRateLimitMessage } from '../services/auth.js';
+import { getAuthEmailRateLimitMessage, getLoginFailureMessage } from '../services/auth.js';
 
 test('signup project email limit clearly states that the verification email was not sent', () => {
   const message = getAuthEmailRateLimitMessage('signup', {
@@ -28,4 +28,17 @@ test('password reset uses the correct email type in the rate limit message', () 
     message: 'email rate limit exceeded'
   });
   assert.match(message, /沒有寄出密碼重設信/);
+});
+
+test('invalid login gives first-time players clear signup guidance without exposing account existence', () => {
+  const message = getLoginFailureMessage({ message: 'Invalid login credentials' });
+  assert.match(message, /第一次使用骰界/);
+  assert.match(message, /建立新帳號/);
+  assert.match(message, /忘記密碼/);
+});
+
+test('login rate limit tells players to stop retrying', () => {
+  const message = getLoginFailureMessage({ status: 429, message: 'Too many requests' });
+  assert.match(message, /登入嘗試太頻繁/);
+  assert.match(message, /停止重複操作/);
 });
