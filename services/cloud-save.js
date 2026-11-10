@@ -224,14 +224,40 @@ export function createCloudSaveService(dependencies) {
     if (!user || !supabaseClient) return;
     try {
       const scopedKey = userSaveKey(user.id);
+      // Keep the exact local snapshot used when the cloud request starts.
+      // If gameplay saves while the request is in flight, the cloud response is stale for this tab.
+      const localSaveAtLoadStart = (() => {
+        try { return scopedKey ? localStorage.getItem(scopedKey) : null; }
+        catch { return null; }
+      })();
       const localSaveBeforeCloud = (() => {
-        try { return JSON.parse(scopedKey ? localStorage.getItem(scopedKey) || 'null' : 'null'); }
+        try { return JSON.parse(localSaveAtLoadStart || 'null'); }
         catch { return null; }
       })();
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves').select('save_data').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
       if (getCurrentUser()?.id !== user.id) return;
+      const localSaveAfterCloud = (() => {
+        try { return scopedKey ? localStorage.getItem(scopedKey) : null; }
+        catch { return null; }
+      })();
+      if (localSaveAfterCloud !== localSaveAtLoadStart) {
+        // A roll or another gameplay change was saved during the network request.
+        // Keep that newer local state and sync it instead of overwriting it with stale cloud data.
+        let latestLocalSave = null;
+        try { latestLocalSave = JSON.parse(localSaveAfterCloud || 'null'); } catch {}
+        if (latestLocalSave?.bag) {
+          const latestState = migrateCurrency(normalizeGloves({ ...fresh(), ...latestLocalSave }));
+          setState(latestState);
+          restoreAutoSellPrefs();
+          render();
+        }
+        await applyPendingGrants(true);
+        await syncCloudSave();
+        await refreshLeaderboards();
+        return;
+      }
       let S;
       if (data?.save_data?.bag) {
         S = migrateCurrency(normalizeGloves({ ...fresh(), ...data.save_data }));
