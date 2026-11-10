@@ -13,15 +13,70 @@
 <header class="top"><div class="brand">骰界 <span>RNG</span></div><div class="weather-status" id="weatherStatus" aria-live="polite"><span class="weather-icon" id="weatherIcon">☀️</span><span class="weather-name" id="weatherName">晴天</span><span class="weather-countdown" id="weatherCountdown" hidden>05:00</span></div><div class="profile"><span class="pill" id="saveStatus" hidden>本機試玩存檔</span><span class="avatar" id="avatar" hidden>旅</span><span id="playerName" hidden>旅人</span><span id="gloveLabel" hidden>基礎手套</span><button class="primary" id="authOpenBtn">登入／註冊</button></div></header><section class="announcement-panel" aria-label="全服公告"><div class="announcement-heading"><span class="announcement-live"></span><b>全服稀有公告</b><span class="announcement-caption">REALM ANNOUNCEMENTS</span></div><div id="globalAnnouncements" class="announcement-list"><div class="announcement-empty">等待稀有骰子現身……</div></div></section>
 <div class="mobile-nav" id="mobileNav"></div><div class="layout"><aside class="nav" id="sideNav"></aside><main class="content">
 <section class="page active" id="page-roll">
-<div class="hero" id="realmHero"><div id="realmHeroWelcome"><div class="eyebrow">WELCOME TO THE DICE REALM</div><h1>命運，由你擲出。</h1><div class="muted">收集未知骰子、鍛造手套，突破你的收藏極限。</div></div><div id="realmAdminActivity" hidden></div></div>
+<div class="hero" id="realmHero"><div id="realmHeroWelcome"><div class="eyebrow">WELCOME TO THE DICE REALM</div><h1>命運，由你擲出。</h1><div class="muted">收集未知骰子、鍛造手套，突破你的收藏極限。</div></div><div class="limited-event-entry-wrap"><button type="button" class="limited-event-entry" data-go="event" hidden>🦈 鯊皇活動 <small>SHARK EMPEROR</small></button></div><div id="realmAdminActivity" hidden></div></div>
 <div class="stats"><div class="stat"><b id="totalRolls">0</b><span>累積擲骰</span></div><div class="stat"><b id="uniqueCount">0 / 59</b><span>已發現骰子</span></div><div class="stat"><b id="luckStat">+0%</b><span>額外運氣</span></div></div>
 <div class="rollbox"><div class="eyebrow">ROLL THE UNKNOWN</div><div class="dice" id="diceFace">⚄</div><div class="result-name" id="resultName">等待命運</div><span class="rarity" id="resultRarity">按下擲骰開始</span><div class="result-sub" id="resultSub">每一次擲骰，都可能帶來新的發現。</div><div class="tenth-progress" id="tenthProgress"><div class="tenth-progress-head"><span>雙倍運氣</span><strong id="tenthProgressLabel">再擲 10 次</strong></div><div class="tenth-track"><span id="tenthProgressBar"></span></div></div><div class="roll-actions"><button class="primary" id="rollBtn">✦ 擲骰</button><button id="autoBtn">▶ 自動擲骰</button><button class="quiet" id="stopBtn" disabled>停止</button></div></div>
 <div class="card" style="margin-top:8px"><div class="section-head" style="margin:0 0 8px"><h2>背包與自動出售</h2><span class="pill" id="bagCapacity">0 / 35 顆</span></div><p class="mini" style="margin:0 0 10px">勾選擲到後要自動出售的骰子；一般骰子先由常見到稀有，再列出萬聖節骰子。</p><div id="autoSellDiceOptions" class="auto-sell-options" aria-label="自動出售骰子選項"></div><div class="stats"><div class="stat"><b id="coinBalance">0$</b><span>金錢數量</span></div><div class="stat"><b id="bagTotal">0 / 35</b><span>背包骰子數</span></div></div></div>
 
 </section>
+<section class="page shark-event-page" id="page-event" hidden>
+<div class="shark-event-header"><div class="shark-event-kicker">LIMITED REALM EVENT · NO. 01</div><div class="shark-event-title-row"><div><h1>鯊皇降臨</h1><p>SHARK EMPEROR AWAKENING</p></div><div class="shark-event-emblem" aria-hidden="true">🦈</div></div><div class="shark-event-subtitle">完成專屬挑戰，累積鯊皇幣，解鎖鯊皇限定收藏。</div><div class="shark-event-header-line"></div></div>
+<div class="shark-event-wallet">
+<div class="shark-event-wallet-card"><span>SHARK COINS</span><strong id="sharkCoinBalance">0 枚</strong><small>鯊皇幣餘額</small></div>
+<div class="shark-event-wallet-card"><span>DRAGON CRYSTAL EGGS</span><strong id="dragonEggBalance">0 顆</strong><small>龍晶蛋庫存</small></div>
+<div class="shark-event-wallet-card"><span>MISSION PROGRESS</span><strong id="sharkTaskCount">0 / 25</strong><small>已完成任務</small></div>
+</div>
+<div class="shark-event-main-grid">
+<div class="shark-event-task-card">
+<div class="shark-event-section-label"><span>01 / CURRENT OBJECTIVE</span><span class="shark-event-live-dot"></span></div>
+<div class="shark-event-task-heading">當前任務</div>
+<h2 id="sharkCurrentTaskTitle">正在載入任務…</h2>
+<div class="shark-event-progress-meta"><span>任務進度</span><strong id="sharkTaskProgress">0 / 0</strong></div>
+<div class="shark-event-progress-track"><span id="sharkTaskProgressBar"></span></div>
+<div class="shark-event-reward-row"><span>完成獎勵</span><strong id="sharkTaskReward">+1 鯊皇幣</strong></div>
+<p id="sharkEventStatus" class="shark-event-status" role="status">正在連線活動核心…</p>
+<button type="button" class="shark-event-refresh" id="refreshSharkEventBtn">⟳ 同步活動資料</button>
+</div>
+<div class="shark-event-egg-card">
+<div class="shark-event-section-label"><span>02 / EVENT PET ARCHIVE</span><span>六種限定寵物</span></div>
+<h2>鯊皇限定寵物圖鑑</h2>
+<p>六種活動寵物已加入收藏圖鑑。取得方式會依正式活動規則開放，這裡不提供隨機抽取。</p>
+<div class="shark-event-pet-list">
+<div><span>🐂</span><b>晶銅獸</b><small>普通 · 15$/秒</small></div>
+<div><span>🧊</span><b>鏡冰靈</b><small>普通 · 30$/秒</small></div>
+<div><span>🐉</span><b>晶龍哨兵</b><small>稀有 · 100$/秒</small></div>
+<div><span>🐲</span><b>異核雙子龍</b><small>傳奇 · 750$/秒</small></div>
+<div><span>🌙</span><b>月光龍</b><small>神話 · 2,500$/秒</small></div>
+<div><span>🦈</span><b>鯊皇</b><small>秘密 · 9,000$/秒</small></div>
+</div>
+
+<div class="shark-event-egg-note">保留原本的龍晶蛋展示與六種寵物機率表；目前僅供查看，不會扣除龍晶蛋或開蛋。</div>
+<button type="button" class="limited-event-egg" data-event-egg aria-expanded="true" aria-controls="dragonCrystalOdds"><span><b>龍晶蛋</b><small>查看六種限定寵物機率</small></span><span>⌄</span></button>
+<div class="event-odds-panel" id="dragonCrystalOdds">
+<div class="section-head"><h3>龍晶蛋寵物機率表</h3><span class="pill">100%</span></div>
+<div class="event-odds-table-wrap"><table class="event-odds-table"><thead><tr><th>寵物</th><th>品質</th><th>機率</th><th>每秒收益</th></tr></thead><tbody>
+<tr><td>晶銅獸</td><td>普通</td><td>45%</td><td>15$/秒</td></tr>
+<tr><td>鏡冰靈</td><td>普通</td><td>30%</td><td>30$/秒</td></tr>
+<tr><td>晶龍哨兵</td><td>稀有</td><td>14.6%</td><td>100$/秒</td></tr>
+<tr><td>異核雙子龍</td><td>傳奇</td><td>8.5%</td><td>750$/秒</td></tr>
+<tr><td>月光龍</td><td>神話</td><td>1.5%</td><td>2,500$/秒</td></tr>
+<tr><td>鯊皇</td><td>秘密</td><td>0.4%</td><td>9,000$/秒</td></tr>
+</tbody></table></div></div>
+</div></div>
+</div>
+<div class="shark-event-admin-grant">
+<div class="shark-event-section-label"><span>03 / ADMINISTRATOR CONSOLE</span><span>ADMIN ONLY</span></div>
+<h3>管理員發放鯊皇幣</h3>
+<p>額外發放會獨立記錄，並直接計入指定玩家的鯊皇幣餘額。</p>
+<label for="sharkGrantUserId">玩家 UUID</label><input id="sharkGrantUserId" type="text" autocomplete="off" placeholder="貼上玩家 UUID">
+<div class="shark-event-grant-fields"><div><label for="sharkGrantAmount">發放數量</label><input id="sharkGrantAmount" type="number" min="0.1" max="1000000" step="0.1" value="1"></div><div><label for="sharkGrantReason">發放原因</label><input id="sharkGrantReason" type="text" maxlength="200" value="管理員活動獎勵"></div></div>
+<button type="button" id="grantSharkCoinsBtn" class="shark-event-refresh">發放鯊皇幣</button><p id="sharkGrantStatus" class="shark-event-status" role="status"></p>
+</div>
+<div class="shark-event-footer"><span>SHARK EMPEROR PROTOCOL</span><button type="button" class="quiet" data-go="roll">返回擲骰大廳</button></div>
+</section>
 <section class="page" id="page-inventory"><div class="section-head"><h2>骰子背包</h2><span class="pill" id="bagCount">0 顆</span></div><div class="inventory-toolbar"><div class="mini" id="inventorySelectedCount">一般模式</div><button class="danger" id="sellSelectedDiceBtn" type="button">出售</button></div><div class="bag-upgrade-strip"><div><b>背包容量擴充</b><div class="mini" id="bagUpgradeInfo">目前容量 35，最高 200 顆</div></div><button class="primary" id="upgradeBagBtn" style="padding:6px 10px;font-size:12px;min-height:30px;white-space:nowrap">擴充 +1</button></div><div class="grid" id="inventoryGrid" style="margin-top:12px"></div></section>
 <section class="page" id="page-codex"><div class="codex-category-switch" role="group" aria-label="圖鑑分類"><button type="button" class="codex-category-btn" data-codex-category="pets">寵物</button><button type="button" class="codex-category-btn active" data-codex-category="normal">一般</button><button type="button" class="codex-category-btn" data-codex-category="weather">天氣</button><button type="button" class="codex-category-btn" data-codex-category="halloween">萬聖節</button></div><div class="section-head"><h2>收藏圖鑑</h2><span class="pill" id="codexPct">0%</span></div><div class="hero"><div class="eyebrow">ARCHIVE DATABASE</div><h1>記錄每一次奇蹟。</h1><div class="muted">未發現的骰子將以未知檔案顯示。部分高階骰子擁有專屬視覺。</div><div class="bar"><span id="codexBar" style="width:0%"></span></div></div><div class="codex-list" id="codexGrid"></div></section>
-<section class="page" id="page-pets"><div class="section-head"><h2>寵物合成</h2><span class="pill">43 種寵物 · 5 個品質</span></div>
+<section class="page" id="page-pets"><div class="section-head"><h2>寵物合成</h2><span class="pill">43 種常規寵物 · 6 種活動限定</span></div>
 
 <div class="hero"><div class="eyebrow">PET SYNTHESIS CORE</div><h1>投入兩顆骰子，合成一隻寵物。</h1><p class="muted">可選擇兩種相同或不同的骰子合成；兩種骰子不可超過 1,000 倍，骰子越稀有，能合成出的寵物品質越高。</p></div>
 <div class="pet-core-layout"><div class="card" style="margin-top:12px"><div class="section-head"><h3 style="margin:0">合成材料</h3><span class="pill" id="petOwnedCount">持有 0 隻寵物</span></div><div class="pet-slots"><div class="pet-slot"><div class="eyebrow">DICE SLOT A</div><div class="pet-art" id="petDiceArtA">🎲</div><select class="pet-select" id="petDiceSlotA" aria-label="選擇第一顆骰子"><option value="">選擇第一顆骰子</option></select><div class="mini" id="petDiceInfoA" style="margin-top:7px">尚未選擇</div></div><div class="pet-slot"><div class="eyebrow">DICE SLOT B</div><div class="pet-art" id="petDiceArtB">🎲</div><select class="pet-select" id="petDiceSlotB" aria-label="選擇第二顆骰子"><option value="">選擇第二顆骰子</option></select><div class="mini" id="petDiceInfoB" style="margin-top:7px">尚未選擇</div></div></div><div style="margin-top:16px"><b>寵物品質機率</b><div id="petChanceRows"><div class="empty">選擇兩顆骰子後顯示機率。</div></div></div><button class="primary" id="petDiceCraftBtn" style="width:100%;margin-top:12px" disabled>消耗兩顆骰子，合成寵物</button><p class="mini" id="petDiceCraftInfo" role="status" style="margin-bottom:0">請選擇兩顆骰子。</p></div>

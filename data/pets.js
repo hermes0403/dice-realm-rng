@@ -13,12 +13,21 @@ export const PETS=[
 ['s1','星界之狼','🐺','secret'],['s2','無序之龍','🐉','secret'],['s3','終焉渡鴉','🐦‍⬛','secret'],['s4','永寂環蛇','🐍','secret'],['s5','虛無君王','👁️','secret'],['s6','原初奇點','🌌','secret']
 ].map(([id,name,icon,rarity])=>({id,name,icon,rarity}));
 PETS.push({id:'dumpling_mythic',name:'水餃',icon:'🥟',rarity:'mythic',fusionOnly:false,adminOnly:true,uniqueReward:true});
-export function petById(id){return PETS.find(p=>p.id===id)}
+/** Limited-event pets are excluded from normal fusion and can only be awarded by event systems. */
+export const EVENT_PETS=[
+ {id:'event_crystal_bronze_beast',name:'晶銅獸',icon:'🐂',rarity:'common',eventOnly:true},
+ {id:'event_mirror_ice_spirit',name:'鏡冰靈',icon:'🧊',rarity:'common',eventOnly:true},
+ {id:'event_crystal_dragon_sentinel',name:'晶龍哨兵',icon:'🐉',rarity:'rare',eventOnly:true},
+ {id:'event_dual_core_dragon',name:'異核雙子龍',icon:'🐲',rarity:'legendary',eventOnly:true},
+ {id:'event_moonlight_dragon',name:'月光龍',icon:'🌙',rarity:'mythic',eventOnly:true},
+ {id:'event_shark_emperor',name:'鯊皇',icon:'🦈',rarity:'secret',eventOnly:true}
+];
+export function petById(id){return PETS.find(p=>p.id===id)||EVENT_PETS.find(p=>p.id===id)}
 export const PET_BASE_INCOME={
  c1:10,c2:13,c3:15,c4:18,c5:20,c6:22,c7:25,c8:28,c9:30,
  r1:40,r2:45,r3:50,r4:58,r5:65,r6:72,r7:82,r8:91,r9:100,
  l1:250,l2:300,l3:360,l4:430,l5:500,l6:580,l7:660,l8:730,l9:800,
- m1:1200,m2:1400,m3:1650,m4:1900,m5:2200,m6:2500,m7:2700,m8:2850,m9:3000,dumpling_mythic:2000,
+ m1:1200,m2:1400,m3:1650,m4:1900,m5:2200,m6:2500,m7:2700,m8:2850,m9:3000,dumpling_mythic:2000,event_crystal_bronze_beast:15,event_mirror_ice_spirit:30,event_crystal_dragon_sentinel:100,event_dual_core_dragon:750,event_moonlight_dragon:2500,event_shark_emperor:9000,
  s1:6000,s2:8000,s3:10000,s4:13000,s5:16000,s6:20000
 };
 export const PET_INCOME_ROLLS={
