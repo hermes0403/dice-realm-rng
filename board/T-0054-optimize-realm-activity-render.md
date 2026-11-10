@@ -1,7 +1,7 @@
 ---
 id: T-0054
 title: 避免全服活動倒數每秒重建整個 DOM
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -13,7 +13,7 @@ updated: 2026-11-09
 depends_on: []
 branch: work/chazi
 done_by: 棒子
-done_at:
+done_at: 2026-11-10
 ---
 
 ## 任務
@@ -52,3 +52,6 @@ done_at:
 
 
 - 2026-11-10 [叉子] 棒子已實際驗收目前遊戲功能正常；本紀錄不將舊 CI 失敗描述為遊戲目前故障。重新執行 `work/chazi` HEAD `690827f9946a744fb250b7a4041ab89b675fae86` 的 Branch tests（run #135，attempt 2）後，完整測試仍為 79 項中 65 通過、14 失敗；失敗包含測試檔語法錯誤及測試 mock／預期與目前生命週期設計不一致。未修改遊戲程式。由於任務原驗收條件仍要求完整測試通過，狀態暫維持 `in_progress`；待測試套件釐清後再送審，遊戲功能正常的 Owner 驗收結果已另行記錄。
+
+
+- 2026-11-10 [棒子] Owner 實機驗收確認：目前遊戲功能正常，標記本任務驗收成功並結案。此標記以實際遊戲驗收為準，不以先前 CI 測試結果判定遊戲故障。
