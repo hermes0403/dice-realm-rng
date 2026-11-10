@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createSharkEventUI } from '../ui/shark-event.js';
 
 const originalCrypto = globalThis.crypto;
+const originalSessionStorage = globalThis.sessionStorage;
 
 function installDocument() {
   const elements = new Map();
@@ -42,6 +43,8 @@ function installDocument() {
 afterEach(() => {
   if (originalCrypto === undefined) delete globalThis.crypto;
   else Object.defineProperty(globalThis, 'crypto', { configurable: true, value: originalCrypto });
+  if (originalSessionStorage === undefined) delete globalThis.sessionStorage;
+  else Object.defineProperty(globalThis, 'sessionStorage', { configurable: true, value: originalSessionStorage });
 });
 
 test('admin coin grant reuses the same idempotency key after an uncertain failure', async () => {
