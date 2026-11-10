@@ -77,7 +77,7 @@ export function createAuthService(deps) {
   }
 
   function setAuthButtonsDisabled(disabled) {
-    ['authLoginBtn', 'authSignupBtn', 'authResetBtn'].forEach(id => {
+    ['authLoginBtn', 'authSignupBtn', 'authResetBtn', 'authGoogleBtn'].forEach(id => {
       const button = document.getElementById(id);
       if (button) button.disabled = disabled;
     });
@@ -152,6 +152,45 @@ export function createAuthService(deps) {
     showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置；已使用過的 3 個帳號仍可繼續登入。');
     timerManager.setTimeout(() => supabaseClient?.auth.signOut().catch(() => {}), 0, 'auth-signout');
     return false;
+  }
+
+  async function googleSignIn() {
+    if (authBusy) return;
+    if (authServiceRestricted) {
+      showAuthMessage('Supabase 雲端服務目前因流量額度限制而暫停，暫時無法登入。請待專案服務恢復後重新整理頁面；本機已保存的遊戲資料不會因這個提示而被清除。');
+      return;
+    }
+    if (!supabaseClient?.auth?.signInWithOAuth) {
+      showAuthMessage('Google 登入模組尚未就緒，請重新整理網頁。');
+      return;
+    }
+
+    authBusy = true;
+    setAuthButtonsDisabled(true);
+    showAuthMessage('正在開啟 Google 帳號選擇…');
+    try {
+      const result = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://hermes0403.github.io/dice-realm-rng/',
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+      if (result.error) throw result.error;
+    } catch (error) {
+      const message = String(error?.message || error?.msg || error?.error_description || '');
+      if (isProjectRestrictionError(error)) {
+        authServiceRestricted = true;
+        showAuthMessage('Supabase 雲端服務目前因流量額度限制而暫停，暫時無法登入。請待專案服務恢復後重新整理頁面；本機已保存的遊戲資料不會因這個提示而被清除。');
+      } else if (/provider.*(disabled|not enabled|unsupported)|unsupported provider/i.test(message)) {
+        showAuthMessage('Google 登入尚未在 Supabase 啟用，請等管理員完成 Google OAuth 設定後再試。');
+      } else {
+        showAuthMessage(error?.message || '無法啟動 Google 登入，請稍後重試。');
+      }
+    } finally {
+      authBusy = false;
+      setAuthButtonsDisabled(false);
+    }
   }
 
   async function authAction(mode) {
@@ -313,7 +352,9 @@ export function createAuthService(deps) {
           document.getElementById('playerName').textContent = getCurrentUser().email || state.name;
           closeAuth();
           if (event === 'SIGNED_IN' && user.email_confirmed_at) {
-            toast('信箱驗證成功！可以開始遊玩了。');
+            const isGoogleUser = user.app_metadata?.provider === 'google'
+              || user.identities?.some(identity => identity.provider === 'google');
+            toast(isGoogleUser ? 'Google 帳號登入成功！可以開始遊玩了。' : '信箱驗證成功！可以開始遊玩了。');
           }
           let cloudLoadSucceeded = false;
           try {
@@ -375,6 +416,7 @@ export function createAuthService(deps) {
     openAuth,
     closeAuth,
     authAction,
+    googleSignIn,
     registerAuthStateListener,
     unregisterAuthStateListener
   };
