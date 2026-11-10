@@ -91,6 +91,16 @@ export function createAuthService(deps) {
       || error?.status === 429;
   }
 
+  function emailRateLimitMessage(mode, error) {
+    const rawMessage = String(error?.message || error?.msg || error?.error_description || '');
+    const cooldown = rawMessage.match(/only request this after\\s+(\\d+)\\s+seconds?/i);
+    const emailType = mode === 'reset' ? '密碼重設信' : '註冊驗證信';
+    if (cooldown) {
+      return '寄送請求太密集，伺服器要求再等待 ' + cooldown[1] + ' 秒。這次沒有寄出' + emailType + '；請等待後再試，不要連續按按鈕。';
+    }
+    return 'Supabase 郵件服務拒絕了這次寄送（HTTP 429：寄信額度已達上限）。這次沒有寄出' + emailType + '，請先停止重複註冊／重設。這是全專案共用的伺服器寄信額度；需要管理員設定自訂郵件服務或 Send Email Hook 才能提高寄送量。';
+  }
+
   function isProjectRestrictionError(error) {
     const candidates = [error, error?.cause, error?.cause?.cause].filter(Boolean);
     const message = candidates.flatMap(candidate => [
@@ -282,8 +292,8 @@ export function createAuthService(deps) {
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
         document.getElementById('authModal').style.display = 'flex';
-      } else if (mode === 'signup' && isEmailRateLimitError(error)) {
-        showAuthMessage('Supabase 郵件服務目前回報寄送上限，這是伺服器端限制，網站前端無法自行解除。');
+      } else if ((mode === 'signup' || mode === 'reset') && isEmailRateLimitError(error)) {
+        showAuthMessage(emailRateLimitMessage(mode, error));
       } else if (mode === 'signup' && /database error saving new user/i.test(message)) {
         showAuthMessage('此 Gmail 可能曾用於被管理員刪除的帳號，無法再次註冊。');
       } else {
