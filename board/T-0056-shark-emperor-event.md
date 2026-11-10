@@ -104,3 +104,5 @@ done_at:
 - 2026-11-10 [叉子] 任務仍維持 `in_progress`：擲骰、寵物合成／品質／變異、藥水合成、持有數量與稀有骰子事件仍依賴 T-0006、T-0009、T-0012 的伺服器權威化；未完成前不接入客戶端自行回報的進度。未建立 PR、未合併至 `work/chazi`／`main`，未部署 GitHub Pages。
 
 - 2026-11-10 [叉子] Supabase Security／Performance Advisors 盤點：鯊皇活動 4 張資料表均啟用 RLS，且 anon／authenticated 無直接資料表權限；活動公開 RPC 為 SECURITY INVOKER，內部 SECURITY DEFINER 函式未授權 anon／authenticated 直接執行，未出現在 Advisor 的公開 SECURITY DEFINER 警告中。Advisor 另指出 `shark_event_progress_events(task_id)` 缺少外鍵索引；目前事件表為空、任務量小，列為後續效能改善，不影響目前功能驗證。其他既有專案 Advisor 警告不屬本任務範圍，未擅自修改。
+
+- 2026-11-10 [叉子] 驗證範圍補充：3/3 通過結果來自臨時隔離目錄中的等效鏡像測試程式，並非直接 checkout 遠端分支後執行其完整測試檔；遠端 commit status／workflow 查詢仍無執行紀錄，因此遠端完整測試結果維持未驗證。
