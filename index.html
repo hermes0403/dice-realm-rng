@@ -58,6 +58,14 @@
 </div>
 </div>
 </div>
+<div class="shark-event-admin-grant">
+<div class="shark-event-section-label"><span>03 / ADMINISTRATOR CONSOLE</span><span>ADMIN ONLY</span></div>
+<h3>管理員發放鯊皇幣</h3>
+<p>額外發放會獨立記錄，並直接計入指定玩家的鯊皇幣餘額。</p>
+<label for="sharkGrantUserId">玩家 UUID</label><input id="sharkGrantUserId" type="text" autocomplete="off" placeholder="貼上玩家 UUID">
+<div class="shark-event-grant-fields"><div><label for="sharkGrantAmount">發放數量</label><input id="sharkGrantAmount" type="number" min="0.1" max="1000000" step="0.1" value="1"></div><div><label for="sharkGrantReason">發放原因</label><input id="sharkGrantReason" type="text" maxlength="200" value="管理員活動獎勵"></div></div>
+<button type="button" id="grantSharkCoinsBtn" class="shark-event-refresh">發放鯊皇幣</button><p id="sharkGrantStatus" class="shark-event-status" role="status"></p>
+</div>
 <div class="shark-event-footer"><span>SHARK EMPEROR PROTOCOL</span><button type="button" class="quiet" data-go="roll">返回擲骰大廳</button></div>
 </section>
 <section class="page" id="page-inventory"><div class="section-head"><h2>骰子背包</h2><span class="pill" id="bagCount">0 顆</span></div><div class="inventory-toolbar"><div class="mini" id="inventorySelectedCount">一般模式</div><button class="danger" id="sellSelectedDiceBtn" type="button">出售</button></div><div class="bag-upgrade-strip"><div><b>背包容量擴充</b><div class="mini" id="bagUpgradeInfo">目前容量 35，最高 200 顆</div></div><button class="primary" id="upgradeBagBtn" style="padding:6px 10px;font-size:12px;min-height:30px;white-space:nowrap">擴充 +1</button></div><div class="grid" id="inventoryGrid" style="margin-top:12px"></div></section>
