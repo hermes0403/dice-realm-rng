@@ -272,7 +272,7 @@ function analyzeSuspiciousRolls(){return adminPlayerManagement?.analyzeSuspiciou
 
 document.getElementById('upgradeBagBtn').onclick=()=>{const cap=Number(S.bagCapacity)||35;if(cap>=200){toast('背包已達目前上限 200 顆');return}const cost=bagUpgradeCost(cap);if((Number(S.coins)||0)<cost){toast(`$ 不足，擴充需要 ${format(cost)}$`);return}S.coins-=cost;S.bagCapacity=cap+1;save();render();toast(`背包容量已擴充至 ${S.bagCapacity} 顆`)};
 document.getElementById('rollBtn').onclick=doRoll;
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authGoogleBtn').onclick=()=>authService?.googleSignIn();document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
+document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
 
 function loadAdminOnlineCurve(){return adminMonitoringSystem?.loadAdminOnlineCurve()}
 
