@@ -67,9 +67,8 @@ export function createSharkEventUI({
   }
 
   async function load() {
-    if (!isAdmin()) return false;
     if (!getCurrentUser() || !supabaseClient) {
-      setText('sharkEventStatus', '請先登入管理員帳號。');
+      setText('sharkEventStatus', '請先登入玩家帳號，再同步個人活動資料。');
       return false;
     }
     if (busy) return false;
@@ -139,6 +138,8 @@ export function createSharkEventUI({
   }
 
   function setup() {
+    const grantPanel = documentRef.querySelector('.shark-event-admin-grant');
+    if (grantPanel) grantPanel.hidden = !isAdmin();
     const grantButton = byId('grantSharkCoinsBtn');
     if (grantButton) grantButton.addEventListener('click', grantCoins);
     const refreshButton = byId('refreshSharkEventBtn');
