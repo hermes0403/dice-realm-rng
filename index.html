@@ -19,7 +19,7 @@
 <div class="card" style="margin-top:8px"><div class="section-head" style="margin:0 0 8px"><h2>背包與自動出售</h2><span class="pill" id="bagCapacity">0 / 35 顆</span></div><p class="mini" style="margin:0 0 10px">勾選擲到後要自動出售的骰子；一般骰子先由常見到稀有，再列出萬聖節骰子。</p><div id="autoSellDiceOptions" class="auto-sell-options" aria-label="自動出售骰子選項"></div><div class="stats"><div class="stat"><b id="coinBalance">0$</b><span>金錢數量</span></div><div class="stat"><b id="bagTotal">0 / 35</b><span>背包骰子數</span></div></div></div>
 
 </section>
-<section class="page shark-event-page" id="page-event">
+<section class="page shark-event-page" id="page-event" hidden>
 <div class="shark-event-header"><div class="shark-event-kicker">LIMITED REALM EVENT · NO. 01</div><div class="shark-event-title-row"><div><h1>鯊皇降臨</h1><p>SHARK EMPEROR AWAKENING</p></div><div class="shark-event-emblem" aria-hidden="true">🦈</div></div><div class="shark-event-subtitle">完成專屬挑戰，累積鯊皇幣，解鎖鯊皇限定收藏。</div><div class="shark-event-header-line"></div></div>
 <div class="shark-event-wallet">
 <div class="shark-event-wallet-card"><span>SHARK COINS</span><strong id="sharkCoinBalance">0 枚</strong><small>鯊皇幣餘額</small></div>
@@ -50,7 +50,18 @@
 <div><span>🦈</span><b>鯊皇</b><small>秘密 · 9,000$/秒</small></div>
 </div>
 
-<div class="shark-event-egg-note">龍晶蛋取得與使用規則尚未設定，目前不會扣除或隨機產生寵物。</div>
+<div class="shark-event-egg-note">保留原本的龍晶蛋展示與六種寵物機率表；目前僅供查看，不會扣除龍晶蛋或開蛋。</div>
+<button type="button" class="limited-event-egg" data-event-egg aria-expanded="true" aria-controls="dragonCrystalOdds"><span><b>龍晶蛋</b><small>查看六種限定寵物機率</small></span><span>⌄</span></button>
+<div class="event-odds-panel" id="dragonCrystalOdds">
+<div class="section-head"><h3>龍晶蛋寵物機率表</h3><span class="pill">100%</span></div>
+<div class="event-odds-table-wrap"><table class="event-odds-table"><thead><tr><th>寵物</th><th>品質</th><th>機率</th><th>每秒收益</th></tr></thead><tbody>
+<tr><td>晶銅獸</td><td>普通</td><td>45%</td><td>15$/秒</td></tr>
+<tr><td>鏡冰靈</td><td>普通</td><td>30%</td><td>30$/秒</td></tr>
+<tr><td>晶龍哨兵</td><td>稀有</td><td>14.6%</td><td>100$/秒</td></tr>
+<tr><td>異核雙子龍</td><td>傳奇</td><td>8.5%</td><td>750$/秒</td></tr>
+<tr><td>月光龍</td><td>神話</td><td>1.5%</td><td>2,500$/秒</td></tr>
+<tr><td>鯊皇</td><td>秘密</td><td>0.4%</td><td>9,000$/秒</td></tr>
+</tbody></table></div></div>
 </div></div>
 </div>
 <div class="shark-event-admin-grant">
