@@ -1,0 +1,39 @@
+name: Google OAuth focused tests
+
+on:
+  push:
+    branches:
+      - work/chazi
+    paths:
+      - 'services/auth.js'
+      - 'script.js'
+      - 'tests/google-oauth.test.js'
+      - '.github/workflows/google-oauth-tests.yml'
+  pull_request:
+    branches:
+      - work/chazi
+    paths:
+      - 'services/auth.js'
+      - 'script.js'
+      - 'tests/google-oauth.test.js'
+      - '.github/workflows/google-oauth-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  google-oauth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check authentication and entrypoint syntax
+        run: |
+          node --check services/auth.js
+          node --check script.js
+      - name: Run Google OAuth tests
+        run: node --test tests/google-oauth.test.js
