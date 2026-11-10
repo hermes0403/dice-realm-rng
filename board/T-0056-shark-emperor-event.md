@@ -102,3 +102,5 @@ done_at:
 - 2026-11-10 [叉子] 新增 `tests/shark-event-idempotency.test.js`，涵蓋逾時重試、修改發放內容及重新整理後重試；更新 Branch tests workflow，將本任務隔離分支納入 push 測試，並加入 `ui/shark-event.js` 語法檢查。相關 commit：`ba8bf500`、`27be445a`、`d483b95d`、`0a60ea61`、`b3161ea3`、`7b63b5a9`。
 - 2026-11-10 [叉子] 驗證：隔離 Node.js 22 測試環境執行 `node --check ui/shark-event.js` 與 `node --test tests/shark-event-idempotency.test.js`，3 項測試通過、0 失敗。GitHub commit status 與 workflow-run 查詢目前未回傳 CI 執行紀錄；完整 repository 測試及 `git diff --check` 尚未執行。
 - 2026-11-10 [叉子] 任務仍維持 `in_progress`：擲骰、寵物合成／品質／變異、藥水合成、持有數量與稀有骰子事件仍依賴 T-0006、T-0009、T-0012 的伺服器權威化；未完成前不接入客戶端自行回報的進度。未建立 PR、未合併至 `work/chazi`／`main`，未部署 GitHub Pages。
+
+- 2026-11-10 [叉子] Supabase Security／Performance Advisors 盤點：鯊皇活動 4 張資料表均啟用 RLS，且 anon／authenticated 無直接資料表權限；活動公開 RPC 為 SECURITY INVOKER，內部 SECURITY DEFINER 函式未授權 anon／authenticated 直接執行，未出現在 Advisor 的公開 SECURITY DEFINER 警告中。Advisor 另指出 `shark_event_progress_events(task_id)` 缺少外鍵索引；目前事件表為空、任務量小，列為後續效能改善，不影響目前功能驗證。其他既有專案 Advisor 警告不屬本任務範圍，未擅自修改。
