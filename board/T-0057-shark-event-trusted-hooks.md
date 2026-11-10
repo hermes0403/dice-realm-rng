@@ -1,7 +1,7 @@
 ---
 id: T-0057
 title: 建立鯊皇活動可信事件接點並整合權威交易
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P1
 created: 2026-11-11
 updated: 2026-11-11
 depends_on: [T-0006, T-0009, T-0012]
-branch:
+branch: task/T-0056-shark-emperor-event
 done_by:
 done_at:
 ---
@@ -46,6 +46,9 @@ done_at:
 ## 紀錄
 
 - 2026-11-11 [叉子] 棒子同意另開棒子方任務，平行處理鯊皇活動專屬可信事件接點；本任務不接管、不修改老查方 T-0006、T-0009、T-0012。依賴未完成前，只先處理不依賴核心交易的契約、映射與測試準備。活動維持管理員限定。
+- 2026-11-11 [叉子] 已新增 `docs/shark-event-trusted-event-contract.md`，明確記錄 pet_sale／weather_summon_special 兩個已接通來源，以及擲骰、寵物合成／變異／持有數、藥水仍待 T-0006／T-0012／T-0009 的可信事件契約。新增 `tests/shark-event-trusted-events.test.js`，保護 migration 不可將可由客戶端寫入的 logs／game_saves 當成活動事件來源，並檢查內部進度函式的 EXECUTE 權限與冪等索引。
+- 2026-11-11 [叉子] 正式 Supabase 唯讀驗證：兩個既有 trigger 存在；authenticated 對內部進度函式沒有 EXECUTE、對進度事件表沒有 INSERT、對獎勵 ledger 沒有 SELECT。執行交易回滾測試，驗證同一 event_id 重送不重複累計、任務 1 達標發放 1 枚並解鎖任務 2；交易 rollback 後再次查詢確認帳戶仍為任務 1、進度 0、餘額 0，未留下測試資料。
+- 2026-11-11 [叉子] GitHub commit status 與 workflow-run 查詢未回傳 CI 執行紀錄，因此新增 Node 測試尚未取得遠端 CI 通過證據；本任務仍未完成。T-0006、T-0009、T-0012 尚未完成，缺少可信擲骰／合成／藥水交易來源，禁止接入前端存檔或玩家可寫入日誌。未合併、未部署 GitHub Pages。
 
 ## 完工回報
 
