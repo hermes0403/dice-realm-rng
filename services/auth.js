@@ -49,7 +49,7 @@ export function createAuthService(deps) {
   }
 
   function setAuthButtonsDisabled(disabled) {
-    ['authLoginBtn', 'authSignupBtn', 'authResetBtn'].forEach(id => {
+    ['authLoginBtn', 'authSignupBtn', 'authResetBtn', 'authGoogleBtn'].forEach(id => {
       const button = document.getElementById(id);
       if (button) button.disabled = disabled;
     });
@@ -112,6 +112,40 @@ export function createAuthService(deps) {
     showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置；已使用過的 3 個帳號仍可繼續登入。');
     timerManager.setTimeout(() => supabaseClient?.auth.signOut().catch(() => {}), 0, 'auth-signout');
     return false;
+  }
+
+  async function googleSignIn() {
+    if (authBusy) return;
+    if (!supabaseClient?.auth?.signInWithOAuth) {
+      showAuthMessage('Google 登入模組尚未就緒，請重新整理網頁。');
+      return;
+    }
+
+    authBusy = true;
+    setAuthButtonsDisabled(true);
+    showAuthMessage('正在開啟 Google 帳號選擇…');
+    try {
+      const result = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://hermes0403.github.io/dice-realm-rng/',
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+      if (result.error) throw result.error;
+    } catch (error) {
+      const message = String(error?.message || error?.msg || error?.error_description || '');
+      if (error?.status === 402 || /exceed_egress_quota|project.*restricted|service.*restricted/i.test(message)) {
+        showAuthMessage('Supabase 雲端服務目前受到額度限制，暫時無法登入。請待服務恢復後再試。');
+      } else if (/provider.*(disabled|not enabled|unsupported)|unsupported provider/i.test(message)) {
+        showAuthMessage('Google 登入尚未在 Supabase 啟用，請確認管理員已儲存 Provider 設定。');
+      } else {
+        showAuthMessage(error?.message || '無法啟動 Google 登入，請稍後重試。');
+      }
+    } finally {
+      authBusy = false;
+      setAuthButtonsDisabled(false);
+    }
   }
 
   async function authAction(mode) {
@@ -308,6 +342,7 @@ export function createAuthService(deps) {
     openAuth,
     closeAuth,
     authAction,
+    googleSignIn,
     registerAuthStateListener,
     unregisterAuthStateListener
   };
