@@ -1,0 +1,28 @@
+name: Dice roll save regression tests
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'systems/dice.js'
+      - 'services/cloud-save.js'
+      - 'tests/dice-roll-save.test.js'
+      - '.github/workflows/dice-roll-save-tests.yml'
+  pull_request:
+    paths:
+      - 'systems/dice.js'
+      - 'services/cloud-save.js'
+      - 'tests/dice-roll-save.test.js'
+      - '.github/workflows/dice-roll-save-tests.yml'
+
+jobs:
+  dice-roll-save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check systems/dice.js
+      - run: node --check services/cloud-save.js
+      - run: node --test tests/dice-roll-save.test.js
