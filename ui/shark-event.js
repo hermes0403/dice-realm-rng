@@ -1,4 +1,4 @@
-/** Shark Emperor limited-event panel. The server is authoritative for balances and egg opening. */
+/** Shark Emperor limited-event panel. The server is authoritative for balances and task rewards. */
 export function createSharkEventUI({
   supabaseClient,
   getCurrentUser,
