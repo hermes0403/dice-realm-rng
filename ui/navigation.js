@@ -14,26 +14,31 @@ export function createNavigationUI({
   function updateAdminVisibility() {
     const allowed = isAdmin();
     document.body.classList.toggle('admin-pets-unlocked', allowed);
-    document.querySelectorAll('[data-page="admin"],[data-page="event"],[data-go="event"]').forEach(button => {
+    document.querySelectorAll('[data-page="admin"]').forEach(button => {
       button.hidden = !allowed;
     });
+    document.querySelectorAll('[data-page="event"],[data-go="event"]').forEach(button => {
+      button.hidden = false;
+    });
     const eventPanel = document.getElementById('page-event');
-    if (eventPanel) eventPanel.hidden = !allowed;
+    if (eventPanel) eventPanel.hidden = false;
+    const adminGrantPanel = document.querySelector('.shark-event-admin-grant');
+    if (adminGrantPanel) adminGrantPanel.hidden = !allowed;
     const panel = document.getElementById('page-admin');
     if (panel) panel.hidden = !allowed;
     const odds = document.getElementById('adminPetOddsManagementFold');
     if (odds) odds.hidden = !allowed;
-    if (!allowed && (panel?.classList.contains('active') || eventPanel?.classList.contains('active'))) go('roll');
+    if (!allowed && panel?.classList.contains('active')) go('roll');
   }
 
   function navHTML() {
     return pages.map(([id, name, icon]) =>
-      `<button data-page="${id}" data-nav-id="${id}" class="${id === 'roll' ? 'active' : ''}" ${id === 'admin' || id === 'event' ? 'hidden' : ''}>${icon} ${name}</button>`
+      `<button data-page="${id}" data-nav-id="${id}" class="${id === 'roll' ? 'active' : ''}" ${id === 'admin' ? 'hidden' : ''}>${icon} ${name}</button>`
     ).join('');
   }
 
   function go(id) {
-    if ((id === 'admin' || id === 'event') && !isAdmin()) {
+    if (id === 'admin' && !isAdmin()) {
       toast('沒有管理員權限');
       return;
     }
