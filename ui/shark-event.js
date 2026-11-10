@@ -32,7 +32,7 @@ export function createSharkEventUI({
     const status = byId('sharkEventStatus');
     if (!task) {
       if (title) title.textContent = '所有活動任務已完成';
-      if (progress) progress.textContent = '25 項任務已全部完成，後續新增任務將自動接續。';
+      if (progress) progress.textContent = number(state.total_tasks) + ' 項任務已全部完成，後續新增任務將自動接續。';
       if (reward) reward.textContent = '活動完成';
       if (bar) bar.style.width = '100%';
       if (status) status.textContent = 'SHARK EMPEROR · ALL TASKS CLEARED';
@@ -106,6 +106,7 @@ export function createSharkEventUI({
       if (error) throw error;
       if (status) status.textContent = '發放成功；該玩家目前餘額：' + number(data?.shark_coins) + ' 枚。';
       toast('已發放 ' + number(amount) + ' 枚鯊皇幣');
+      busy = false;
       await load();
       return true;
     } catch (error) {
@@ -142,6 +143,7 @@ export function createSharkEventUI({
       if (!data?.pet?.id) throw new Error('伺服器沒有回傳寵物資料');
       await loadCloudSave();
       render();
+      busy = false;
       await load();
       const petNames = {
         event_crystal_bronze_beast: '晶銅獸',
