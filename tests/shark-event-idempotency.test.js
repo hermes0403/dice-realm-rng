@@ -131,3 +131,56 @@ test('changing the grant payload creates a new idempotency key', async () => {
   assert.notEqual(grantCalls[0].p_idempotency_key, grantCalls[1].p_idempotency_key);
   assert.equal(generatedKeys, 2);
 });
+
+
+test('admin coin grant reuses the pending idempotency key after a page refresh', async () => {
+  let generatedKeys = 0;
+  const storage = new Map();
+  Object.defineProperty(globalThis, 'crypto', {
+    configurable: true,
+    value: { randomUUID: () => 'refresh-grant-key-' + (++generatedKeys) }
+  });
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    configurable: true,
+    value: {
+      getItem: key => storage.get(key) ?? null,
+      setItem: (key, value) => storage.set(key, value),
+      removeItem: key => storage.delete(key)
+    }
+  });
+  const first = installDocument();
+  const second = installDocument();
+  const grantCalls = [];
+  let grantAttempt = 0;
+  const supabaseClient = {
+    async rpc(name, args) {
+      if (name === 'admin_grant_shark_coins') {
+        grantCalls.push(args);
+        grantAttempt += 1;
+        if (grantAttempt === 1) return { data: null, error: { message: 'network timeout' } };
+        return { data: { shark_coins: 2.5 }, error: null };
+      }
+      if (name === 'get_shark_event_state') {
+        return { data: { shark_coins: 2.5, dragon_eggs: 0, completed_tasks: 0, total_tasks: 25, current_task: null }, error: null };
+      }
+      throw new Error('Unexpected RPC: ' + name);
+    }
+  };
+  const options = {
+    supabaseClient,
+    getCurrentUser: () => ({ id: 'admin-user' }),
+    isAdmin: () => true,
+    toast: () => {}
+  };
+  createSharkEventUI({ ...options, documentRef: first.documentRef });
+  await first.elements.get('grantSharkCoinsBtn').listeners.click();
+
+  createSharkEventUI({ ...options, documentRef: second.documentRef });
+  await second.elements.get('grantSharkCoinsBtn').listeners.click();
+
+  assert.equal(grantCalls.length, 2);
+  assert.equal(grantCalls[0].p_idempotency_key, 'refresh-grant-key-1');
+  assert.equal(grantCalls[1].p_idempotency_key, 'refresh-grant-key-1');
+  assert.equal(generatedKeys, 1);
+  assert.equal(storage.size, 0);
+});
