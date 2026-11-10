@@ -97,3 +97,8 @@ done_at:
 - 2026-11-10 [叉子] 權限驗證：公開 RPC 為 SECURITY INVOKER，僅 authenticated 可執行；私有 SECURITY DEFINER 函式不授權 anon，進度內部函式不授權 authenticated；活動資料表啟用 RLS 且不提供客戶端直接存取政策。
 - 2026-11-10 [叉子] 靜態驗證：活動頁存在、入口與路由均有管理員權限檢查、活動寵物 6 種且加入圖鑑、HTML 新增 ID 無重複；`node --check` 已通過 `ui/shark-event.js` 與 `ui/navigation.js`。GitHub Actions workflow runs 與 commit status checks 均未回傳項目；完整瀏覽器登入測試尚未執行。
 - 2026-11-10 [叉子] 目前仍為 in_progress：骰子擲骰、寵物合成、藥水與持有數量等任務事件，必須等 T-0006、T-0009、T-0012 完成伺服器權威化後再接通；目前不以客戶端回報假造進度。未建立 PR、未合併 work/chazi、未部署 GitHub Pages。
+
+- 2026-11-10 [叉子] 修正管理員發放鯊皇幣的重試冪等性：同一管理員、目標玩家、數量及原因會沿用同一 idempotency key，並暫存於 sessionStorage；請求逾時、回應遺失或頁面重新整理後重試，不會因新 key 而重複發放。發放內容變更時產生新 key，成功後清除暫存。
+- 2026-11-10 [叉子] 新增 `tests/shark-event-idempotency.test.js`，涵蓋逾時重試、修改發放內容及重新整理後重試；更新 Branch tests workflow，將本任務隔離分支納入 push 測試，並加入 `ui/shark-event.js` 語法檢查。相關 commit：`ba8bf500`、`27be445a`、`d483b95d`、`0a60ea61`、`b3161ea3`、`7b63b5a9`。
+- 2026-11-10 [叉子] 驗證：隔離 Node.js 22 測試環境執行 `node --check ui/shark-event.js` 與 `node --test tests/shark-event-idempotency.test.js`，3 項測試通過、0 失敗。GitHub commit status 與 workflow-run 查詢目前未回傳 CI 執行紀錄；完整 repository 測試及 `git diff --check` 尚未執行。
+- 2026-11-10 [叉子] 任務仍維持 `in_progress`：擲骰、寵物合成／品質／變異、藥水合成、持有數量與稀有骰子事件仍依賴 T-0006、T-0009、T-0012 的伺服器權威化；未完成前不接入客戶端自行回報的進度。未建立 PR、未合併至 `work/chazi`／`main`，未部署 GitHub Pages。
