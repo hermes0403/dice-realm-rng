@@ -3,13 +3,10 @@ export function createSharkEventUI({
   supabaseClient,
   getCurrentUser,
   isAdmin,
-  loadCloudSave,
-  render,
   toast,
   documentRef = document
 }) {
   let busy = false;
-  let lastState = null;
 
   const byId = id => documentRef.getElementById(id);
   const number = value => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(Number(value) || 0);
@@ -20,7 +17,6 @@ export function createSharkEventUI({
   }
 
   function renderState(state) {
-    lastState = state;
     setText('sharkCoinBalance', number(state.shark_coins) + ' 枚');
     setText('dragonEggBalance', number(state.dragon_eggs) + ' 顆');
     setText('sharkTaskCount', number(state.completed_tasks) + ' / ' + number(state.total_tasks));
