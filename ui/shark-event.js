@@ -78,6 +78,46 @@ export function createSharkEventUI({
     }
   }
 
+  async function grantCoins() {
+    if (!isAdmin() || busy) return false;
+    const userId = byId('sharkGrantUserId')?.value?.trim();
+    const amount = Number(byId('sharkGrantAmount')?.value);
+    const reason = byId('sharkGrantReason')?.value?.trim() || '管理員活動獎勵';
+    const status = byId('sharkGrantStatus');
+    if (!userId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)) {
+      if (status) status.textContent = '請輸入正確的玩家 UUID。';
+      return false;
+    }
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 1000000) {
+      if (status) status.textContent = '發放數量需大於 0，且不可超過 1,000,000。';
+      return false;
+    }
+    busy = true;
+    const button = byId('grantSharkCoinsBtn');
+    if (button) button.disabled = true;
+    if (status) status.textContent = '正在送出發放請求…';
+    try {
+      const { data, error } = await supabaseClient.rpc('admin_grant_shark_coins', {
+        p_target_user_id: userId,
+        p_amount: amount,
+        p_idempotency_key: crypto.randomUUID(),
+        p_reason: reason
+      });
+      if (error) throw error;
+      if (status) status.textContent = '發放成功；該玩家目前餘額：' + number(data?.shark_coins) + ' 枚。';
+      toast('已發放 ' + number(amount) + ' 枚鯊皇幣');
+      await load();
+      return true;
+    } catch (error) {
+      console.error('Shark Coin admin grant failed', error);
+      if (status) status.textContent = '發放失敗：' + (error.message || '請稍後再試');
+      return false;
+    } finally {
+      busy = false;
+      if (button) button.disabled = false;
+    }
+  }
+
   async function openEgg() {
     if (!isAdmin() || busy) return false;
     if (!getCurrentUser() || !supabaseClient) {
@@ -135,6 +175,8 @@ export function createSharkEventUI({
   function setup() {
     const openButton = byId('openDragonCrystalEggBtn');
     if (openButton) openButton.addEventListener('click', openEgg);
+    const grantButton = byId('grantSharkCoinsBtn');
+    if (grantButton) grantButton.addEventListener('click', grantCoins);
     const refreshButton = byId('refreshSharkEventBtn');
     if (refreshButton) refreshButton.addEventListener('click', load);
     const oddsButton = byId('sharkEggOddsToggle');
