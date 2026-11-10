@@ -80,3 +80,25 @@ test('Google sign-in is blocked after the project reports a quota restriction', 
   assert.match(elements.get('authMessage').textContent, /流量額度限制/);
   assert.equal(elements.get('authGoogleBtn').disabled, false);
 });
+
+test('Google sign-in is blocked by the shared cloud restriction before OAuth starts', async () => {
+  const elements = installDocument();
+  let oauthCalls = 0;
+  const service = createAuthService({
+    DEVICE_ACCOUNT_LIMIT: 3,
+    isCloudSyncBlocked: () => true,
+    supabaseClient: {
+      auth: {
+        signInWithOAuth: async () => {
+          oauthCalls += 1;
+          return { data: {}, error: null };
+        }
+      }
+    }
+  });
+
+  await service.googleSignIn();
+
+  assert.equal(oauthCalls, 0);
+  assert.match(elements.get('authMessage').textContent, /流量額度限制/);
+});
