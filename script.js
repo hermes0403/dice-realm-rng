@@ -16,7 +16,7 @@ import { createProgressionSystem } from './systems/progression.js';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js';
-import { createCloudSaveService } from './services/cloud-save.js';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261110-roll-save-cachefix';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
