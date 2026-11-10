@@ -149,7 +149,7 @@ end;
 $$;
 revoke all on function private.record_shark_event_progress(uuid,text,text,integer) from public, anon, authenticated;
 
-create or replace function public.get_shark_event_state()
+create or replace function private.get_shark_event_state()
 returns jsonb
 language plpgsql
 security definer
@@ -187,10 +187,18 @@ begin
   );
 end;
 $$;
+revoke all on function private.get_shark_event_state() from public, anon;
+grant usage on schema private to authenticated;
+grant execute on function private.get_shark_event_state() to authenticated;
+
+create or replace function public.get_shark_event_state()
+returns jsonb language sql security invoker
+set search_path = pg_catalog, public, private
+as $ select private.get_shark_event_state(); $;
 revoke all on function public.get_shark_event_state() from public, anon;
 grant execute on function public.get_shark_event_state() to authenticated;
 
-create or replace function public.admin_grant_shark_coins(
+create or replace function private.admin_grant_shark_coins(
   p_target_user_id uuid, p_amount numeric, p_idempotency_key text, p_reason text default '管理員發放'
 ) returns jsonb
 language plpgsql
@@ -222,6 +230,14 @@ begin
   return jsonb_build_object('success',true,'shark_coins',v_balance);
 end;
 $$;
+revoke all on function private.admin_grant_shark_coins(uuid,numeric,text,text) from public, anon;
+grant execute on function private.admin_grant_shark_coins(uuid,numeric,text,text) to authenticated;
+
+create or replace function public.admin_grant_shark_coins(
+  p_target_user_id uuid, p_amount numeric, p_idempotency_key text, p_reason text default '管理員發放'
+) returns jsonb language sql security invoker
+set search_path = pg_catalog, public, private
+as $ select private.admin_grant_shark_coins(p_target_user_id,p_amount,p_idempotency_key,p_reason); $;
 revoke all on function public.admin_grant_shark_coins(uuid,numeric,text,text) from public, anon;
 grant execute on function public.admin_grant_shark_coins(uuid,numeric,text,text) to authenticated;
 
