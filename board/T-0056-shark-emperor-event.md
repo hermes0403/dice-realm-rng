@@ -92,3 +92,8 @@ done_at:
 - 2026-11-10 [叉子] 目前已接通伺服器可信事件：寵物出售 tombstone 與玩家召喚水晶／地獄天氣；擲骰、寵物合成、藥水及持有數量等事件仍依賴 T-0006、T-0009、T-0012 的伺服器權威化，未完成前不接受前端自行回報進度。
 - 2026-11-10 [叉子] 龍晶蛋隨機抽取功能已撤除；資料庫不保留開蛋 RPC 或開蛋紀錄表，介面只顯示庫存及活動寵物圖鑑，不進行隨機抽取。
 - 2026-11-10 [叉子] Supabase migration source 已存於 `docs/migrations/20261110124248_shark_emperor_event_core.sql`；已套用核心 migration、任務追加相容更新及來源對齊 migration。尚未完成完整測試、PR、合併或部署。
+
+- 2026-11-10 [叉子] 驗證紀錄：資料庫確認 25 項任務、獎勵總和 33 枚、兩個可信事件 trigger；隨機開蛋 RPC 與開蛋紀錄表均不存在。以 rollback 測試驗證任務 10 自動發放 1.5 枚、任務 22 事件去重、狀態 RPC 與管理員發放 RPC；測試資料回滾後殘留筆數為 0。
+- 2026-11-10 [叉子] 權限驗證：公開 RPC 為 SECURITY INVOKER，僅 authenticated 可執行；私有 SECURITY DEFINER 函式不授權 anon，進度內部函式不授權 authenticated；活動資料表啟用 RLS 且不提供客戶端直接存取政策。
+- 2026-11-10 [叉子] 靜態驗證：活動頁存在、入口與路由均有管理員權限檢查、活動寵物 6 種且加入圖鑑、HTML 新增 ID 無重複；`node --check` 已通過 `ui/shark-event.js` 與 `ui/navigation.js`。GitHub Actions workflow runs 與 commit status checks 均未回傳項目；完整瀏覽器登入測試尚未執行。
+- 2026-11-10 [叉子] 目前仍為 in_progress：骰子擲骰、寵物合成、藥水與持有數量等任務事件，必須等 T-0006、T-0009、T-0012 完成伺服器權威化後再接通；目前不以客戶端回報假造進度。未建立 PR、未合併 work/chazi、未部署 GitHub Pages。
