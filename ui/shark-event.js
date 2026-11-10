@@ -7,6 +7,7 @@ export function createSharkEventUI({
   documentRef = document
 }) {
   let busy = false;
+  let pendingGrant = null;
 
   const byId = id => documentRef.getElementById(id);
   const number = value => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(Number(value) || 0);
@@ -82,6 +83,12 @@ export function createSharkEventUI({
       if (status) status.textContent = '發放數量需大於 0，且不可超過 1,000,000。';
       return false;
     }
+
+    const requestSignature = JSON.stringify({ userId, amount, reason });
+    if (!pendingGrant || pendingGrant.signature !== requestSignature) {
+      pendingGrant = { signature: requestSignature, idempotencyKey: crypto.randomUUID() };
+    }
+
     busy = true;
     const button = byId('grantSharkCoinsBtn');
     if (button) button.disabled = true;
@@ -90,10 +97,11 @@ export function createSharkEventUI({
       const { data, error } = await supabaseClient.rpc('admin_grant_shark_coins', {
         p_target_user_id: userId,
         p_amount: amount,
-        p_idempotency_key: crypto.randomUUID(),
+        p_idempotency_key: pendingGrant.idempotencyKey,
         p_reason: reason
       });
       if (error) throw error;
+      pendingGrant = null;
       if (status) status.textContent = '發放成功；該玩家目前餘額：' + number(data?.shark_coins) + ' 枚。';
       toast('已發放 ' + number(amount) + ' 枚鯊皇幣');
       busy = false;
@@ -101,7 +109,7 @@ export function createSharkEventUI({
       return true;
     } catch (error) {
       console.error('Shark Coin admin grant failed', error);
-      if (status) status.textContent = '發放失敗：' + (error.message || '請稍後再試');
+      if (status) status.textContent = '發放失敗：' + (error.message || '請稍後再試') + '；相同資料重試會沿用同一請求編號。';
       return false;
     } finally {
       busy = false;
