@@ -1,4 +1,4 @@
-name: Google OAuth focused tests
+name: Focused game regression tests
 
 on:
   push:
@@ -18,13 +18,15 @@ on:
       - 'services/auth.js'
       - 'script.js'
       - 'tests/google-oauth.test.js'
+      - 'tests/dice-roll-save.test.js'
+      - 'systems/dice.js'
       - '.github/workflows/google-oauth-tests.yml'
 
 permissions:
   contents: read
 
 jobs:
-  google-oauth:
+  focused-regressions:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
