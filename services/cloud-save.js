@@ -25,6 +25,10 @@ export function createCloudSaveService(dependencies) {
     return userId ? KEY + '_user_' + String(userId) : null;
   }
 
+  function localSavedAtKey(userId = getCurrentUser()?.id) {
+    return userId ? KEY + '_local_saved_at_' + String(userId) : null;
+  }
+
   function savePayload() {
     const S = getState();
     return {
@@ -146,6 +150,11 @@ export function createCloudSaveService(dependencies) {
         localStorage.setItem(KEY, JSON.stringify(S));
         const scopedKey = userSaveKey(syncingUserId);
         if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
+        const savedAtKey = localSavedAtKey(syncingUserId);
+        if (savedAtKey) {
+          const previousSavedAt = Number(localStorage.getItem(savedAtKey)) || 0;
+          localStorage.setItem(savedAtKey, String(Math.max(previousSavedAt, Date.parse(now) || Date.now())));
+        }
       } catch (e) {}
       document.getElementById('saveStatus').textContent = '雲端已同步';
       return true;
@@ -181,7 +190,12 @@ export function createCloudSaveService(dependencies) {
 
   function save() {
     const S = getState();
-    try { const scopedKey = userSaveKey(); if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S)); } catch (e) {}
+    try {
+      const scopedKey = userSaveKey();
+      if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
+      const savedAtKey = localSavedAtKey();
+      if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
+    } catch (e) {}
     localStorage.setItem(KEY, JSON.stringify(S));
     document.getElementById('saveStatus').textContent = getCurrentUser() ? '已儲存本機，雲端每 5 分鐘備份' : '本機存檔';
     if (getCurrentUser()) scheduleSync();
@@ -234,8 +248,10 @@ export function createCloudSaveService(dependencies) {
         try { return JSON.parse(localSaveAtLoadStart || 'null'); }
         catch { return null; }
       })();
+      const savedAtKey = localSavedAtKey(user.id);
+      const localSavedAtAtLoadStart = Number(savedAtKey ? localStorage.getItem(savedAtKey) : 0) || 0;
       const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
-      const { data, error } = await supabaseClient.from('game_saves').select('save_data').eq('user_id', user.id).maybeSingle();
+      const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
       if (getCurrentUser()?.id !== user.id) return;
       const localSaveAfterCloud = (() => {
@@ -253,6 +269,31 @@ export function createCloudSaveService(dependencies) {
           restoreAutoSellPrefs();
           render();
         }
+        await applyPendingGrants(true);
+        await syncCloudSave();
+        await refreshLeaderboards();
+        return;
+      }
+      const cloudRolls = Number(data?.save_data?.rolls) || 0;
+      const localRolls = Number(localSaveBeforeCloud?.rolls) || 0;
+      const cloudUpdatedAt = Date.parse(data?.updated_at || '') || 0;
+      const localIsNewerThanCloud = !!localSaveBeforeCloud?.bag && (
+        (localSavedAtAtLoadStart > 0 && localSavedAtAtLoadStart > cloudUpdatedAt + 1000) ||
+        localRolls > cloudRolls
+      );
+      if (localIsNewerThanCloud) {
+        // Local gameplay progress may have been saved before this page was refreshed,
+        // while the five-minute cloud batch is still pending. Never replace it with an older cloud row.
+        const latestState = migrateCurrency(normalizeGloves({ ...fresh(), ...localSaveBeforeCloud }));
+        latestState.bag = latestState.bag || {};
+        latestState.first = latestState.first || {};
+        latestState.rollCounts = latestState.rollCounts || {};
+        setState(latestState);
+        restoreAutoSellPrefs();
+        if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(latestState));
+        localStorage.setItem(KEY, JSON.stringify(latestState));
+        render();
+        document.getElementById('saveStatus').textContent = '保留較新的本機存檔，正在補同步雲端';
         await applyPendingGrants(true);
         await syncCloudSave();
         await refreshLeaderboards();

@@ -1,0 +1,96 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createCloudSaveService } from '../services/cloud-save.js';
+
+function storageMock(initial = {}) {
+  const values = new Map(Object.entries(initial));
+  return {
+    getItem(key) { return values.has(key) ? values.get(key) : null; },
+    setItem(key, value) { values.set(key, String(value)); },
+    removeItem(key) { values.delete(key); }
+  };
+}
+
+function timersMock() {
+  return {
+    setTimeout(callback) { return { callback }; },
+    clearTimeout() {}
+  };
+}
+
+function setup({ local, localSavedAt, cloud, cloudUpdatedAt }) {
+  const KEY = 'diceRealm';
+  const storage = storageMock({
+    [KEY]: JSON.stringify(local),
+    [KEY + '_user_user-1']: JSON.stringify(local),
+    [KEY + '_local_saved_at_user-1']: String(localSavedAt)
+  });
+  let state = { ...local };
+  const cloudWrites = [];
+  const supabaseClient = {
+    from(table) {
+      if (table === 'player_grants') {
+        return { select() { return this; }, eq() { return this; }, async maybeSingle() { return { data: null, error: null }; } };
+      }
+      if (table === 'game_saves') {
+        return {
+          select() { return this; },
+          eq() { return this; },
+          async maybeSingle() { return { data: { save_data: cloud, updated_at: cloudUpdatedAt }, error: null }; },
+          async upsert(row) { cloudWrites.push(row); return { error: null }; }
+        };
+      }
+      throw new Error('Unexpected table ' + table);
+    }
+  };
+  const service = createCloudSaveService({
+    KEY, D: [], POTIONS: [], supabaseClient,
+    getState: () => state, setState: value => { state = value; },
+    getCurrentUser: () => ({ id: 'user-1' }),
+    fresh: () => ({ potions: { inventory: {}, active: {}, activeSpeed: {} } }),
+    normalizeGloves: value => value, migrateCurrency: value => value,
+    ensurePetData() {}, restoreAutoSellPrefs() {}, totalUnique: () => 1,
+    render() {}, refreshLeaderboards: async () => {}, toast() {},
+    openAuth() {}, showAuthMessage() {}, timerManager: timersMock(),
+    localStorageRef: storage,
+    documentRef: { getElementById() { return { textContent: '' }; }, addEventListener() {} },
+    windowRef: { addEventListener() {} }
+  });
+  return { service, storage, getState: () => state, cloudWrites, KEY };
+}
+
+const base = {
+  name: '測試玩家', rolls: 100, bag: { d1: 100 }, first: {}, rollCounts: { d1: 100 },
+  coins: 50, pets: [], equippedPetUids: [], petDiscovered: {}, gloves: [], potions: { inventory: {} }
+};
+
+test('login preserves locally saved rolls when the cloud row is older', async () => {
+  const local = { ...base, rolls: 125, bag: { d1: 125 }, rollCounts: { d1: 125 } };
+  const cloud = { ...base, rolls: 100, bag: { d1: 100 }, rollCounts: { d1: 100 } };
+  const { service, getState, cloudWrites, storage, KEY } = setup({
+    local, localSavedAt: Date.parse('2026-11-10T10:05:00.000Z'),
+    cloud, cloudUpdatedAt: '2026-11-10T10:00:00.000Z'
+  });
+
+  await service.loadCloudSave();
+
+  assert.equal(getState().rolls, 125);
+  assert.equal(getState().bag.d1, 125);
+  assert.equal(JSON.parse(storage.getItem(KEY + '_user_user-1')).rolls, 125);
+  assert.equal(cloudWrites.length, 1, 'the newer local snapshot is uploaded to replace the stale cloud row');
+  assert.equal(cloudWrites[0].save_data.rolls, 125);
+});
+
+test('legacy local save with a higher roll count wins even without a local timestamp', async () => {
+  const local = { ...base, rolls: 126, bag: { d1: 126 }, rollCounts: { d1: 126 } };
+  const cloud = { ...base, rolls: 100, bag: { d1: 100 }, rollCounts: { d1: 100 } };
+  const { service, getState, cloudWrites } = setup({
+    local, localSavedAt: 0, cloud, cloudUpdatedAt: '2026-11-10T10:00:00.000Z'
+  });
+
+  await service.loadCloudSave();
+
+  assert.equal(getState().rolls, 126);
+  assert.equal(getState().bag.d1, 126);
+  assert.equal(cloudWrites[0].save_data.rolls, 126);
+});

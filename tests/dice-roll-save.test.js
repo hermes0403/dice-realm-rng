@@ -26,7 +26,7 @@ test('completed roll result is saved before async announcement and reveal work',
 });
 
 test('cloud bootstrap preserves local progress changed while cloud request is pending', () => {
-  const request = cloudSource.indexOf("await supabaseClient.from('game_saves').select('save_data')");
+  const request = cloudSource.indexOf("await supabaseClient.from('game_saves').select('save_data,updated_at')");
   const compare = cloudSource.indexOf('localSaveAfterCloud !== localSaveAtLoadStart', request);
   const staleApply = cloudSource.indexOf('S = migrateCurrency(normalizeGloves({ ...fresh(), ...data.save_data }))', request);
   assert.notEqual(request, -1, 'cloud save request exists');

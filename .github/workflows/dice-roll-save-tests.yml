@@ -7,6 +7,7 @@ on:
       - 'systems/dice.js'
       - 'services/cloud-save.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/local-save-cloud-conflict.test.js'
       - '.github/workflows/dice-roll-save-tests.yml'
   pull_request:
     paths:
@@ -25,4 +26,4 @@ jobs:
           node-version: 22
       - run: node --check systems/dice.js
       - run: node --check services/cloud-save.js
-      - run: node --test tests/dice-roll-save.test.js
+      - run: node --test tests/dice-roll-save.test.js tests/local-save-cloud-conflict.test.js
