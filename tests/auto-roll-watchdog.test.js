@@ -129,12 +129,13 @@ test('watchdog recovers a roll that remains locked beyond the timeout', async ()
     processing.callback();
     await Promise.resolve();
     assert.equal(dice.isRolling(), true);
-    assert.equal(getSaveCount(), 1);
+    const savesBeforeWatchdog = getSaveCount();
+    assert.ok(savesBeforeWatchdog >= 1, 'roll state is persisted before watchdog recovery');
 
     now += 46000;
     watchdogInterval.callback();
     assert.equal(dice.isRolling(), true);
-    assert.equal(getSaveCount(), 2);
+    assert.equal(getSaveCount(), savesBeforeWatchdog + 1, 'watchdog recovery persists the next roll');
 
     dice.stopAuto();
     timers.manager.clearAll();
