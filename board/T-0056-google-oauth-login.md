@@ -47,14 +47,14 @@ done_at:
 
 - `services/auth.js`：新增 `googleSignIn()`，呼叫 Supabase Google OAuth，使用 `prompt=select_account`，回跳到 GitHub Pages；沿用既有 `onAuthStateChange`、裝置帳號限制與雲端載入流程，並處理 quota restriction 及 Provider 未啟用訊息。
 - `index.html`、`script.js`：新增 Google 登入按鈕及事件綁定，保留 Email／密碼、註冊與忘記密碼。
-- `tests/google-oauth.test.js`：新增兩項測試，驗證 redirect／帳號選擇參數及 402 時阻止 OAuth。
+- `tests/google-oauth.test.js`：新增三項測試，驗證 redirect／帳號選擇參數、登入後遇到 402 阻止 OAuth，以及共用 cloud restriction 已啟動時阻止 OAuth。
 - `.github/workflows/google-oauth-tests.yml`：新增獨立 Node 語法檢查與 Google OAuth 測試工作流程。
 
 ### 怎麼驗證的
 
-- GitHub Actions `Google OAuth focused tests`，run `42792090039`：成功；`node --check services/auth.js`、`node --check script.js` 及 `node --test tests/google-oauth.test.js` 全部通過。
+- GitHub Actions `Google OAuth focused tests`，run `42792523386`：成功；`node --check services/auth.js`、`node --check script.js`、完整任務差異 `git diff --check` 及 `node --test tests/google-oauth.test.js` 全部通過（三項測試）。
 - 完整回歸測試在修改後為 77 項、63 pass、14 fail；修改前基準 commit `3b1d1bccde3f986a87f5baa87988cbed9784b20a` 為 75 項、61 pass、14 fail，失敗項目相同。新增的兩項 OAuth 測試均通過。
-- 尚未取得可執行本機 `git diff --check` 的工作樹；最後一次 CI workflow 修改後未取得新的 workflow run，因此完整任務 diff whitespace check 未驗證。
+
 
 ### 沒做／做不到的
 
