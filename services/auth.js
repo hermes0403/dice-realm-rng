@@ -156,7 +156,8 @@ export function createAuthService(deps) {
 
   async function googleSignIn() {
     if (authBusy) return;
-    if (authServiceRestricted) {
+    if (authServiceRestricted || isCloudSyncBlocked()) {
+      authServiceRestricted = true;
       showAuthMessage('Supabase 雲端服務目前因流量額度限制而暫停，暫時無法登入。請待專案服務恢復後重新整理頁面；本機已保存的遊戲資料不會因這個提示而被清除。');
       return;
     }
