@@ -69,6 +69,9 @@
 <div id="authModal" style="display:none;position:fixed;inset:0;z-index:100;background:#050711dd;backdrop-filter:blur(10px);padding:18px;overflow:auto;align-items:center;justify-content:center">
  <div class="card" style="width:min(100%,440px);padding:22px;border-color:#454d7a;box-shadow:0 25px 90px #0009">
   <div class="eyebrow">DICE REALM ACCOUNT</div><h2 style="margin:5px 0 4px">登入雲端帳號</h2><p class="muted" style="font-size:13px">使用 Email 與密碼登入，將骰子收藏同步到雲端。首次註冊需先到信箱確認身分，點擊驗證信後即可返回遊戲。</p>
+  <button class="primary" id="authGoogleBtn" type="button" style="width:100%;min-height:44px;background:#f7f8fc;color:#202433;border:1px solid #d9dce7;display:flex;align-items:center;justify-content:center;gap:10px"><span aria-hidden="true" style="font-weight:900;font-size:18px;color:#4285f4">G</span>使用 Google 帳號登入</button>
+  <p class="mini" style="text-align:center;margin:7px 0 12px">Google 會開啟帳號選擇畫面，也可選擇新增 Google 帳戶。</p>
+  <div style="display:flex;align-items:center;gap:10px;margin:8px 0 12px;color:#8d95b7;font-size:11px"><span style="height:1px;background:#343b5e;flex:1"></span>或使用 Email<span style="height:1px;background:#343b5e;flex:1"></span></div>
   <label for="authEmail">Gmail／Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="name@gmail.com" class="field" style="width:100%;margin:6px 0 12px">
   <label for="authPassword">密碼（至少 6 位）</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="輸入密碼" class="field" style="width:100%;margin:6px 0 14px">
   <div class="toolbar"><button class="primary" id="authLoginBtn" style="flex:1">登入</button><button id="authSignupBtn" style="flex:1">註冊</button></div>
