@@ -8,6 +8,8 @@ on:
       - 'services/auth.js'
       - 'script.js'
       - 'tests/google-oauth.test.js'
+      - 'tests/dice-roll-save.test.js'
+      - 'systems/dice.js'
       - '.github/workflows/google-oauth-tests.yml'
   pull_request:
     branches:
@@ -37,7 +39,9 @@ jobs:
         run: |
           node --check services/auth.js
           node --check script.js
+          node --check systems/dice.js
+          node --check tests/dice-roll-save.test.js
       - name: Check whitespace for the complete task diff
         run: git diff --check 3b1d1bccde3f986a87f5baa87988cbed9784b20a...HEAD
-      - name: Run Google OAuth tests
-        run: node --test tests/google-oauth.test.js
+      - name: Run focused regression tests
+        run: node --test tests/google-oauth.test.js tests/dice-roll-save.test.js
