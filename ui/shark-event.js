@@ -7,7 +7,26 @@ export function createSharkEventUI({
   documentRef = document
 }) {
   let busy = false;
-  let pendingGrant = null;
+  const pendingGrantStorageKey = 'diceRealm.sharkEvent.pendingAdminGrant.v1';
+
+  function readPendingGrant() {
+    try {
+      return JSON.parse(globalThis.sessionStorage?.getItem(pendingGrantStorageKey) || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  function storePendingGrant(value) {
+    try {
+      if (value) globalThis.sessionStorage?.setItem(pendingGrantStorageKey, JSON.stringify(value));
+      else globalThis.sessionStorage?.removeItem(pendingGrantStorageKey);
+    } catch {
+      // The in-memory key still protects retries while this page remains open.
+    }
+  }
+
+  let pendingGrant = readPendingGrant();
 
   const byId = id => documentRef.getElementById(id);
   const number = value => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(Number(value) || 0);
@@ -84,9 +103,10 @@ export function createSharkEventUI({
       return false;
     }
 
-    const requestSignature = JSON.stringify({ userId, amount, reason });
+    const requestSignature = JSON.stringify({ adminId: getCurrentUser()?.id || '', userId, amount, reason });
     if (!pendingGrant || pendingGrant.signature !== requestSignature) {
       pendingGrant = { signature: requestSignature, idempotencyKey: crypto.randomUUID() };
+      storePendingGrant(pendingGrant);
     }
 
     busy = true;
@@ -102,6 +122,7 @@ export function createSharkEventUI({
       });
       if (error) throw error;
       pendingGrant = null;
+      storePendingGrant(null);
       if (status) status.textContent = '發放成功；該玩家目前餘額：' + number(data?.shark_coins) + ' 枚。';
       toast('已發放 ' + number(amount) + ' 枚鯊皇幣');
       busy = false;
