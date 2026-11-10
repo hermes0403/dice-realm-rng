@@ -381,3 +381,13 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 .shark-event-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;padding:12px 2px;color:#775e63;font-size:8px;font-weight:950;letter-spacing:.18em}
 .shark-event-footer button{padding:7px 11px;border-color:#50343d;color:#c2a4a0;font-size:10px}
 @media(max-width:680px){.shark-event-wallet{grid-template-columns:1fr 1fr}.shark-event-wallet-card:last-child{grid-column:1/-1}.shark-event-main-grid{grid-template-columns:minmax(0,1fr)}.shark-event-header{padding:19px 16px 15px}.shark-event-task-card,.shark-event-egg-card{padding:14px}.shark-event-emblem{width:55px;height:55px;font-size:30px}}
+
+
+.shark-event-admin-grant{margin-top:12px;padding:15px;border:1px solid #57404a;border-radius:14px;background:linear-gradient(140deg,#17121a,#0c1018)}
+.shark-event-admin-grant h3{margin:10px 0 4px;color:#e8c58d;font-size:14px}
+.shark-event-admin-grant>p{margin:0 0 12px;color:#9d8d91;font-size:10px}
+.shark-event-admin-grant label{display:block;margin:8px 0 5px;color:#b99479;font-size:10px;font-weight:800}
+.shark-event-admin-grant input{width:100%;min-width:0;padding:9px 10px;border:1px solid #4d3942;border-radius:8px;background:#090c14;color:#f0e5d8;font-size:12px}
+.shark-event-grant-fields{display:grid;grid-template-columns:minmax(100px,.6fr) minmax(0,1.4fr);gap:9px}
+.shark-event-admin-grant .shark-event-status{min-height:18px;margin-bottom:0}
+@media(max-width:440px){.shark-event-grant-fields{grid-template-columns:1fr}}
