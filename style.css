@@ -361,23 +361,23 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 .shark-event-status{min-height:34px;margin:10px 0;color:#b8a0a0;font-size:10px;line-height:1.5}
 .shark-event-refresh{width:100%;padding:8px 10px;border:1px solid #7b4a4c;background:linear-gradient(100deg,#29121c,#18121a);color:#e8c18a;font-size:11px;font-weight:850}
 .shark-event-egg-card>p{min-height:36px;color:#aa979a;font-size:11px}
-.shark-event-egg-visual{position:relative;display:grid;place-items:center;height:128px;margin:13px 0 5px;overflow:hidden;border:1px solid #68434a;border-radius:13px;background:radial-gradient(circle at center,#4d1c2c 0,#1a101b 46%,#0a0d15 78%)}
-.shark-event-egg-ring{position:absolute;width:98px;height:98px;border:1px solid #d5a65f;border-radius:50%;box-shadow:0 0 22px #c77d4a55,inset 0 0 18px #d6a25c22}
-.shark-event-egg-icon{position:relative;z-index:1;font-size:57px;filter:drop-shadow(0 0 18px #e7b96b88)}
-.shark-event-egg-caption{position:absolute;bottom:8px;color:#c89c69;font-size:8px;font-weight:950;letter-spacing:.2em}
-.shark-event-egg-stock{text-align:center;color:#d4aa75;font-size:10px;margin:9px 0}
-.shark-event-open-button{width:100%;padding:10px;border:1px solid #c49455;background:linear-gradient(105deg,#60202e,#32131e 56%,#5b3820);color:#ffebc8;font-size:12px;font-weight:950;letter-spacing:.08em;box-shadow:0 0 18px #c67a3c20}
-.shark-event-open-button:disabled{border-color:#44343a;background:#1a151b;color:#786d72;opacity:1}
-.shark-event-egg-result{margin-top:8px;padding:9px;border:1px solid #a77a46;border-radius:9px;background:#26191b;color:#ffe0a5;text-align:center;font-size:12px;font-weight:900}
-.shark-event-odds-toggle{display:flex;justify-content:space-between;width:100%;margin-top:11px;padding:9px 2px 0;border:0;border-top:1px solid #50343d;border-radius:0;background:transparent;color:#caa06c;font-size:10px;text-align:left}
-.shark-event-odds-toggle span{transition:transform .2s}
-.shark-event-odds-toggle[aria-expanded="true"] span{transform:rotate(180deg)}
-.shark-event-odds-panel{margin-top:9px;overflow-x:auto}
-.shark-event-odds-panel table{width:100%;border-collapse:collapse;font-size:10px;white-space:nowrap}
-.shark-event-odds-panel th{padding:7px 5px;color:#c18c65;text-align:left;border-bottom:1px solid #64414a}
-.shark-event-odds-panel td{padding:8px 5px;color:#d6c4bc;border-bottom:1px solid #39272f}
-.shark-event-odds-panel td:nth-child(3){color:#f0c47a;font-weight:950}
-.shark-event-odds-total{padding:8px 4px;color:#e7bd7b;text-align:right;font-size:9px;font-weight:950;letter-spacing:.1em}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .shark-event-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;padding:12px 2px;color:#775e63;font-size:8px;font-weight:950;letter-spacing:.18em}
 .shark-event-footer button{padding:7px 11px;border-color:#50343d;color:#c2a4a0;font-size:10px}
 @media(max-width:680px){.shark-event-wallet{grid-template-columns:1fr 1fr}.shark-event-wallet-card:last-child{grid-column:1/-1}.shark-event-main-grid{grid-template-columns:minmax(0,1fr)}.shark-event-header{padding:19px 16px 15px}.shark-event-task-card,.shark-event-egg-card{padding:14px}.shark-event-emblem{width:55px;height:55px;font-size:30px}}
