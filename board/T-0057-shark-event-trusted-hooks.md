@@ -1,7 +1,7 @@
 ---
 id: T-0057
 title: 建立鯊皇活動可信事件接點並整合權威交易
-status: in_progress
+status: blocked
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -59,3 +59,5 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-11 23:59 [叉子] 後續接線仍被 T-0006、T-0009、T-0012 阻塞；GitHub 比對顯示本分支相對 work/chazi 已分歧（ahead 56、behind 10），且 commit status／workflow 查詢未提供 CI 結果。為避免將未整合且未完整驗證的活動系統推上正式站，本次不合併、不部署；待依賴完成、分支安全整合及測試通過後再部署。
