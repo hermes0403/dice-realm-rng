@@ -10,6 +10,7 @@ on:
       - 'tests/google-oauth.test.js'
       - 'tests/dice-roll-save.test.js'
       - 'systems/dice.js'
+      - 'services/cloud-save.js'
       - '.github/workflows/google-oauth-tests.yml'
   pull_request:
     branches:
@@ -42,6 +43,7 @@ jobs:
           node --check services/auth.js
           node --check script.js
           node --check systems/dice.js
+          node --check services/cloud-save.js
           node --check tests/dice-roll-save.test.js
       - name: Check whitespace for the complete task diff
         run: git diff --check 3b1d1bccde3f986a87f5baa87988cbed9784b20a...HEAD
