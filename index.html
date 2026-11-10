@@ -13,11 +13,52 @@
 <header class="top"><div class="brand">骰界 <span>RNG</span></div><div class="weather-status" id="weatherStatus" aria-live="polite"><span class="weather-icon" id="weatherIcon">☀️</span><span class="weather-name" id="weatherName">晴天</span><span class="weather-countdown" id="weatherCountdown" hidden>05:00</span></div><div class="profile"><span class="pill" id="saveStatus" hidden>本機試玩存檔</span><span class="avatar" id="avatar" hidden>旅</span><span id="playerName" hidden>旅人</span><span id="gloveLabel" hidden>基礎手套</span><button class="primary" id="authOpenBtn">登入／註冊</button></div></header><section class="announcement-panel" aria-label="全服公告"><div class="announcement-heading"><span class="announcement-live"></span><b>全服稀有公告</b><span class="announcement-caption">REALM ANNOUNCEMENTS</span></div><div id="globalAnnouncements" class="announcement-list"><div class="announcement-empty">等待稀有骰子現身……</div></div></section>
 <div class="mobile-nav" id="mobileNav"></div><div class="layout"><aside class="nav" id="sideNav"></aside><main class="content">
 <section class="page active" id="page-roll">
-<div class="hero" id="realmHero"><div id="realmHeroWelcome"><div class="eyebrow">WELCOME TO THE DICE REALM</div><h1>命運，由你擲出。</h1><div class="muted">收集未知骰子、鍛造手套，突破你的收藏極限。</div></div><div id="realmAdminActivity" hidden></div></div>
+<div class="hero" id="realmHero"><div id="realmHeroWelcome"><div class="eyebrow">WELCOME TO THE DICE REALM</div><h1>命運，由你擲出。</h1><div class="muted">收集未知骰子、鍛造手套，突破你的收藏極限。</div></div><div class="limited-event-entry-wrap"><button type="button" class="limited-event-entry" data-go="event" hidden>🦈 鯊皇活動 <small>SHARK EMPEROR</small></button></div><div id="realmAdminActivity" hidden></div></div>
 <div class="stats"><div class="stat"><b id="totalRolls">0</b><span>累積擲骰</span></div><div class="stat"><b id="uniqueCount">0 / 59</b><span>已發現骰子</span></div><div class="stat"><b id="luckStat">+0%</b><span>額外運氣</span></div></div>
 <div class="rollbox"><div class="eyebrow">ROLL THE UNKNOWN</div><div class="dice" id="diceFace">⚄</div><div class="result-name" id="resultName">等待命運</div><span class="rarity" id="resultRarity">按下擲骰開始</span><div class="result-sub" id="resultSub">每一次擲骰，都可能帶來新的發現。</div><div class="tenth-progress" id="tenthProgress"><div class="tenth-progress-head"><span>雙倍運氣</span><strong id="tenthProgressLabel">再擲 10 次</strong></div><div class="tenth-track"><span id="tenthProgressBar"></span></div></div><div class="roll-actions"><button class="primary" id="rollBtn">✦ 擲骰</button><button id="autoBtn">▶ 自動擲骰</button><button class="quiet" id="stopBtn" disabled>停止</button></div></div>
 <div class="card" style="margin-top:8px"><div class="section-head" style="margin:0 0 8px"><h2>背包與自動出售</h2><span class="pill" id="bagCapacity">0 / 35 顆</span></div><p class="mini" style="margin:0 0 10px">勾選擲到後要自動出售的骰子；一般骰子先由常見到稀有，再列出萬聖節骰子。</p><div id="autoSellDiceOptions" class="auto-sell-options" aria-label="自動出售骰子選項"></div><div class="stats"><div class="stat"><b id="coinBalance">0$</b><span>金錢數量</span></div><div class="stat"><b id="bagTotal">0 / 35</b><span>背包骰子數</span></div></div></div>
 
+</section>
+<section class="page shark-event-page" id="page-event">
+<div class="shark-event-header"><div class="shark-event-kicker">LIMITED REALM EVENT · NO. 01</div><div class="shark-event-title-row"><div><h1>鯊皇降臨</h1><p>SHARK EMPEROR AWAKENING</p></div><div class="shark-event-emblem" aria-hidden="true">🦈</div></div><div class="shark-event-subtitle">完成專屬挑戰，累積鯊皇幣，開啟龍晶蛋，尋找傳說中的鯊皇。</div><div class="shark-event-header-line"></div></div>
+<div class="shark-event-wallet">
+<div class="shark-event-wallet-card"><span>SHARK COINS</span><strong id="sharkCoinBalance">0 枚</strong><small>鯊皇幣餘額</small></div>
+<div class="shark-event-wallet-card"><span>DRAGON CRYSTAL EGGS</span><strong id="dragonEggBalance">0 顆</strong><small>龍晶蛋庫存</small></div>
+<div class="shark-event-wallet-card"><span>MISSION PROGRESS</span><strong id="sharkTaskCount">0 / 25</strong><small>已完成任務</small></div>
+</div>
+<div class="shark-event-main-grid">
+<div class="shark-event-task-card">
+<div class="shark-event-section-label"><span>01 / CURRENT OBJECTIVE</span><span class="shark-event-live-dot"></span></div>
+<div class="shark-event-task-heading">當前任務</div>
+<h2 id="sharkCurrentTaskTitle">正在載入任務…</h2>
+<div class="shark-event-progress-meta"><span>任務進度</span><strong id="sharkTaskProgress">0 / 0</strong></div>
+<div class="shark-event-progress-track"><span id="sharkTaskProgressBar"></span></div>
+<div class="shark-event-reward-row"><span>完成獎勵</span><strong id="sharkTaskReward">+1 鯊皇幣</strong></div>
+<p id="sharkEventStatus" class="shark-event-status" role="status">正在連線活動核心…</p>
+<button type="button" class="shark-event-refresh" id="refreshSharkEventBtn">⟳ 同步活動資料</button>
+</div>
+<div class="shark-event-egg-card">
+<div class="shark-event-section-label"><span>02 / RELIC HATCHERY</span><span>六種限定寵物</span></div>
+<div class="shark-event-egg-visual"><div class="shark-event-egg-ring"></div><div class="shark-event-egg-icon">🥚</div><div class="shark-event-egg-caption">DRAGON CRYSTAL</div></div>
+<h2>龍晶蛋</h2>
+<p>消耗 1 顆龍晶蛋，隨機獲得一隻限定活動寵物。結果由伺服器抽取並保存。</p>
+<div class="shark-event-egg-stock" id="dragonEggOpenHint">目前沒有龍晶蛋</div>
+<button type="button" class="shark-event-open-button" id="openDragonCrystalEggBtn" disabled>✦ 開啟龍晶蛋</button>
+<div id="dragonEggResult" class="shark-event-egg-result" hidden></div>
+<button type="button" class="shark-event-odds-toggle" id="sharkEggOddsToggle" aria-expanded="false" aria-controls="sharkEggOddsPanel">查看六種寵物機率 <span>⌄</span></button>
+<div id="sharkEggOddsPanel" class="shark-event-odds-panel" hidden>
+<table><thead><tr><th>限定寵物</th><th>品質</th><th>機率</th><th>收益</th></tr></thead><tbody>
+<tr><td>晶銅獸</td><td>普通</td><td>45%</td><td>15$/秒</td></tr>
+<tr><td>鏡冰靈</td><td>普通</td><td>30%</td><td>30$/秒</td></tr>
+<tr><td>晶龍哨兵</td><td>稀有</td><td>14.6%</td><td>100$/秒</td></tr>
+<tr><td>異核雙子龍</td><td>傳奇</td><td>8.5%</td><td>750$/秒</td></tr>
+<tr><td>月光龍</td><td>神話</td><td>1.5%</td><td>2,500$/秒</td></tr>
+<tr><td>鯊皇</td><td>秘密</td><td>0.4%</td><td>9,000$/秒</td></tr>
+</tbody></table><div class="shark-event-odds-total">TOTAL DROP RATE · 100%</div>
+</div>
+</div>
+</div>
+<div class="shark-event-footer"><span>SHARK EMPEROR PROTOCOL</span><button type="button" class="quiet" data-go="roll">返回擲骰大廳</button></div>
 </section>
 <section class="page" id="page-inventory"><div class="section-head"><h2>骰子背包</h2><span class="pill" id="bagCount">0 顆</span></div><div class="inventory-toolbar"><div class="mini" id="inventorySelectedCount">一般模式</div><button class="danger" id="sellSelectedDiceBtn" type="button">出售</button></div><div class="bag-upgrade-strip"><div><b>背包容量擴充</b><div class="mini" id="bagUpgradeInfo">目前容量 35，最高 200 顆</div></div><button class="primary" id="upgradeBagBtn" style="padding:6px 10px;font-size:12px;min-height:30px;white-space:nowrap">擴充 +1</button></div><div class="grid" id="inventoryGrid" style="margin-top:12px"></div></section>
 <section class="page" id="page-codex"><div class="codex-category-switch" role="group" aria-label="圖鑑分類"><button type="button" class="codex-category-btn" data-codex-category="pets">寵物</button><button type="button" class="codex-category-btn active" data-codex-category="normal">一般</button><button type="button" class="codex-category-btn" data-codex-category="weather">天氣</button><button type="button" class="codex-category-btn" data-codex-category="halloween">萬聖節</button></div><div class="section-head"><h2>收藏圖鑑</h2><span class="pill" id="codexPct">0%</span></div><div class="hero"><div class="eyebrow">ARCHIVE DATABASE</div><h1>記錄每一次奇蹟。</h1><div class="muted">未發現的骰子將以未知檔案顯示。部分高階骰子擁有專屬視覺。</div><div class="bar"><span id="codexBar" style="width:0%"></span></div></div><div class="codex-list" id="codexGrid"></div></section>
