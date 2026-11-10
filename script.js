@@ -231,8 +231,6 @@ const sharkEventUI = createSharkEventUI({
   supabaseClient,
   getCurrentUser: () => currentUser,
   isAdmin,
-  loadCloudSave,
-  render,
   toast,
   documentRef: document
 });
