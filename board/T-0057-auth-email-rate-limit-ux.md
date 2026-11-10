@@ -38,3 +38,8 @@ done_at:
 
 ## 紀錄
 - 2026-11-10 [叉子] 接手：棒子回報多位玩家註冊後沒有收到驗證信，並希望處理；已在正式 Auth logs 確認多個 /signup 請求回傳 429、over_email_send_rate_limit，確定為伺服器郵件寄送限制。
+
+- 2026-11-10 [叉子] 修改 services/auth.js：註冊與密碼重設遇到郵件 429 時，明確提示該次信件未寄出、全專案共用寄信額度及不要連續重試；伺服器若回傳個別冷卻秒數，直接顯示應等待秒數。保留 402 Egress 限制、Google OAuth、一般登入及信箱驗證流程。
+- 2026-11-10 [叉子] 新增 tests/auth-email-rate-limit.test.js，涵蓋專案郵件額度、個別秒數冷卻與密碼重設信件類型；GitHub Branch tests workflow 已會執行 tests/*.test.js，services/auth.js 也在語法檢查清單內。相關 commit：cce3f0c4、d817ed96、ee97c622、d50e3c6f、6a571702。
+- 2026-11-10 [叉子] 驗證狀態：已確認遠端原始碼與 Board 寫入；目前尚未取得 GitHub Actions 執行結果，單元測試與瀏覽器端驗證尚未在實際 repository runner 執行，不宣稱已通過。
+- 2026-11-10 [叉子] 真正提高寄信額度仍需管理員設定自訂郵件服務或 Send Email Auth Hook；需要外部服務帳號及秘密設定，未取得授權前不修改正式設定。尚未確認 dice-rng 現行 SMTP provider 的具體配置。
