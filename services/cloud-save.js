@@ -416,7 +416,12 @@ export function createCloudSaveService(dependencies) {
       const localChanged = previousLocal !== currentLocal;
       const hasCloudChanges = lastSyncedUserId === user.id
         && Object.keys(diffPayload(lastSyncedPayload, savePayload())).length > 0;
-      if (hasCloudChanges || ((cloudSyncBlocked || cloudLoadInProgressUserCounts.has(user.id)) && localChanged)) {
+      // Until this account's cloud baseline is loaded, any local mutation must
+      // be marked dirty. Otherwise a late cloud-load response can overwrite
+      // rolls made after sign-in but before the first successful cloud read.
+      const cloudBaselineUnknown = lastSyncedUserId !== user.id;
+      if ((hasCloudChanges || cloudBaselineUnknown || cloudSyncBlocked
+        || cloudLoadInProgressUserCounts.has(user.id)) && localChanged) {
         markLocalSaveDirty(user.id);
       }
     }
