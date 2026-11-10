@@ -38,25 +38,20 @@
 <button type="button" class="shark-event-refresh" id="refreshSharkEventBtn">⟳ 同步活動資料</button>
 </div>
 <div class="shark-event-egg-card">
-<div class="shark-event-section-label"><span>02 / RELIC HATCHERY</span><span>六種限定寵物</span></div>
-<div class="shark-event-egg-visual"><div class="shark-event-egg-ring"></div><div class="shark-event-egg-icon">🥚</div><div class="shark-event-egg-caption">DRAGON CRYSTAL</div></div>
-<h2>龍晶蛋</h2>
-<p>消耗 1 顆龍晶蛋，隨機獲得一隻限定活動寵物。結果由伺服器抽取並保存。</p>
-<div class="shark-event-egg-stock" id="dragonEggOpenHint">目前沒有龍晶蛋</div>
-<button type="button" class="shark-event-open-button" id="openDragonCrystalEggBtn" disabled>✦ 開啟龍晶蛋</button>
-<div id="dragonEggResult" class="shark-event-egg-result" hidden></div>
-<button type="button" class="shark-event-odds-toggle" id="sharkEggOddsToggle" aria-expanded="false" aria-controls="sharkEggOddsPanel">查看六種寵物機率 <span>⌄</span></button>
-<div id="sharkEggOddsPanel" class="shark-event-odds-panel" hidden>
-<table><thead><tr><th>限定寵物</th><th>品質</th><th>機率</th><th>收益</th></tr></thead><tbody>
-<tr><td>晶銅獸</td><td>普通</td><td>45%</td><td>15$/秒</td></tr>
-<tr><td>鏡冰靈</td><td>普通</td><td>30%</td><td>30$/秒</td></tr>
-<tr><td>晶龍哨兵</td><td>稀有</td><td>14.6%</td><td>100$/秒</td></tr>
-<tr><td>異核雙子龍</td><td>傳奇</td><td>8.5%</td><td>750$/秒</td></tr>
-<tr><td>月光龍</td><td>神話</td><td>1.5%</td><td>2,500$/秒</td></tr>
-<tr><td>鯊皇</td><td>秘密</td><td>0.4%</td><td>9,000$/秒</td></tr>
-</tbody></table><div class="shark-event-odds-total">TOTAL DROP RATE · 100%</div>
+<div class="shark-event-section-label"><span>02 / EVENT PET ARCHIVE</span><span>六種限定寵物</span></div>
+<h2>鯊皇限定寵物圖鑑</h2>
+<p>六種活動寵物已加入收藏圖鑑。取得方式會依正式活動規則開放，這裡不提供隨機抽取。</p>
+<div class="shark-event-pet-list">
+<div><span>🐂</span><b>晶銅獸</b><small>普通 · 15$/秒</small></div>
+<div><span>🧊</span><b>鏡冰靈</b><small>普通 · 30$/秒</small></div>
+<div><span>🐉</span><b>晶龍哨兵</b><small>稀有 · 100$/秒</small></div>
+<div><span>🐲</span><b>異核雙子龍</b><small>傳奇 · 750$/秒</small></div>
+<div><span>🌙</span><b>月光龍</b><small>神話 · 2,500$/秒</small></div>
+<div><span>🦈</span><b>鯊皇</b><small>秘密 · 9,000$/秒</small></div>
 </div>
-</div>
+<div class="shark-event-egg-stock">龍晶蛋庫存：<strong id="dragonEggBalance">0 顆</strong></div>
+<div class="shark-event-egg-note">龍晶蛋取得與使用規則尚未設定，目前不會扣除或隨機產生寵物。</div>
+</div></div>
 </div>
 <div class="shark-event-admin-grant">
 <div class="shark-event-section-label"><span>03 / ADMINISTRATOR CONSOLE</span><span>ADMIN ONLY</span></div>
