@@ -18,10 +18,10 @@ export function createNavigationUI({
       button.hidden = !allowed;
     });
     document.querySelectorAll('[data-page="event"],[data-go="event"]').forEach(button => {
-      button.hidden = false;
+      button.hidden = !allowed;
     });
     const eventPanel = document.getElementById('page-event');
-    if (eventPanel) eventPanel.hidden = false;
+    if (eventPanel) eventPanel.hidden = !allowed;
     const adminGrantPanel = document.querySelector('.shark-event-admin-grant');
     if (adminGrantPanel) adminGrantPanel.hidden = !allowed;
     const panel = document.getElementById('page-admin');
@@ -32,13 +32,14 @@ export function createNavigationUI({
   }
 
   function navHTML() {
-    return pages.map(([id, name, icon]) =>
-      `<button data-page="${id}" data-nav-id="${id}" class="${id === 'roll' ? 'active' : ''}" ${id === 'admin' ? 'hidden' : ''}>${icon} ${name}</button>`
-    ).join('');
+    return pages.map(([id, name, icon]) => {
+      const hidden = id === 'admin' || (id === 'event' && !isAdmin()) ? 'hidden' : '';
+      return `<button data-page="${id}" data-nav-id="${id}" class="${id === 'roll' ? 'active' : ''}" ${hidden}>${icon} ${name}</button>`;
+    }).join('');
   }
 
   function go(id) {
-    if (id === 'admin' && !isAdmin()) {
+    if ((id === 'admin' || id === 'event') && !isAdmin()) {
       toast('沒有管理員權限');
       return;
     }
