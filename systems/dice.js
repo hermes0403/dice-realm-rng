@@ -229,7 +229,9 @@ export function createDiceSystem(deps) {
     rolling = true;
     // 先立即消耗本次擲骰序號並寫入本機，避免動畫期間重新整理重複取得第 10 抽雙倍。
     state.rolls = Math.max(0, Number(state.rolls) || 0) + 1;
-    localStorage.setItem(KEY, JSON.stringify(state));
+    // Persist both the shared and user-scoped local snapshots immediately.
+    // This prevents cloud-load from restoring an older per-user roll count after refresh.
+    save();
     const face = documentRef.getElementById('diceFace');
     face.classList.add('rolling');
     const rollButton = documentRef.getElementById('rollBtn');
@@ -327,6 +329,10 @@ export function createDiceSystem(deps) {
         documentRef.getElementById('resultRarity').textContent = chanceText(dice);
         const resultDetail = (sold || autoCollected) ? '' : (isNew ? '✦ 首次發現！' : '獲得 ×' + (Number(currentState.bag[dice.id]) || 0));
         documentRef.getElementById('resultSub').textContent = [resultDetail, new Date(now).toLocaleTimeString()].filter(Boolean).join(' · ');
+
+        // Commit the completed roll to local storage before any network call or reveal animation.
+        // A refresh during rare-roll broadcasts/reveals must not discard the obtained dice.
+        save();
 
         if (autoCollected) toast('已自動保留藥水材料：' + dice.name);
         else if (sold) toast('已出售 ' + dice.name);
