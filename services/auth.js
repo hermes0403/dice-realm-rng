@@ -27,6 +27,18 @@ export async function runCloudSessionInitialization({
   }
   return true;
 }
+export function getLoginFailureMessage(error) {
+  const message = String(error?.message || error?.msg || error?.error_description || '').toLowerCase();
+  if (error?.status === 429 || message.includes('too many requests') || message.includes('rate limit')) {
+    return '登入嘗試太頻繁，請先停止重複操作，稍後再試。若畫面有顯示等待時間，請等候倒數結束。';
+  }
+  if (message.includes('invalid login credentials') || message.includes('invalid_credentials')
+    || message.includes('email or password') || message.includes('user not found')) {
+    return '帳號或密碼不正確。第一次使用骰界？請按「建立新帳號」完成註冊；已經有帳號則請檢查 Email 和密碼，或使用「忘記密碼」。請勿連續猜測密碼，以免觸發安全限制。';
+  }
+  return error?.message || '登入失敗，請確認帳號資料後再試。第一次使用請先建立新帳號。';
+}
+
 export function getAuthEmailRateLimitMessage(mode, error) {
   const rawMessage = String(error?.message || error?.msg || error?.error_description || '');
   const cooldown = rawMessage.match(/only request this after\s+(\d+)\s+seconds?/i);
