@@ -39,6 +39,7 @@ import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js';
 import { setupAccountActions } from './services/account-actions.js';
 import { createTimerManager } from './core/timer-manager.js';
+import { createSharkEventUI } from './ui/shark-event.js';
 
 const timerManager = createTimerManager();
 let globalBoostState=null;
@@ -226,8 +227,18 @@ const {
 } = petSystem;
 const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, documentRef: document, toast });
 petTradingSearch.setup();
+const sharkEventUI = createSharkEventUI({
+  supabaseClient,
+  getCurrentUser: () => currentUser,
+  isAdmin,
+  loadCloudSave,
+  render,
+  toast,
+  documentRef: document
+});
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage,
+  loadSharkEvent: () => sharkEventUI.load()
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
