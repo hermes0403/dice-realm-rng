@@ -1,7 +1,7 @@
 ---
 id: T-0056
 title: 新增 Google OAuth 登入與既有帳號安全連結
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -38,14 +38,30 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-10 [叉子] 棒子已同意新增 Google 登入。依 AGENTS.md，使用叉子個人分支 `work/chazi`，不使用協作者的 `work/laocha` 或 `main`。先實作前端 OAuth 入口及測試；正式 Provider 設定仍待 Owner 控制台操作。
+- 2026-11-10 [叉子] 棒子同意新增 Google 登入。依 AGENTS.md 使用叉子個人分支 `work/chazi`，未使用協作者的 `work/laocha` 或 `main`。
+- 2026-11-10 [叉子] 已完成前端 OAuth 入口、帳號選擇參數、登入按鈕、事件綁定及兩項單元測試；新增獨立 CI workflow。Supabase Google Provider、Google OAuth 憑證與 redirect allow list 尚待 Owner 控制台設定。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `services/auth.js`：新增 `googleSignIn()`，呼叫 Supabase Google OAuth，使用 `prompt=select_account`，回跳到 GitHub Pages；沿用既有 `onAuthStateChange`、裝置帳號限制與雲端載入流程，並處理 quota restriction 及 Provider 未啟用訊息。
+- `index.html`、`script.js`：新增 Google 登入按鈕及事件綁定，保留 Email／密碼、註冊與忘記密碼。
+- `tests/google-oauth.test.js`：新增兩項測試，驗證 redirect／帳號選擇參數及 402 時阻止 OAuth。
+- `.github/workflows/google-oauth-tests.yml`：新增獨立 Node 語法檢查與 Google OAuth 測試工作流程。
+
 ### 怎麼驗證的
+
+- GitHub Actions `Google OAuth focused tests`，run `42792090039`：成功；`node --check services/auth.js`、`node --check script.js` 及 `node --test tests/google-oauth.test.js` 全部通過。
+- 完整回歸測試在修改後為 77 項、63 pass、14 fail；修改前基準 commit `3b1d1bccde3f986a87f5baa87988cbed9784b20a` 為 75 項、61 pass、14 fail，失敗項目相同。新增的兩項 OAuth 測試均通過。
+- 尚未取得可執行本機 `git diff --check` 的工作樹；最後一次 CI workflow 修改後未取得新的 workflow run，因此完整任務 diff whitespace check 未驗證。
 
 ### 沒做／做不到的
 
+- 尚未在 Supabase Dashboard 啟用 Google Provider，也未設定 Google OAuth Client ID／Secret 與 redirect allow list；這些設定需由 Owner 在控制台完成，憑證不得寫入前端或 repository。
+- 尚未用實際 Android 裝置完成 Google 帳號選擇、OAuth 回跳及舊玩家存檔連續性測試。
+- 未部署 GitHub Pages、未合併至 `main`，玩家資料與 Supabase 資料均未修改。
+
 ### 衍生任務／影響任務
+
+- 待棒子完成 Supabase／Google 控制台設定後，親自驗收 Google 登入與既有 Email 帳號的存檔連續性。
