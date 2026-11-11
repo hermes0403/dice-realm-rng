@@ -154,7 +154,7 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(realm.setupRealmSocialUI(), true);
   assert.equal(realm.setupRealmSocialUI(), false);
   assert.equal(realmDocument.listeners.get('realmPollButtons:click').length, 1);
-  assert.equal(timers.manager.getStats().scopes['realm-poll-sync'].intervals, 1);
+  assert.equal(timers.manager.getStats().scopes['realm-poll-sync'], undefined, 'realm poll sync must wait for an authenticated session');
 
   const codexDocument = createFakeDocument();
   const codex = createCodexUI({
