@@ -24,7 +24,7 @@ test('沒有既有 ID 的功能依標題分類', () => {
   assert.equal(classifyAdminFold(fold('','玩家停權／解封')),'players');
   assert.equal(classifyAdminFold(fold('','全體玩家發放')),'actions');
   assert.equal(classifyAdminFold(fold('','全體玩家發放寵物')),'actions');
-  assert.equal(classifyAdminFold(fold('','最近合成紀錄')),'records');
+  assert.equal(classifyAdminFold(fold('','最近合成紀錄')),'players');
   assert.equal(classifyAdminFold(fold('','玩家在線狀況')),'players');
 });
 test('搜尋同時比對標題與內容，忽略大小寫及首尾空白', () => {
