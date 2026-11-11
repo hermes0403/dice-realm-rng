@@ -524,3 +524,48 @@ button:hover{border-color:#65d996}
 @media(prefers-reduced-motion:no-preference){
   body{background-size:100% 100%;background-attachment:fixed}
 }
+
+
+/* Lavender space background — background layer only; keep all foreground UI untouched */
+body{
+  background-color:#c9c8f2;
+  background-image:
+    radial-gradient(ellipse at 12% 8%,#f2eaff 0%,#e3ddff 20%,transparent 48%),
+    radial-gradient(ellipse at 88% 18%,#c9d8ffbb 0%,transparent 42%),
+    radial-gradient(ellipse at 52% 105%,#b9c9f4aa 0%,transparent 52%),
+    radial-gradient(ellipse at 76% 72%,#e8d9ff66 0%,transparent 38%),
+    linear-gradient(145deg,#d9d5ff 0%,#c8d3f5 46%,#b9c7ee 100%);
+  background-attachment:fixed;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.62;
+  background-image:
+    radial-gradient(circle at 7% 13%,#ffffff 0 1px,transparent 1.8px),
+    radial-gradient(circle at 19% 67%,#ffffffd9 0 1px,transparent 1.9px),
+    radial-gradient(circle at 31% 28%,#ffffff 0 .8px,transparent 1.7px),
+    radial-gradient(circle at 47% 82%,#fff 0 1px,transparent 1.9px),
+    radial-gradient(circle at 62% 17%,#fff 0 1px,transparent 1.8px),
+    radial-gradient(circle at 74% 54%,#ffffff 0 .9px,transparent 1.8px),
+    radial-gradient(circle at 91% 31%,#fff 0 1px,transparent 1.8px),
+    radial-gradient(circle at 84% 88%,#ffffffd9 0 .8px,transparent 1.7px),
+    radial-gradient(ellipse at 72% 34%,#fff8 0%,#d9d2ff44 18%,transparent 44%),
+    radial-gradient(ellipse at 22% 86%,#b9b8ff55 0%,transparent 38%);
+  background-size:173px 151px,211px 193px,149px 177px,233px 207px,187px 163px,257px 229px,199px 181px,227px 211px,100% 100%,100% 100%;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.28;
+  background:
+    radial-gradient(ellipse at 78% 38%,transparent 0 12%,#f8f4ff44 12.15% 12.35%,transparent 12.6% 18%,#e9e2ff38 18.2% 18.4%,transparent 18.7%),
+    radial-gradient(ellipse at 28% 22%,#ffffff55 0%,transparent 24%),
+    linear-gradient(125deg,transparent 0 44%,#ffffff22 49%,transparent 56%);
+}
