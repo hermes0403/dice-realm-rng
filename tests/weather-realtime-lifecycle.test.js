@@ -6,6 +6,8 @@ test('shared weather realtime and refresh wait for login and unsubscribe on logo
   const originalDocument = globalThis.document;
   const originalStorage = globalThis.localStorage;
   globalThis.document = {
+    body: { classList: { toggle() {} }, appendChild() {} },
+    createElement() { return { setAttribute() {}, classList: { add() {}, remove() {} } }; },
     addEventListener() {},
     getElementById() { return null; },
     querySelector() { return null; },
