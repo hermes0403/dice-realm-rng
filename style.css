@@ -524,3 +524,16 @@ button:hover{border-color:#65d996}
 @media(prefers-reduced-motion:no-preference){
   body{background-size:100% 100%;background-attachment:fixed}
 }
+
+/* 多重天氣以獨立名稱標籤同列顯示，不再合併成「雨＋水晶」。 */
+.weather-name{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.weather-name-chip{display:inline-flex;align-items:center;padding:1px 6px;border:1px solid currentColor;border-radius:999px;background:#0002;font-size:12px;line-height:1.35;white-space:nowrap}
+.weather-name-chip-rain{color:#8ccaff;background:#18314b;border-color:#467cb3}
+.weather-name-chip-snow{color:#effaff;background:#263d4c;border-color:#8bbfd7}
+.weather-name-chip-thunder{color:#fff09a;background:#302b20;border-color:#a18a43}
+.weather-name-chip-crystal{color:#f0a5ff;background:#351b43;border-color:#df5cff}
+.weather-name-chip-hell{color:#ffad91;background:#451d17;border-color:#ff542d}
+.weather-name-chip-dumpling{color:#ffdc91;background:#3b2b17;border-color:#d99b3b}
+.weather-status.weather-multiple{gap:5px;padding-left:8px;padding-right:8px}
+.weather-status.weather-multiple .weather-icon{display:none}
+@media(max-width:760px){.weather-status.weather-multiple{gap:4px;padding:5px 6px}.weather-status.weather-multiple .weather-name-chip{font-size:10px;padding:1px 4px}.weather-status.weather-multiple .weather-countdown{font-size:10px}}
