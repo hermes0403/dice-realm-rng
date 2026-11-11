@@ -48,7 +48,7 @@ function createSystem({ now = () => 1000, isCloudSyncBlocked = () => false, mark
   return { system, get queries() { return queries; } };
 }
 
-test('concurrent leaderboard refreshes share one request and cache for 30 seconds', async () => {
+test('concurrent leaderboard refreshes share one request and cache for 60 seconds', async () => {
   const dom = installLeaderboardDom();
   let now = 1000;
   const fixture = createSystem({ now: () => now });
@@ -59,11 +59,11 @@ test('concurrent leaderboard refreshes share one request and cache for 30 second
     assert.equal(fixture.queries, 1);
 
     await fixture.system.refreshLeaderboards();
-    assert.equal(fixture.queries, 1, 'opening the leaderboard again within 30 seconds should use cache');
+    assert.equal(fixture.queries, 1, 'opening the leaderboard again within 60 seconds should use cache');
 
-    now += 30001;
+    now += 60001;
     await fixture.system.refreshLeaderboards();
-    assert.equal(fixture.queries, 2, 'the cache should expire after 30 seconds');
+    assert.equal(fixture.queries, 2, 'the cache should expire after 60 seconds');
   } finally {
     dom.restore();
   }
