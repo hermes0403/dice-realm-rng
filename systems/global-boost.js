@@ -76,6 +76,7 @@ export function createGlobalBoostSystem({
     const element = documentRef.getElementById('adminGlobalBoostStatus');
     if (!element) return;
     const boost = activeGlobalBoost();
+    const fusion = activeFusionLuckBoost();
     if (!boost.ends_at && !boost.expires_at && !boost.end_at) {
       element.textContent = fusion ? `目前全服融合運氣 +${fusion.percent}%，剩餘 ${Math.max(0, Math.ceil((timestampToMs(fusion.ends_at)-Date.now())/1000))} 秒` : '目前沒有全體加成';
       return;
