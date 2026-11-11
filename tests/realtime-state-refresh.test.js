@@ -64,6 +64,7 @@ test('global boost uses Realtime and keeps a five-minute fallback plus live UI t
   let restarts = 0;
   const system = createGlobalBoostSystem({
     supabaseClient: client,
+    getCurrentUser: () => ({ id: 'user-1' }),
     getBoostState: () => boost,
     setBoostState: value => { boost = value; },
     render: () => { renders++; },
@@ -74,6 +75,7 @@ test('global boost uses Realtime and keeps a five-minute fallback plus live UI t
   });
 
   system.setupGlobalBoostUI();
+  system.startGlobalBoostRealtime();
   await new Promise(resolve => setTimeout(resolve, 0));
 
   assert.ok(client.handlers.has('realm_global_boost'));
