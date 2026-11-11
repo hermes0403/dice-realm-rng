@@ -11,13 +11,15 @@ export function createGlobalBoostSystem({
   documentRef,
   timerManager,
   isCloudSyncBlocked = () => false,
-  markCloudSyncBlocked = () => false
+  markCloudSyncBlocked = () => false,
+  onFusionLuckChanged = () => {}
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
   let globalBoostChannel = null;
   let globalBoostRealtimeRevision = 0;
   let realmActivitySignature = '';
+  let fusionPreviewSignature = '';
   function activeGlobalBoost() {
     const boost = getBoostState() || {};
     const active = Number.isFinite(new Date(boost.ends_at).getTime()) && new Date(boost.ends_at).getTime() > Date.now();
@@ -40,10 +42,20 @@ export function createGlobalBoostSystem({
       : null;
   }
 
+  function syncFusionLuckPreview() {
+    const fusion = activeFusionLuckBoost();
+    const signature = fusion ? `${fusion.percent}|${fusion.ends_at}` : '';
+    if (signature === fusionPreviewSignature) return false;
+    fusionPreviewSignature = signature;
+    onFusionLuckChanged();
+    return true;
+  }
+
   function applyGlobalBoostRow(data) {
-    const before = JSON.stringify(activeGlobalBoost());
+    const before = JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
     setBoostState(data || null);
-    const changed = before !== JSON.stringify(activeGlobalBoost());
+    const changed = before !== JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
+    syncFusionLuckPreview();
     if (changed) {
       if (typeof render === 'function') render();
       if (typeof restartAutoInterval === 'function') restartAutoInterval();
@@ -126,6 +138,7 @@ export function createGlobalBoostSystem({
   }
 
   function updateGlobalBoostStatus() {
+    syncFusionLuckPreview();
     const element = documentRef.getElementById('adminGlobalBoostStatus');
     if (!element) return;
     const boost = activeGlobalBoost();
