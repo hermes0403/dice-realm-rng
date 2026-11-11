@@ -344,7 +344,7 @@ export function createPetSystem({
       ? `<div class="mini" style="margin:4px 0 8px;color:#d7a2ff">融合運氣 +${Number(appliedPercent.toFixed(2))}%｜神話、秘密提高，${donorKey || '其他品質'}扣除機率</div>`
       : '';
     rows.innerHTML = boostNote + PET_RARITIES.map(rarity => {
-      const value = rates[rarity.id] || 0;
+      const value = Number((rates[rarity.id] || 0).toFixed(4));
       return `<div class="pet-prob-row" style="display:grid;grid-template-columns:64px minmax(0,1fr) 48px;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid #ffffff12"><b class="${rarity.cls}" style="background:linear-gradient(90deg,${rarity.a},${rarity.b});-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 10px ${rarity.a}33">${rarity.name}</b><div class="pet-prob-track" aria-label="${rarity.name} ${value}%" style="background:linear-gradient(90deg,#171c30,#252b43)"><span style="width:${Math.max(0, Math.min(100, value))}%;--prob-a:${rarity.a};--prob-b:${rarity.b};background:linear-gradient(90deg,${rarity.a},${rarity.b});box-shadow:0 0 8px ${rarity.a}66"></span></div><strong style="text-align:right">${value}%</strong></div>`;
     }).join('');
   }
