@@ -1,7 +1,7 @@
 ---
 id: T-0059
 title: 新增管理員全服寵物融合運氣限時活動
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -42,13 +42,32 @@ done_at:
 ## 紀錄
 
 - 2026-11-11 20:04 [叉子] 依棒子指示建立。以現有 realm_global_boost 單例資料列擴充獨立融合運氣欄位，沿用既有全服加成 Realtime 通道，避免新增額外輪詢；實作期間不改 T-0012 任務狀態或其伺服器權威範圍。
+- 2026-11-11 20:14 [叉子] 完成管理員施放介面、資料庫欄位與 admin_set_realm_fusion_luck RPC、全服 Realtime／5 分鐘 fallback 同步、活動卡片、合成預覽與 weightedPetRarity 抽樣。加成獨立於骰子運氣／速度及原有全服加成；結束後依時間自動恢復。機率計算按 mythic／secret 同比提高，從 common／rare／legendary 中原始機率最高者扣除，來源不足時按可扣除量縮減實際加成。
+- 2026-11-11 20:14 [叉子] 正式 Supabase migration 已套用；確認 fusion_luck_* 四欄存在、anon 無 RPC EXECUTE、authenticated 可呼叫且函式固定 search_path 為空字串並在函式內驗證登入身份與管理員 email。
+- 2026-11-11 20:14 [叉子] GitHub Actions 最新 head 816626c：focused regression、Game save delta sync、Branch tests 均成功；完整 Node 測試 93/93 通過，語法檢查及 git diff --check 通過。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `admin/ui-bindings.js`、`index.html`：管理員新增全服寵物融合運氣設定，可輸入 0–500% 與 1–604800 秒。
+- `systems/pets.js`：預覽與實際合成抽樣共用同一套調整機率；神話、秘密按相同比例提升，增加量從其餘品質最高機率項目扣除。
+- `systems/global-boost.js`、`script.js`：沿用既有 Realtime 通道與 5 分鐘 fallback，玩家主頁顯示融合運氣活動卡及倒數，並在加成開始／到期時更新合成預覽。
+- `docs/migrations/20261111120400_realm_global_fusion_luck.sql`：新增獨立融合運氣狀態欄位與管理員 RPC；正式 Supabase migration 已成功套用。
+- 新增 `tests/pet-fusion-luck.test.js`，擴充 `tests/global-boost-render.test.js`。
+
 ### 怎麼驗證的
+
+- Supabase：欄位查詢確認四個 `fusion_luck_*` 欄位存在；RPC 權限查詢確認 anon 無 EXECUTE、authenticated 有 EXECUTE；函式為 SECURITY DEFINER、固定空 search_path，並在函式內驗證 auth.uid() 與管理員 email。
+- GitHub Actions：Focused game regression tests、Game save delta sync tests、Branch tests 均成功；完整 Node 測試 93/93 通過。
+- JavaScript syntax checks：通過；`git diff --check`：通過。
 
 ### 沒做／做不到的
 
+- 尚未以棒子的正式管理員瀏覽器帳號實際施放驗收。
+- PR #37 仍為 Draft，尚未合併至 work/chazi／main，也尚未部署 GitHub Pages；玩家目前線上頁面尚未取得這次前端功能。
+- T-0012 的伺服器權威寵物合成尚未完成；目前融合品質抽樣沿用既有前端流程，不能宣稱已具備伺服器權威防作弊能力。
+
 ### 衍生任務／影響任務
+
+- T-0012 已追加 impact：後續伺服器權威合成必須讀取融合運氣狀態，並在伺服器端沿用相同品質機率分配規則。
