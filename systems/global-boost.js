@@ -8,7 +8,8 @@ export function createGlobalBoostSystem({
   loadAdminIncomeMonitor,
   getCoinBoost = () => null,
   documentRef,
-  timerManager
+  timerManager,
+  onFusionLuckChanged = () => {}
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
@@ -55,9 +56,11 @@ export function createGlobalBoostSystem({
         .select('luck_percent,speed_percent,starts_at,ends_at,updated_at,fusion_luck_percent,fusion_luck_starts_at,fusion_luck_ends_at,fusion_luck_updated_by')
         .eq('singleton', true).maybeSingle();
       if (error) throw error;
-      const before = JSON.stringify(activeGlobalBoost());
+      const before = JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
       setBoostState(data || null);
-      if (before !== JSON.stringify(activeGlobalBoost())) {
+      const fusionChanged = before !== JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
+      if (fusionChanged) onFusionLuckChanged();
+      if (fusionChanged) {
         if (typeof render === 'function') render();
         if (typeof restartAutoInterval === 'function') restartAutoInterval();
       }
