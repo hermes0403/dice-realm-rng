@@ -42,11 +42,11 @@ test('管理員導覽不使用會強制捲動的快速捷徑', () => {
   assert.doesNotMatch(js,/scrollIntoView/); assert.doesNotMatch(js,/admin-quick-actions/);
   assert.match(js,/let activeCategory = 'players'/); assert.match(js,/admin-navigation-layout/);
 });
-test('管理員頁面的 26 個既有功能區塊全部可分類', () => {
+test('管理員頁面的 27 個功能區塊全部可分類', () => {
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const a=html.indexOf('<section class="page" id="page-admin"'),z=html.indexOf('</section>',a),section=html.slice(a,z);
   const entries=[...section.matchAll(/<details class="admin-fold"([^>]*)>\s*<summary>(.*?)<\/summary>/gs)];
-  assert.equal(entries.length,26);
+  assert.equal(entries.length,27);
   const categories=new Set(['players','rewards','pets','weather','economy','stats','records']);
   for(const [,attrs,raw] of entries){const id=attrs.match(/id="([^"]+)"/)?.[1]||'';const title=raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();assert.ok(categories.has(classifyAdminFold(fold(id,title))),title);}
   assert.match(section,/id="adminActivityButton"/);
