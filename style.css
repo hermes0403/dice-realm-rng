@@ -364,208 +364,187 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 
-/* Emerald night theme — preserve all content geometry and typography */
+/* Purple-blue cosmic theme: dark readable UI over a muted lavender-blue starfield */
 :root{
-  --bg:#06130f;
-  --panel:#0b1d17;
-  --panel2:#10271e;
-  --line:#244b3a;
-  --blue:#61d69b;
-  --purple:#65c995;
-  --cyan:#a4f4c8;
+  --bg:#101024;
+  --panel:#17172f;
+  --panel2:#202044;
+  --line:#414475;
+  --text:#edf0ff;
+  --muted:#a8afd0;
+  --blue:#929bff;
+  --purple:#c09aff;
+  --cyan:#9ce7ff;
 }
 body{
-  background-color:#06130f;
+  color:var(--text);
+  background-color:#929bcf;
   background-image:
-    radial-gradient(ellipse at 12% -8%,#1c8b5b55 0,transparent 43%),
-    radial-gradient(ellipse at 92% 18%,#176b4a42 0,transparent 38%),
-    radial-gradient(ellipse at 50% 108%,#123e3155 0,transparent 52%),
-    linear-gradient(145deg,#071610 0%,#091b14 42%,#07120f 100%);
+    radial-gradient(ellipse at 12% 8%,#b7afe8 0%,#a7a7df 18%,transparent 48%),
+    radial-gradient(ellipse at 88% 15%,#91b6e5cc 0%,transparent 43%),
+    radial-gradient(ellipse at 52% 108%,#798fca 0%,transparent 55%),
+    radial-gradient(ellipse at 72% 70%,#a99ad866 0%,transparent 42%),
+    radial-gradient(circle at 11% 24%,#ffffffb0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 32% 61%,#ffffffa0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 64% 22%,#ffffffb0 0 1px,transparent 2px),
+    radial-gradient(circle at 86% 77%,#ffffff99 0 .8px,transparent 1.8px),
+    linear-gradient(145deg,#aaa7df 0%,#9aa9d9 48%,#8399ce 100%);
   background-attachment:fixed;
+  background-size:100% 100%;
 }
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  pointer-events:none;
-  opacity:.24;
-  background-image:
-    linear-gradient(115deg,transparent 0 38%,#69e6a20b 38.1% 38.3%,transparent 38.4% 100%),
-    linear-gradient(25deg,transparent 0 62%,#69e6a208 62.1% 62.25%,transparent 62.35% 100%),
-    radial-gradient(circle at 18% 28%,#8affc31a 0 1px,transparent 1.8px),
-    radial-gradient(circle at 78% 64%,#8affc314 0 1px,transparent 1.8px);
-  background-size:100% 100%,100% 100%,46px 46px,61px 61px;
-}
+.shell{position:relative;z-index:1}
 .nav{
-  background:linear-gradient(165deg,#0b2119ed,#0a1713e8 75%,#10251bdc);
-  border-color:#28513e;
-  box-shadow:0 12px 34px #020b0780,inset 0 1px #a9ffd00a;
+  background:linear-gradient(165deg,#17182fee,#11172ceF 75%,#191b39e8);
+  border-color:#464779;
+  box-shadow:0 12px 34px #11112b66,inset 0 1px #d4d5ff0c;
 }
 .nav button.active{
-  background:linear-gradient(110deg,#174d35,#153c2e);
-  border-color:#347a56;
+  background:linear-gradient(110deg,#34386f,#34305f);
+  border-color:#7778c8;
+  color:#fff;
 }
 .hero{
-  border-color:#2b694a;
+  border-color:#5c5b91;
   background:
-    radial-gradient(ellipse at 10% 0%,#3bd48722,transparent 48%),
-    linear-gradient(135deg,#10271feF,#10251ddd 58%,#102019dd);
-  box-shadow:0 14px 38px #020b0780,inset 0 1px #c5ffdc0d;
+    radial-gradient(ellipse at 10% 0%,#8d82e82b,transparent 48%),
+    linear-gradient(135deg,#1d2040f2,#22203fef 58%,#171c38ef);
+  box-shadow:0 14px 38px #17152f66,inset 0 1px #e1ddff0d;
 }
-.hero:after{background:#42d98b20}
-.eyebrow{color:#9af0bd}
+.hero:after{background:#9a8aff24}
+.eyebrow{color:#a9dfff}
 .stat,.card{
-  background:linear-gradient(145deg,#10251c,#0b1a14);
-  border-color:#244a38;
+  background:linear-gradient(145deg,#20213f,#17192f);
+  border-color:#3c406e;
 }
 .rollbox{
   background:
-    radial-gradient(ellipse at 50% 10%,#1d6847 0,#103323 48%,#0a1b14 100%);
-  border-color:#347653;
+    radial-gradient(ellipse at 50% 10%,#484b91 0,#27294f 48%,#171a34 100%);
+  border-color:#555b9a;
 }
 .dice{
-  background:linear-gradient(145deg,#1b5239,#10281d);
-  border-color:#62bd8a;
-  box-shadow:0 0 35px #42d98b24,inset 0 0 20px #ffffff0b;
+  background:linear-gradient(145deg,#414477,#202443);
+  border-color:#858be0;
+  box-shadow:0 0 35px #8b83ff30,inset 0 0 20px #ffffff0b;
 }
 .item{
-  background:linear-gradient(145deg,#10241b,#0b1913);
-  border-color:#244a38;
+  background:linear-gradient(145deg,#20213e,#17192f);
+  border-color:#3c406e;
 }
 button{
-  background:linear-gradient(120deg,#102b20,#153b2b);
-  border-color:#2c6246;
+  color:var(--text);
+  background:linear-gradient(120deg,#252849,#34335f);
+  border-color:#55598e;
 }
-button:hover{border-color:#65d996}
+button:hover{border-color:#a29aff}
 .primary{
-  background:linear-gradient(115deg,#16834e,#27b66c 58%,#56c985);
-  color:#f5fff8;
+  background:linear-gradient(115deg,#555fd0,#7164d7 58%,#9275df);
+  color:#fff;
   border:0;
 }
-.quiet{background:linear-gradient(120deg,#0d2018,#112a1e)}
+.quiet{background:linear-gradient(120deg,#202442,#29284d)}
 .toolbar input,.toolbar select,.field{
-  background:#091a12;
-  border-color:#28513b;
+  background:#151a32;
+  color:var(--text);
+  border-color:#454b7b;
 }
 .weather-status{
-  border-color:#32684c;
-  background:linear-gradient(120deg,#10281c,#153a28);
+  border-color:#6269a4;
+  background:linear-gradient(120deg,#222747,#30345e);
+  color:#eef0ff;
 }
 .admin-navigation-head{
-  border-color:#2b6246;
+  border-color:#575b91;
   background:
-    radial-gradient(ellipse at 8% 0%,#2ca76b55,transparent 48%),
-    linear-gradient(125deg,#10291e,#10251b 58%,#14291d);
+    radial-gradient(ellipse at 8% 0%,#7773d655,transparent 48%),
+    linear-gradient(125deg,#25284d,#202443 58%,#29264c);
 }
 .admin-search{
-  border-color:#35694c;
-  background:linear-gradient(120deg,#081a12,#10271b);
-  color:#9de9b9;
+  border-color:#6267a2;
+  background:linear-gradient(120deg,#171b38,#25294e);
+  color:#c5d5ff;
 }
 .admin-category-nav{
-  border-color:#28533d;
-  background:linear-gradient(165deg,#10251b,#0c1c14 78%,#10271b);
+  border-color:#484d7d;
+  background:linear-gradient(165deg,#202443,#171a35 78%,#222448);
 }
 .admin-category-tab[aria-pressed=true]{
-  border-color:#4b9a68;
-  background:linear-gradient(105deg,#1d6843,#174a33 75%,#183d2c);
-  box-shadow:inset 3px 0 #8df0b0,0 5px 16px #050f0988;
+  border-color:#8587d5;
+  background:linear-gradient(105deg,#4c52a0,#393d7a 75%,#303866);
+  box-shadow:inset 3px 0 #b7baff,0 5px 16px #080a1d88;
 }
 .admin-category-icon{
-  border-color:#35684a;
-  background:#163a28;
-  color:#a4edbd;
+  border-color:#555b91;
+  background:#292e58;
+  color:#c4d4ff;
 }
 .admin-category-tab[aria-pressed=true] .admin-category-icon{
-  border-color:#68c98a;
-  background:#286746;
+  border-color:#9a9eea;
+  background:#41488a;
 }
 .admin-category-count{
-  border-color:#315b43;
-  background:#0c2016;
-  color:#a7d9b7;
+  border-color:#4d527f;
+  background:#1b2040;
+  color:#c5d5ff;
 }
 .admin-category-content{
-  border-color:#28513c;
+  border-color:#454a78;
   background:
-    radial-gradient(ellipse at 100% 0%,#2d8b5520,transparent 45%),
-    linear-gradient(150deg,#0e2118,#0a1912 72%,#102219);
+    radial-gradient(ellipse at 100% 0%,#7772d622,transparent 45%),
+    linear-gradient(150deg,#202443,#171a34 72%,#222448);
 }
-.admin-navigation-status{border-bottom-color:#2a4c38}
+.admin-navigation-status{border-bottom-color:#454a78}
 .admin-category-title{
-  border-color:#356447;
-  background:linear-gradient(100deg,#1b543866,#163b2c77 65%,transparent);
+  border-color:#5a5f98;
+  background:linear-gradient(100deg,#494d9a66,#34396977 65%,transparent);
 }
 .admin-category-title>span{
-  border-color:#4b9465;
-  background:#19452e;
-  color:#b4f3c9;
+  border-color:#777dcc;
+  background:#30376b;
+  color:#d0d7ff;
 }
 .admin-category-group>.admin-fold{
-  border-color:#2b533e;
-  background:linear-gradient(110deg,#132b20,#0e2118 75%);
+  border-color:#484d7b;
+  background:linear-gradient(110deg,#262a50,#1b2040 75%);
 }
 .admin-category-group>.admin-fold[open]{
-  border-color:#4b9465;
-  background:linear-gradient(110deg,#173b29,#10251b 80%);
-  box-shadow:0 0 0 1px #74d99a16,0 7px 18px #020b0766;
+  border-color:#777dcc;
+  background:linear-gradient(110deg,#33396b,#222747 80%);
+  box-shadow:0 0 0 1px #a7aaff16,0 7px 18px #080a1d66;
 }
-.admin-category-group>.admin-fold>summary::marker{color:#8ce6aa}
+.admin-category-group>.admin-fold>summary::marker{color:#b4c8ff}
 .admin-activity-entry{
-  border-color:#55a975!important;
-  background:linear-gradient(100deg,#216c45,#174e37 70%,#163e2d)!important;
-  box-shadow:0 0 18px #3cb87522;
+  border-color:#858be0!important;
+  background:linear-gradient(100deg,#454b9b,#353d7a 70%,#2c3567)!important;
+  box-shadow:0 0 18px #777dff22;
 }
 .admin-empty-state{
-  border-color:#356447;
-  background:#10241a;
+  border-color:#50568a;
+  background:#202443;
 }
+.admin-curve-wrap{background:#171b35;border-color:#454b7b}
+.admin-curve-grid{stroke:#3b416e}
+.admin-curve-line{stroke:#a5b6ff}
+.admin-curve-point{fill:#e0e6ff;stroke:#879cff}
+.admin-curve-label{fill:#b4bddb}
+.admin-curve-legend{color:#c0c9e8}
+.admin-curve-dot{background:#a5b6ff}
 @media(prefers-reduced-motion:no-preference){
   body{background-size:100% 100%;background-attachment:fixed}
 }
 
-
-/* Lavender space background — background layer only; keep all foreground UI untouched */
+/* Keep the starfield muted: no white wash, no external images, no interaction overlay. */
+/* Lavender-blue outer-space background */
 body{
-  background-color:#c9c8f2;
+  background-color:#929bcf;
   background-image:
-    radial-gradient(ellipse at 12% 8%,#f2eaff 0%,#e3ddff 20%,transparent 48%),
-    radial-gradient(ellipse at 88% 18%,#c9d8ffbb 0%,transparent 42%),
-    radial-gradient(ellipse at 52% 105%,#b9c9f4aa 0%,transparent 52%),
-    radial-gradient(ellipse at 76% 72%,#e8d9ff66 0%,transparent 38%),
-    linear-gradient(145deg,#d9d5ff 0%,#c8d3f5 46%,#b9c7ee 100%);
+    radial-gradient(ellipse at 12% 8%,#b7afe8 0%,#a7a7df 18%,transparent 48%),
+    radial-gradient(ellipse at 88% 15%,#91b6e5cc 0%,transparent 43%),
+    radial-gradient(ellipse at 52% 108%,#798fca 0%,transparent 55%),
+    radial-gradient(ellipse at 72% 70%,#a99ad866 0%,transparent 42%),
+    radial-gradient(circle at 11% 24%,#ffffffb0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 32% 61%,#ffffffa0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 64% 22%,#ffffffb0 0 1px,transparent 2px),
+    radial-gradient(circle at 86% 77%,#ffffff99 0 .8px,transparent 1.8px),
+    linear-gradient(145deg,#aaa7df 0%,#9aa9d9 48%,#8399ce 100%);
   background-attachment:fixed;
-}
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  pointer-events:none;
-  opacity:.62;
-  background-image:
-    radial-gradient(circle at 7% 13%,#ffffff 0 1px,transparent 1.8px),
-    radial-gradient(circle at 19% 67%,#ffffffd9 0 1px,transparent 1.9px),
-    radial-gradient(circle at 31% 28%,#ffffff 0 .8px,transparent 1.7px),
-    radial-gradient(circle at 47% 82%,#fff 0 1px,transparent 1.9px),
-    radial-gradient(circle at 62% 17%,#fff 0 1px,transparent 1.8px),
-    radial-gradient(circle at 74% 54%,#ffffff 0 .9px,transparent 1.8px),
-    radial-gradient(circle at 91% 31%,#fff 0 1px,transparent 1.8px),
-    radial-gradient(circle at 84% 88%,#ffffffd9 0 .8px,transparent 1.7px),
-    radial-gradient(ellipse at 72% 34%,#fff8 0%,#d9d2ff44 18%,transparent 44%),
-    radial-gradient(ellipse at 22% 86%,#b9b8ff55 0%,transparent 38%);
-  background-size:173px 151px,211px 193px,149px 177px,233px 207px,187px 163px,257px 229px,199px 181px,227px 211px,100% 100%,100% 100%;
-}
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  pointer-events:none;
-  opacity:.28;
-  background:
-    radial-gradient(ellipse at 78% 38%,transparent 0 12%,#f8f4ff44 12.15% 12.35%,transparent 12.6% 18%,#e9e2ff38 18.2% 18.4%,transparent 18.7%),
-    radial-gradient(ellipse at 28% 22%,#ffffff55 0%,transparent 24%),
-    linear-gradient(125deg,transparent 0 44%,#ffffff22 49%,transparent 56%);
 }
