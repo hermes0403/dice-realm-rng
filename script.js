@@ -291,7 +291,8 @@ globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
- render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
+ render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost,
+ onFusionLuckChanged:()=>petSystem?.updatePetDicePreview?.(), documentRef:document
 });
 const { activeGlobalBoost, activeFusionLuckBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
 setupGlobalBoostUI();
