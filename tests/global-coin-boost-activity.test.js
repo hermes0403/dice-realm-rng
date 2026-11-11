@@ -205,7 +205,10 @@ test('coin boost status refresh is throttled and never polls once per second', a
       await service.refreshCoinBoosts();
     }
     assert.equal(fetchCount, 1);
-    now += 1000;
+    now += 55_000;
+    await service.refreshCoinBoosts();
+    assert.equal(fetchCount, 1, 'coin boost status must remain cached for 60 seconds');
+    now += 5_000;
     await service.refreshCoinBoosts();
     assert.equal(fetchCount, 2);
   } finally {
