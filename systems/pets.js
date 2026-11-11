@@ -167,7 +167,7 @@ export function createPetSystem({
   function fusionAdjustedTierRates(tier) {
     const baseRates = PET_TIER_RATES[tier] || PET_TIER_RATES[1];
     const boost = getFusionLuckBoost();
-    const active = boost && Number(boost.ends_at) > Date.now() && Number(boost.percent) > 0;
+    const active = boost && new Date(boost.ends_at).getTime() > Date.now() && Number(boost.percent) > 0;
     return applyFusionLuckToRates(baseRates, active ? boost.percent : 0);
   }
 
