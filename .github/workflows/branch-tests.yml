@@ -27,8 +27,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run full Node test suite
-        run: node --test tests/*.test.js
+      - name: Run focused Shark event tests
+        run: node --test tests/shark-event-idempotency.test.js tests/shark-event-trusted-events.test.js
 
       - name: Check JavaScript syntax for changed services
         run: |
@@ -43,3 +43,6 @@ jobs:
           else
             git diff --check "${{ github.event.before }}" HEAD
           fi
+
+      - name: Run full Node test suite
+        run: node --test tests/*.test.js
