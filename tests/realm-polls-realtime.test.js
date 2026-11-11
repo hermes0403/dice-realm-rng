@@ -95,7 +95,7 @@ test('realm poll sync uses broadcasts and lowers fallback polling after realtime
   assert.deepEqual(intervalDelays, []);
 });
 
-test('realm poll setup sends no requests or subscriptions while cloud is restricted', () => {
+test('realm poll setup sends no requests or subscriptions while cloud is restricted', async () => {
   let channels = 0;
   const intervals = [];
   const system = createRealmPolls({
