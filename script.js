@@ -215,6 +215,7 @@ petSystem=createPetSystem({
  getState:()=>S, PETS, PET_RARITIES, PET_TIER_CONFIG, PET_TIER_RATES, PET_MUTATIONS, PET_IMAGE_ASSETS, D,
  petById, getDiceById:byId, randomPet, petIncomePerSecond, rollPetVariant, renderPetIncome,
  format, escapeHTML, save, render, toast, getCurrentUser:()=>currentUser, openAuth, recordPetFusion,
+ getFusionLuckBoost:()=>globalBoostSystem?.activeFusionLuckBoost?.()||null,
  showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message)
 });
 const {
@@ -281,9 +282,10 @@ globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
- render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
+ render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost,
+ onFusionLuckChanged:()=>petSystem?.updatePetDicePreview?.(), documentRef:document
 });
-const { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
+const { activeGlobalBoost, activeFusionLuckBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
 setupGlobalBoostUI();
 ensurePetData(S.pets);
 petSystem.setupPetSystemUI();
