@@ -306,7 +306,7 @@ setupAdminUIBindings({
   supabaseClient, format, escapeHTML, D, populateAdminPetSelects, petById,
   writeAdminGrantLog, refreshLeaderboards: forceRefreshLeaderboards, refreshCoinBoosts,
   updateGlobalBoostStatus, renderRealmActivity, render, restartAutoInterval,
-  setGlobalBoostState: value => { globalBoostState = value; }, updateAdminVisibility,
+  setGlobalBoostState: value => { globalBoostState = value ? { ...(globalBoostState || {}), ...value } : null; }, updateAdminVisibility,
   setPlayerBan, getCurrentUser: () => currentUser,
   isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
   markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
