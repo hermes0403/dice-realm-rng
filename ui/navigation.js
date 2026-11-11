@@ -6,7 +6,8 @@ export function createNavigationUI({
   loadAdminDashboard,
   refreshLeaderboards,
   loadWeatherSummonData,
-  renderPetsPage
+  renderPetsPage,
+  loadSharkEvent
 }) {
   let leaderboardRefreshTimer = null;
 
@@ -16,21 +17,29 @@ export function createNavigationUI({
     document.querySelectorAll('[data-page="admin"]').forEach(button => {
       button.hidden = !allowed;
     });
+    document.querySelectorAll('[data-page="event"],[data-go="event"]').forEach(button => {
+      button.hidden = !allowed;
+    });
+    const eventPanel = document.getElementById('page-event');
+    if (eventPanel) eventPanel.hidden = !allowed;
+    const adminGrantPanel = document.querySelector('.shark-event-admin-grant');
+    if (adminGrantPanel) adminGrantPanel.hidden = !allowed;
     const panel = document.getElementById('page-admin');
     if (panel) panel.hidden = !allowed;
     const odds = document.getElementById('adminPetOddsManagementFold');
     if (odds) odds.hidden = !allowed;
-    if (!allowed && panel?.classList.contains('active')) go('roll');
+    if (!allowed && (panel?.classList.contains('active') || eventPanel?.classList.contains('active'))) go('roll');
   }
 
   function navHTML() {
-    return pages.map(([id, name, icon]) =>
-      `<button data-page="${id}" data-nav-id="${id}" class="${id === 'roll' ? 'active' : ''}" ${id === 'admin' ? 'hidden' : ''}>${icon} ${name}</button>`
-    ).join('');
+    return pages.map(([id, name, icon]) => {
+      const hidden = id === 'admin' || (id === 'event' && !isAdmin()) ? 'hidden' : '';
+      return `<button data-page="${id}" data-nav-id="${id}" class="${id === 'roll' ? 'active' : ''}" ${hidden}>${icon} ${name}</button>`;
+    }).join('');
   }
 
   function go(id) {
-    if (id === 'admin' && !isAdmin()) {
+    if ((id === 'admin' || id === 'event') && !isAdmin()) {
       toast('沒有管理員權限');
       return;
     }
@@ -45,6 +54,7 @@ export function createNavigationUI({
       leaderboardRefreshTimer = null;
     }
     if (id === 'admin') loadAdminDashboard();
+    if (id === 'event') loadSharkEvent?.();
     if (id === 'leaderboard') {
       refreshLeaderboards();
       if (leaderboardRefreshTimer === null) {

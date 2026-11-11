@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - work/chazi
+      - task/T-0058-shark-event-integration
   pull_request:
     branches:
       - work/chazi
+      - task/T-0058-shark-event-integration
 
 permissions:
   contents: read
@@ -25,12 +27,12 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run full Node test suite
-        run: node --test tests/*.test.js
+      - name: Run focused game regression tests
+        run: node --test tests/shark-event-idempotency.test.js tests/shark-event-trusted-events.test.js tests/pet-fusion-luck.test.js
 
       - name: Check JavaScript syntax for changed services
         run: |
-          for file in services/auth.js services/cloud-save.js services/presence.js services/visit-tracking.js systems/weather.js systems/global-boost.js systems/leaderboards.js admin/pet-odds.js script.js; do
+          for file in services/auth.js services/cloud-save.js services/presence.js services/visit-tracking.js systems/weather.js systems/global-boost.js systems/pets.js systems/leaderboards.js admin/pet-odds.js admin/ui-bindings.js ui/shark-event.js script.js; do
             node --check "$file"
           done
 
@@ -41,3 +43,6 @@ jobs:
           else
             git diff --check "${{ github.event.before }}" HEAD
           fi
+
+      - name: Run full Node test suite
+        run: node --test tests/*.test.js

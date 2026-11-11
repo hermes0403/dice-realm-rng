@@ -1,6 +1,6 @@
 import { D, G } from './data/dice.js';
 import { POTIONS, ANGEL_ODDS } from './data/equipment.js';
-import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js';
+import { PET_RARITIES, PETS, EVENT_PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js';
 import { supabaseClient } from './services/supabase.js';
@@ -39,6 +39,7 @@ import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js';
 import { setupAccountActions } from './services/account-actions.js';
 import { createTimerManager } from './core/timer-manager.js';
+import { createSharkEventUI } from './ui/shark-event.js';
 
 const timerManager = createTimerManager();
 let globalBoostState=null;
@@ -212,9 +213,10 @@ const { petIncomeMultiplier, rollPetVariant, petIncomePerSecond, equippedPetInco
   timerManager
 });
 petSystem=createPetSystem({
- getState:()=>S, PETS, PET_RARITIES, PET_TIER_CONFIG, PET_TIER_RATES, PET_MUTATIONS, PET_IMAGE_ASSETS, D,
+ getState:()=>S, PETS, EVENT_PETS, PET_RARITIES, PET_TIER_CONFIG, PET_TIER_RATES, PET_MUTATIONS, PET_IMAGE_ASSETS, D,
  petById, getDiceById:byId, randomPet, petIncomePerSecond, rollPetVariant, renderPetIncome,
  format, escapeHTML, save, render, toast, getCurrentUser:()=>currentUser, openAuth, recordPetFusion,
+ getFusionLuckBoost:()=>globalBoostSystem?.activeFusionLuckBoost?.()||null,
  showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message)
 });
 const {
@@ -226,8 +228,16 @@ const {
 } = petSystem;
 const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, documentRef: document, toast });
 petTradingSearch.setup();
+const sharkEventUI = createSharkEventUI({
+  supabaseClient,
+  getCurrentUser: () => currentUser,
+  isAdmin,
+  toast,
+  documentRef: document
+});
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage,
+  loadSharkEvent: () => sharkEventUI.load()
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
@@ -278,12 +288,13 @@ mainRenderUI = createMainRenderUI({
 });
 setupAutoRollUI();
 globalBoostSystem = createGlobalBoostSystem({
- supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
+ supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value?{...(globalBoostState||{}),...value}:null},
  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
- render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
+ render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost,
+ onFusionLuckChanged:()=>petSystem?.updatePetDicePreview?.(), documentRef:document
 });
-const { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
+const { activeGlobalBoost, activeFusionLuckBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
 setupGlobalBoostUI();
 ensurePetData(S.pets);
 petSystem.setupPetSystemUI();
@@ -295,7 +306,7 @@ setupAdminUIBindings({
   supabaseClient, format, escapeHTML, D, populateAdminPetSelects, petById,
   writeAdminGrantLog, refreshLeaderboards: forceRefreshLeaderboards, refreshCoinBoosts,
   updateGlobalBoostStatus, renderRealmActivity, render, restartAutoInterval,
-  setGlobalBoostState: value => { globalBoostState = value; }, updateAdminVisibility,
+  setGlobalBoostState: value => { globalBoostState = value ? { ...(globalBoostState || {}), ...value } : null; }, updateAdminVisibility,
   setPlayerBan, getCurrentUser: () => currentUser,
   isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
   markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false
@@ -307,7 +318,7 @@ function analyzeSuspiciousRolls(){return adminPlayerManagement?.analyzeSuspiciou
 
 document.getElementById('upgradeBagBtn').onclick=()=>{const cap=Number(S.bagCapacity)||35;if(cap>=200){toast('背包已達目前上限 200 顆');return}const cost=bagUpgradeCost(cap);if((Number(S.coins)||0)<cost){toast(`$ 不足，擴充需要 ${format(cost)}$`);return}S.coins-=cost;S.bagCapacity=cap+1;save();render();toast(`背包容量已擴充至 ${S.bagCapacity} 顆`)};
 document.getElementById('rollBtn').onclick=doRoll;
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authGoogleBtn').onclick=()=>authService?.googleSignIn();document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=forceRefreshLeaderboards;
+document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=forceRefreshLeaderboards;
 
 function loadAdminOnlineCurve(){return adminMonitoringSystem?.loadAdminOnlineCurve()}
 

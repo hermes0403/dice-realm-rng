@@ -66,6 +66,7 @@ test('Realtime HTTP 402 trips the shared breaker and prevents refresh or resubsc
   });
   const globalBoost = createGlobalBoostSystem({
     supabaseClient,
+    getCurrentUser: () => ({ id: 'user-1' }),
     getBoostState: () => null,
     setBoostState() {},
     render() {},

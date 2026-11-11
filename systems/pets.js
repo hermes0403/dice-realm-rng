@@ -1,6 +1,23 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
 import { petWeightSkillMultiplier } from './pet-skills.js';
 
+export function applyFusionLuckToRates(rates, bonusPercent = 0) {
+  const adjusted = Object.fromEntries(Object.entries(rates || {}).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]));
+  const targets = ['mythic', 'secret'];
+  const donorKey = Object.keys(adjusted).filter(key => !targets.includes(key))
+    .sort((a, b) => adjusted[b] - adjusted[a])[0] || null;
+  const targetTotal = targets.reduce((sum, key) => sum + (adjusted[key] || 0), 0);
+  const requestedPercent = Math.max(0, Number(bonusPercent) || 0);
+  const requestedDelta = targetTotal * requestedPercent / 100;
+  const appliedDelta = Math.min(requestedDelta, donorKey ? adjusted[donorKey] : 0);
+  const appliedPercent = targetTotal > 0 ? appliedDelta / targetTotal * 100 : 0;
+  if (appliedDelta > 0) {
+    for (const key of targets) adjusted[key] = (adjusted[key] || 0) * (1 + appliedPercent / 100);
+    adjusted[donorKey] = Math.max(0, adjusted[donorKey] - appliedDelta);
+  }
+  return { rates: adjusted, appliedPercent, requestedPercent, donorKey, deductedPercent: appliedDelta };
+}
+
 /** Formats the independent appearance and weather mutation fields on a pet instance. */
 export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
   if (!pet || typeof pet !== 'object') return '';
@@ -23,6 +40,7 @@ export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
 export function createPetSystem({
   getState,
   PETS,
+  EVENT_PETS = [],
   PET_RARITIES,
   PET_TIER_CONFIG,
   PET_TIER_RATES,
@@ -45,7 +63,8 @@ export function createPetSystem({
   recordPetFusion,
   showPetAutoSellNotice,
   documentRef,
-  confirmAction
+  confirmAction,
+  getFusionLuckBoost = () => null
 }) {
   let petSortMode = 'rarity-desc';
 
@@ -127,8 +146,12 @@ export function createPetSystem({
       : pet.rarity === 'mythic' ? '0 0 16px #ff334f88'
         : pet.rarity === 'legendary' ? '0 0 13px #ffc53377'
           : '0 0 9px ' + rarity.a + '66';
-    const index = Math.max(0, PETS.findIndex(item => item.id === pet.id)) % PET_IMAGE_ASSETS.length;
-    const src = PET_IMAGE_ASSETS[index];
+    const index = PETS.findIndex(item => item.id === pet.id);
+    if (index < 0) {
+      const icon = petById(pet.id)?.icon || pet.icon || '◈';
+      return `<span role="img" aria-label="${escapeHTML(pet.name || '活動寵物')}" title="${escapeHTML(pet.name || '活動寵物')}" style="display:grid;place-items:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};font-size:${small ? '42px' : '58px'};filter:drop-shadow(${special})">${icon}</span>`;
+    }
+    const src = PET_IMAGE_ASSETS[index % PET_IMAGE_ASSETS.length];
     return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};overflow:hidden;filter:drop-shadow(${special});user-select:none"><img src="${src}" alt="${pet.name}" loading="lazy" style="display:block;width:100%;height:${small ? '82px' : '120px'};object-fit:contain;border-radius:8px;background:transparent"></span>`;
   }
 
@@ -141,8 +164,15 @@ export function createPetSystem({
     return 0;
   }
 
+  function fusionAdjustedTierRates(tier) {
+    const baseRates = PET_TIER_RATES[tier] || PET_TIER_RATES[1];
+    const boost = getFusionLuckBoost();
+    const active = boost && new Date(boost.ends_at).getTime() > Date.now() && Number(boost.percent) > 0;
+    return applyFusionLuckToRates(baseRates, active ? boost.percent : 0);
+  }
+
   function weightedPetRarity(tier) {
-    const rates = PET_TIER_RATES[tier] || PET_TIER_RATES[1];
+    const rates = fusionAdjustedTierRates(tier).rates;
     const roll = Math.random() * 100;
     let cumulative = 0;
     for (const rarity of PET_RARITIES) {
@@ -282,7 +312,7 @@ export function createPetSystem({
 
   function renderPetCodex() {
     const S = getState();
-    const all = PETS;
+    const all = [...PETS, ...EVENT_PETS];
     const owned = new Set(Object.keys(S.petDiscovered || {}));
     const count = all.filter(pet => owned.has(pet.id)).length;
     const percentage = Math.round(count / all.length * 100);
@@ -291,7 +321,7 @@ export function createPetSystem({
     documentRef.querySelectorAll('[data-codex-category]').forEach(button => button.classList.toggle('active', button.dataset.codexCategory === 'pets'));
     documentRef.querySelector('#page-codex .hero .eyebrow').textContent = 'PET ARCHIVE DATABASE';
     documentRef.querySelector('#page-codex .hero h1').textContent = '記錄每一個生命。';
-    documentRef.querySelector('#page-codex .hero .muted').textContent = '共 43 種寵物；未發現的寵物會顯示為未知剪影。';
+    documentRef.querySelector('#page-codex .hero .muted').textContent = '包含 ' + PETS.length + ' 種常規寵物與 ' + EVENT_PETS.length + ' 種活動限定寵物；未發現的寵物會顯示為未知剪影。';
     const grid = documentRef.getElementById('codexGrid');
     grid.className = 'pet-catalog-grid';
     grid.innerHTML = all.map(pet => {
@@ -309,9 +339,12 @@ export function createPetSystem({
       rows.innerHTML = '<div class="empty">放入兩顆骰子後顯示機率。</div>';
       return;
     }
-    const rates = PET_TIER_RATES[tier] || PET_TIER_RATES[1];
-    rows.innerHTML = PET_RARITIES.map(rarity => {
-      const value = rates[rarity.id] || 0;
+    const { rates, appliedPercent, requestedPercent, donorKey } = fusionAdjustedTierRates(tier);
+    const boostNote = requestedPercent > 0
+      ? `<div class="mini" style="margin:4px 0 8px;color:#d7a2ff">融合運氣 +${Number(appliedPercent.toFixed(2))}%｜神話、秘密提高，${donorKey || '其他品質'}扣除機率</div>`
+      : '';
+    rows.innerHTML = boostNote + PET_RARITIES.map(rarity => {
+      const value = Number((rates[rarity.id] || 0).toFixed(4));
       return `<div class="pet-prob-row" style="display:grid;grid-template-columns:64px minmax(0,1fr) 48px;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid #ffffff12"><b class="${rarity.cls}" style="background:linear-gradient(90deg,${rarity.a},${rarity.b});-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 10px ${rarity.a}33">${rarity.name}</b><div class="pet-prob-track" aria-label="${rarity.name} ${value}%" style="background:linear-gradient(90deg,#171c30,#252b43)"><span style="width:${Math.max(0, Math.min(100, value))}%;--prob-a:${rarity.a};--prob-b:${rarity.b};background:linear-gradient(90deg,${rarity.a},${rarity.b});box-shadow:0 0 8px ${rarity.a}66"></span></div><strong style="text-align:right">${value}%</strong></div>`;
     }).join('');
   }
@@ -419,8 +452,8 @@ export function createPetSystem({
       return;
     }
     const tier = dicePairTier(da, db);
-    const rates = PET_TIER_RATES[tier];
-    const preview = PET_RARITIES.map(rarity => `${rarity.name} ${rates[rarity.id] || 0}%`).join('、');
+    const { rates, appliedPercent, requestedPercent, donorKey } = fusionAdjustedTierRates(tier);
+    const preview = PET_RARITIES.map(rarity => `${rarity.name} ${Number((rates[rarity.id] || 0).toFixed(4))}%`).join('、');
     const wa = da.weather && PET_MUTATIONS[da.weather] ? da.weather : null;
     const wb = db.weather && PET_MUTATIONS[db.weather] ? db.weather : null;
     const weatherInfo = !wa && !wb ? '天氣變異：0%'
@@ -428,7 +461,10 @@ export function createPetSystem({
         : wa && wb && wa !== wb ? `${PET_MUTATIONS[wa].name}：40%、${PET_MUTATIONS[wb].name}：40%`
           : `${PET_MUTATIONS[wa || wb].name}：40%`);
     const denSum = Number(da.den) + Number(db.den);
-    if (!confirmAction(`確定消耗「${da.name}」＋「${db.name}」合成寵物？\n兩顆骰子分母相加：${denSum.toLocaleString('en-US')}\n合成品質機率：${preview}\n${weatherInfo}\n黃金、鑽石、彩虹等外觀變異另外獨立判定，可與天氣變異同時取得。\n此操作會消耗${same ? '同種骰子 2 顆' : '兩種骰子各 1 顆'}。`)) return;
+    const fusionLuckInfo = requestedPercent > 0
+      ? `\n融合運氣：要求 +${requestedPercent}%、實際 +${Number(appliedPercent.toFixed(2))}%，由${donorKey || '其他品質'}扣除。`
+      : '';
+    if (!confirmAction(`確定消耗「${da.name}」＋「${db.name}」合成寵物？\n兩顆骰子分母相加：${denSum.toLocaleString('en-US')}\n合成品質機率：${preview}${fusionLuckInfo}\n${weatherInfo}\n黃金、鑽石、彩虹等外觀變異另外獨立判定，可與天氣變異同時取得。\n此操作會消耗${same ? '同種骰子 2 顆' : '兩種骰子各 1 顆'}。`)) return;
     const rarity = weightedPetRarity(tier);
     const pet = addPet(rarity, tier);
     if (pet) {
@@ -504,6 +540,7 @@ export function createPetSystem({
   }
 
   return {
+    fusionAdjustedTierRates,
     equippedPetHas,
     applyPetSkillDailyReset,
     applyPetRollSkills,
