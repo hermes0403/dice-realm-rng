@@ -23,7 +23,20 @@ test('global coin boost appears in realm activity without exposing personal boos
   Date.now = () => 1_000_000;
   try {
     const welcome = { hidden: false };
-    const panel = { hidden: true, innerHTML: '' };
+    const panel = {
+      hidden: true,
+      innerHTML: '',
+      querySelector(selector) {
+        if (!selector.includes('data-activity-countdown')) return null;
+        return {
+          set textContent(value) {
+            this.value = value;
+            panel.innerHTML = panel.innerHTML.replace('</small>', String(value) + '</small>');
+          },
+          get textContent() { return this.value || ''; }
+        };
+      }
+    };
     const documentRef = {
       getElementById(id) { return id === 'realmHeroWelcome' ? welcome : id === 'realmAdminActivity' ? panel : null; }
     };
@@ -52,7 +65,20 @@ test('expired global coin boost removes its activity card and restores welcome',
   Date.now = () => now;
   try {
     const welcome = { hidden: false };
-    const panel = { hidden: true, innerHTML: '' };
+    const panel = {
+      hidden: true,
+      innerHTML: '',
+      querySelector(selector) {
+        if (!selector.includes('data-activity-countdown')) return null;
+        return {
+          set textContent(value) {
+            this.value = value;
+            panel.innerHTML = panel.innerHTML.replace('</small>', String(value) + '</small>');
+          },
+          get textContent() { return this.value || ''; }
+        };
+      }
+    };
     const documentRef = {
       getElementById(id) { return id === 'realmHeroWelcome' ? welcome : id === 'realmAdminActivity' ? panel : null; }
     };
