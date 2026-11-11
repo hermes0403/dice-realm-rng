@@ -288,7 +288,7 @@ mainRenderUI = createMainRenderUI({
 });
 setupAutoRollUI();
 globalBoostSystem = createGlobalBoostSystem({
- supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
+ supabaseClient, timerManager, getCurrentUser:()=>currentUser, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value?{...(globalBoostState||{}),...value}:null},
  isCloudSyncBlocked: () => cloudSaveService?.isCloudSyncBlocked?.() || false,
  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
  render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost,
