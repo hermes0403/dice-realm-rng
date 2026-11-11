@@ -235,7 +235,7 @@ test('dirty local progress survives reload and uses the saved cloud version as a
     cloudSave,
     version: '2026-11-09T00:00:00.000Z'
   });
-  assert.equal(await second.service.loadCloudSave(), false);
+  assert.equal(await second.service.loadCloudSave(), true, 'local recovery is a successful game-load path');
   assert.equal(second.getState().coins, 175, 'the newer local state must not be replaced by the cloud snapshot');
   assert.equal(second.scheduled.length, 1, 'a version-checked local recovery sync should be scheduled');
   assert.equal(second.writes.length, 0, 'recovery should not overwrite the cloud before the version check');
@@ -254,7 +254,7 @@ test('dirty local progress is preserved without upload when no cloud baseline ex
     storage: first.storage,
     cloudSave: { bag: { d1: 1 }, pets: [], equippedPetUids: [], coins: 100, rolls: 10 }
   });
-  assert.equal(await second.service.loadCloudSave(), false);
+  assert.equal(await second.service.loadCloudSave(), true, 'local recovery is a successful game-load path');
   assert.equal(second.getState().coins, 250, 'local progress must remain active');
   assert.equal(second.scheduled.length, 0, 'without a known baseline, do not upload over an existing cloud save');
   assert.equal(second.writes.length, 0);
@@ -270,7 +270,7 @@ test('dirty local progress can initialize cloud storage when no remote save exis
   first.service.save();
 
   const second = createService({ storage: first.storage });
-  assert.equal(await second.service.loadCloudSave(), false);
+  assert.equal(await second.service.loadCloudSave(), true, 'local recovery is a successful game-load path');
   assert.equal(second.getState().coins, 300);
   assert.equal(second.scheduled.length, 1, 'a new cloud save may be created when no remote save exists');
 });
@@ -292,7 +292,7 @@ test('local changes made while cloud load is pending are not overwritten by its 
     error: null
   });
 
-  assert.equal(await loading, false);
+  assert.equal(await loading, true, 'local recovery is a successful game-load path');
   assert.equal(service.getState().coins, 350);
   assert.ok(service.storage.getItem('diceRealmTest_cloud_dirty_user-a'));
   assert.equal(service.writes.length, 0);
