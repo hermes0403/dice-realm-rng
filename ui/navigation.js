@@ -28,7 +28,7 @@ export function createNavigationUI({
     if (panel) panel.hidden = !allowed;
     const odds = document.getElementById('adminPetOddsManagementFold');
     if (odds) odds.hidden = !allowed;
-    if (!allowed && panel?.classList.contains('active')) go('roll');
+    if (!allowed && (panel?.classList.contains('active') || eventPanel?.classList.contains('active'))) go('roll');
   }
 
   function navHTML() {
