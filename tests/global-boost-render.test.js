@@ -116,3 +116,61 @@ test('global boost realtime waits for login and is removed on logout', async () 
   await system.refreshGlobalBoost();
   assert.equal(queries, 1);
 });
+
+
+test('fusion luck activity is displayed and its countdown is refreshed for all players', () => {
+  const originalNow = Date.now;
+  let now = originalNow();
+  Date.now = () => now;
+  try {
+    let boost = {
+      luck_percent: 0,
+      speed_percent: 0,
+      fusion_luck_percent: 50,
+      fusion_luck_starts_at: new Date(now - 1000).toISOString(),
+      fusion_luck_ends_at: new Date(now + 10000).toISOString()
+    };
+    let html = '';
+    const countdown = { textContent: '' };
+    const panel = {
+      hidden: false,
+      get innerHTML() { return html; },
+      set innerHTML(value) { html = value; },
+      querySelector(selector) {
+        return selector === '[data-activity-countdown="fusion"]' ? countdown : null;
+      }
+    };
+    const system = createGlobalBoostSystem({
+      supabaseClient: null,
+      getBoostState: () => boost,
+      setBoostState: value => { boost = value; },
+      render() {},
+      restartAutoInterval() {},
+      loadAdminIncomeMonitor() {},
+      getCoinBoost: () => null,
+      documentRef: {
+        getElementById(id) {
+          if (id === 'realmHeroWelcome') return { hidden: false };
+          if (id === 'realmAdminActivity') return panel;
+          return null;
+        },
+        addEventListener() {}
+      },
+      timerManager: { clearScope() {}, setInterval() {}, clearInterval() {} },
+      isCloudSyncBlocked: () => false
+    });
+
+    assert.equal(system.activeFusionLuckBoost().percent, 50);
+    system.renderRealmActivity();
+    assert.match(html, /融合運氣 \+50%/);
+    assert.match(countdown.textContent, /剩餘/);
+    now += 1000;
+    system.renderRealmActivity();
+    assert.match(countdown.textContent, /剩餘/);
+
+    now += 11000;
+    assert.equal(system.activeFusionLuckBoost(), null);
+  } finally {
+    Date.now = originalNow;
+  }
+});
