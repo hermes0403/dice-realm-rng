@@ -23,6 +23,7 @@ export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
 export function createPetSystem({
   getState,
   PETS,
+  EVENT_PETS = [],
   PET_RARITIES,
   PET_TIER_CONFIG,
   PET_TIER_RATES,
@@ -127,8 +128,12 @@ export function createPetSystem({
       : pet.rarity === 'mythic' ? '0 0 16px #ff334f88'
         : pet.rarity === 'legendary' ? '0 0 13px #ffc53377'
           : '0 0 9px ' + rarity.a + '66';
-    const index = Math.max(0, PETS.findIndex(item => item.id === pet.id)) % PET_IMAGE_ASSETS.length;
-    const src = PET_IMAGE_ASSETS[index];
+    const index = PETS.findIndex(item => item.id === pet.id);
+    if (index < 0) {
+      const icon = petById(pet.id)?.icon || pet.icon || '◈';
+      return `<span role="img" aria-label="${escapeHTML(pet.name || '活動寵物')}" title="${escapeHTML(pet.name || '活動寵物')}" style="display:grid;place-items:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};font-size:${small ? '42px' : '58px'};filter:drop-shadow(${special})">${icon}</span>`;
+    }
+    const src = PET_IMAGE_ASSETS[index % PET_IMAGE_ASSETS.length];
     return `<span role="img" aria-label="${pet.name}" title="${pet.name}" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:${small ? '72px' : '100px'};overflow:hidden;filter:drop-shadow(${special});user-select:none"><img src="${src}" alt="${pet.name}" loading="lazy" style="display:block;width:100%;height:${small ? '82px' : '120px'};object-fit:contain;border-radius:8px;background:transparent"></span>`;
   }
 
@@ -282,7 +287,7 @@ export function createPetSystem({
 
   function renderPetCodex() {
     const S = getState();
-    const all = PETS;
+    const all = [...PETS, ...EVENT_PETS];
     const owned = new Set(Object.keys(S.petDiscovered || {}));
     const count = all.filter(pet => owned.has(pet.id)).length;
     const percentage = Math.round(count / all.length * 100);
@@ -291,7 +296,7 @@ export function createPetSystem({
     documentRef.querySelectorAll('[data-codex-category]').forEach(button => button.classList.toggle('active', button.dataset.codexCategory === 'pets'));
     documentRef.querySelector('#page-codex .hero .eyebrow').textContent = 'PET ARCHIVE DATABASE';
     documentRef.querySelector('#page-codex .hero h1').textContent = '記錄每一個生命。';
-    documentRef.querySelector('#page-codex .hero .muted').textContent = '共 43 種寵物；未發現的寵物會顯示為未知剪影。';
+    documentRef.querySelector('#page-codex .hero .muted').textContent = '包含 ' + PETS.length + ' 種常規寵物與 ' + EVENT_PETS.length + ' 種活動限定寵物；未發現的寵物會顯示為未知剪影。';
     const grid = documentRef.getElementById('codexGrid');
     grid.className = 'pet-catalog-grid';
     grid.innerHTML = all.map(pet => {
