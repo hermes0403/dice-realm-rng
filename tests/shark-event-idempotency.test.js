@@ -36,7 +36,7 @@ function installDocument() {
   }
   return {
     elements,
-    documentRef: { getElementById: id => elements.get(id) || null }
+    documentRef: { getElementById: id => elements.get(id) || null, querySelector: () => ({ hidden: false }) }
   };
 }
 
