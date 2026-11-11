@@ -6,7 +6,7 @@ test('fusion luck multiplies mythic and secret rates and deducts the increase fr
   const base = { common: 70, rare: 20, legendary: 8.9, mythic: 1, secret: 0.1 };
   const result = applyFusionLuckToRates(base, 50);
   assert.equal(result.rates.mythic, 1.5);
-  assert.equal(result.rates.secret, 0.15);
+  assert.ok(Math.abs(result.rates.secret - 0.15) < 1e-12);
   assert.equal(result.donorKey, 'common');
   assert.equal(result.rates.common, 69.45);
   assert.ok(Math.abs(Object.values(result.rates).reduce((sum, value) => sum + value, 0) - 100) < 1e-10);
