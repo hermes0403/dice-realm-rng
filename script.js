@@ -251,7 +251,8 @@ mainRenderUI = createMainRenderUI({
 setupAutoRollUI();
 globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
- render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
+ render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document,
+ onFusionLuckChanged:()=>petSystem?.updatePetDicePreview?.()
 });
 const { activeGlobalBoost, activeFusionLuckBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
 setupGlobalBoostUI();
