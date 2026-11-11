@@ -138,7 +138,7 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(boost.setupGlobalBoostUI(), true);
   assert.equal(boost.setupGlobalBoostUI(), false);
   assert.equal(boostDocument.listeners.get('click').length, 1);
-  assert.equal(timers.manager.getStats().scopes['global-boost-refresh'].intervals, 1);
+  assert.equal(timers.manager.getStats().scopes['global-boost-status'].intervals, 1);
 
   const realmDocument = createFakeDocument(['adminBroadcastSendBtn', 'adminPollStartBtn', 'realmPollButtons']);
   const realm = createRealmPolls({
@@ -262,6 +262,7 @@ test('global announcement setup does not create duplicate realtime channels', ()
   const channel = { on() { return this; }, subscribe() { return this; } };
   const announcements = createGlobalAnnouncements({
     supabaseClient: { channel() { channelCreations++; return channel; } },
+    getCurrentUser: () => ({ id: 'user-1' }),
     documentRef: createFakeDocument()
   });
   announcements.setupGlobalAnnouncements();
