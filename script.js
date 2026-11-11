@@ -40,6 +40,7 @@ import { createTimerManager } from './core/timer-manager.js';
 
 const timerManager = createTimerManager();
 let globalBoostState=null;
+let globalBoostSystem=null;
 let realmSocialSystem=null;
 let equipmentUI=null;
 let adminPetOddsUI=null;
@@ -189,6 +190,7 @@ petSystem=createPetSystem({
  getState:()=>S, PETS, PET_RARITIES, PET_TIER_CONFIG, PET_TIER_RATES, PET_MUTATIONS, PET_IMAGE_ASSETS, D,
  petById, getDiceById:byId, randomPet, petIncomePerSecond, rollPetVariant, renderPetIncome,
  format, escapeHTML, save, render, toast, getCurrentUser:()=>currentUser, openAuth, recordPetFusion,
+ getFusionLuckBoost:()=>globalBoostSystem?.activeFusionLuckBoost?.()||null,
  showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message)
 });
 const {
@@ -247,10 +249,11 @@ mainRenderUI = createMainRenderUI({
   renderCodex, renderGloves, renderPotions, renderQuests, renderProfile, D
 });
 setupAutoRollUI();
-const { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = createGlobalBoostSystem({
+globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
  render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document
 });
+const { activeGlobalBoost, activeFusionLuckBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI } = globalBoostSystem;
 setupGlobalBoostUI();
 ensurePetData(S.pets);
 petSystem.setupPetSystemUI();
