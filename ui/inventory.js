@@ -30,8 +30,10 @@ export function createInventoryUI({
 }) {
   let inventorySellMode = false;
   let inventoryLockMode = false;
-  function lockedSet(id, count) {
-    return lockedDiceIndexes(getState(), id);
+  function lockedSet() {
+    const S = getState();
+    if (!Array.isArray(S.lockedDice)) S.lockedDice = [];
+    return new Set(S.lockedDice);
   }
 
   function updateLockModeButton() {
@@ -206,7 +208,7 @@ export function createInventoryUI({
       if (!inventoryLockMode) return;
       const tile = lock.closest('.inventory-tile');
       const key = tile.dataset.diceId + ':' + tile.dataset.diceIndex;
-      const S = getState(), locks = lockedSet(tile.dataset.diceId);
+      const S = getState(), locks = lockedSet();
       if (locks.has(key)) locks.delete(key); else locks.add(key);
       S.lockedDice = [...locks];
       save();
