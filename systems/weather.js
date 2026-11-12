@@ -99,7 +99,25 @@ async function convertWeather(){
  finally{renderGloves()}
 }
 document.addEventListener('click',e=>{if(e.target.closest('#weatherConvertBtn'))convertWeather()});
-function updateWeatherUI(){const state=getWeather(),wrap=document.getElementById('weatherStatus'),activeTypes=state.types||[state.type];document.body.classList.toggle('weather-aura-crystal',activeTypes.includes('crystal'));document.body.classList.toggle('weather-aura-hell',activeTypes.includes('hell'));document.body.classList.toggle('weather-aura-dumpling',activeTypes.includes('dumpling'));let scene=document.getElementById('weatherSceneOverlay');if(!scene){scene=document.createElement('div');scene.id='weatherSceneOverlay';scene.className='weather-scene-overlay';scene.setAttribute('aria-hidden','true');document.body.appendChild(scene)}scene.className='weather-scene-overlay'+(['rain','snow','thunder'].includes(state.type)?' '+state.type:'');if(!wrap)return;const meta=WEATHER_TYPES[state.type],allMeta=activeTypes.map(t=>WEATHER_TYPES[t]).filter(Boolean);wrap.classList.remove('weather-rain','weather-snow','weather-thunder','weather-crystal','weather-hell','weather-dumpling');activeTypes.forEach(t=>{if(WEATHER_TYPES[t])wrap.classList.add('weather-'+t)});if(meta){document.getElementById('weatherIcon').textContent=allMeta.map(m=>m.icon).join('＋')||'☀️';document.getElementById('weatherName').textContent=allMeta.map(m=>m.label).join('、')||'晴天';const left=Math.max(0,Math.ceil((state.until-Date.now())/1000));const mm=String(Math.floor(left/60)).padStart(2,'0'),ss=String(left%60).padStart(2,'0');const timer=document.getElementById('weatherCountdown');timer.hidden=false;timer.textContent=mm+':'+ss;}else{document.getElementById('weatherIcon').textContent='☀️';document.getElementById('weatherName').textContent='晴天';document.getElementById('weatherCountdown').hidden=true}}
+function updateWeatherUI(){
+ const state=getWeather(),wrap=document.getElementById('weatherStatus'),activeTypes=(state.types||[state.type]).filter(t=>WEATHER_TYPES[t]);
+ document.body.classList.toggle('weather-aura-crystal',activeTypes.includes('crystal'));
+ document.body.classList.toggle('weather-aura-hell',activeTypes.includes('hell'));
+ document.body.classList.toggle('weather-aura-dumpling',activeTypes.includes('dumpling'));
+ let scene=document.getElementById('weatherSceneOverlay');
+ if(!scene){scene=document.createElement('div');scene.id='weatherSceneOverlay';scene.className='weather-scene-overlay';scene.setAttribute('aria-hidden','true');document.body.appendChild(scene)}
+ scene.className='weather-scene-overlay'+(['rain','snow','thunder'].includes(state.type)?' '+state.type:'');
+ if(!wrap)return;
+ wrap.classList.remove('weather-rain','weather-snow','weather-thunder','weather-crystal','weather-hell','weather-dumpling');
+ activeTypes.forEach(t=>wrap.classList.add('weather-'+t));
+ if(!activeTypes.length){wrap.innerHTML='<span class="weather-item"><span class="weather-icon">☀️</span><span class="weather-name">晴天</span></span>';return}
+ const now=Date.now();
+ wrap.innerHTML=activeTypes.map(type=>{
+  const meta=WEATHER_TYPES[type],until=Number(state.untilByType?.[type]??state[type+'Until']??state.until)||0;
+  const left=Math.max(0,Math.ceil((until-now)/1000)),mm=String(Math.floor(left/60)).padStart(2,'0'),ss=String(left%60).padStart(2,'0');
+  return '<span class="weather-item weather-item-'+type+'" data-weather-type="'+type+'"><span class="weather-icon">'+meta.icon+'</span><span class="weather-name">'+meta.label+'</span><span class="weather-countdown">'+mm+':'+ss+'</span></span>';
+ }).join('');
+}
 timerManager.setInterval(()=>{updateWeatherUI();if(!document.getElementById('weatherConvertPanel')?.hidden&&getState().equipped==='g7')renderGloves()},1000,'weather-ui');updateWeatherUI();
 let weatherContributionPoints=0,weatherContributionDeposits={};
 function renderWeatherSummon(){
