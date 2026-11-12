@@ -40,8 +40,11 @@ done_at:
 
 ## 紀錄
 
-<!-- 只增不改。格式：- YYYY-MM-DD HH:MM [棒子|叉子|barry|老查] 內容；影響紀錄：- YYYY-MM-DD HH:MM [impact][添加者角色] 內容 -->
+<!-- 只增不改。每筆新紀錄使用台灣本機完整日期時間：- YYYY-MM-DD HH:MM [棒子|叉子|barry|老查] 內容；影響紀錄：- YYYY-MM-DD HH:MM [impact][添加者角色] 內容。至少精確到分鐘，不得只寫日期或相對時間。 -->
 - YYYY-MM-DD HH:MM [barry] 開單
+
+<!-- done 前須有由人類決定者署名的驗收紀錄，內容包含「驗收」及非空「來源：...」。 -->
+<!-- done → in_progress 重開時，由對應權限方人類記錄決策者、完整日期時間、重開原因及原 done_by／done_at；保留原結案紀錄，再清空 frontmatter 的 done_by／done_at。 -->
 
 ## 完工回報
 
