@@ -844,3 +844,141 @@ button.danger{
   background:#c8a9c6!important;
   border-color:#b58eaf!important;
 }
+
+
+/* T-0070: deepen the unified lavender-blue palette while keeping panel contrast subtle */
+body{
+  background-color:#8792c9!important;
+  color:#252d59!important;
+}
+:root{
+  --bg:#8792c9;
+  --panel:#929cd0;
+  --panel2:#8d97cc;
+  --line:#7f8abe;
+  --text:#252d59;
+  --muted:#485584;
+}
+.nav,
+.hero,
+.stat,.card,
+.rollbox,
+.item,
+.codex-row,
+.sell-row,
+.inventory-row,
+.potion-recipe-slot,
+.potion-result-slot,
+#potionList,
+.bag-upgrade-strip,
+.rarity-reveal-card,
+.notice,
+.adminbox,
+.mobile-nav,
+.announcement-panel,
+.achievement-row,
+.codex-variant-row,
+.admin-fold,
+.my-rank-card,
+.leaderboard-fold,
+.potion-summary,
+.potion-detail,
+.weather-summon-card,
+.summon-dice-row,
+.summon-outcome,
+.auto-sell-option,
+.admin-category-title,
+.admin-curve-wrap,
+.pet-card,
+.pet-skill-ideas,
+.inventory-tile,
+.pet-sell-dialog,
+.pet-sell-choice,
+.pet-sell-summary,
+.pet-income-panel,
+.realm-activity-card,
+.limited-event-entry,
+.event-admin-wallet,
+.admin-navigation-head,
+.admin-category-nav,
+.admin-category-content,
+.admin-empty-state,
+.announcement-line{
+  color:#252d59!important;
+  background:#929cd0!important;
+  border-color:#8490c2!important;
+  box-shadow:inset 0 1px 0 #ffffff24,0 2px 7px #303b7018!important;
+}
+.hero,
+.rollbox,
+.admin-navigation-head,
+.admin-category-content{
+  background:#8d97cc!important;
+}
+.nav,
+.admin-category-nav,
+.admin-fold,
+.leaderboard-fold{
+  background:#8994c8!important;
+}
+.stat,.card,.item,.pet-card,.inventory-tile{
+  background:#969fd2!important;
+}
+.stat b,.hero h1,.section-head h2,.item h3,.admin-category-title,
+.codex-name,.inventory-dice{
+  color:#252d59!important;
+}
+.muted,.stat span,.item p,.toolbar label,.announcement-line,
+.announce-style-label,.admin-category-copy small{
+  color:#485584!important;
+}
+.eyebrow{color:#46588f!important}
+.pill,.rarity,.admin-category-count{
+  color:#3c4978!important;
+  background:#a4add9!important;
+  border-color:#8490c2!important;
+}
+.toolbar input,.toolbar select,.field,
+.sell-qty,.inventory-sell input,.pet-select{
+  color:#252d59!important;
+  background:#a4add9!important;
+  border-color:#8490c2!important;
+}
+.weather-status{
+  color:#252d59!important;
+  background:#969fd2!important;
+  border-color:#8490c2!important;
+}
+.admin-category-group>.admin-fold[open]{
+  background:#8994c8!important;
+  border-color:#7885b9!important;
+  box-shadow:inset 0 1px 0 #ffffff24,0 2px 7px #303b7018!important;
+}
+.admin-category-tab:not([aria-pressed=true]){
+  color:#3f4c7c!important;
+  background:#969fd2!important;
+  border-color:#8490c2!important;
+  box-shadow:none!important;
+}
+button:not(.primary):not(.danger){
+  color:#35416f!important;
+  background:#9ba5d5!important;
+  border-color:#8490c2!important;
+  box-shadow:inset 0 1px 0 #ffffff2b,0 1px 4px #303b7018!important;
+}
+button:not(.primary):not(.danger):hover:not(:disabled){
+  background:#a4add9!important;
+  border-color:#7885b9!important;
+}
+button.primary,
+button.codex-category-btn.active,
+button.admin-activity-entry{
+  color:#fff!important;
+  background:#6875b5!important;
+  border-color:#7f8bc5!important;
+}
+button.danger{
+  color:#653751!important;
+  background:#b895c0!important;
+  border-color:#a27eae!important;
+}
