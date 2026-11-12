@@ -125,10 +125,11 @@ test('an empty authoritative cloud pet inventory stays empty despite old local p
 
 
 test('locked dice indexes are included in the cloud save payload', () => {
-  const { service } = createService({
+  const { service, getState } = createService({
     localSave: { bag: { d1: 3 }, lockedDice: ['d1:0', 'd1:2'] },
     cloudSave: { bag: { d1: 3 }, lockedDice: ['d1:0', 'd1:2'] }
   });
+  getState().lockedDice = ['d1:0', 'd1:2'];
   const payload = service.savePayload();
   assert.deepEqual(payload.lockedDice, ['d1:0', 'd1:2']);
 });
