@@ -193,15 +193,15 @@
 
 ## 13. Branch／Worktree 管理
 
-- 每位協作者保留一個長期角色整合 worktree，使用自己的 `work/<role>` 分支；老查固定為 `work/laocha`。此 worktree 應保持乾淨，不直接在其中實作單張任務。
-- 每張任務建立獨立短期 worktree，建議路徑 `.worktrees/task-T-xxxx-short-name`，並綁定 `task/T-xxxx-short-name` 分支；分支及路徑都必須能回對 Board 任務 ID。
-- 標準任務分支不需每次額外徵求建立同意：Board 任務已由有權限者建立／指派，且名稱、來源分支與路徑符合本節規範時即可建立。若要建立額外長期分支、非標準命名、跨角色分支或實驗性工作環境，老查須取得 Barry 明確同意，叉子須取得棒子明確同意。
-- 開始新任務前，先確認角色整合分支已同步至最新共同基準、工作區乾淨，且沒有尚未整合的前一任務。若條件不符，先處理舊任務，不得把舊修改直接帶入新任務。
+- `work/barry`、`work/laocha`、`work/bangzi`、`work/chazi` 必須始終與 `origin/main` 指向同一個 commit；它們不是角色整合目的地，不建立長期角色 Worktree，也不得在其上保存任務修改。
+- 每張任務只建立一條 `task/T-xxxx-short-name` 分支，從 `origin/main` 建立，並在任務狀態正式轉為 `in_progress` 後才建立獨立 Worktree；建議路徑 `.worktrees/task-T-xxxx-short-name`。任務仍為 `open` 時可以有任務分支以承載開單 PR，但不得建立 Worktree 或開始實作。
+- 標準任務分支可在開單階段建立，不需每次額外徵求建立同意：Board 任務已由有權限者建立／指派，且名稱與來源符合本節規範時即可建立。若要建立額外長期分支、非標準命名、跨任務分支或實驗性工作環境，老查須取得 Barry 明確同意，叉子須取得棒子明確同意。
+- 開始 Worktree 工作前，確認任務已是 `in_progress`、任務分支源自 `origin/main`，且沒有其他執行者、未保存成果或來源不明修改。不得把其他任務的修改帶入本任務。
 - 每次接續專案時列出 local branches、worktree 路徑及用途。發現用途不明的分支／worktree，先查明，不得自行刪除或改寫。
-- 任務分支整合回角色分支、且確認任務成果已安全保存後，才可清理該任務 worktree 與短期分支。清理前確認 tracked／untracked 狀態、未提交修改、未追蹤檔案、分支是否已整合及是否仍承載其他任務。
-- 第七階段正式結案及 Board 任務紀錄交付完成前，不得清理該任務的 Worktree／短期分支；內容已整合但任務尚未驗收，不構成清理授權。
+- 同一任務的開單 PR、開工 PR、交付 PR 都沿用同一任務分支；各 PR 以任務分支為 head、`main` 為 base，使用 merge commit。每次 PR 合併後 fetch，並以 `--ff-only` 將任務分支同步至最新 `origin/main`，不得改用另一條分支。
+- 第七階段正式結案及 Board 任務紀錄交付完成前，不得清理該任務的 Worktree／短期分支；內容 PR 已合併但任務尚未驗收，不構成清理授權。結案後清理前，仍須確認 tracked／untracked 狀態、未提交修改、未追蹤檔案及分支是否仍承載其他成果。
 - 若短期 worktree 有未提交修改或未追蹤檔案，不得強制移除；先列出並分類，經任務負責人決定保留或丟棄後再處理。不得因清理而刪除唯一一份 migration、測試、SQL、Board 紀錄或其他重要資料。
-- 不得清理長期角色整合 worktree、`main` 的共同基準資料，或其他仍承載未完成任務的分支。`main` 不應作為日常實作 worktree。
+- 不得清理或改寫 `work/<role>`、`main` 的共同基準資料，或其他仍承載未完成任務的分支。`main` 不應作為日常實作 Worktree。
 
 ## 14. 目前任務索引
 
