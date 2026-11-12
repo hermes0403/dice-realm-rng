@@ -1392,3 +1392,119 @@ body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
 #page-codex #codexGrid .codex-row.codex-halloween:not(.missing) .codex-icon{
   color:#ff8a3d!important;
 }
+
+
+/* T-0080: restore category frames and every pet rarity color in the codex. */
+/* Weather and Halloween dice rows retain their original colored frames. */
+#page-codex #codexGrid .codex-row.codex-weather-rain{
+  --rarity-color:#75baff!important;
+  border-color:#75baff!important;
+  border-left-color:#75baff!important;
+  background-image:linear-gradient(100deg,#75baff29,#0f1423 72%)!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-snow{
+  --rarity-color:#f4fbff!important;
+  border-color:#f4fbff!important;
+  border-left-color:#f4fbff!important;
+  background-image:linear-gradient(100deg,#f4fbff25,#0f1423 72%)!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-thunder{
+  --rarity-color:#fff000!important;
+  border-color:#fff000!important;
+  border-left-color:#fff000!important;
+  background-image:linear-gradient(100deg,#fff00029,#0f1423 72%)!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-crystal{
+  --rarity-color:#e35dff!important;
+  border-color:#e35dff!important;
+  border-left-color:#e35dff!important;
+  background-image:linear-gradient(100deg,#e35dff35,#0f1423 72%)!important;
+  box-shadow:inset 0 0 18px #e35dff20,0 0 8px #e35dff18!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-hell{
+  --rarity-color:#ff4b24!important;
+  border-color:#ff4b24!important;
+  border-left-color:#ff4b24!important;
+  background-image:linear-gradient(100deg,#ff4b2438,#0f1423 72%)!important;
+  box-shadow:inset 0 0 18px #ff4b2420,0 0 8px #ff4b2418!important;
+}
+#page-codex #codexGrid .codex-row.codex-halloween{
+  --rarity-color:#ff8a3d!important;
+  border-color:#ff8a3d!important;
+  border-left-color:#ff8a3d!important;
+  background-image:linear-gradient(100deg,#ff8a3d35,#0f1423 72%)!important;
+  box-shadow:inset 0 0 16px #ff8a3d18!important;
+}
+/* Keep the weather and Halloween category tabs visibly distinct, including active state. */
+#page-codex .codex-category-btn[data-codex-category="weather"]{
+  border-color:#75baff!important;
+  color:#9bd0ff!important;
+  background:linear-gradient(145deg,#14263b,#172b43)!important;
+}
+#page-codex .codex-category-btn[data-codex-category="weather"].active{
+  color:#fff!important;
+  border-color:#a6d8ff!important;
+  background:linear-gradient(120deg,#2866a4,#398dcc)!important;
+  box-shadow:0 0 16px #75baff45!important;
+}
+#page-codex .codex-category-btn[data-codex-category="halloween"]{
+  border-color:#ff8a3d!important;
+  color:#ffb477!important;
+  background:linear-gradient(145deg,#382014,#482416)!important;
+}
+#page-codex .codex-category-btn[data-codex-category="halloween"].active{
+  color:#fff!important;
+  border-color:#ffc18a!important;
+  background:linear-gradient(120deg,#a94718,#e36b24)!important;
+  box-shadow:0 0 16px #ff8a3d45!important;
+}
+/* Restore the original rarity-tinted pet card frames and text gradients. */
+#page-codex #codexGrid .pet-card:not(.undiscovered){
+  border-color:color-mix(in srgb,var(--rarity-color) 78%,#244b3a)!important;
+  border-top-color:var(--rarity-color)!important;
+  background-image:linear-gradient(145deg,color-mix(in srgb,var(--rarity-color) 22%,#0b1d17),#0b1d17 78%)!important;
+  box-shadow:inset 0 0 18px color-mix(in srgb,var(--rarity-color) 13%,transparent),0 0 8px color-mix(in srgb,var(--rarity-color) 12%,transparent)!important;
+}
+#page-codex #codexGrid .pet-card.undiscovered{
+  border-color:#52675b!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-common,
+#page-codex #codexGrid .pet-meta.pet-rarity-common{
+  background:linear-gradient(90deg,#087b3d 0%,#7deba0 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-rare,
+#page-codex #codexGrid .pet-meta.pet-rarity-rare{
+  background:linear-gradient(90deg,#0755d9 0%,#70baff 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-legendary,
+#page-codex #codexGrid .pet-meta.pet-rarity-legendary{
+  background:linear-gradient(90deg,#d99a00 0%,#ffe58a 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-mythic,
+#page-codex #codexGrid .pet-meta.pet-rarity-mythic{
+  background:linear-gradient(90deg,#d90022 0%,#ff7888 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-secret,
+#page-codex #codexGrid .pet-meta.pet-rarity-secret{
+  background:linear-gradient(90deg,#080808 0%,#777777 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
