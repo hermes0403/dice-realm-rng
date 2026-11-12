@@ -681,3 +681,19 @@ button.potion-auto-add.active{
   color:#f0efff!important;
   box-shadow:0 0 12px #777dff12!important;
 }
+
+
+/* T-0067: statistic tiles should sit almost flush with the lavender-blue page background */
+.stats>.stat,
+.stat{
+  background:linear-gradient(145deg,#9aa3d4 0%,#929dce 100%)!important;
+  border:1px solid #9da7d5!important;
+  box-shadow:inset 0 1px 0 #ffffff24,0 2px 7px #454f8730!important;
+  color:#252b55!important;
+}
+.stat b{
+  color:#252b55!important;
+}
+.stat span{
+  color:#414b79!important;
+}
