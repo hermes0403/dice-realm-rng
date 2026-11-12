@@ -1,7 +1,7 @@
 ---
 id: T-0074
 title: 鎖定星星雲端保存、設定頁精簡與版本號
-status: in_progress
+status: completed
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-12
 updated: 2026-11-12
 depends_on: [T-0073]
 branch: task/T-0074-lock-persistence-settings-version
-done_by:
-done_at:
+done_by: 叉子
+done_at: 2026-11-12
 ---
 
 ## 需求
@@ -25,8 +25,8 @@ done_at:
 - 後續每次收到新的修改需求，版本號增加 0.01。
 
 ## 驗收
-- [ ] 雲端 payload 包含 lockedDice，讀取後恢復鎖定標記。
-- [ ] 本機存檔正常保留 lockedDice。
-- [ ] 名稱按鈕可正常修改並同步排行榜名稱。
-- [ ] 設定頁文字與版本號符合需求。
-- [ ] 相關 CI 與 Pages 部署成功。
+- [x] 雲端 payload 包含 lockedDice，讀取後恢復鎖定標記。
+- [x] 本機存檔正常保留 lockedDice。
+- [x] 名稱按鈕可正常修改並同步排行榜名稱。
+- [x] 設定頁文字與版本號符合需求。
+- [x] 相關 CI 與 Pages 部署成功。
