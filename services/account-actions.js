@@ -14,6 +14,7 @@ export function setupAccountActions(dependencies) {
     save,
     render,
     flushCloudSave,
+    syncCloudSave,
     toast,
     stopAuto,
     KEY,
