@@ -1508,3 +1508,18 @@ body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
   color:transparent!important;
   -webkit-text-fill-color:transparent!important;
 }
+
+
+/* T-0081：多重天氣各自顯示名稱與倒數 */
+.weather-status{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 10px;white-space:normal}
+.weather-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 0}
+.weather-item .weather-icon{font-size:15px;line-height:1}
+.weather-item .weather-name{font-size:12px;font-weight:850}
+.weather-item .weather-countdown{font-variant-numeric:tabular-nums;font-size:12px;font-weight:900}
+.weather-item-rain .weather-name,.weather-item-rain .weather-countdown{color:#75baff}
+.weather-item-snow .weather-name,.weather-item-snow .weather-countdown{color:#f4fbff}
+.weather-item-thunder .weather-name,.weather-item-thunder .weather-countdown{color:#fff000}
+.weather-item-crystal .weather-name,.weather-item-crystal .weather-countdown{color:#e35dff}
+.weather-item-hell .weather-name,.weather-item-hell .weather-countdown{color:#ff6038}
+.weather-item-dumpling .weather-name,.weather-item-dumpling .weather-countdown{color:#ffcf79}
+@media(max-width:720px){.weather-status{gap:4px 8px;padding:6px 9px}.weather-item{gap:4px}.weather-item .weather-name,.weather-item .weather-countdown{font-size:11px}}
