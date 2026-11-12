@@ -618,3 +618,66 @@ button.potion-auto-add.active{
   color:#fff!important;
   box-shadow:0 0 18px #777dff22!important;
 }
+
+
+/* T-0066: soften button contrast so controls blend into the cosmic panels */
+button:not(.danger){
+  color:#e5e8fb!important;
+  border-color:#42476f!important;
+  background:linear-gradient(125deg,#20223f 0%,#252542 58%,#292541 100%)!important;
+  box-shadow:inset 0 1px 0 #d9ddff09,0 2px 7px #080b2038;
+}
+button:not(.danger):hover:not(:disabled){
+  border-color:#686b9c!important;
+  background:linear-gradient(125deg,#2b2e52 0%,#303052 58%,#34304f 100%)!important;
+  box-shadow:0 0 0 1px #aaa5ff12,0 3px 9px #080b2044;
+}
+button.primary,
+button.codex-category-btn.active,
+button.admin-activity-entry{
+  color:#f4f3ff!important;
+  border:1px solid #68658f!important;
+  background:linear-gradient(115deg,#343858 0%,#3a3558 58%,#403653 100%)!important;
+  box-shadow:inset 0 1px 0 #ffffff12,0 2px 8px #080b2038;
+}
+button.quiet{
+  color:#d8def5!important;
+  border-color:#3d4568!important;
+  background:linear-gradient(120deg,#1d233d,#24233f)!important;
+}
+.nav button.active{
+  color:#f1f0ff!important;
+  border-color:#66658e!important;
+  background:linear-gradient(110deg,#303653,#302d4d)!important;
+  box-shadow:inset 3px 0 #9695c8,0 2px 8px #080b2038!important;
+}
+button.danger{
+  color:#f2dce8!important;
+  border-color:#68445e!important;
+  background:linear-gradient(120deg,#38263a,#30243a)!important;
+}
+button.danger:hover:not(:disabled){
+  border-color:#94647e!important;
+  background:linear-gradient(120deg,#473047,#3b2c47)!important;
+}
+button.codex-category-btn{
+  color:#cbd1eb!important;
+  border-color:#3e4569!important;
+  background:linear-gradient(145deg,#1d243f,#25223f)!important;
+}
+button.codex-category-btn.active{
+  color:#f4f3ff!important;
+  border-color:#68658f!important;
+  background:linear-gradient(115deg,#343858,#3a3558 58%,#403653)!important;
+}
+button.potion-auto-add.active{
+  color:#e3e0f7!important;
+  border-color:#5d5884!important;
+  background:linear-gradient(120deg,#2c2e51,#34304e)!important;
+}
+.realm-activity-card{
+  border-color:#62658e!important;
+  background:linear-gradient(125deg,#292f53,#302a4d)!important;
+  color:#f0efff!important;
+  box-shadow:0 0 12px #777dff12!important;
+}
