@@ -1361,3 +1361,34 @@ body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
 #page-codex .codex-row.codex-halloween .codex-name{color:#ff8a3d!important}
 #page-codex .codex-row.codex-standard .codex-chance,
 #page-codex .codex-row.codex-standard .codex-icon{color:#9b9aff!important}
+
+
+/* T-0079: force original per-die colors through all global typography overrides. */
+#inventoryGrid .inventory-tile .tile-chance,
+#inventoryGrid .inventory-tile .tile-icon,
+#inventoryGrid .inventory-tile .tile-name{
+  color:var(--rarity-color)!important;
+}
+#inventoryGrid .inventory-tile .tile-index{
+  color:#b9cfc0!important;
+}
+#autoSellDiceOptions .auto-sell-option span,
+#autoSellDiceOptions .auto-sell-option span *,
+#autoDepositDiceOptions .auto-sell-option span,
+#autoDepositDiceOptions .auto-sell-option span *{
+  color:inherit!important;
+}
+#page-codex #codexGrid .codex-row:not(.missing) .codex-chance,
+#page-codex #codexGrid .codex-row:not(.missing) .codex-name,
+#page-codex #codexGrid .codex-row:not(.missing) .codex-icon{
+  color:var(--rarity-color)!important;
+}
+#page-codex #codexGrid .codex-row.missing .codex-chance,
+#page-codex #codexGrid .codex-row.missing .codex-name,
+#page-codex #codexGrid .codex-row.missing .codex-icon{
+  color:#87938c!important;
+}
+#page-codex #codexGrid .codex-row.codex-halloween:not(.missing) .codex-name,
+#page-codex #codexGrid .codex-row.codex-halloween:not(.missing) .codex-icon{
+  color:#ff8a3d!important;
+}

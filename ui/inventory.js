@@ -66,7 +66,7 @@ export function createInventoryUI({
         ? ({ rain: '#3298ff', snow: '#ffffff', thunder: '#fff000', crystal: '#d56bff', hell: '#ff3434' }[item.weather] || '#4df27c')
         : '#4df27c';
       const weatherLabel = ({ rain: '雨', snow: '雪', thunder: '打雷', crystal: '水晶', hell: '地獄' })[item.weather] || '天氣';
-      return `<label class="auto-sell-option"><input type="checkbox" data-auto-delete="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}"><b>${chanceText(item)}</b> ${item.name}${item.weather ? `（${weatherLabel}）` : ''}</span></label>`;
+      return `<label class="auto-sell-option"><input type="checkbox" data-auto-delete="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}!important"><b>${chanceText(item)}</b> ${item.name}${item.weather ? `（${weatherLabel}）` : ''}</span></label>`;
     };
     box.innerHTML = dice.map(renderOne).join('');
   }
@@ -89,7 +89,7 @@ export function createInventoryUI({
         last = item.weather;
         heading = `<div class="auto-weather-group-title" style="color:${color}">${labels[item.weather] || item.weather}天氣（機率由小到大）</div>`;
       }
-      return `${heading}<label class="auto-sell-option"><input type="checkbox" data-auto-deposit-dice="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}"><b>${chanceText(item)}</b> ${escapeHTML(item.name)}</span></label>`;
+      return `${heading}<label class="auto-sell-option"><input type="checkbox" data-auto-deposit-dice="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}!important"><b>${chanceText(item)}</b> ${escapeHTML(item.name)}</span></label>`;
     }).join('') || '<div class="empty">目前沒有可設定的天氣骰子。</div>';
   }
 
