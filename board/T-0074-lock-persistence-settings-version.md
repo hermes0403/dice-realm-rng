@@ -1,7 +1,7 @@
 ---
 id: T-0074
 title: 鎖定星星雲端保存、設定頁精簡與版本號
-status: completed
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
