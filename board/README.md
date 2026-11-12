@@ -257,14 +257,14 @@
 - 老查與叉子都必須遵守上述順序。老查檢查本機 Repository／Worktree；叉子檢查 GitHub Repository、GitHub App 工作環境及其可取得的提交／PR 證據，不得要求叉子提供不存在的 Barry 本機路徑或 upstream。
 - 人類決策題使用國中程度白話；技術術語第一次出現時立即用生活化例子解釋其意思及影響。每個決策獨立一題 A／B／C／D／E；E 永遠是「其他做法（請自行描述）」。有可靠建議時放在 A，標示建議方及理由；其他選項說明結果與代價。沒有可靠建議時中立列出優缺點，不硬推方案。每題說明現況、決策原因及選擇後驗證方式。
 - 缺少資訊時，先自行完成可查的部分；記錄已知事實、未知內容、影響、可否安全繼續及需要誰提供什麼。不得把未執行的檢查描述為通過。
-- 每次規範修改後，執行 `node scripts/validate-board.mjs`；需要檢查特定一方的即時容量時，另執行 `node scripts/validate-board.mjs --side=collaborator_side` 或 `--side=owner_side`。這項檢查只讀取 Board 任務檔，不會替人類作出接手決定。
+- 每次規範修改後，執行 `node scripts/validate-board.mjs`；需要檢查特定一方的即時容量時，另執行 `node scripts/validate-board.mjs --side=collaborator_side` 或 `--side=owner_side`。這項檢查只讀取 Board 任務檔，不會替人類作出接手決定。M1 新增的容量資料來源、Communicate 觸發條件、任務分支／PR 關係、Worktree 建立時點、公開 ID 固定、時間戳與人類驗收紀錄等自動檢查，均**待 M2 實作**；本文件不得宣稱目前 validator 已檢查這些新規則。
 
 ### 15.2 第一階段：工作環境准入
 
 - **目的：**確認角色、Repository、工作環境、分支及提交關係正確安全，並判斷是否具備開始任務的條件。
-- **檢查：**確認 AI 代表角色及權限群組；確認本機或 GitHub App Repository；確認目前 branch、HEAD SHA、角色整合分支、共同 `main`、任務分支及其建立來源；檢查提交差異、ahead／behind、merge-base、獨有提交、工作區修改、staged／untracked 檔案及其他執行者。
-- **老查：**執行 `git fetch origin`，分開比較本機 `work/laocha` 與 `origin/work/laocha`，以及本機 `work/laocha` 與 `origin/main`；再比較 task branch 與本機 `work/laocha`。列出 `git worktree list --porcelain`、`git branch -vv` 及目前工作區狀態。只有確認安全快轉時才同步本機角色分支；不自動 push。
-- **叉子：**以 GitHub 線上 Repository 為權威來源，檢查 `work/chazi`、`main`、task branch、commit compare／PR base 及 GitHub App 自身工作環境。若 App 無法顯示未提交狀態，明確記錄限制，不得推定沒有未保存成果。
+- **檢查：**確認 AI 代表角色及權限群組；確認本機或 GitHub App Repository；確認目前 branch、HEAD SHA、`origin/main`、`work/<role>` 是否與 `origin/main` 同 SHA、任務分支及其建立來源；檢查提交差異、ahead／behind、merge-base、獨有提交、工作區修改、staged／untracked 檔案及其他執行者。
+- **老查：**執行 `git fetch origin`，確認 `origin/main`，並驗證 `work/laocha` 與 `origin/main` 指向同一 commit；再檢查 task branch 與 `origin/main` 的提交關係。列出 `git worktree list --porcelain`、`git branch -vv` 及目前工作區狀態。不再以角色分支作為任務分支來源或同步基準。
+- **叉子：**以 GitHub 線上 Repository 為權威來源，檢查 `main`、`work/chazi` 是否與 `main` 相同、task branch、commit compare／PR head/base 及 GitHub App 自身工作環境。若 App 無法顯示未提交狀態，明確記錄限制，不得推定沒有未保存成果。
 - **提交關係判斷：**`SYNCED`、`BEHIND`、`AHEAD`、`DIVERGED`、`UNKNOWN`。ahead／behind 或 SHA 不同本身不等於拒絕整個任務；依提交來源、任務歸屬、衝突及受影響操作判斷。不得丟棄提交、改寫歷史、強制 push 或直接選 ours／theirs。
 - **結果：**`READY`、`BLOCKED` 或 `UNKNOWN`。只有必要安全條件均確認才是 `READY`；`BLOCKED` 寫明原因及解除條件；`UNKNOWN` 指出缺少的證據及能提供的人。只有 `READY` 才進第二階段。
 
@@ -274,9 +274,9 @@
 - 先盤點 `board/` 與 `board/archive/` 的任務 metadata，再閱讀指定任務及相關任務全文。確認 `from`、`to`、`owner`、`reviewer`、`status`、`depends_on`、`branch`、驗收條件、工作環境及既有成果；不得只看標題或狀態。
 - `from` 決定權限歸屬；`to` 是接收對象，`owner` 是主要交付負責人。任何角色不得因被指派、持有分支或能修改檔案，就推定取得另一方的任務狀態權限。
 - 確認任務仍有效、依賴已解除、沒有委派鎖定、沒有其他執行者或未保存成果，且任務範圍及驗收條件清楚。若任務已是本方原執行者的 `in_progress`，可以核對後接續，不得虛構重複的 `open` → `in_progress` 轉換。
-- **五單容量閘門：**分別統計本方 `from` 歸屬的有效 `in_progress` 與 `review` 任務；合計達五張（含五張），不得將其他 `open` 任務轉為 `in_progress`。必須列出占用任務 ID、狀態、負責人，並建議優先完成哪一張及理由。
-- **Communicate 優先閘門：**本方只要有一張有效、`from` 歸屬本方且 `status: in_progress` 的 `communicate task`，該委派工作即為本方最高優先級；其他 `open` 任務不得啟動，即使五單容量未滿。此閘門只由進行中的 communicate task 觸發，不得擴大成任何一般 `in_progress` 任務都會獨占工作。
-- 兩道閘門彼此獨立，必須分別檢查；任一觸發時，其他 `open` 任務保持 `open`。每次 `open` → `in_progress` 前重新檢查。既有任務接手不需重走第三階段，直接進第四階段。
+- **五單容量閘門：**只統計本方 `from` 歸屬且狀態為 `in_progress` 的有效任務；`review`、`open`、`blocked`、`returned`、`done`、`cancelled` 均不計入。唯一資料基準是最新取得的 `origin/main` Board（包含 `board/` 與 `board/archive/`）；不得以本機舊副本、任務分支或未合併內容代替。合計達五張（含五張），不得將其他 `open` 任務轉為 `in_progress`。必須列出占用任務 ID、負責人及來源 SHA。若無法 fetch `origin/main` 或無法完整讀取 Board，結果標示 `UNKNOWN`，不得推定容量未滿，也不得啟動新任務。
+- **Communicate 優先閘門：**依 §15.9 新定義，使用最新 `origin/main` Board 判斷；觸發時，該 Communicate 工作為本方最高優先級，其他 `open` 任務不得啟動，即使五單容量未滿。若無法取得或完整讀取 Board，Communicate 閘門同樣標示 `UNKNOWN`。人類未明確覆寫並留下紀錄前，不得自行忽略。
+- 兩道閘門彼此獨立，必須分別檢查；任一觸發或結果為 `UNKNOWN` 時，其他 `open` 任務保持 `open`。每次 `open` → `in_progress` 前重新檢查。既有任務接手不需重走第三階段，直接進第四階段。
 - **結果：**`TAKEOVER`、`WAIT`、`UNAUTHORIZED`、`ALREADY_ACTIVE`、`NEW_REQUEST`、`UNKNOWN`、`CAPACITY_BLOCKED`、`COMMUNICATE_PRIORITY_BLOCKED`。只有合法且兩道閘門均未阻擋的任務可啟動。
 
 ### 15.4 第三階段：新需求開單
@@ -284,18 +284,20 @@
 - **目的：**確認需求不是重複工作，釐清目標、權限、範圍、依賴及驗收方式，建立可追蹤的正式任務。
 - 先檢查有效任務與 archive，判斷新需求、既有任務延伸、後續任務或重複需求；確認 `from` 由實際開單方／有權限者決定，不得為方便冒用另一方角色。
 - 先完成可自行進行的需求、程式架構及依賴調查。純文件／流程任務不需為開單執行 Supabase SOP；涉及資料庫結構、正式資料、RLS、RPC、trigger、migration 或 Edge Function 才依任務需要取得相應證據。調查不等於獲准修改正式環境。
-- 建立新需求紀錄前，再次分別檢查 §15.3 的五單容量及 Communicate 優先兩道閘門。五單已滿時列出占用清單及優先建議；有進行中的 communicate task 時不得啟動其他任務。新需求仍可建立並保持 `open`，但不得啟動或開始實作。
-- 取得正式任務 ID 後，才建立 `task/T-xxxx-short-name` 及獨立工作環境。建立工作環境不代表已獲准開發；不得透過先建 branch／Worktree／App 工作環境繞過閘門。
-- **Board 任務紀錄同步的限定預先授權：**新開單任務可將本次 Board 任務檔、索引及必要任務 metadata 提交並整合至開單方自己的 `work/<role>`，再依既定方式同步至共同 `main`，讓雙方可見。此預先授權只涵蓋本次 Board 任務紀錄，不包含遊戲程式、其他任務成果、Supabase、部署或正式環境操作。只整合同一份 Board 紀錄；不得整條角色分支或其他任務程式碼。遇到分歧、衝突、分支保護或權限不足時停止並回報。
-- 分別回讀 task branch、角色 `work` 與 `main`，確認任務 ID、檔案、索引、branch 欄位及 commit SHA；未同步的部分不得宣稱完成。
-- **結果：**`CREATED`、`CREATED_OPEN_CAPACITY_BLOCKED`、`CREATED_OPEN_COMMUNICATE_PRIORITY_BLOCKED`、`NEED_INPUT`、`DUPLICATE`、`UNAUTHORIZED`、`BLOCKED`、`CANCELLED`。
+- 建立新需求紀錄前，再次分別檢查 §15.3 的五單容量及 Communicate 優先兩道閘門。五單已滿、Communicate 閘門觸發或容量結果為 `UNKNOWN` 時，新需求仍可建立並保持 `open`，但不得啟動或開始實作。
+- 取得正式任務 ID 後，建立唯一 `task/T-xxxx-short-name` 分支，來源必須是當下最新 `origin/main`；此階段可用該分支建立「開單 PR」，PR head 為任務分支、base 為 `main`，合併使用 merge commit。任務 ID／索引合併至 `origin/main` 後才算公開並永久固定。
+- 閘門阻擋時仍可提交「開單 PR」，但不得建立 Worktree 或開始實作。只有通過兩道閘門、任務正式由 `open` 轉為 `in_progress`，且「開工 PR」已合併至 `origin/main` 後，才建立 Worktree。
+- 同一任務的「開單 PR」、「開工 PR」、「交付 PR」三階段全部沿用同一任務分支；每次 PR 都以該分支為 head、`main` 為 base，使用 merge commit。每次合併後 fetch，將同一任務分支以 `--ff-only` 同步至最新 `origin/main`，再進入下一階段；不得另建分支承接同一任務。
+- `work/<role>` 必須始終與 `origin/main` 指向同一 commit，不得作為任務分支來源、PR head 或 Board 任務紀錄整合目的地。分別回讀任務分支與 `origin/main`，確認任務 ID、檔案、索引、branch 欄位、PR head/base、merge commit SHA 及同步結果；未同步的部分不得宣稱完成。
+- **結果：**`CREATED`、`CREATED_OPEN_CAPACITY_BLOCKED`、`CREATED_OPEN_COMMUNICATE_PRIORITY_BLOCKED`、`CREATED_OPEN_GATE_UNKNOWN`、`NEED_INPUT`、`DUPLICATE`、`UNAUTHORIZED`、`BLOCKED`、`CANCELLED`。
 
 ### 15.5 第四階段：建立／確認 Task Branch 與工作環境
 
 - **目的：**確保一張任務有獨立、可追蹤且不與其他工作混用的工作位置。
-- 確認任務 ID、`from`、`to`、`owner`、`branch`、來源角色分支及來源 HEAD SHA。老查從安全的本機 `work/laocha` 建立獨立 Worktree，task branch upstream 指向本機 `work/laocha`；叉子從線上 `work/chazi` 建立任務分支，使用 GitHub App 的獨立任務工作環境，檢查 branch 建立來源／PR base，不要求本機 upstream。
+- 確認任務 ID、`from`、`to`、`owner`、`branch`、`origin/main` 來源 SHA 及開工 PR 合併 SHA。老查與叉子的任務分支來源一律是 `origin/main`；不得從 `work/<role>` 建立，也不得把 `work/<role>` 當作 upstream 或 PR 來源。
+- **Worktree 建立條件：**任務已正式為 `in_progress`，且開工 PR 已合併至 `origin/main`；在此之前不得建立本機 Worktree 或 GitHub App 任務工作環境。條件未滿足時結果為 `BLOCKED`，不得進入實作。
 - 一條正式 task branch 只對應一張任務及一個正式工作環境／執行者。檢查是否已有同 ID 分支、其他執行者、未提交／未追蹤／未整合成果及來源不明修改；不得搶做、覆蓋或另開第二個工作環境。
-- 回讀並比對任務 ID、branch、工作位置、來源 SHA、目前 HEAD、upstream／PR base、工作區狀態及 Board `branch` 欄位。
+- 回讀並比對任務 ID、branch、Worktree／App 工作位置、來源 SHA、目前 HEAD、PR head/base、merge commit、工作區狀態及 Board `branch` 欄位；PR head 必須是任務分支，base 必須是 `main`。
 - **結果：**全部對應且安全為 `READY`；有未保存成果或來源不明為 `BLOCKED`；缺少無法自行取得的證據為 `UNKNOWN`。只有 `READY` 才進第五階段。
 
 ### 15.6 第五階段：開發與驗證
@@ -314,9 +316,9 @@
 - **目的：**交付程式碼、文件或其他工作成果；本階段不驗收任務、不更新 `done`。
 - **6.1 確認提交內容：**雙方檢查修改內容、未追蹤檔案及提交清單，逐一確認歸屬。老查本機排除 `supabase/` 與所有 `.csv`，不得未檢查就使用 `git add -A`／`git add .`；叉子依 GitHub App 差異及提交預覽檢查。
 - **6.2 建立內容提交：**只提交本任務成果；記錄 commit SHA 並回讀檔案清單。提交成功不等於整合或遠端交付。
-- **6.3 整合回角色分支：**老查依標準本機流程整合至 `work/laocha`。叉子只有在以下七項全部成立時，才預先獲准直接整合至線上 `work/chazi`：①正式指派叉子；②`from` 屬棒子方；③task branch 以 `work/chazi` 為建立基準；④沒有其他執行者正在修改 `work/chazi`；⑤提交只含本任務成果；⑥沒有未解衝突或來源不明提交；⑦不會覆蓋他人成果或改寫歷史。此授權不包含 `main`、其他角色分支、PR 合併、部署或正式環境操作。任一項不符或無法確認即停止。整合後回讀 HEAD、提交及差異。
-- **6.4 遠端內容交付與部署：**`Push` 在老查流程中專指本機角色分支推送 GitHub，必須取得本次明確授權並確認目標分支及提交；叉子使用 GitHub App 線上提交／修改分支，不稱為老查本機 Push。雙方建立／合併 PR、部署或操作正式環境都須本次明確授權及目標／版本確認。不得把 6.3 預先授權擴張為 main 合併或部署。
-- 內容里程碑分開記錄：`LOCAL_CONTENT_DELIVERED`、`ROLE_BRANCH_INTEGRATED`、`PUSHED`、`PR_OPEN`、`MAIN_INTEGRATED`、`DEPLOYED`。未執行標示 `NOT_DONE`、`BLOCKED` 或 `UNKNOWN`；這些不是任務驗收狀態。
+- **6.3 任務分支保持單一：**不再將任務分支整合回 `work/<role>`；四條 `work/<role>` 必須持續與 `origin/main` 同 SHA。所有任務內容均留在該任務唯一分支，透過交付 PR 合併至 `main`。
+- **6.4 遠端內容交付與部署：**同一任務的開單、開工、交付三階段 PR 都以該任務分支為 head、`main` 為 base，並使用 merge commit；每次合併後 fetch，再將任務分支以 `--ff-only` 同步至最新 `origin/main`。Push、建立／合併 PR、部署或操作正式環境，仍須符合 `AGENTS.md` 及本次明確授權；不得將其中一階段的授權擴張到其他階段或部署。
+- 內容里程碑分開記錄：`TASK_BRANCH_CREATED`、`OPEN_PR_MERGED`、`WORK_START_PR_MERGED`、`WORKTREE_CREATED`、`DELIVERY_PR_MERGED`、`DEPLOYED`。未執行標示 `NOT_DONE`、`BLOCKED` 或 `UNKNOWN`；這些不是任務驗收狀態。
 
 ### 15.8 第七階段：任務驗收與交付
 
@@ -324,18 +326,21 @@
 - **7.1 確認驗收者：**依 `from` 及權限規則確認。協作者方由 Barry 作最終決定；棒子方由棒子作最終決定。叉子可依授權執行線上檢查，但不得代替棒子作 Owner 專屬決定。
 - **7.2 雙路徑驗收：**依任務實際驗收內容選擇本地或線上路徑。若驗收涉及管理員介面或管理員專屬操作，老查本地路徑必須準備 Barry 可實際操作的隔離副本，包含所需操作入口、測試用管理員身分及隔離測試資料；不得冒用棒子的線上管理員身分／憑證或連接正式資料。若任務不涉及管理員介面，則以任務明列的文件檢查、測試、建置或其他可重複驗證方式作為本地驗收，不得為了符合形式而製造無關的管理員介面副本。正式 Supabase 權限或線上專屬設定只能由本地副本明確涵蓋的部分驗證，不得宣稱已驗證正式權限。叉子線上路徑依授權執行；只有棒子有管理員權限的操作，必須由棒子親自執行或確認。任一路徑完整逐項 `PASS` 即可通過，不要求兩路都通過；另一條未執行或受限仍須如實記錄。
 - **7.3 處理結果：**至少一條路徑完整 `PASS`，記錄採用路徑、驗收者、逐條結果及證據，並處理非阻斷事項；兩路都未通過，依權限規則退回 `in_progress`；兩路都因外部條件無法驗證，記錄 `blocked`／`UNKNOWN`、等待對象及解除條件。
-- **7.4 正式交付及結案：**只有至少一條完整 `PASS` 且 7.3 整理完成，才可準備 `done`、`done_by`、`done_at`、`updated`、結案紀錄、archive 及索引變更。接著以 Board 任務紀錄為對象，再執行任務版 6.2（獨立提交並記錄 SHA）、6.3（整合至本人角色分支）及 6.4（依本次授權交付指定遠端分支／PR／main，回讀確認另一方可見）。此為任務紀錄交付，不是重新提交或部署遊戲程式。三步完成並回讀成功後，才正式 `DONE`。
+- **7.4 正式交付及結案：**只有至少一條完整 `PASS` 且 7.3 整理完成，才可由任務所屬方人類決定是否結案，並準備 `done`、`done_by`、`done_at`、`updated`、含「驗收」及非空 `來源：` 的驗收紀錄、archive 及索引變更。Board 任務紀錄的更新仍提交在同一任務分支，透過該任務的交付 PR（head 為任務分支、base 為 `main`、merge commit）交付；不得整合至 `work/<role>`。交付 PR 合併並回讀確認另一方可見後，才完成任務紀錄交付；此為 Board 紀錄交付，不是重新提交或部署遊戲程式。
 - **7.5 清理工作環境：**正式結案及任務紀錄交付完成後，才可清理 Worktree／短期分支。先確認成果已整合、提交已保存、沒有未提交／未追蹤／唯一副本資料；不確定就停止清理。
 
 ### 15.9 第八階段：跨方工作委派（Communicate Task）
 
-- **定位：**`communicate task` 是正式工作單，不是訊息。`impact` 只通知；需要另一方調查、修改、驗證、提供資料或作出其權限內決定時，必須建立 communicate task。
+- **定位：**`communicate task` 是正式工作單，不是訊息。`impact` 只通知；需要另一方調查、修改、驗證、提供資料或作出其權限內決定時，必須建立 communicate task。Communicate 優先閘門是跨方工作排程規則，不等同原任務的鎖定紀錄。
 - **建立與權限：**由原需求方提出並建立獨立任務；若原需求方無權建立對方權限群組的正式任務，請該權限方建立，絕不可冒用對方的 `from`。`from` 始終是真正開單方，`to` 指派接收方，`owner` 指定執行者。接收方只取得這張委派單明確授予的接單、執行、更新進度、提交成果及回報權，不取得原任務或開單方其他任務的權限。
 - **委派資訊：**communicate task 必須有 `## 委派資訊` 區塊，明列 `關聯原任務：T-xxxx`、`原需求方：角色`、`接收方：角色`，且 `reviewer` 指定原需求方。原任務以紀錄標記鎖定及解除，完整格式為 `- YYYY-MM-DD HH:MM [角色] [COMMUNICATE_LOCK] task=T-xxxx actor=角色 at=YYYY-MM-DD HH:MM`；解除時使用 `- YYYY-MM-DD HH:MM [角色] [COMMUNICATE_UNLOCK] task=T-xxxx actor=角色 at=YYYY-MM-DD HH:MM`。`task=` 填 communicate task ID，紀錄必須寫在關聯原任務內；兩處 ID 必須互相對應。不得把一般 `depends_on` 反向當成關聯欄位。
 - **鎖定：**委派單成功建立並正式指派後，才在原任務新增鎖定紀錄。鎖定期間，原任務不得被接手／啟動、修改實作內容或再次委派相同工作；不得藉鎖定將原任務標為 `done`，也不改變原任務 `from`、權限歸屬或負責人。委派單建立或指派失敗，不得先鎖原任務。
 - **接單及執行：**接收方依授權接手委派單，可將該單 `open` → `in_progress`、`in_progress` ↔ `blocked`，並更新該單進度、branch、成果及證據；不得修改原任務。發現無權執行、需求不清或依賴不成立，將委派單標記 `blocked` 並回報，不得擴大權限。
 - **交回：**接收方完成自己負責的部分、提交成果／驗證證據／未完成事項後，將 communicate task 由 `in_progress` 轉為 `returned`。`returned` 只表示接收方已交回，不是 `done`，也不代表原需求完成或已被開單方驗收。
-- **接回與補正：**原需求方收到 `returned` 後檢查交付。確認合格時，記錄接回者、時間及驗證結果，在原任務新增 `COMMUNICATE_UNLOCK`，解除鎖定，並將委派單標記 `done`；原任務由原權限方接續。若不合格，記錄差異並將委派單退回 `in_progress` 補正，鎖定持續。只有原需求方確認接回才可解鎖。若 `from` 不屬原需求方，原需求方僅取得這張委派單的 `returned` → `done`／`in_progress` 接回確認權，不取得其他狀態操作權。
+- **接回與補正：**原需求方收到 `returned` 後檢查交付。確認合格時，由原需求方人類記錄接回者、完整日期時間及驗收結果，在原任務新增 `COMMUNICATE_UNLOCK`，解除鎖定，並將委派單標記 `done`；`done_by` 填該人類角色，驗收紀錄須含「驗收」及非空 `來源：`。原任務由原權限方接續。若不合格，記錄差異並將委派單退回 `in_progress` 補正，鎖定持續。只有原需求方確認接回才可解鎖。若 `from` 不屬原需求方，原需求方僅取得這張委派單的 `returned` → `done`／`in_progress` 接回確認權，不取得其他狀態操作權；`done` 仍須由原需求方人類決定。
 - **取消、阻塞及逾期：**取消或無法執行時由原需求方確認處置；解除鎖定前確認原任務可安全恢復、接收方沒有未保存成果及是否需要改派。不得因逾期、已讀或暫時無回覆自動解鎖。
-- **優先閘門：**有效且 `from` 歸屬本方、`status: in_progress` 的 communicate task 觸發 §15.3 的 Communicate 優先閘門；它與五單容量閘門獨立。`returned` 不觸發進行中委派閘門，也不等於整個原任務完成。
+- **優先閘門觸發條件：**雙方各自獨立判斷本方角色群組。只要存在有效 communicate task，符合以下任一條件即觸發本方閘門：① `to` 指派給本方，且狀態為 `open` 或 `in_progress`；② `from` 歸屬本方，且狀態為 `returned`。不得只檢查 `from` 或只檢查 `in_progress`。
+- **閘門效果：**觸發後，該 Communicate 工作為本方最高優先級；本方其他 `open` 任務不得轉為 `in_progress`，也不得開始實作，即使五單容量未滿。新需求可以建立並保持 `open`。既有任務的權限、鎖定及狀態不因閘門自動改變；閘門不會把一般任務變成 communicate task。
+- **人類覆寫：**只有本方有權限的人類可明確覆寫；必須在準備啟動的任務紀錄中寫明觸發的 communicate task ID、決策者、覆寫原因、允許範圍及有效期限／解除條件。沒有這筆紀錄即視為未覆寫；GPT 不得自行解除或忽略閘門。
+- **與容量閘門的關係：**Communicate 閘門與五單容量閘門彼此獨立，必須分別檢查；`returned` 會觸發 Communicate 閘門，但不計入五單容量，也不等於原任務已完成。只有條件不再符合或人類完成有效覆寫，才可重新評估其他 `open` 任務。
 - **結果：**`NOT_REQUIRED`、`NOTICE_ONLY`、`TASK_CREATED`、`LOCKED`、`IN_PROGRESS`、`returned`、`REWORK`、`BLOCKED`、`CLOSED`。只有原需求方確認接回並解除鎖定，委派流程才是 `CLOSED`；原任務仍依自己的驗收條件決定是否完成。
