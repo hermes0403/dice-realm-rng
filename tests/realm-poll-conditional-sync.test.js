@@ -5,6 +5,8 @@ const source = fs.readFileSync(require('node:path').join(__dirname, '../systems/
 
 test('公告只使用 60 秒補查，投票閒置時不啟動輪詢', () => {
   assert.match(source, /setInterval\(realmRefreshAnnouncement, 60000, 'realm-announcement-sync'\)/);
+  assert.match(source, /expires_at: new Date\(Date.now\(\) \+ 3800\)\.toISOString\(\)/);
+  assert.doesNotMatch(source, /expires_at: new Date\(Date\.now\(\) \+ 60000\)/);
   assert.doesNotMatch(source, /setInterval\(realmPollTick,\s*1500/);
   assert.match(source, /setInterval\(realmRefreshPoll, 5000, 'realm-poll-sync'\)/);
   assert.match(source, /function realmSetPollSync\(active\)/);
@@ -25,4 +27,8 @@ test('投票倒數每秒更新，且重新連線會立即同步', () => {
   assert.match(source, /realm-poll-countdown'\)/);
   assert.match(source, /}, 1000, 'realm-poll-countdown'\)/);
   assert.match(source, /\.subscribe\(status => \{\s*if \(status === 'SUBSCRIBED'\) realmPollTick\(\);/);
+});
+
+test('投票套用時必須確認登入使用者與 Supabase client 存在', () => {
+  assert.match(source, /if \(!currentUser \|\| !supabaseClient\) return;/);
 });
