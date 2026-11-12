@@ -5,11 +5,15 @@ status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
+contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-12
 updated: 2026-11-12
+depends_on: []
 branch: task/T-0069-unified-background-subtle-panels
+done_by:
+done_at:
 ---
 
 ## 任務目標
