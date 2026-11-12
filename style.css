@@ -1095,7 +1095,7 @@ button.danger{
 
 /* T-0072: individually locked inventory dice */
 .inventory-tile{position:relative}
-.dice-lock-star{position:absolute!important;top:3px;left:4px;z-index:3;width:18px!important;min-width:18px!important;height:18px!important;min-height:18px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#ffe58a!important;font-size:13px!important;line-height:18px!important;opacity:0;pointer-events:none}
+.dice-lock-star{position:absolute!important;top:3px;left:4px;z-index:3;width:10px!important;min-width:10px!important;height:10px!important;min-height:10px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#ffe58a!important;font-size:9px!important;line-height:10px!important;opacity:0;pointer-events:none}
 .inventory-tile.dice-locked .dice-lock-star{opacity:1;pointer-events:auto}
 .inventory-tile:not(.dice-locked) .dice-lock-star{display:none}
 .inventory-tile.dice-locked{outline:1px solid #f2d477;outline-offset:-2px}
