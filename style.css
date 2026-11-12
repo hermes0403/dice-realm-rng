@@ -1333,3 +1333,31 @@ body .admin-category-tab:not([aria-pressed=true]) *{
 body .admin-category-tab:not([aria-pressed=true]) .admin-category-icon{
   color:#a8f2c1!important;
 }
+
+
+/* T-0078: keep per-die rarity/weather colors in inventory, auto-sell and codex */
+body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
+  summary,a,li,dt,dd,legend,output,figcaption,th,td,caption,
+  .muted,.mini,.hint,.help,.description,.subtitle,.result-sub,
+  .eyebrow,.stat-label,.stat-value,.item-description,.pet-meta,
+  .quest-title,.achievement-title,.codex-name,.inventory-dice,
+  .admin-category-title,.admin-category-copy,.toolbar label,
+  .announcement-line,.announce-style-label,.sell-help,
+  .inventory-row small,.inventory-sell small,.nav small,
+  .profile-version):not(.inventory-tile *):not(.auto-sell-option span):not(.codex-row *){
+  color:#e8f5ec!important;
+  opacity:1!important;
+}
+/* Inventory tiles and auto-sell options already carry each die's own inline rarity/weather color. */
+#inventoryGrid .inventory-tile .tile-chance,
+#inventoryGrid .inventory-tile .tile-icon,
+#inventoryGrid .inventory-tile .tile-name{
+  color:var(--rarity-color)!important;
+}
+#inventoryGrid .inventory-tile .tile-index{color:#b9cfc0!important}
+/* Keep codex rarity colors; only make the count/details line readable. */
+#page-codex .codex-row .codex-count{color:#b9cfc0!important}
+#page-codex .codex-row .codex-chance{color:var(--rarity-color,#c5cbe0)!important}
+#page-codex .codex-row.codex-halloween .codex-name{color:#ff8a3d!important}
+#page-codex .codex-row.codex-standard .codex-chance,
+#page-codex .codex-row.codex-standard .codex-icon{color:#9b9aff!important}
