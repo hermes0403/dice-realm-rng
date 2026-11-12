@@ -199,7 +199,7 @@
 
 ## 13. Branch／Worktree 管理
 
-- 專案根目錄是主要工作目錄；`work/<role>` 僅作為 `origin/main` 的同步檢出，不在其中實作或累積任務提交。同步完成後必須與 `origin/main` 相同、不得領先，且必須可 `--ff-only` 同步。現存 `work/laocha`、`work/chazi` 的已知分歧依 §7 過渡條款標示 `KNOWN_DIVERGED`；逐任務抽出前不得刪除、重置、改寫或作為任務來源。
+- 專案根目錄本身就是主要工作目錄，不另建長期角色 Worktree；若該工作目錄檢出 `work/<role>`，該分支僅作為 `origin/main` 的同步檢出，不在其中實作或累積任務提交。同步完成後必須與 `origin/main` 相同、不得領先，且必須可 `--ff-only` 同步。現存 `work/laocha`、`work/chazi` 的已知分歧依 §7 過渡條款標示 `KNOWN_DIVERGED`；逐任務抽出前不得刪除、重置、改寫或作為任務來源。
 - 每張任務只建立一條 `task/T-xxxx-short-name` 分支，從 `origin/main` 建立。開單／開工階段可使用只含 `board/` 變更的臨時 Worktree 提交 Board 紀錄，推送後即移除；正式任務 Worktree 必須等任務狀態正式轉為 `in_progress` 且開工 PR 合併後才建立。建議正式 Worktree 路徑 `.worktrees/task-T-xxxx-short-name`。
 - 標準任務分支可在開單階段建立，不需每次額外徵求建立同意：Board 任務已由有權限者建立／指派，且名稱與來源符合本節規範時即可建立。若要建立額外長期分支、非標準命名、跨任務分支或實驗性工作環境，老查須取得 Barry 明確同意，叉子須取得棒子明確同意。
 - 開始 Worktree 工作前，確認任務已是 `in_progress`、任務分支源自 `origin/main`，且沒有其他執行者、未保存成果或來源不明修改。不得把其他任務的修改帶入本任務。
