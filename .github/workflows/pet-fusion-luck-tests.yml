@@ -1,0 +1,28 @@
+name: Pet fusion luck tests
+
+on:
+  pull_request:
+    paths:
+      - 'systems/pets.js'
+      - 'systems/global-boost.js'
+      - 'tests/pet-fusion-luck.test.js'
+      - '.github/workflows/pet-fusion-luck-tests.yml'
+
+jobs:
+  pet-fusion-luck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test pet fusion probability adjustment
+        run: node --test tests/pet-fusion-luck.test.js
+      - name: Check changed JavaScript syntax
+        run: |
+          node --check systems/pets.js
+          node --check systems/global-boost.js
+          node --check admin/ui-bindings.js
+          node --check script.js
+      - name: Check patch whitespace
+        run: git diff --check

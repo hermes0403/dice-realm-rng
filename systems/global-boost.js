@@ -8,7 +8,8 @@ export function createGlobalBoostSystem({
   loadAdminIncomeMonitor,
   getCoinBoost = () => null,
   documentRef,
-  timerManager
+  timerManager,
+  onFusionLuckChanged = () => {}
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
@@ -32,6 +33,14 @@ export function createGlobalBoostSystem({
     }
     return { ...boost, _endsAtMs: endsAt };
   }
+  function activeFusionLuckBoost() {
+    const boost = getBoostState() || {};
+    const startsAt = timestampToMs(boost.fusion_luck_starts_at);
+    const endsAt = timestampToMs(boost.fusion_luck_ends_at);
+    const percent = Number(boost.fusion_luck_percent) || 0;
+    return Number.isFinite(endsAt) && endsAt > Date.now() && (!Number.isFinite(startsAt) || startsAt <= Date.now()) && percent > 0
+      ? { percent, starts_at: boost.fusion_luck_starts_at, ends_at: boost.fusion_luck_ends_at } : null;
+  }
   function remainingClock(endsAt) {
     if (!Number.isFinite(endsAt)) return '剩餘時間無法讀取';
     const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
@@ -44,12 +53,14 @@ export function createGlobalBoostSystem({
     refreshBusy = true;
     try {
       const { data, error } = await supabaseClient.from('realm_global_boost')
-        .select('luck_percent,speed_percent,starts_at,ends_at,updated_at')
+        .select('luck_percent,speed_percent,starts_at,ends_at,updated_at,fusion_luck_percent,fusion_luck_starts_at,fusion_luck_ends_at,fusion_luck_updated_by')
         .eq('singleton', true).maybeSingle();
       if (error) throw error;
-      const before = JSON.stringify(activeGlobalBoost());
+      const before = JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
       setBoostState(data || null);
-      if (before !== JSON.stringify(activeGlobalBoost())) {
+      const fusionChanged = before !== JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
+      if (fusionChanged) onFusionLuckChanged();
+      if (fusionChanged) {
         if (typeof render === 'function') render();
         if (typeof restartAutoInterval === 'function') restartAutoInterval();
       }
@@ -65,16 +76,17 @@ export function createGlobalBoostSystem({
     const element = documentRef.getElementById('adminGlobalBoostStatus');
     if (!element) return;
     const boost = activeGlobalBoost();
+    const fusion = activeFusionLuckBoost();
     if (!boost.ends_at && !boost.expires_at && !boost.end_at) {
-      element.textContent = '目前沒有全體加成';
+      element.textContent = fusion ? `目前全服融合運氣 +${fusion.percent}%，剩餘 ${Math.max(0, Math.ceil((timestampToMs(fusion.ends_at)-Date.now())/1000))} 秒` : '目前沒有全體加成';
       return;
     }
     const remaining = Number.isFinite(boost._endsAtMs)
       ? Math.max(0, Math.ceil((boost._endsAtMs - Date.now()) / 1000))
       : null;
-    element.textContent = remaining == null
-      ? `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘時間無法讀取`
-      : `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘 ${remaining} 秒`;
+    const globalText = remaining == null ? `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘時間無法讀取` : `目前全體運氣 +${Number(boost.luck_percent) || 0}%、速度 +${Number(boost.speed_percent) || 0}%，剩餘 ${remaining} 秒`;
+    const fusionText = fusion ? `全服融合運氣 +${fusion.percent}%（剩餘 ${Math.max(0, Math.ceil((timestampToMs(fusion.ends_at)-Date.now())/1000))} 秒）` : '';
+    element.textContent = [globalText, fusionText].filter(Boolean).join('；');
   }
 
   function renderRealmActivity() {
@@ -84,10 +96,11 @@ export function createGlobalBoostSystem({
     const boost = activeGlobalBoost();
     const luckPercent = Number(boost.luck_percent) || 0;
     const speedPercent = Number(boost.speed_percent) || 0;
+    const fusionBoost = activeFusionLuckBoost();
     const coinBoost = getCoinBoost();
     const hasLuckOrSpeed = !!getBoostState() && (luckPercent > 0 || speedPercent > 0);
     const hasCoinBoost = !!coinBoost;
-    const hasBoost = hasLuckOrSpeed || hasCoinBoost;
+    const hasBoost = hasLuckOrSpeed || !!fusionBoost || hasCoinBoost;
     welcome.hidden = hasBoost;
     panel.hidden = !hasBoost;
     if (!hasBoost) {
@@ -97,6 +110,7 @@ export function createGlobalBoostSystem({
     const globalRemaining = remainingClock(boost._endsAtMs);
     const cards = [];
     if (luckPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="luck"><span class="realm-activity-icon">✦</span><span><b>全服運氣 +${luckPercent}%</b><small>${globalRemaining}</small></span></button>`);
+    if (fusionBoost) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="fusion"><span class="realm-activity-icon">🐾</span><span><b>融合運氣 +${fusionBoost.percent}%</b><small>${remainingClock(timestampToMs(fusionBoost.ends_at))}</small></span></button>`);
     if (speedPercent > 0) cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="speed"><span class="realm-activity-icon">⚡</span><span><b>全服速度 +${speedPercent}%</b><small>${globalRemaining}</small></span></button>`);
     if (coinBoost) {
       cards.push(`<button type="button" class="realm-activity-card" data-activity-detail="coin"><span class="realm-activity-icon">💰</span><span><b>金錢倍率 x${Number(coinBoost.multiplier) || 1}</b><small>${remainingClock(Number(coinBoost.expires_at))}</small></span></button>`);
@@ -111,6 +125,13 @@ export function createGlobalBoostSystem({
       const card = event.target.closest('[data-activity-detail]');
       if (!card) return;
       const kind = card.dataset.activityDetail;
+      if (kind === 'fusion') {
+        const fusion = activeFusionLuckBoost();
+        if (!fusion) return;
+        const remaining = Math.max(0, Math.ceil((timestampToMs(fusion.ends_at) - Date.now()) / 1000));
+        alert(`全服寵物融合運氣 +${fusion.percent}%\\n神話與秘密品質機率提高。\\n剩餘 ${Math.floor(remaining / 60)} 分 ${remaining % 60} 秒`);
+        return;
+      }
       if (kind === 'coin') {
         const coinBoost = getCoinBoost();
         if (!coinBoost) return;
@@ -144,5 +165,5 @@ export function createGlobalBoostSystem({
     return true;
   }
 
-  return { activeGlobalBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI };
+  return { activeGlobalBoost, activeFusionLuckBoost, refreshGlobalBoost, updateGlobalBoostStatus, renderRealmActivity, setupGlobalBoostUI };
 }

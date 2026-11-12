@@ -362,3 +362,741 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 @media(max-width:760px){.admin-navigation{gap:10px;margin:10px 0 15px}.admin-navigation-head{grid-template-columns:1fr;gap:11px;padding:14px}.admin-navigation-heading strong{font-size:18px}.admin-navigation-layout{grid-template-columns:minmax(0,1fr);gap:10px}.admin-category-nav{position:static;display:flex;gap:6px;overflow-x:auto;padding:7px;border-radius:12px;scrollbar-width:thin}.admin-category-tab{display:flex;flex:0 0 auto;width:auto;min-height:38px;gap:6px;padding:6px 9px;border-radius:9px}.admin-category-icon{width:24px;height:24px;flex:0 0 24px;font-size:13px}.admin-category-copy{display:block}.admin-category-copy strong{font-size:11px}.admin-category-copy small,.admin-category-count{display:none}.admin-category-tab[aria-pressed=true]{box-shadow:inset 0 -2px #a49aff}.admin-category-content{padding:10px;border-radius:12px}.admin-category-title{margin-bottom:9px}.admin-category-group>.admin-fold{margin-bottom:8px}.admin-category-group>.admin-fold>summary{padding:12px;font-size:12px}}
 @media(max-width:420px){.admin-category-nav{gap:5px}.admin-category-tab{padding:6px 8px}.admin-navigation-heading>span:last-child{font-size:10px}.admin-category-content{padding:8px}.admin-category-group>.admin-fold .admin-fold-body{padding:0 8px 10px}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+
+/* Purple-blue cosmic theme: dark readable UI over a muted lavender-blue starfield */
+:root{
+  --bg:#101024;
+  --panel:#17172f;
+  --panel2:#202044;
+  --line:#414475;
+  --text:#edf0ff;
+  --muted:#a8afd0;
+  --blue:#929bff;
+  --purple:#c09aff;
+  --cyan:#9ce7ff;
+}
+body{
+  color:var(--text);
+  background-color:#929bcf;
+  background-image:
+    radial-gradient(ellipse at 12% 8%,#b7afe8 0%,#a7a7df 18%,transparent 48%),
+    radial-gradient(ellipse at 88% 15%,#91b6e5cc 0%,transparent 43%),
+    radial-gradient(ellipse at 52% 108%,#798fca 0%,transparent 55%),
+    radial-gradient(ellipse at 72% 70%,#a99ad866 0%,transparent 42%),
+    radial-gradient(circle at 11% 24%,#ffffffb0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 32% 61%,#ffffffa0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 64% 22%,#ffffffb0 0 1px,transparent 2px),
+    radial-gradient(circle at 86% 77%,#ffffff99 0 .8px,transparent 1.8px),
+    linear-gradient(145deg,#aaa7df 0%,#9aa9d9 48%,#8399ce 100%);
+  background-attachment:fixed;
+  background-size:100% 100%;
+}
+.shell{position:relative;z-index:1}
+.nav{
+  background:linear-gradient(165deg,#17182fee,#11172ceF 75%,#191b39e8);
+  border-color:#464779;
+  box-shadow:0 12px 34px #11112b66,inset 0 1px #d4d5ff0c;
+}
+.nav button.active{
+  background:linear-gradient(110deg,#34386f,#34305f);
+  border-color:#7778c8;
+  color:#fff;
+}
+.hero{
+  border-color:#5c5b91;
+  background:
+    radial-gradient(ellipse at 10% 0%,#8d82e82b,transparent 48%),
+    linear-gradient(135deg,#1d2040f2,#22203fef 58%,#171c38ef);
+  box-shadow:0 14px 38px #17152f66,inset 0 1px #e1ddff0d;
+}
+.hero:after{background:#9a8aff24}
+.eyebrow{color:#a9dfff}
+.stat,.card{
+  background:linear-gradient(145deg,#20213f,#17192f);
+  border-color:#3c406e;
+}
+.rollbox{
+  background:
+    radial-gradient(ellipse at 50% 10%,#484b91 0,#27294f 48%,#171a34 100%);
+  border-color:#555b9a;
+}
+.dice{
+  background:linear-gradient(145deg,#414477,#202443);
+  border-color:#858be0;
+  box-shadow:0 0 35px #8b83ff30,inset 0 0 20px #ffffff0b;
+}
+.item{
+  background:linear-gradient(145deg,#20213e,#17192f);
+  border-color:#3c406e;
+}
+button{
+  color:var(--text);
+  background:linear-gradient(120deg,#252849,#34335f);
+  border-color:#55598e;
+}
+button:hover{border-color:#a29aff}
+.primary{
+  background:linear-gradient(115deg,#555fd0,#7164d7 58%,#9275df);
+  color:#fff;
+  border:0;
+}
+.quiet{background:linear-gradient(120deg,#202442,#29284d)}
+.toolbar input,.toolbar select,.field{
+  background:#151a32;
+  color:var(--text);
+  border-color:#454b7b;
+}
+.weather-status{
+  border-color:#6269a4;
+  background:linear-gradient(120deg,#222747,#30345e);
+  color:#eef0ff;
+}
+.admin-navigation-head{
+  border-color:#575b91;
+  background:
+    radial-gradient(ellipse at 8% 0%,#7773d655,transparent 48%),
+    linear-gradient(125deg,#25284d,#202443 58%,#29264c);
+}
+.admin-search{
+  border-color:#6267a2;
+  background:linear-gradient(120deg,#171b38,#25294e);
+  color:#c5d5ff;
+}
+.admin-category-nav{
+  border-color:#484d7d;
+  background:linear-gradient(165deg,#202443,#171a35 78%,#222448);
+}
+.admin-category-tab[aria-pressed=true]{
+  border-color:#8587d5;
+  background:linear-gradient(105deg,#4c52a0,#393d7a 75%,#303866);
+  box-shadow:inset 3px 0 #b7baff,0 5px 16px #080a1d88;
+}
+.admin-category-icon{
+  border-color:#555b91;
+  background:#292e58;
+  color:#c4d4ff;
+}
+.admin-category-tab[aria-pressed=true] .admin-category-icon{
+  border-color:#9a9eea;
+  background:#41488a;
+}
+.admin-category-count{
+  border-color:#4d527f;
+  background:#1b2040;
+  color:#c5d5ff;
+}
+.admin-category-content{
+  border-color:#454a78;
+  background:
+    radial-gradient(ellipse at 100% 0%,#7772d622,transparent 45%),
+    linear-gradient(150deg,#202443,#171a34 72%,#222448);
+}
+.admin-navigation-status{border-bottom-color:#454a78}
+.admin-category-title{
+  border-color:#5a5f98;
+  background:linear-gradient(100deg,#494d9a66,#34396977 65%,transparent);
+}
+.admin-category-title>span{
+  border-color:#777dcc;
+  background:#30376b;
+  color:#d0d7ff;
+}
+.admin-category-group>.admin-fold{
+  border-color:#484d7b;
+  background:linear-gradient(110deg,#262a50,#1b2040 75%);
+}
+.admin-category-group>.admin-fold[open]{
+  border-color:#777dcc;
+  background:linear-gradient(110deg,#33396b,#222747 80%);
+  box-shadow:0 0 0 1px #a7aaff16,0 7px 18px #080a1d66;
+}
+.admin-category-group>.admin-fold>summary::marker{color:#b4c8ff}
+.admin-activity-entry{
+  border-color:#858be0!important;
+  background:linear-gradient(100deg,#454b9b,#353d7a 70%,#2c3567)!important;
+  box-shadow:0 0 18px #777dff22;
+}
+.admin-empty-state{
+  border-color:#50568a;
+  background:#202443;
+}
+.admin-curve-wrap{background:#171b35;border-color:#454b7b}
+.admin-curve-grid{stroke:#3b416e}
+.admin-curve-line{stroke:#a5b6ff}
+.admin-curve-point{fill:#e0e6ff;stroke:#879cff}
+.admin-curve-label{fill:#b4bddb}
+.admin-curve-legend{color:#c0c9e8}
+.admin-curve-dot{background:#a5b6ff}
+@media(prefers-reduced-motion:no-preference){
+  body{background-size:100% 100%;background-attachment:fixed}
+}
+
+/* Keep the starfield muted: no white wash, no external images, no interaction overlay. */
+/* Lavender-blue outer-space background */
+body{
+  background-color:#929bcf;
+  background-image:
+    radial-gradient(ellipse at 12% 8%,#b7afe8 0%,#a7a7df 18%,transparent 48%),
+    radial-gradient(ellipse at 88% 15%,#91b6e5cc 0%,transparent 43%),
+    radial-gradient(ellipse at 52% 108%,#798fca 0%,transparent 55%),
+    radial-gradient(ellipse at 72% 70%,#a99ad866 0%,transparent 42%),
+    radial-gradient(circle at 11% 24%,#ffffffb0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 32% 61%,#ffffffa0 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 64% 22%,#ffffffb0 0 1px,transparent 2px),
+    radial-gradient(circle at 86% 77%,#ffffff99 0 .8px,transparent 1.8px),
+    linear-gradient(145deg,#aaa7df 0%,#9aa9d9 48%,#8399ce 100%);
+  background-attachment:fixed;
+}
+
+/* T-0065: unify interactive controls with the purple-blue cosmic palette */
+button:not(.danger){
+  color:#eef0ff!important;
+  border-color:#6268a5!important;
+  background:linear-gradient(125deg,#292f59 0%,#34325f 58%,#3b315f 100%)!important;
+  box-shadow:inset 0 1px 0 #d9ddff12,0 3px 10px #080b2055;
+}
+button:not(.danger):hover:not(:disabled){
+  border-color:#a5a4f0!important;
+  background:linear-gradient(125deg,#3b4278 0%,#48417d 58%,#514078 100%)!important;
+  box-shadow:0 0 0 1px #aaa5ff20,0 5px 14px #080b2066;
+}
+button:not(.danger):active:not(:disabled){filter:brightness(1.12)}
+button.primary,
+button.codex-category-btn.active,
+button.admin-activity-entry{
+  color:#fff!important;
+  border-color:#9998ef!important;
+  background:linear-gradient(115deg,#505fc2 0%,#665bc2 58%,#8062bd 100%)!important;
+  box-shadow:0 3px 14px #7569dc35,inset 0 1px 0 #ffffff20;
+}
+button.quiet{
+  color:#dce2ff!important;
+  border-color:#505887!important;
+  background:linear-gradient(120deg,#20294b,#2a2850)!important;
+}
+.nav button:not(.active){
+  color:#b9c2e4!important;
+  border-color:transparent!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.nav button.active{
+  color:#fff!important;
+  border-color:#8588d9!important;
+  background:linear-gradient(110deg,#414a8b,#393568)!important;
+  box-shadow:inset 3px 0 #b8b8ff,0 3px 12px #080b2044!important;
+}
+button.danger{
+  color:#ffe8f0!important;
+  border-color:#87506f!important;
+  background:linear-gradient(120deg,#47283f,#392641)!important;
+  box-shadow:inset 0 1px 0 #ffffff0c,0 3px 10px #080b2055;
+}
+button.danger:hover:not(:disabled){
+  border-color:#c17b9d!important;
+  background:linear-gradient(120deg,#5a3150,#493052)!important;
+}
+button.codex-category-btn{
+  color:#cbd2f3!important;
+  border-color:#555b8c!important;
+  background:linear-gradient(145deg,#202747,#29264e)!important;
+}
+button.codex-category-btn.active{
+  color:#fff!important;
+  border-color:#9998ef!important;
+  background:linear-gradient(115deg,#505fc2,#665bc2 58%,#8062bd)!important;
+}
+button.potion-auto-add.active{
+  color:#e6e4ff!important;
+  border-color:#827bd0!important;
+  background:linear-gradient(120deg,#35376f,#45366f)!important;
+}
+.realm-activity-card{
+  border-color:#858be0!important;
+  background:linear-gradient(125deg,#343d79,#403568)!important;
+  color:#fff!important;
+  box-shadow:0 0 18px #777dff22!important;
+}
+
+
+/* T-0066: soften button contrast so controls blend into the cosmic panels */
+button:not(.danger){
+  color:#e5e8fb!important;
+  border-color:#42476f!important;
+  background:linear-gradient(125deg,#20223f 0%,#252542 58%,#292541 100%)!important;
+  box-shadow:inset 0 1px 0 #d9ddff09,0 2px 7px #080b2038;
+}
+button:not(.danger):hover:not(:disabled){
+  border-color:#686b9c!important;
+  background:linear-gradient(125deg,#2b2e52 0%,#303052 58%,#34304f 100%)!important;
+  box-shadow:0 0 0 1px #aaa5ff12,0 3px 9px #080b2044;
+}
+button.primary,
+button.codex-category-btn.active,
+button.admin-activity-entry{
+  color:#f4f3ff!important;
+  border:1px solid #68658f!important;
+  background:linear-gradient(115deg,#343858 0%,#3a3558 58%,#403653 100%)!important;
+  box-shadow:inset 0 1px 0 #ffffff12,0 2px 8px #080b2038;
+}
+button.quiet{
+  color:#d8def5!important;
+  border-color:#3d4568!important;
+  background:linear-gradient(120deg,#1d233d,#24233f)!important;
+}
+.nav button.active{
+  color:#f1f0ff!important;
+  border-color:#66658e!important;
+  background:linear-gradient(110deg,#303653,#302d4d)!important;
+  box-shadow:inset 3px 0 #9695c8,0 2px 8px #080b2038!important;
+}
+button.danger{
+  color:#f2dce8!important;
+  border-color:#68445e!important;
+  background:linear-gradient(120deg,#38263a,#30243a)!important;
+}
+button.danger:hover:not(:disabled){
+  border-color:#94647e!important;
+  background:linear-gradient(120deg,#473047,#3b2c47)!important;
+}
+button.codex-category-btn{
+  color:#cbd1eb!important;
+  border-color:#3e4569!important;
+  background:linear-gradient(145deg,#1d243f,#25223f)!important;
+}
+button.codex-category-btn.active{
+  color:#f4f3ff!important;
+  border-color:#68658f!important;
+  background:linear-gradient(115deg,#343858,#3a3558 58%,#403653)!important;
+}
+button.potion-auto-add.active{
+  color:#e3e0f7!important;
+  border-color:#5d5884!important;
+  background:linear-gradient(120deg,#2c2e51,#34304e)!important;
+}
+.realm-activity-card{
+  border-color:#62658e!important;
+  background:linear-gradient(125deg,#292f53,#302a4d)!important;
+  color:#f0efff!important;
+  box-shadow:0 0 12px #777dff12!important;
+}
+
+
+/* T-0068: let statistic tiles blend directly into the page background */
+.stats>.stat,
+.stat{
+  background:transparent!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  color:#252b55!important;
+}
+.stat b{
+  color:#252b55!important;
+}
+.stat span{
+  color:#414b79!important;
+}
+
+
+/* T-0069: one unified lavender-blue page background with gently separated panels */
+body{
+  background-color:#a4addd!important;
+  background-image:
+    radial-gradient(circle at 11% 24%,#ffffff55 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 32% 61%,#ffffff4a 0 .8px,transparent 1.8px),
+    radial-gradient(circle at 64% 22%,#ffffff55 0 1px,transparent 2px),
+    radial-gradient(circle at 86% 77%,#ffffff44 0 .8px,transparent 1.8px)!important;
+  background-attachment:fixed!important;
+  color:#30345f!important;
+}
+:root{
+  --bg:#a4addd;
+  --panel:#b1b9e3;
+  --panel2:#aab3df;
+  --line:#9ba6d2;
+  --text:#30345f;
+  --muted:#58618b;
+}
+.nav,
+.hero,
+.stat,.card,
+.rollbox,
+.item,
+.codex-row,
+.sell-row,
+.inventory-row,
+.potion-recipe-slot,
+.potion-result-slot,
+#potionList,
+.bag-upgrade-strip,
+.rarity-reveal-card,
+.notice,
+.adminbox,
+.mobile-nav,
+.announcement-panel,
+.achievement-row,
+.codex-variant-row,
+.admin-fold,
+.my-rank-card,
+.leaderboard-fold,
+.potion-summary,
+.potion-detail,
+.weather-summon-card,
+.summon-dice-row,
+.summon-outcome,
+.auto-sell-option,
+.admin-category-title,
+.admin-curve-wrap,
+.pet-card,
+.pet-skill-ideas,
+.inventory-tile,
+.pet-sell-dialog,
+.pet-sell-choice,
+.pet-sell-summary,
+.pet-income-panel,
+.realm-activity-card,
+.limited-event-entry,
+.event-admin-wallet,
+.admin-navigation-head,
+.admin-category-nav,
+.admin-category-content,
+.admin-empty-state,
+.announcement-line{
+  color:#30345f!important;
+  background:#b1b9e3!important;
+  border-color:#9ba6d2!important;
+  box-shadow:inset 0 1px 0 #ffffff35,0 2px 7px #606b9a18!important;
+}
+.hero,
+.rollbox,
+.admin-navigation-head,
+.admin-category-content{
+  background:#aeb7e1!important;
+}
+.nav,
+.admin-category-nav,
+.admin-fold,
+.leaderboard-fold{
+  background:#aab3df!important;
+}
+.stat,.card,.item,.pet-card,.inventory-tile{
+  background:#b4bce5!important;
+}
+.nav button:not(.active){
+  color:#4e5885!important;
+}
+.hero h1,.section-head h2,.item h3,.admin-category-title,
+.stat b,.codex-name,.inventory-dice{
+  color:#30345f!important;
+}
+.muted,.stat span,.item p,.toolbar label,.announcement-line,
+.announce-style-label,.admin-category-copy small{
+  color:#58618b!important;
+}
+.eyebrow{color:#52649b!important}
+.pill,.rarity,.admin-category-count{
+  color:#46517f!important;
+  background:#c0c7e9!important;
+  border-color:#9ba6d2!important;
+}
+.toolbar input,.toolbar select,.field,
+.sell-qty,.inventory-sell input,.pet-select{
+  color:#30345f!important;
+  background:#c0c7e9!important;
+  border-color:#9ba6d2!important;
+}
+.weather-status{
+  color:#30345f!important;
+  background:#b4bce5!important;
+  border-color:#9ba6d2!important;
+}
+.admin-category-group>.admin-fold[open]{
+  background:#a5afdc!important;
+  border-color:#929ecb!important;
+  box-shadow:inset 0 1px 0 #ffffff35,0 2px 7px #606b9a18!important;
+}
+.admin-category-tab:not([aria-pressed=true]){
+  color:#4e5885!important;
+  background:#b4bce5!important;
+  border-color:#9ba6d2!important;
+  box-shadow:none!important;
+}
+button:not(.primary):not(.danger){
+  color:#414b79!important;
+  background:#b7bee5!important;
+  border-color:#9ba6d2!important;
+  box-shadow:inset 0 1px 0 #ffffff45,0 1px 4px #606b9a18!important;
+}
+button:not(.primary):not(.danger):hover:not(:disabled){
+  background:#c0c7e9!important;
+  border-color:#929ecb!important;
+}
+button.primary,
+button.codex-category-btn.active,
+button.admin-activity-entry{
+  color:#fff!important;
+  background:#777fc0!important;
+  border-color:#9299ce!important;
+}
+button.danger{
+  color:#773d5d!important;
+  background:#c8a9c6!important;
+  border-color:#b58eaf!important;
+}
+
+
+/* T-0070: deepen the unified lavender-blue palette while keeping panel contrast subtle */
+body{
+  background-color:#8792c9!important;
+  color:#252d59!important;
+}
+:root{
+  --bg:#8792c9;
+  --panel:#929cd0;
+  --panel2:#8d97cc;
+  --line:#7f8abe;
+  --text:#252d59;
+  --muted:#485584;
+}
+.nav,
+.hero,
+.stat,.card,
+.rollbox,
+.item,
+.codex-row,
+.sell-row,
+.inventory-row,
+.potion-recipe-slot,
+.potion-result-slot,
+#potionList,
+.bag-upgrade-strip,
+.rarity-reveal-card,
+.notice,
+.adminbox,
+.mobile-nav,
+.announcement-panel,
+.achievement-row,
+.codex-variant-row,
+.admin-fold,
+.my-rank-card,
+.leaderboard-fold,
+.potion-summary,
+.potion-detail,
+.weather-summon-card,
+.summon-dice-row,
+.summon-outcome,
+.auto-sell-option,
+.admin-category-title,
+.admin-curve-wrap,
+.pet-card,
+.pet-skill-ideas,
+.inventory-tile,
+.pet-sell-dialog,
+.pet-sell-choice,
+.pet-sell-summary,
+.pet-income-panel,
+.realm-activity-card,
+.limited-event-entry,
+.event-admin-wallet,
+.admin-navigation-head,
+.admin-category-nav,
+.admin-category-content,
+.admin-empty-state,
+.announcement-line{
+  color:#252d59!important;
+  background:#929cd0!important;
+  border-color:#8490c2!important;
+  box-shadow:inset 0 1px 0 #ffffff24,0 2px 7px #303b7018!important;
+}
+.hero,
+.rollbox,
+.admin-navigation-head,
+.admin-category-content{
+  background:#8d97cc!important;
+}
+.nav,
+.admin-category-nav,
+.admin-fold,
+.leaderboard-fold{
+  background:#8994c8!important;
+}
+.stat,.card,.item,.pet-card,.inventory-tile{
+  background:#969fd2!important;
+}
+.stat b,.hero h1,.section-head h2,.item h3,.admin-category-title,
+.codex-name,.inventory-dice{
+  color:#252d59!important;
+}
+.muted,.stat span,.item p,.toolbar label,.announcement-line,
+.announce-style-label,.admin-category-copy small{
+  color:#485584!important;
+}
+.eyebrow{color:#46588f!important}
+.pill,.rarity,.admin-category-count{
+  color:#3c4978!important;
+  background:#a4add9!important;
+  border-color:#8490c2!important;
+}
+.toolbar input,.toolbar select,.field,
+.sell-qty,.inventory-sell input,.pet-select{
+  color:#252d59!important;
+  background:#a4add9!important;
+  border-color:#8490c2!important;
+}
+.weather-status{
+  color:#252d59!important;
+  background:#969fd2!important;
+  border-color:#8490c2!important;
+}
+.admin-category-group>.admin-fold[open]{
+  background:#8994c8!important;
+  border-color:#7885b9!important;
+  box-shadow:inset 0 1px 0 #ffffff24,0 2px 7px #303b7018!important;
+}
+.admin-category-tab:not([aria-pressed=true]){
+  color:#3f4c7c!important;
+  background:#969fd2!important;
+  border-color:#8490c2!important;
+  box-shadow:none!important;
+}
+button:not(.primary):not(.danger){
+  color:#35416f!important;
+  background:#9ba5d5!important;
+  border-color:#8490c2!important;
+  box-shadow:inset 0 1px 0 #ffffff2b,0 1px 4px #303b7018!important;
+}
+button:not(.primary):not(.danger):hover:not(:disabled){
+  background:#a4add9!important;
+  border-color:#7885b9!important;
+}
+button.primary,
+button.codex-category-btn.active,
+button.admin-activity-entry{
+  color:#fff!important;
+  background:#6875b5!important;
+  border-color:#7f8bc5!important;
+}
+button.danger{
+  color:#653751!important;
+  background:#b895c0!important;
+  border-color:#a27eae!important;
+}
+
+
+/* T-0071: deepen the entire site palette together, preserving subtle panel separation */
+:root{
+  --bg:#6673ad;
+  --panel:#707db5;
+  --panel2:#6c79b1;
+  --line:#626fa6;
+  --text:#171f45;
+  --muted:#303d69;
+}
+body{
+  background-color:#6673ad!important;
+  color:#171f45!important;
+}
+/* All major content surfaces share one darker blue-violet family. */
+.nav,.hero,.stat,.card,.rollbox,.item,.codex-row,.sell-row,
+.inventory-row,.potion-recipe-slot,.potion-result-slot,#potionList,
+.bag-upgrade-strip,.rarity-reveal-card,.notice,.adminbox,.mobile-nav,
+.announcement-panel,.achievement-row,.codex-variant-row,.admin-fold,
+.my-rank-card,.leaderboard-fold,.potion-summary,.potion-detail,
+.weather-summon-card,.summon-dice-row,.summon-outcome,.auto-sell-option,
+.admin-category-title,.admin-curve-wrap,.pet-card,.pet-skill-ideas,
+.inventory-tile,.pet-sell-dialog,.pet-sell-choice,.pet-sell-summary,
+.pet-income-panel,.realm-activity-card,.limited-event-entry,
+.event-admin-wallet,.admin-navigation-head,.admin-category-nav,
+.admin-category-content,.admin-empty-state,.announcement-line,
+.admin-category-group,.admin-category-tab,.admin-category-icon,
+.admin-category-count,.admin-search,.weather-status,.pill,.rarity,
+.codex-card,.codex-entry,.quest-card,.achievement-card,
+.leaderboard-card,.profile-card,.glove-card,.fusion-card,
+.task-card,.event-card,.inventory-card,.pet-detail-card{
+  color:#171f45!important;
+  background-color:#707db5!important;
+  border-color:#626fa6!important;
+  box-shadow:inset 0 1px 0 #ffffff18,0 2px 7px #17214b24!important;
+}
+/* Secondary sections vary only slightly from the common panel tone. */
+.hero,.rollbox,.admin-navigation-head,.admin-category-content,
+.admin-fold,.leaderboard-fold,.nav,.admin-category-nav{
+  background-color:#6c79b1!important;
+}
+.stat,.card,.item,.pet-card,.inventory-tile,.weather-status,
+.announcement-panel,.achievement-row,.codex-row,.quest-card,
+.achievement-card,.leaderboard-card,.profile-card,.glove-card,
+.fusion-card,.task-card,.event-card,.inventory-card{
+  background-color:#7481b9!important;
+}
+.admin-category-group>.admin-fold[open],
+.admin-category-tab[aria-pressed=true]{
+  background-color:#626fa8!important;
+  border-color:#59669d!important;
+}
+.admin-category-tab:not([aria-pressed=true]){
+  background-color:#707db5!important;
+  color:#26345f!important;
+}
+/* Text remains dark and readable across every panel. */
+h1,h2,h3,h4,.hero h1,.section-head h2,.item h3,
+.admin-category-title,.stat b,.codex-name,.inventory-dice,
+.pet-name,.quest-title,.achievement-title{
+  color:#171f45!important;
+}
+.muted,.stat span,.item p,.toolbar label,.announcement-line,
+.announce-style-label,.admin-category-copy small,.eyebrow,
+.nav button:not(.active){
+  color:#303d69!important;
+}
+/* Inputs, selectors and action controls are darkened with the same palette. */
+input,select,textarea,.toolbar input,.toolbar select,.field,
+.sell-qty,.inventory-sell input,.pet-select{
+  color:#171f45!important;
+  background:#7c88bd!important;
+  border-color:#626fa6!important;
+}
+button:not(.primary):not(.danger){
+  color:#202c57!important;
+  background:#7783b8!important;
+  border-color:#626fa6!important;
+  box-shadow:inset 0 1px 0 #ffffff20,0 1px 4px #17214b24!important;
+}
+button:not(.primary):not(.danger):hover:not(:disabled){
+  background:#818dc2!important;
+  border-color:#59669d!important;
+}
+button.primary,button.codex-category-btn.active,button.admin-activity-entry{
+  color:#fff!important;
+  background:#5969a6!important;
+  border-color:#7180ba!important;
+}
+button.quiet{
+  color:#e0e5ff!important;
+  background:#59669e!important;
+  border-color:#4f5d95!important;
+}
+button.danger{
+  color:#fff0f5!important;
+  background:#795b85!important;
+  border-color:#906d9b!important;
+}
+.nav button.active{
+  color:#fff!important;
+  background:#5969a6!important;
+  border-color:#7180ba!important;
+}
+.pill,.rarity,.admin-category-count{
+  color:#202c57!important;
+  background:#8792c3!important;
+  border-color:#626fa6!important;
+}
+
+/* T-0072: individually locked inventory dice */
+.inventory-tile{position:relative}
+.dice-lock-star{position:absolute!important;top:3px;left:4px;z-index:3;width:18px!important;min-width:18px!important;height:18px!important;min-height:18px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#ffe58a!important;font-size:13px!important;line-height:18px!important;opacity:0;pointer-events:none}
+.inventory-tile.dice-locked .dice-lock-star{opacity:1;pointer-events:auto}
+.inventory-tile:not(.dice-locked) .dice-lock-star{display:none}
+.inventory-tile.dice-locked{outline:1px solid #f2d477;outline-offset:-2px}
+#lockDiceModeBtn.active{background:#5969a6!important;color:#fff!important}

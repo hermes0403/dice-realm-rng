@@ -1,35 +1,37 @@
 const ADMIN_CATEGORIES = [
-  { id: 'players', label: '玩家管理', icon: '♙', description: '玩家名單、帳號狀態與新玩家' },
-  { id: 'rewards', label: '獎勵發放', icon: '✦', description: '全體／指定玩家獎勵與發放紀錄' },
-  { id: 'pets', label: '寵物管理', icon: '◇', description: '寵物庫存、融合設定與紀錄' },
-  { id: 'weather', label: '天氣與公告', icon: '☄', description: '全服訊息、投票與天氣控制' },
-  { id: 'economy', label: '收益與倍率', icon: '↗', description: '玩家收益、運氣／速度與金錢倍率' },
-  { id: 'stats', label: '玩家統計', icon: '▥', description: '成就統計與近 24 小時造訪資料' },
-  { id: 'records', label: '紀錄與安全', icon: '⌑', description: '稀有擲骰、操作紀錄與安全稽核' },
-  { id: 'all', label: '全部功能', icon: '▦', description: '顯示所有分類' }
+  { id: 'actions', label: '管理員操作／施放', icon: '✦', description: '公告投票、獎勵發放、全服加成、天氣與系統設定' },
+  { id: 'players', label: '玩家資料／管理', icon: '♙', description: '玩家名單、新玩家、在線狀況、24 小時統計與玩家紀錄' },
+  { id: 'all', label: '全部功能', icon: '▦', description: '同時顯示兩大分類' }
 ];
 const CATEGORY_TITLES = Object.fromEntries(ADMIN_CATEGORIES.filter(item => item.id !== 'all').map(item => [item.id, item.label]));
 const FOLD_CATEGORIES = {
-  adminIncomeMonitorFold: 'economy', adminBroadcastFold: 'weather', adminGrantHistoryFold: 'rewards',
-  adminPetFusionLogsFold: 'pets', adminPetInventoryCountsFold: 'pets', adminPetOddsManagementFold: 'pets',
-  adminNewPlayersFold: 'players', adminAchievementCountsFold: 'stats', adminOnlineCurveFold: 'stats',
-  adminPotionLogsFold: 'records', adminDeletedAccountsFold: 'records', adminRareRollFold: 'records',
-  adminSuspiciousRollFold: 'records', adminClientAuditFold: 'records', adminGlobalBoostFold: 'economy',
-  adminCoinBoostFold: 'economy', adminWeatherControlFold: 'weather', adminPlayerWeatherFold: 'weather',
-  adminWeatherHistoryFold: 'weather'
+  adminIncomeMonitorFold: 'players',
+  adminBroadcastFold: 'actions',
+  adminGrantHistoryFold: 'players',
+  adminPetFusionLogsFold: 'players',
+  adminPetInventoryCountsFold: 'players',
+  adminPetOddsManagementFold: 'actions',
+  adminNewPlayersFold: 'players',
+  adminAchievementCountsFold: 'players',
+  adminOnlineCurveFold: 'players',
+  adminPotionLogsFold: 'players',
+  adminDeletedAccountsFold: 'players',
+  adminRareRollFold: 'players',
+  adminSuspiciousRollFold: 'players',
+  adminClientAuditFold: 'players',
+  adminGlobalBoostFold: 'actions',
+  adminCoinBoostFold: 'actions',
+  adminWeatherControlFold: 'actions',
+  adminPlayerWeatherFold: 'actions',
+  adminWeatherHistoryFold: 'players'
 };
 
 export function classifyAdminFold(fold) {
   const id = fold?.id || '';
   if (FOLD_CATEGORIES[id]) return FOLD_CATEGORIES[id];
   const title = (fold?.querySelector('summary')?.textContent || fold?.textContent || '').toLowerCase();
-  if (/玩家停權|解除停權|刪除玩家帳號|玩家在線狀況|新加入的玩家/.test(title)) return 'players';
-  if (/全體玩家發放|指定玩家發放/.test(title)) return 'rewards';
-  if (/寵物/.test(title) && /持有數量|合成機率|合成紀錄|發放寵物/.test(title)) return 'pets';
-  if (/全服天氣|指定玩家天氣|天氣紀錄|訊息／全服投票/.test(title)) return 'weather';
-  if (/收益監控|運氣／速度加成|金錢收益倍率/.test(title)) return 'economy';
-  if (/成就|造訪數/.test(title)) return 'stats';
-  return 'records';
+  if (/全體玩家發放|指定玩家發放|訊息／全服投票|全服天氣控制|指定玩家天氣|全體運氣／速度加成|金錢收益倍率|寵物合成機率管理/.test(title)) return 'actions';
+  return 'players';
 }
 export function matchesAdminFold(fold, query) {
   const needle = String(query || '').trim().toLocaleLowerCase();
@@ -66,7 +68,7 @@ export function setupAdminNavigation(documentRef = document) {
       <div class="admin-navigation-heading">
         <span class="admin-navigation-eyebrow">DICE REALM · CONTROL CENTER</span>
         <strong>管理控制台</strong>
-        <span>選擇分類，右側只顯示該類管理功能</span>
+        <span>管理員操作與玩家資料分開整理</span>
       </div>
       <label class="admin-search">
         <span aria-hidden="true">⌕</span><span class="sr-only">搜尋管理員功能</span>
@@ -77,7 +79,7 @@ export function setupAdminNavigation(documentRef = document) {
     <div class="admin-navigation-layout">
       <nav class="admin-category-nav" aria-label="管理功能分類"></nav>
       <div class="admin-category-content">
-        <div class="admin-navigation-status"><span data-admin-active-title>玩家管理</span><span data-admin-count aria-live="polite"></span></div>
+        <div class="admin-navigation-status"><span data-admin-active-title>玩家資料／管理</span><span data-admin-count aria-live="polite"></span></div>
         <div class="admin-category-groups"></div>
         <div class="admin-empty-state" data-admin-empty hidden>找不到符合的管理功能，請更換關鍵字。</div>
       </div>
@@ -100,7 +102,7 @@ export function setupAdminNavigation(documentRef = document) {
   }
   folds.forEach((fold, index) => { ensureFoldId(fold, index); fold.dataset.adminCategory = classifyAdminFold(fold); groups.get(fold.dataset.adminCategory).append(fold); });
   const activityButton = page.querySelector(':scope > #adminActivityButton');
-  if (activityButton) { activityButton.classList.add('admin-activity-entry'); groups.get('economy').prepend(activityButton); }
+  if (activityButton) { activityButton.classList.add('admin-activity-entry'); groups.get('actions').prepend(activityButton); }
   page.querySelectorAll(':scope > .admin-category-title').forEach(node => node.remove());
   page.insertBefore(shell, notice.nextSibling);
 
@@ -118,8 +120,8 @@ export function setupAdminNavigation(documentRef = document) {
         fold.hidden = !show; if (show) { visible++; groupVisible++; }
       }
       const activityMatch = activityButton && (!query || activityButton.textContent.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
-      const hasActivity = categoryId === 'economy' && activityMatch && (activeCategory === 'all' || activeCategory === 'economy');
-      if (activityButton && categoryId === 'economy') activityButton.hidden = !hasActivity;
+      const hasActivity = categoryId === 'actions' && activityMatch && (activeCategory === 'all' || activeCategory === 'actions');
+      if (activityButton && categoryId === 'actions') activityButton.hidden = !hasActivity;
       group.hidden = activeCategory !== 'all' && activeCategory !== categoryId;
       if (activeCategory === 'all' && groupVisible === 0 && !hasActivity) group.hidden = true;
     }
