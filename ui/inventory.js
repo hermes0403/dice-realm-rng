@@ -206,7 +206,7 @@ export function createInventoryUI({
       if (!inventoryLockMode) return;
       const tile = lock.closest('.inventory-tile');
       const key = tile.dataset.diceId + ':' + tile.dataset.diceIndex;
-      const S = getState(), locks = lockedSet();
+      const S = getState(), locks = lockedSet(tile.dataset.diceId);
       if (locks.has(key)) locks.delete(key); else locks.add(key);
       S.lockedDice = [...locks];
       save();
