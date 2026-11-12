@@ -116,7 +116,7 @@ export function createRealmPolls(dependencies) {
 
   async function realmApplyPoll(poll) {
     const currentUser = getCurrentUser();
-    if (!currentUser) return;
+    if (!currentUser || !supabaseClient) return;
     if (!poll || !poll.id || !poll.ends_at || poll.is_active === false || Date.parse(poll.ends_at) <= Date.now()) {
       realmHidePoll();
       return;
@@ -199,7 +199,7 @@ export function createRealmPolls(dependencies) {
     btn.disabled = true;
     status.textContent = '正在發送…';
     try {
-      const payload = { message, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 60000).toISOString() };
+      const payload = { message, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 3800).toISOString() };
       const { error } = await supabaseClient.from('realm_admin_messages').insert(payload);
       if (error) throw error;
       realmLastMessageAt = Date.parse(payload.created_at) || Date.now();
