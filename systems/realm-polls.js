@@ -2,6 +2,7 @@
 export function createRealmPolls(dependencies) {
   const { getState, getCurrentUser, supabaseClient, isAdmin, escapeHTML, format, documentRef, timerManager } = dependencies;
   let realmLastMessageId = 0;
+  let realmLastMessageAt = 0;
   let realmCurrentPollId = null;
   let realmPollExpiry = 0;
   let realmPollTimer = null;
@@ -99,9 +100,12 @@ export function createRealmPolls(dependencies) {
       const { data: messages, error } = await supabaseClient.from('realm_admin_messages')
         .select('id,message,admin_label,created_at,expires_at')
         .gt('expires_at', now).order('id', { ascending: false }).limit(1);
-      if (!error && messages?.length && Number(messages[0].id) > realmLastMessageId) {
-        realmLastMessageId = Number(messages[0].id);
-        realmShowAnnouncement(messages[0]);
+      const latest = messages?.[0];
+      const latestAt = Date.parse(latest?.created_at || '') || 0;
+      if (!error && latest && latestAt > realmLastMessageAt) {
+        realmLastMessageId = Number(latest.id) || realmLastMessageId;
+        realmLastMessageAt = latestAt;
+        realmShowAnnouncement(latest);
       }
     } catch (e) {
       console.debug('公告補查失敗', e);
@@ -112,6 +116,7 @@ export function createRealmPolls(dependencies) {
 
   async function realmApplyPoll(poll) {
     const currentUser = getCurrentUser();
+    if (!currentUser) return;
     if (!poll || !poll.id || !poll.ends_at || poll.is_active === false || Date.parse(poll.ends_at) <= Date.now()) {
       realmHidePoll();
       return;
@@ -197,11 +202,12 @@ export function createRealmPolls(dependencies) {
       const payload = { message, admin_label: '𝓗𝓮𝓻𝓶𝓮𝓼', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 60000).toISOString() };
       const { error } = await supabaseClient.from('realm_admin_messages').insert(payload);
       if (error) throw error;
+      realmLastMessageAt = Date.parse(payload.created_at) || Date.now();
       realmShowAnnouncement(payload);
       sendSocialBroadcast('admin_message', payload);
       status.textContent = '已發送；玩家畫面會顯示 3.8 秒。';
       input.value = '';
-      realmLastMessageId = 0;
+
     } catch (e) {
       status.textContent = '發送失敗：' + (e.message || '請稍後重試');
     } finally {
@@ -273,6 +279,8 @@ export function createRealmPolls(dependencies) {
       realmSocialChannel
         .on('broadcast', { event: 'admin_message' }, ({ payload }) => {
           if (payload?.message && (!payload.expires_at || Date.parse(payload.expires_at) > Date.now())) {
+            const messageAt = Date.parse(payload.created_at || '') || Date.now();
+            realmLastMessageAt = Math.max(realmLastMessageAt, messageAt);
             if (Number(payload.id)) realmLastMessageId = Math.max(realmLastMessageId, Number(payload.id));
             realmShowAnnouncement(payload);
           }
