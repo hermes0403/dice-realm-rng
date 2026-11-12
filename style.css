@@ -1289,3 +1289,47 @@ button.danger{
 @media(prefers-reduced-motion:no-preference){
   body{background-size:100% 100%;background-attachment:fixed}
 }
+
+
+/* T-0077: restore readable light typography on the dark emerald theme */
+body{
+  color:#e8f5ec!important;
+}
+body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
+  summary,a,li,dt,dd,legend,output,figcaption,th,td,caption,
+  .muted,.mini,.hint,.help,.description,.subtitle,.result-sub,
+  .eyebrow,.stat-label,.stat-value,.item-description,.pet-meta,
+  .quest-title,.achievement-title,.codex-name,.inventory-dice,
+  .admin-category-title,.admin-category-copy,.toolbar label,
+  .announcement-line,.announce-style-label,.sell-help,
+  .inventory-row small,.inventory-sell small,.nav small,
+  .profile-version){
+  color:#e8f5ec!important;
+  opacity:1!important;
+}
+body :is(.eyebrow,.admin-category-icon){color:#a8f2c1!important}
+body :is(.admin-category-count,.pill,.rarity){color:#c9f5d8!important}
+body :is(button,button span,.button,.btn){color:#eafff0!important}
+body button.primary,
+body button.codex-category-btn.active,
+body button.admin-activity-entry,
+body .nav button.active{color:#ffffff!important}
+body button.danger{color:#fff0f5!important}
+body :is(input,select,textarea,.field,.toolbar input,.toolbar select,
+  .sell-qty,.inventory-sell input,.pet-select){
+  color:#14251b!important;
+  background:#e0eee5!important;
+}
+body :is(input,select,textarea)::placeholder{color:#526b5b!important;opacity:1!important}
+body .dice-lock-star{color:#ffd700!important}
+
+/* Ensure plain text directly inside secondary admin tabs also stays bright. */
+body .admin-category-tab:not([aria-pressed=true]){
+  color:#e8f5ec!important;
+}
+body .admin-category-tab:not([aria-pressed=true]) *{
+  color:#e8f5ec!important;
+}
+body .admin-category-tab:not([aria-pressed=true]) .admin-category-icon{
+  color:#a8f2c1!important;
+}
