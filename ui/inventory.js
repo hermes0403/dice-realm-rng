@@ -27,6 +27,12 @@ export function createInventoryUI({
   render
 }) {
   let inventorySellMode = false;
+  let inventoryLockMode = false;
+  function lockedSet() {
+    const S = getState();
+    if (!Array.isArray(S.lockedDice)) S.lockedDice = [];
+    return new Set(S.lockedDice);
+  }
 
   function itemHTML(dice, owned = true) {
     const S = getState();
@@ -109,7 +115,8 @@ export function createInventoryUI({
       const halloween = halloweenIds.has(item.id);
       const color = halloween ? '#ff8a3d' : (mutationColors[item.weather] || '#4df27c');
       for (let n = 0; n < count; n++) {
-        html += `<label class="inventory-tile" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}"><input type="checkbox" data-sell-select="${item.id}" aria-label="選擇出售${escapeHTML(item.name)}第${n + 1}顆"><span class="tile-chance" style="color:${color}">${chanceText(item)}</span><span class="tile-icon" style="color:${color}">${item.icon}</span><span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span><span class="tile-index">#${n + 1}</span></label>`;
+        const locked = lockedSet().has(item.id + ':' + n);
+        html += `<label class="inventory-tile ${locked ? 'dice-locked' : ''}" data-dice-id="${item.id}" data-dice-index="${n}" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}"><input type="checkbox" data-sell-select="${item.id}" ${locked ? "disabled" : ""} aria-label="選擇出售${escapeHTML(item.name)}第${n + 1}顆"><button type="button" class="dice-lock-star" data-toggle-dice-lock="1" aria-label="切換鎖定">${locked ? "★" : ""}</button><span class="tile-chance" style="color:${color}">${chanceText(item)}</span><span class="tile-icon" style="color:${color}">${item.icon}</span><span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span><span class="tile-index">#${n + 1}</span></label>`;
       }
     }
     grid.innerHTML = html || '<div class="empty" style="grid-column:1/-1">背包目前沒有骰子。</div>';
@@ -136,6 +143,7 @@ export function createInventoryUI({
     const input = row?.querySelector(`[data-sell-qty="${id}"]`);
     const S = getState();
     const have = Number(S.bag[id]) || 0;
+    if (lockedSet().size && [...lockedSet()].some(key => key.startsWith(id + ':'))) { toast('請取消星號在出售'); return; }
     const amount = Math.floor(Number(input?.value) || 0);
     if (have <= 0 || amount < 1) { toast('請輸入有效出售數量'); return; }
     if (amount > have) {
@@ -185,12 +193,34 @@ export function createInventoryUI({
   });
 
   document.getElementById('inventoryGrid').addEventListener('click', event => {
+    const lock = event.target.closest('[data-toggle-dice-lock]');
+    if (lock) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!inventoryLockMode) return;
+      const tile = lock.closest('.inventory-tile');
+      const key = tile.dataset.diceId + ':' + tile.dataset.diceIndex;
+      const S = getState(), locks = lockedSet();
+      if (locks.has(key)) locks.delete(key); else locks.add(key);
+      S.lockedDice = [...locks];
+      save();
+      renderInventory();
+      return;
+    }
     const tile = event.target.closest('.inventory-tile');
-    if (tile && !inventorySellMode) event.preventDefault();
+    if (tile && (!inventorySellMode || tile.classList.contains('dice-locked'))) event.preventDefault();
   });
   document.getElementById('inventoryGrid').addEventListener('change', event => {
     if (event.target.matches('input[data-sell-select]')) updateInventorySelectedCount();
   });
+  document.getElementById('lockDiceModeBtn').addEventListener('click', () => {
+    if (inventorySellMode) return;
+    inventoryLockMode = !inventoryLockMode;
+    const button = document.getElementById('lockDiceModeBtn');
+    button.classList.toggle('active', inventoryLockMode);
+    toast(inventoryLockMode ? '點選骰子即可加上或取消星號' : '已完成鎖定設定');
+  });
+
   document.getElementById('sellSelectedDiceBtn').addEventListener('click', () => {
     const S = getState();
     const grid = document.getElementById('inventoryGrid');
@@ -202,6 +232,7 @@ export function createInventoryUI({
       return;
     }
     const checked = [...grid.querySelectorAll('input[data-sell-select]:checked')];
+    if (checked.some(input => input.closest('.inventory-tile')?.classList.contains('dice-locked'))) { toast('請取消星號在出售'); return; }
     if (!checked.length) {
       inventorySellMode = false;
       grid.classList.remove('sell-select-mode');
