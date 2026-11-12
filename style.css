@@ -1322,3 +1322,14 @@ body :is(input,select,textarea,.field,.toolbar input,.toolbar select,
 }
 body :is(input,select,textarea)::placeholder{color:#526b5b!important;opacity:1!important}
 body .dice-lock-star{color:#ffd700!important}
+
+/* Ensure plain text directly inside secondary admin tabs also stays bright. */
+body .admin-category-tab:not([aria-pressed=true]){
+  color:#e8f5ec!important;
+}
+body .admin-category-tab:not([aria-pressed=true]) *{
+  color:#e8f5ec!important;
+}
+body .admin-category-tab:not([aria-pressed=true]) .admin-category-icon{
+  color:#a8f2c1!important;
+}
