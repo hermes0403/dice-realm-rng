@@ -124,7 +124,7 @@ export function createInventoryUI({
       const halloween = halloweenIds.has(item.id);
       const color = halloween ? '#ff8a3d' : (mutationColors[item.weather] || '#4df27c');
       for (let n = 0; n < count; n++) {
-        const locked = lockedSet(item.id, count).has(n);
+        const locked = lockedDiceIndexes(S, item.id).has(n);
         html += `<label class="inventory-tile ${locked ? 'dice-locked' : ''}" data-dice-id="${item.id}" data-dice-index="${n}" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}"><input type="checkbox" data-sell-select="${item.id}" ${locked ? "disabled" : ""} aria-label="選擇出售${escapeHTML(item.name)}第${n + 1}顆"><button type="button" class="dice-lock-star" data-toggle-dice-lock="1" aria-label="切換鎖定">${locked ? "★" : ""}</button><span class="tile-chance" style="color:${color}">${chanceText(item)}</span><span class="tile-icon" style="color:${color}">${item.icon}</span><span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span><span class="tile-index">#${n + 1}</span></label>`;
       }
     }
