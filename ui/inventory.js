@@ -208,6 +208,16 @@ export function createInventoryUI({
       return;
     }
     const tile = event.target.closest('.inventory-tile');
+    if (tile && inventoryLockMode) {
+      event.preventDefault();
+      const key = tile.dataset.diceId + ':' + tile.dataset.diceIndex;
+      const S = getState(), locks = lockedSet();
+      if (locks.has(key)) locks.delete(key); else locks.add(key);
+      S.lockedDice = [...locks];
+      save();
+      renderInventory();
+      return;
+    }
     if (tile && (!inventorySellMode || tile.classList.contains('dice-locked'))) event.preventDefault();
   });
   document.getElementById('inventoryGrid').addEventListener('change', event => {
