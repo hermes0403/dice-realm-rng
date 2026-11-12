@@ -1125,3 +1125,167 @@ input::placeholder,textarea::placeholder{
   color:#29365e!important;
   opacity:1!important;
 }
+
+
+/* T-0076: restore the T-0061 emerald night theme while retaining current contrast and features */
+:root{
+  --bg:#06130f;
+  --panel:#0b1d17;
+  --panel2:#10271e;
+  --line:#244b3a;
+  --blue:#61d69b;
+  --purple:#65c995;
+  --cyan:#a4f4c8;
+}
+body{
+  background-color:#06130f!important;
+  background-image:
+    radial-gradient(ellipse at 12% -8%,#1c8b5b55 0,transparent 43%),
+    radial-gradient(ellipse at 92% 18%,#176b4a42 0,transparent 38%),
+    radial-gradient(ellipse at 50% 108%,#123e3155 0,transparent 52%),
+    linear-gradient(145deg,#071610 0%,#091b14 42%,#07120f 100%)!important;
+  background-attachment:fixed!important;
+  color:#0b1433!important;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.24;
+  background-image:
+    linear-gradient(115deg,transparent 0 38%,#69e6a20b 38.1% 38.3%,transparent 38.4% 100%),
+    linear-gradient(25deg,transparent 0 62%,#69e6a208 62.1% 62.25%,transparent 62.35% 100%),
+    radial-gradient(circle at 18% 28%,#8affc31a 0 1px,transparent 1.8px),
+    radial-gradient(circle at 78% 64%,#8affc314 0 1px,transparent 1.8px);
+  background-size:100% 100%,100% 100%,46px 46px,61px 61px;
+}
+.nav{
+  background:linear-gradient(165deg,#0b2119ed,#0a1713e8 75%,#10251bdc)!important;
+  border-color:#28513e!important;
+  box-shadow:0 12px 34px #020b0780,inset 0 1px #a9ffd00a!important;
+}
+.nav button.active{
+  background:linear-gradient(110deg,#174d35,#153c2e)!important;
+  border-color:#347a56!important;
+}
+.hero{
+  border-color:#2b694a!important;
+  background:radial-gradient(ellipse at 10% 0%,#3bd48722,transparent 48%),linear-gradient(135deg,#10271fef,#10251ddd 58%,#102019dd)!important;
+  box-shadow:0 14px 38px #020b0780,inset 0 1px #c5ffdc0d!important;
+}
+.hero:after{background:#42d98b20!important}
+.eyebrow{color:#9af0bd!important}
+.stat,.card,.item,.pet-card,.inventory-tile,.weather-status,
+.announcement-panel,.achievement-row,.codex-row,.quest-card,
+.achievement-card,.leaderboard-card,.profile-card,.glove-card,
+.fusion-card,.task-card,.event-card,.inventory-card,.codex-card,
+.codex-entry,.leaderboard-fold,.my-rank-card,.notice,.admin-fold,
+.bag-upgrade-strip,.pet-income-panel,.pet-sell-dialog,
+.pet-sell-choice,.pet-sell-summary,.summon-dice-row,
+.summon-outcome,.auto-sell-option,.adminbox,.mobile-nav,
+.admin-category-title,.admin-curve-wrap,.realm-activity-card,
+.limited-event-entry,.event-admin-wallet,.admin-category-group,
+.admin-category-tab,.admin-category-icon,.admin-category-count,
+.admin-search,.admin-navigation-head,.admin-category-nav,
+.admin-category-content,.admin-empty-state,.announcement-line{
+  background-color:#10251c!important;
+  border-color:#28513d!important;
+  box-shadow:inset 0 1px 0 #c5ffdc0b,0 2px 10px #020b0750!important;
+}
+.hero,.rollbox,.admin-navigation-head,.admin-category-content,
+.admin-fold,.leaderboard-fold,.nav,.admin-category-nav{
+  background-color:#0c2118!important;
+}
+.stat,.card,.item,.pet-card,.inventory-tile,.weather-status,
+.announcement-panel,.achievement-row,.codex-row,.quest-card,
+.achievement-card,.leaderboard-card,.profile-card,.glove-card,
+.fusion-card,.task-card,.event-card,.inventory-card{
+  background-color:#10271e!important;
+}
+.rollbox{
+  background:radial-gradient(ellipse at 50% 10%,#1d6847 0,#103323 48%,#0a1b14 100%)!important;
+  border-color:#347653!important;
+}
+.dice{
+  background:linear-gradient(145deg,#1b5239,#10281d)!important;
+  border-color:#62bd8a!important;
+  box-shadow:0 0 35px #42d98b24,inset 0 0 20px #ffffff0b!important;
+}
+.admin-category-group>.admin-fold[open],
+.admin-category-tab[aria-pressed=true]{
+  background:linear-gradient(105deg,#1d6843,#174a33 75%,#183d2c)!important;
+  border-color:#4b9a68!important;
+}
+.admin-category-tab:not([aria-pressed=true]){
+  background:#10251b!important;
+  color:#0b1433!important;
+}
+.admin-category-icon{background:#163a28!important;color:#a4edbd!important}
+.admin-category-tab[aria-pressed=true] .admin-category-icon{
+  border-color:#68c98a!important;background:#286746!important;
+}
+.admin-category-count{background:#0c2016!important;color:#a7d9b7!important}
+.admin-category-title{
+  background:linear-gradient(100deg,#1b543866,#163b2c77 65%,transparent)!important;
+  border-color:#356447!important;
+}
+.admin-category-title>span{
+  background:#19452e!important;border-color:#4b9465!important;color:#b4f3c9!important;
+}
+.admin-category-group>.admin-fold{
+  background:linear-gradient(110deg,#132b20,#0e2118 75%)!important;
+  border-color:#2b533e!important;
+}
+.admin-category-group>.admin-fold[open]{
+  background:linear-gradient(110deg,#173b29,#10251b 80%)!important;
+  border-color:#4b9465!important;
+}
+.admin-category-group>.admin-fold>summary::marker{color:#8ce6aa!important}
+.admin-activity-entry{
+  background:linear-gradient(100deg,#216c45,#174e37 70%,#163e2d)!important;
+  border-color:#55a975!important;
+  box-shadow:0 0 18px #3cb87522!important;
+}
+.admin-empty-state{background:#10241a!important;border-color:#356447!important}
+button:not(.primary):not(.danger){
+  color:#d5f2df!important;
+  background:linear-gradient(120deg,#102b20,#153b2b)!important;
+  border-color:#2c6246!important;
+  box-shadow:inset 0 1px 0 #ffffff14,0 1px 4px #020b0740!important;
+}
+button:not(.primary):not(.danger):hover:not(:disabled){
+  background:linear-gradient(120deg,#17432e,#1a5036)!important;
+  border-color:#65d996!important;
+}
+button.primary,button.codex-category-btn.active,button.admin-activity-entry{
+  color:#f5fff8!important;
+  background:linear-gradient(115deg,#16834e,#27b66c 58%,#56c985)!important;
+  border-color:#4cae78!important;
+}
+button.quiet{
+  color:#d8f4e2!important;
+  background:linear-gradient(120deg,#0d2018,#112a1e)!important;
+  border-color:#28513b!important;
+}
+button.danger{
+  color:#fff0f5!important;
+  background:linear-gradient(120deg,#704052,#87506a)!important;
+  border-color:#a26a81!important;
+}
+.toolbar input,.toolbar select,.field,input,select,textarea,
+.sell-qty,.inventory-sell input,.pet-select{
+  color:#0b1433!important;
+  background:#e0eee5!important;
+  border-color:#56866a!important;
+}
+.weather-status{
+  background:linear-gradient(120deg,#10281c,#153a28)!important;
+  border-color:#32684c!important;
+}
+.profile-version{color:#dcefe2!important}
+.dice-lock-star{color:#ffd700!important}
+@media(prefers-reduced-motion:no-preference){
+  body{background-size:100% 100%;background-attachment:fixed}
+}
