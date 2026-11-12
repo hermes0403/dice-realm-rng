@@ -1095,8 +1095,11 @@ button.danger{
 
 /* T-0072: individually locked inventory dice */
 .inventory-tile{position:relative}
-.dice-lock-star{position:absolute!important;top:3px;left:4px;z-index:3;width:10px!important;min-width:10px!important;height:10px!important;min-height:10px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#ffe58a!important;font-size:9px!important;line-height:10px!important;opacity:0;pointer-events:none}
+.dice-lock-star{position:absolute!important;top:3px;left:4px;z-index:3;width:10px!important;min-width:10px!important;height:10px!important;min-height:10px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#ffd700!important;text-shadow:0 0 4px #ffbf00aa;font-size:9px!important;line-height:10px!important;opacity:0;pointer-events:none}
 .inventory-tile.dice-locked .dice-lock-star{opacity:1;pointer-events:auto}
 .inventory-tile:not(.dice-locked) .dice-lock-star{display:none}
 .inventory-tile.dice-locked{outline:1px solid #f2d477;outline-offset:-2px}
 #lockDiceModeBtn.active{background:#5969a6!important;color:#fff!important}
+
+/* T-0074: compact profile version label */
+.profile-version{text-align:center;margin:10px 0 0;color:#dce4ff!important;letter-spacing:.08em}

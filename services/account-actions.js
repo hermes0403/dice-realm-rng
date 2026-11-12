@@ -14,6 +14,7 @@ export function setupAccountActions(dependencies) {
     save,
     render,
     flushCloudSave,
+    syncCloudSave,
     toast,
     stopAuto,
     KEY,
@@ -23,7 +24,10 @@ export function setupAccountActions(dependencies) {
   } = dependencies;
 
   document.getElementById('saveName').onclick = async () => {
-    const name = document.getElementById('profileNameInput').value.trim().slice(0, 20);
+    const currentName = String(getState()?.name || '旅人');
+    const enteredName = globalThis.prompt?.('輸入新的玩家名稱', currentName);
+    if (enteredName === null || enteredName === undefined) return;
+    const name = String(enteredName).trim().slice(0, 20);
     if (!name) { toast('名稱不可空白'); return; }
     const currentUser = getCurrentUser();
     const state = getState();

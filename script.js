@@ -12,11 +12,11 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js';
+import { createProgressionSystem } from './systems/progression.js?v=20261112-t0074-settings';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261110-roll-save-cachefix';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261112-t0074-lock-persistence';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
@@ -35,7 +35,7 @@ import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js';
-import { setupAccountActions } from './services/account-actions.js';
+import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
 import { createTimerManager } from './core/timer-manager.js';
 
 const timerManager = createTimerManager();
@@ -291,7 +291,7 @@ setupAccountActions({
   documentRef: document, getState: () => S, setState: value => { S = value; },
   getCurrentUser: () => currentUser, setCurrentUser: value => { currentUser = value; },
   supabaseClient, SUPABASE_URL, SUPABASE_KEY, totalUnique, achievementStats,
-  save, render, flushCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
+  save, render, flushCloudSave, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
 save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
