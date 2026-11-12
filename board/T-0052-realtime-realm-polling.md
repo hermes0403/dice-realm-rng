@@ -1,7 +1,7 @@
 ---
 id: T-0052
 title: 將全服公告與投票改為即時廣播並降低資料庫輪詢
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-09
-updated: 2026-11-09
+updated: 2026-11-12
 depends_on: []
 branch: work/chazi
 done_by: 棒子
-done_at:
+done_at: 2026-11-12
 ---
 
 ## 任務
@@ -49,3 +49,5 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-12 [棒子驗收] 棒子確認 T-0052 實作成功，正式驗收結案。
