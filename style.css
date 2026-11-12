@@ -1103,3 +1103,25 @@ button.danger{
 
 /* T-0074: compact profile version label */
 .profile-version{text-align:center;margin:10px 0 0;color:#dce4ff!important;letter-spacing:.08em}
+
+
+/* T-0075: improve text contrast without changing the established backgrounds */
+:root{
+  --text:#0b1433;
+  --muted:#0b1433;
+}
+body{color:#0b1433!important}
+.muted,.mini,.hint,.help,.description,.subtitle,.result-sub,
+.tenth-progress-head,.nav small,.nav button:not(.active),
+.stat span,.item p,.toolbar label,.announcement-line,
+.announce-style-label,.admin-category-copy small,
+.sell-help,.inventory-row small,.inventory-sell small,
+.codex-row .codex-count,.pet-meta,.profile-version,
+small:not(.weather-status *){
+  color:#0b1433!important;
+  opacity:1!important;
+}
+input::placeholder,textarea::placeholder{
+  color:#29365e!important;
+  opacity:1!important;
+}
