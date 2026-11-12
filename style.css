@@ -1523,3 +1523,15 @@ body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
 .weather-item-hell .weather-name,.weather-item-hell .weather-countdown{color:#ff6038}
 .weather-item-dumpling .weather-name,.weather-item-dumpling .weather-countdown{color:#ffcf79}
 @media(max-width:720px){.weather-status{gap:4px 8px;padding:6px 9px}.weather-item{gap:4px}.weather-item .weather-name,.weather-item .weather-countdown{font-size:11px}}
+
+
+/* T-0082：補齊深藍文字對比，維持深綠科幻主題與稀有度專屬色。 */
+body{color:#e8f5ec!important}
+body :is(.muted,.mini,.hint,.help,.description,.subtitle,.result-sub,.stat span,.item p,.toolbar label,.announcement-line,.announce-style-label,.admin-category-copy small,.sell-help,.inventory-row small,.inventory-sell small,.codex-row .codex-count,.pet-meta:not(.pet-rarity-common):not(.pet-rarity-rare):not(.pet-rarity-legendary):not(.pet-rarity-mythic):not(.pet-rarity-secret),.profile-version,.admin-empty-state,.admin-category-tab:not([aria-pressed=true])){color:#d6eee0!important;opacity:1!important}
+body :is(h1,h2,h3,h4,h5,h6,.section-head,.admin-category-title,.admin-category-copy strong,.stat b,.codex-name,.inventory-dice,.pet-name,.quest-title,.achievement-title){color:#e8f5ec!important}
+body button:not(.primary):not(.danger),body button.quiet{color:#eafff0!important}
+body .admin-category-tab:not([aria-pressed=true]) *{color:#d6eee0!important}
+body :is(input,select,textarea,.field,.toolbar input,.toolbar select,.sell-qty,.inventory-sell input,.pet-select){color:#14251b!important}
+#authModal .eyebrow{color:#a8f2c1!important}
+#authModal h2,#authModal p,#authModal label,#authModal .muted{color:#e8f5ec!important}
+#authModal input::placeholder{color:#526b5b!important}
