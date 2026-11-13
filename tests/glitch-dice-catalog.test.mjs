@@ -16,6 +16,7 @@ test('四顆故障主題骰子加入一般圖鑑與一般擲骰池', () => {
     assert.equal(dice.name, name);
     assert.equal(dice.den, den);
     assert.equal(dice.weather, undefined, 'must remain in the normal codex');
+    assert.equal(dice.glitchBonus, true, 'must receive the fault-weather weight bonus');
   }
   assert.equal(new Set(expected.map(([id]) => id)).size, 4);
 });

@@ -60,6 +60,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-13 16:52 [叉子] PR #80 CI 發現既有 lifecycle regression 測試未跟上條件式投票同步：無進行中投票時應為 0 個 `realm-poll-sync` interval；另天氣系統測試 fixture 補上 `WEATHER_TYPES`。此修正只校正測試預期，不新增輪詢。
+
 - 2026-11-13 12:08 [叉子] 開單 PR #76 已合併至 main（merge commit `893903c9928defef3c506bf0e4de6c56fa1d7dfa`）；依最新 main Board 檢查，owner_side 有效 in_progress 任務 T-0079、T-0080、T-0083，共 3/5；未發現觸發 owner_side Communicate 優先閘門的任務。T-0084 由 open 轉為 in_progress，準備開工 PR。
 
 - 2026-11-13 12:08 [叉子] 依棒子本次需求開單；「1/128 以上骰子降低機率」已依棒子指示取消。四顆骰子暫採提案名稱，基礎機率依需求原順序記錄。

@@ -22,8 +22,8 @@ function applyServerWeatherRow(row,announce=false){
  if(updatedAt&&lastServerWeatherUpdatedAt&&updatedAt<lastServerWeatherUpdatedAt)return;
  const until=row.ends_at?new Date(row.ends_at).getTime():0;
  // 召喚成功後，若短時間內讀到舊的晴天資料，保留召喚天氣直到原定結束時間。
- if(row.weather_type==='sunny'&&summonedWeatherGuardUntil>now)return;
- const valid=['sunny','rain','snow','thunder','crystal','hell','dumpling'];const next=until>now&&valid.includes(row.weather_type)?{type:row.weather_type,types:[row.weather_type,...(valid.includes(row.weather_type_2)&&row.weather_type_2!==row.weather_type?[row.weather_type_2]:[])],until,by:row.summoned_by||'玩家',at:updatedAt||now}:null;
+ if(row.weather_type==='sunny'&&(!row.weather_type_2||row.weather_type_2==='sunny')&&summonedWeatherGuardUntil>now)return;
+ const valid=['sunny','rain','snow','thunder','crystal','hell','dumpling','glitch'];const next=until>now&&valid.includes(row.weather_type)?{type:row.weather_type,types:[row.weather_type,...(valid.includes(row.weather_type_2)&&row.weather_type_2!==row.weather_type?[row.weather_type_2]:[])],until,by:row.summoned_by||'玩家',at:updatedAt||now}:null;
  if(updatedAt)lastServerWeatherUpdatedAt=Math.max(lastServerWeatherUpdatedAt,updatedAt);
  if(next&&next.type!=='sunny'){summonedWeatherGuardUntil=next.until;try{localStorage.setItem('diceRealmSummonedWeatherGuard',JSON.stringify({until:next.until,type:next.type}))}catch{}}
  if(!next&&summonedWeatherGuardUntil<=now){summonedWeatherGuardUntil=0;try{localStorage.removeItem('diceRealmSummonedWeatherGuard')}catch{}}
@@ -60,13 +60,13 @@ async function refreshServerWeather(announce=false){
  try{const {data,error}=await supabaseClient.from('realm_weather_state').select('weather_type,weather_type_2,ends_at,summoned_by,updated_at').eq('singleton',true).maybeSingle();if(error)throw error;if(data)applyServerWeatherRow(data,announce)}
  catch(e){console.debug('Shared weather state unavailable',e)}finally{serverWeatherRefreshBusy=false}
 }
-function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
+function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder','glitch'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
 function minuteSeed(n){let x=(n^0x9e3779b9)>>>0;x=Math.imul(x^(x>>>16),0x21f0aaad);x=Math.imul(x^(x>>>15),0x735a2d97);x=(x^(x>>>15))>>>0;return x/4294967296}
 function getWeather(now=Date.now()){
  if(playerWeatherOverride&&Number(playerWeatherOverride.until)>now)return playerWeatherOverride;
  if(playerWeatherOverride&&Number(playerWeatherOverride.until)<=now){playerWeatherOverride=null;lastPlayerWeatherKey='';}
  // 共享狀態只在非晴天天氣期間覆蓋自然天氣循環。舊版雲端若留下長效 sunny 記錄，會讓所有玩家卡在晴天。
- if(serverWeatherState&&serverWeatherState.type!=='sunny'&&Number(serverWeatherState.until)>now)return serverWeatherState;
+ if(serverWeatherState&&Number(serverWeatherState.until)>now&&(serverWeatherState.type!=='sunny'||(serverWeatherState.types||[]).some(type=>type!=='sunny')))return serverWeatherState;
  if(forcedWeatherState){if(Number(forcedWeatherState.until)>now)return forcedWeatherState;forcedWeatherState=null;try{localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;}
  const minute=Math.floor(now/60000);if(minute===cachedWeatherMinute)return cachedWeatherState;
  const dayStart=Math.floor(now/86400000)*1440-5;let state={type:'sunny',until:0};
@@ -104,11 +104,12 @@ function updateWeatherUI(){
  document.body.classList.toggle('weather-aura-crystal',activeTypes.includes('crystal'));
  document.body.classList.toggle('weather-aura-hell',activeTypes.includes('hell'));
  document.body.classList.toggle('weather-aura-dumpling',activeTypes.includes('dumpling'));
+ document.body.classList.toggle('weather-aura-glitch',activeTypes.includes('glitch'));
  let scene=document.getElementById('weatherSceneOverlay');
  if(!scene){scene=document.createElement('div');scene.id='weatherSceneOverlay';scene.className='weather-scene-overlay';scene.setAttribute('aria-hidden','true');document.body.appendChild(scene)}
- scene.className='weather-scene-overlay'+(['rain','snow','thunder'].includes(state.type)?' '+state.type:'');
+ scene.className='weather-scene-overlay'+(['rain','snow','thunder'].includes(state.type)?' '+state.type:'')+(activeTypes.includes('glitch')?' glitch':'');
  if(!wrap)return;
- wrap.classList.remove('weather-rain','weather-snow','weather-thunder','weather-crystal','weather-hell','weather-dumpling');
+ wrap.classList.remove('weather-rain','weather-snow','weather-thunder','weather-crystal','weather-hell','weather-dumpling','weather-glitch');
  activeTypes.forEach(t=>wrap.classList.add('weather-'+t));
  if(!activeTypes.length){wrap.innerHTML='<span class="weather-item"><span class="weather-icon">☀️</span><span class="weather-name">晴天</span></span>';return}
  const now=Date.now();
