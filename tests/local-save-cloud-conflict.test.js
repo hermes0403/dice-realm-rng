@@ -110,10 +110,13 @@ test('cloud save sends only changed fields and skips unchanged snapshots', async
   await service.loadCloudSave();
   const initialWriteCount = cloudWrites.length;
   getState().coins = 75;
+  getState().bagCapacity = 36;
+  getState().gloves = ['g2'];
+  getState().equipped = 'g2';
   await service.syncCloudSave();
 
   assert.equal(cloudWrites.length, initialWriteCount + 1);
-  assert.deepEqual(Object.keys(cloudWrites.at(-1).args.p_save_patch), ['coins']);
+  assert.deepEqual(Object.keys(cloudWrites.at(-1).args.p_save_patch).sort(), ['bagCapacity', 'coins', 'equipped', 'gloves']);
   assert.equal(cloudWrites.at(-1).args.p_expected_updated_at, '2026-11-14T00:34:00.000Z');
 
   const writeCountAfterChange = cloudWrites.length;
