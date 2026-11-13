@@ -29,5 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Check JavaScript syntax
+        run: node --input-type=module --check < services/cloud-save.js && node --input-type=module --check < script.js
       - name: Run full Node regression suite
         run: node --test tests/*.test.js
