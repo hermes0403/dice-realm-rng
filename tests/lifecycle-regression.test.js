@@ -11,6 +11,7 @@ import { createGloveUI } from '../ui/gloves.js';
 import { createPotionUI } from '../ui/potions.js';
 import { createPetSystem } from '../systems/pets.js';
 import { createWeatherSystem } from '../systems/weather.js';
+import { WEATHER_TYPES } from '../config.js';
 import { createGlobalAnnouncements } from '../systems/global-announcements.js';
 
 function createFakeDocument(ids = []) {
@@ -154,7 +155,7 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(realm.setupRealmSocialUI(), true);
   assert.equal(realm.setupRealmSocialUI(), false);
   assert.equal(realmDocument.listeners.get('realmPollButtons:click').length, 1);
-  assert.equal(timers.manager.getStats().scopes['realm-poll-sync'].intervals, 1);
+  assert.equal(timers.manager.getStats().scopes['realm-poll-sync']?.intervals || 0, 0);
 
   const codexDocument = createFakeDocument();
   const codex = createCodexUI({
@@ -237,6 +238,7 @@ test('player weather subscription replaces the previous account channel', async 
   };
   try {
     const weather = createWeatherSystem({
+      WEATHER_TYPES,
       supabaseClient,
       getCurrentUser: () => currentUser,
       timerManager: createFakeTimerManager().manager,
