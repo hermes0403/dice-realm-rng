@@ -1551,3 +1551,5 @@ body :is(input,select,textarea,.field,.toolbar input,.toolbar select,.sell-qty,.
 @keyframes glitchRevealCard{0%{transform:translateX(-3px) skew(-1deg);filter:hue-rotate(-18deg)}100%{transform:translateX(3px) skew(1deg);filter:hue-rotate(22deg)}}
 @keyframes glitchRevealIcon{0%{transform:translate(-2px,-1px) scale(.98)}100%{transform:translate(2px,1px) scale(1.08)}}
 @media(prefers-reduced-motion:reduce){.rarity-overlay.tier-glitch::before,.rarity-overlay.tier-glitch::after,.rarity-overlay.tier-glitch .rarity-reveal-card,.rarity-overlay.tier-glitch .rarity-reveal-icon,.weather-aura-glitch .weather-scene-overlay.glitch{animation:none!important}}
+
+.weather-aura-glitch #weatherStatus{border-color:#ff3d9a!important;box-shadow:0 0 20px #ff3d9a55,inset 0 0 18px #ff3d9a22!important;background:linear-gradient(105deg,#351329,#181326)!important}.weather-aura-glitch #weatherStatus .weather-item-glitch{filter:drop-shadow(0 0 5px #ff3d9a)}
