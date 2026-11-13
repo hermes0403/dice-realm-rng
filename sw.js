@@ -4,6 +4,7 @@ const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './script.js?v=20261113-t0085-landscape-pwa',
   './style.css?v=20261113-t0085-landscape-pwa',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
