@@ -34,7 +34,7 @@ done_at:
 
 - 新增 weather type：glitch，完整支援全服狀態、畫面顯示、倒數、既有 Realtime 同步及管理員手動施放。
 - 管理員天氣控制沿用既有權限、持續時間及 RPC；僅允許管理員指定故障天氣。
-- 特殊天氣召喚維持原本水晶 70%、地獄 30%，不新增故障天氣隨機召喚，也不更動召喚 RPC。
+- 特殊天氣召喚維持原本水晶 70%、地獄 30%，不新增故障天氣隨機召喚，不改變召喚比例、能量扣除及獎勵；僅在既有召喚 RPC 加入故障天氣期間的保護鎖。
 
 ## 範圍與禁止
 
@@ -60,3 +60,4 @@ done_at:
 
 - 2026-11-13 12:08 [叉子] 開單 PR #76 已合併至 main（merge commit `893903c9928defef3c506bf0e4de6c56fa1d7dfa`）；依當時 Board 快照，owner_side 有效 in_progress 任務 T-0079、T-0080、T-0083，共 3/5；未發現觸發 owner_side Communicate 優先閘門的任務。T-0084 由 open 轉為 in_progress，開工 PR #77 已合併。
 - 2026-11-13 12:37 [叉子] 依棒子明確要求改採安全版：四顆骰子改為固定累積擲骰里程碑解鎖，完全排除隨機擲骰池；故障天氣保留管理員手動施放，特殊天氣召喚維持原水晶 70%／地獄 30%。原先分母不再作為抽取機率。
+- 2026-11-13 12:38 [叉子] 已將 Supabase `realm_weather_state_weather_type_check` 加入 `glitch`，並更新 `admin_set_realm_weather_pair` 管理員白名單；`summon_realm_weather` 維持水晶 70%／地獄 30%，僅新增故障天氣期間不可被召喚中斷的檢查。Migration：`add_glitch_weather_admin_support`；資料庫約束回讀已確認包含 `glitch`。
