@@ -1,7 +1,7 @@
 ---
 id: T-0085
 title: 手機橫向版面與 PWA 全螢幕支援
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -44,6 +44,8 @@ done_at:
 - [ ] 遊戲版本由 V1.14 更新為 V1.15。
 
 ## 紀錄
+
+- 2026-11-13 18:09 [叉子] 開單 PR #82 已合併至 main（merge commit `9bbb15e03c556bd75c9da952a89c08a36c72b909`）；重新檢查最新 main 的容量與 Communicate 閘門，owner_side 有效 in_progress 任務 2/5，未觸發優先閘門；任務正式接手，準備開工 PR。
 
 - 2026-11-13 18:08 [叉子] 依棒子明確指示建立；範圍包含設定頁全螢幕按鈕、PWA 顯示、瀏覽器一般模式回退、橫向排版及安全區。採橫向優先但不強制旋轉，避免在不支援方向鎖定的瀏覽器造成阻斷。
 
