@@ -45,6 +45,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-13 18:17 [叉子] 完成程式實作；PWA 顯示測試 8/8、JavaScript 語法檢查及差異空白檢查通過。完整 Node 測試為 104/106，2 項既有寵物圖片順序測試仍使用舊 39 隻清單，與本任務修改範圍無關；等待交付 PR 合併及 Pages 部署驗證。
+
 - 2026-11-13 18:09 [叉子] 開單 PR #82 已合併至 main（merge commit `9bbb15e03c556bd75c9da952a89c08a36c72b909`）；重新檢查最新 main 的容量與 Communicate 閘門，owner_side 有效 in_progress 任務 2/5，未觸發優先閘門；任務正式接手，準備開工 PR。
 
 - 2026-11-13 18:08 [叉子] 依棒子明確指示建立；範圍包含設定頁全螢幕按鈕、PWA 顯示、瀏覽器一般模式回退、橫向排版及安全區。採橫向優先但不強制旋轉，避免在不支援方向鎖定的瀏覽器造成阻斷。
@@ -53,8 +55,25 @@ done_at:
 
 ### 改了什麼
 
+- `index.html`：加入 PWA manifest／iOS 主畫面 metadata、`viewport-fit=cover`、設定頁「全螢幕」按鈕，版本更新至 V1.15。
+- `ui/display-controls.js`：按鈕切換 Fullscreen API、優先要求隱藏瀏覽器 UI、同步全螢幕狀態，並在 HTTPS 安全來源註冊 Service Worker。
+- `manifest.webmanifest` 與兩種尺寸 PNG 圖示：設定 PWA 安裝資訊、fullscreen 優先顯示模式；方向維持 any，不強迫旋轉。
+- `sw.js`：網路優先處理同源頁面與靜態資源，離線時回退快取；不處理跨來源 Supabase API／認證／玩家存檔。
+- `style.css`：加入安全區 padding、動態 viewport 高度及手機橫向左側導覽／雙欄擲骰版面；直向與桌面保留原樣。
+- `script.js`：載入顯示控制模組。
+
 ### 怎麼驗證的
+
+- GitHub Actions PWA 顯示測試：8/8 通過；JavaScript 語法檢查及 `git diff --check` 通過。
+- 完整 Node 測試曾執行：104/106 通過；剩餘 2 項皆在既有 `tests/pet-image-mapping.test.js`，其預期仍是舊 39 隻寵物，但目前資料已包含 6 隻活動寵物。此任務未修改寵物資料、圖片或相關測試。
+- GitHub Pages 尚待交付 PR 合併後部署；實際手機瀏覽器外觀仍需棒子用裝置驗收。
 
 ### 沒做／做不到的
 
+- 一般瀏覽器只能在支援 Fullscreen API 且玩家點擊按鈕後請求隱藏瀏覽器 UI；iOS Safari 等不支援的環境會保留系統介面，版面仍可使用。
+- 本次不強制鎖定橫向，也不新增 Supabase 查詢、RPC、資料表或輪詢。
+- 本次記錄完成的是程式與自動化驗證；尚未宣稱 Pages 已部署或完成 Owner 驗收。
+
 ### 衍生任務／影響任務
+
+- 無。

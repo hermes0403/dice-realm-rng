@@ -1552,3 +1552,131 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
 @keyframes glitchCard{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}50%{transform:translate(-1px,1px)}75%{transform:translate(2px,0)}}
 @keyframes glitchIcon{0%,100%{transform:translateX(0) skewX(0)}50%{transform:translateX(2px) skewX(-2deg)}}
 @media(prefers-reduced-motion:reduce){.rarity-overlay.glitch-reveal::before,.rarity-overlay.glitch-reveal .rarity-reveal-card,.rarity-overlay.glitch-reveal .rarity-reveal-icon{animation:none!important}}
+
+
+/* T-0085: safe-area aware viewport and landscape-first mobile layout */
+@supports (height: 100dvh) {
+  body { min-height: 100dvh; }
+}
+@media (max-width: 760px) {
+  .shell {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding-left: max(10px, env(safe-area-inset-left));
+  }
+}
+#fullscreenToggleBtn { min-width: 112px; }
+#fullscreenToggleBtn:disabled { opacity: .7; cursor: default; }
+
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 620px) {
+  .shell {
+    max-width: none;
+    padding: max(7px, env(safe-area-inset-top))
+      max(9px, env(safe-area-inset-right))
+      max(7px, env(safe-area-inset-bottom))
+      max(9px, env(safe-area-inset-left));
+  }
+  .top { gap: 8px; padding: 2px 0 7px; min-height: 40px; }
+  .brand { font-size: 18px; }
+  .weather-status { min-width: 0; padding: 4px 9px; font-size: 11px; }
+  .profile { gap: 5px; }
+  .profile .avatar { width: 30px; height: 30px; }
+  .profile #playerName, .profile #gloveLabel { display: none !important; }
+  .announcement-panel { margin: 0 0 7px; }
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    z-index: 40;
+    top: calc(env(safe-area-inset-top) + 49px);
+    bottom: max(7px, env(safe-area-inset-bottom));
+    left: max(7px, env(safe-area-inset-left));
+    width: 66px;
+    margin: 0;
+    padding: 5px 3px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 12px;
+    scrollbar-width: thin;
+  }
+  .mobile-nav button {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 42px;
+    padding: 6px 2px;
+    white-space: normal;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  .layout { display: block; margin-left: 74px; }
+  .nav { display: none !important; }
+  .content { min-width: 0; }
+  #page-roll.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px;
+  }
+  #page-roll > .hero,
+  #page-roll > .stats { grid-column: 1 / -1; }
+  #page-roll > .hero { padding: 10px 14px; }
+  #page-roll > .hero h1 { font-size: 22px; }
+  #page-roll > .stats { margin: 0; gap: 7px; }
+  #page-roll > .stats .stat { padding: 7px 10px; }
+  #page-roll > .stats .stat b { font-size: 16px; }
+  #page-roll > .rollbox {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: minmax(88px, .72fr) minmax(0, 1.28fr);
+    grid-template-areas:
+      "eyebrow eyebrow"
+      "dice name"
+      "dice rarity"
+      "dice sub"
+      "dice progress"
+      "dice actions";
+    align-content: center;
+    align-items: center;
+    gap: 4px 9px;
+    margin-top: 0;
+    min-width: 0;
+    padding: 11px 9px;
+    text-align: left;
+  }
+  #page-roll > .rollbox > .eyebrow { grid-area: eyebrow; }
+  #page-roll > .rollbox > .dice {
+    grid-area: dice;
+    width: clamp(76px, 17vh, 112px);
+    height: clamp(76px, 17vh, 112px);
+    margin: 4px auto;
+    border-radius: 20px;
+    font-size: clamp(38px, 9vh, 56px);
+  }
+  #page-roll > .rollbox > .result-name { grid-area: name; margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+  #page-roll > .rollbox > .rarity { grid-area: rarity; justify-self: start; }
+  #page-roll > .rollbox > .result-sub { grid-area: sub; min-height: 0; font-size: 11px; }
+  #page-roll > .rollbox > .tenth-progress { grid-area: progress; width: 100%; max-width: none; margin: 2px 0; }
+  #page-roll > .rollbox > .roll-actions {
+    grid-area: actions;
+    justify-content: flex-start;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  #page-roll > .rollbox > .roll-actions button { min-width: 0; padding: 7px 9px; font-size: 11px; }
+  #page-roll > .card {
+    grid-column: 2;
+    align-self: stretch;
+    min-width: 0;
+    margin-top: 0 !important;
+    padding: 10px;
+  }
+  #page-roll > .card .section-head h2 { font-size: 15px; }
+  #page-roll > .card .stats { gap: 6px; }
+  #page-roll > .card .stat { padding: 7px; }
+  #page-roll > .card .stat b { font-size: 15px; }
+  .page:not(#page-roll) { min-width: 0; }
+}
