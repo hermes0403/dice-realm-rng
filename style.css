@@ -1680,3 +1680,99 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
   #page-roll > .card .stat b { font-size: 15px; }
   .page:not(#page-roll) { min-width: 0; }
 }
+
+/* T-0085 follow-up: restore normal component scale on landscape phones. */
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 620px) {
+  .shell {
+    padding: max(10px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+  .top {
+    min-height: 48px;
+    gap: 10px;
+    padding: 4px 0 9px;
+  }
+  .brand { font-size: 21px; }
+  .weather-status {
+    min-width: 108px;
+    gap: 7px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  .weather-icon { font-size: 16px; }
+  .profile { gap: 8px; font-size: 13px; }
+  .profile .avatar { width: 36px; height: 36px; }
+  .profile #playerName,
+  .profile #gloveLabel { display: inline !important; }
+  .profile #gloveLabel { font-size: 12px; }
+  .announcement-panel { margin: 0 0 9px; }
+  .mobile-nav {
+    top: calc(env(safe-area-inset-top) + 60px);
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: max(10px, env(safe-area-inset-left));
+    width: 78px;
+    padding: 8px 5px;
+    gap: 5px;
+    border-radius: 14px;
+  }
+  .mobile-nav button {
+    min-height: 48px;
+    padding: 8px 4px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .layout { margin-left: 90px; }
+  .content { min-width: 0; }
+  #page-roll.active { gap: 10px; }
+  #page-roll > .hero { padding: 14px 16px; }
+  #page-roll > .hero h1 { font-size: 24px; }
+  #page-roll > .hero .muted { font-size: 13px; }
+  #page-roll > .stats { gap: 8px; }
+  #page-roll > .stats .stat { padding: 10px 12px; }
+  #page-roll > .stats .stat b { font-size: 20px; }
+  #page-roll > .stats .stat span { font-size: 12px; }
+  #page-roll > .rollbox {
+    gap: 7px 12px;
+    padding: 14px 12px;
+  }
+  #page-roll > .rollbox > .dice {
+    width: clamp(104px, 30vh, 128px);
+    height: clamp(104px, 30vh, 128px);
+    border-radius: 24px;
+    font-size: 64px;
+  }
+  #page-roll > .rollbox > .result-name {
+    font-size: 22px;
+    line-height: 1.3;
+  }
+  #page-roll > .rollbox > .rarity {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  #page-roll > .rollbox > .result-sub {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  #page-roll > .rollbox > .tenth-progress { margin: 5px 0; }
+  #page-roll > .rollbox > .roll-actions {
+    gap: 7px;
+    margin-top: 5px;
+  }
+  #page-roll > .rollbox > .roll-actions button {
+    min-width: 104px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  #page-roll > .card {
+    padding: 14px;
+  }
+  #page-roll > .card .section-head h2 { font-size: 18px; }
+  #page-roll > .card .stats { gap: 8px; }
+  #page-roll > .card .stat { padding: 10px; }
+  #page-roll > .card .stat b { font-size: 18px; }
+  #page-roll > .card .stat span { font-size: 12px; }
+  .page:not(#page-roll) { min-width: 0; }
+}
+
