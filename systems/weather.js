@@ -136,7 +136,7 @@ function renderWeatherSummon(){
  btn.disabled=!getCurrentUser()||points<35000||specialWeatherLocked();
  btn.textContent=specialWeatherLocked()?'特殊天氣鎖定中':'✧ 召喚特殊天氣';
  if(!getCurrentUser())status.textContent='請先登入雲端帳號；投入骰子和召喚需要同步到全服伺服器。';
- else if(specialWeatherLocked())status.textContent=`目前${WEATHER_TYPES[serverWeatherState.type]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`;
+ else if(specialWeatherLocked()){const lockedType=(serverWeatherState?.types||[serverWeatherState?.type]).find(type=>['crystal','hell','glitch'].includes(type));status.textContent=`目前${WEATHER_TYPES[lockedType]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`}
  else status.textContent=points>=35000?`可以召喚：${summonOddsText()}。召喚後全服持續 5 分鐘。`:`還需要 ${format(remaining)} 能量。`;
  const weatherDice=D.filter(d=>d.weather&&Number(getState().bag?.[d.id])>0).sort((a,b)=>({rain:0,snow:1,thunder:2,crystal:3,hell:4}[a.weather]-({rain:0,snow:1,thunder:2,crystal:3,hell:4}[b.weather])||a.den-b.den));
  if(!getCurrentUser()){list.innerHTML='<div class="empty">登入雲端帳號後，這裡會顯示可投入的天氣變異骰子。</div>';return}
