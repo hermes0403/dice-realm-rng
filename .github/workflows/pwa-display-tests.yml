@@ -28,7 +28,12 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/pwa-display-controls.test.mjs
+        run: node --test tests/*.test.js tests/*.test.mjs
+      - name: Check JavaScript syntax
+        run: |
+          node --check script.js
+          node --check ui/display-controls.js
+          node --check sw.js
       - name: Check patch whitespace
         run: |
           git fetch origin main
