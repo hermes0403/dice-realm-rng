@@ -131,7 +131,7 @@ function renderWeatherSummon(){
  btn.textContent=specialWeatherLocked()?'特殊天氣鎖定中':'✧ 召喚特殊天氣';
  if(!getCurrentUser())status.textContent='請先登入雲端帳號；投入骰子和召喚需要同步到全服伺服器。';
  else if(specialWeatherLocked())status.textContent=`目前${WEATHER_TYPES[serverWeatherState.type]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`;
- else status.textContent=points>=35000?'可以召喚：60% 水晶天氣、27% 地獄天氣、13% 故障天氣。召喚後全服持續 5 分鐘。':`還需要 ${format(remaining)} 能量。`;
+ else status.textContent=points>=35000?'可以召喚：70% 水晶天氣、30% 地獄天氣。召喚後全服持續 5 分鐘。':`還需要 ${format(remaining)} 能量。`;
  const weatherDice=D.filter(d=>d.weather&&Number(getState().bag?.[d.id])>0).sort((a,b)=>({rain:0,snow:1,thunder:2,crystal:3,hell:4}[a.weather]-({rain:0,snow:1,thunder:2,crystal:3,hell:4}[b.weather])||a.den-b.den));
  if(!getCurrentUser()){list.innerHTML='<div class="empty">登入雲端帳號後，這裡會顯示可投入的天氣變異骰子。</div>';return}
  if(!weatherDice.length){list.innerHTML='<div class="empty">目前沒有可投入的天氣變異骰子。雨、雪、打雷、水晶、地獄限定骰子都可以投入。</div>';return}
@@ -165,7 +165,7 @@ async function summonSpecialWeather(){
  if(!getCurrentUser()||!supabaseClient){openAuth();toast('請先登入雲端帳號');return}
 
  if(weatherContributionPoints<35000){toast('召喚能量尚未達到 35,000 點');return}
- if(!confirm('確定召喚特殊天氣嗎？召喚結果會立即改變全伺服器的天氣，所有玩家都會受到影響。水晶 60%、地獄 27%、故障 13%。'))return;
+ if(!confirm('確定召喚特殊天氣嗎？召喚結果會立即改變全伺服器的天氣，所有玩家都會受到影響。水晶天氣機率 70%，地獄天氣機率 30%。'))return;
  const btn=document.getElementById('summonWeatherBtn');btn.disabled=true;btn.textContent='正在吟唱召喚咒文…';
  try{
   await flushCloudSave();
