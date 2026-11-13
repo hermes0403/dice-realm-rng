@@ -1535,21 +1535,3 @@ body :is(input,select,textarea,.field,.toolbar input,.toolbar select,.sell-qty,.
 #authModal .eyebrow{color:#a8f2c1!important}
 #authModal h2,#authModal p,#authModal label,#authModal .muted{color:#e8f5ec!important}
 #authModal input::placeholder{color:#526b5b!important}
-
-/* T-0084: glitch weather and dedicated rare-die reveal. */
-#page-codex #codexGrid .codex-row.codex-glitch{--rarity-color:#ff3d9a!important;border-color:#ff3d9a!important;border-left-color:#ff3d9a!important;background-image:linear-gradient(100deg,#ff3d9a35,#0f1423 72%)!important;box-shadow:inset 0 0 20px #ff3d9a25,0 0 10px #ff3d9a22!important}
-.weather-item-glitch .weather-name,.weather-item-glitch .weather-countdown{color:#ff3d9a}
-.weather-aura-glitch .weather-scene-overlay.glitch{opacity:.35;background:repeating-linear-gradient(0deg,transparent 0 7px,#ff3d9a22 8px 9px,transparent 10px 17px),linear-gradient(90deg,#ff3d9a0a,#6e4dff12,#45fff00a);animation:glitchWeatherFlash .28s steps(2,end) infinite}
-@keyframes glitchWeatherFlash{0%{filter:hue-rotate(0deg);transform:translateX(0)}50%{filter:hue-rotate(80deg);transform:translateX(2px)}100%{filter:hue-rotate(0deg);transform:translateX(-2px)}}
-.rarity-overlay.tier-glitch{background:repeating-linear-gradient(0deg,#08030c 0 3px,#1a071b 4px 6px),radial-gradient(ellipse at center,#32103a,#020208 72%)}
-.rarity-overlay.tier-glitch::before{opacity:1;animation:glitchRevealRays .18s steps(2,end) infinite}
-.rarity-overlay.tier-glitch::after{opacity:.9;animation:energyRing .65s cubic-bezier(.12,.62,.25,1) infinite;border-radius:12px;inset:7%;transform:skew(-4deg)}
-.rarity-overlay.tier-glitch .rarity-reveal-card{border:2px solid #ff3d9a;box-shadow:0 0 24px #ff3d9a,0 0 90px #8d45ff99,inset 0 0 40px #ff3d9a30;animation:glitchRevealCard .16s steps(2,end) infinite alternate}
-.rarity-overlay.tier-glitch .rarity-reveal-icon{filter:drop-shadow(0 0 12px #fff) drop-shadow(0 0 28px #ff3d9a);animation:glitchRevealIcon .22s steps(2,end) infinite alternate}
-.rarity-overlay.tier-glitch .rarity-reveal-title{text-shadow:2px 0 #52f1e6,-2px 0 #ff3d9a;letter-spacing:.32em}
-@keyframes glitchRevealRays{0%{transform:rotate(0deg) scale(1);filter:hue-rotate(0deg)}100%{transform:rotate(180deg) scale(1.08);filter:hue-rotate(120deg)}}
-@keyframes glitchRevealCard{0%{transform:translateX(-3px) skew(-1deg);filter:hue-rotate(-18deg)}100%{transform:translateX(3px) skew(1deg);filter:hue-rotate(22deg)}}
-@keyframes glitchRevealIcon{0%{transform:translate(-2px,-1px) scale(.98)}100%{transform:translate(2px,1px) scale(1.08)}}
-@media(prefers-reduced-motion:reduce){.rarity-overlay.tier-glitch::before,.rarity-overlay.tier-glitch::after,.rarity-overlay.tier-glitch .rarity-reveal-card,.rarity-overlay.tier-glitch .rarity-reveal-icon,.weather-aura-glitch .weather-scene-overlay.glitch{animation:none!important}}
-
-.weather-aura-glitch #weatherStatus{border-color:#ff3d9a!important;box-shadow:0 0 20px #ff3d9a55,inset 0 0 18px #ff3d9a22!important;background:linear-gradient(105deg,#351329,#181326)!important}.weather-aura-glitch #weatherStatus .weather-item-glitch{filter:drop-shadow(0 0 5px #ff3d9a)}

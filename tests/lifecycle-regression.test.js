@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createTimerManager } from '../core/timer-manager.js';
-import { WEATHER_TYPES } from '../config.js';
 import { createAuthService } from '../services/auth.js';
 import { createVisitTrackingService } from '../services/visit-tracking.js';
 import { createDiceSystem } from '../systems/dice.js';
@@ -155,7 +154,7 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(realm.setupRealmSocialUI(), true);
   assert.equal(realm.setupRealmSocialUI(), false);
   assert.equal(realmDocument.listeners.get('realmPollButtons:click').length, 1);
-  assert.equal(timers.manager.getStats().scopes['realm-poll-sync']?.intervals || 0, 0); // no active poll means no background polling
+  assert.equal(timers.manager.getStats().scopes['realm-poll-sync'].intervals, 1);
 
   const codexDocument = createFakeDocument();
   const codex = createCodexUI({
@@ -238,7 +237,6 @@ test('player weather subscription replaces the previous account channel', async 
   };
   try {
     const weather = createWeatherSystem({
-      WEATHER_TYPES,
       supabaseClient,
       getCurrentUser: () => currentUser,
       timerManager: createFakeTimerManager().manager,

@@ -61,11 +61,11 @@ export const D=[
 {id:'d60',name:'晶耀核心',den:17100,icon:'💎',color:'#ed75ff',weather:'crystal',desc:'水晶能量凝結而成的天氣限定骰子。',effect:'晶耀核心'},
 {id:'d61',name:'熾獄之心',den:15222,icon:'🔥',color:'#ff6038',weather:'hell',desc:'地獄火焰凝結而成的天氣限定骰子。',effect:'熾獄之心'},
 {id:'d62',name:'永霜核心',den:34321,icon:'❄️',color:'#d8f2ff',weather:'snow',desc:'冰雪能量凝結而成的天氣限定骰子。',effect:'永霜核心'},
-{id:'d63',name:'深雨之核',den:62200,icon:'🌧️',color:'#75baff',weather:'rain',desc:'雨滴能量凝結而成的天氣限定骰子。',effect:'深雨之核'},
-{id:'d64',name:'錯誤代碼',den:100000000,icon:'⌘',color:'#ff3d9a',specialWeather:'glitch',desc:'故障天氣中浮現的系統錯誤代碼，字元持續重組。',effect:'錯誤代碼',unlockRolls:100000},
-{id:'d65',name:'異常殘響',den:7777777,icon:'⌁',color:'#9b6bff',specialWeather:'glitch',desc:'故障天氣留下的異常訊號，在骰面間反覆迴盪。',effect:'異常殘響',unlockRolls:250000},
-{id:'d66',name:'系統崩解',den:25000000,icon:'⛓',color:'#ff5656',specialWeather:'glitch',desc:'系統結構逐漸崩解，紅色裂紋蔓延整顆骰子。',effect:'系統崩解',unlockRolls:500000},
-{id:'d67',name:'虛空漏洞',den:800000,icon:'⟁',color:'#52f1e6',specialWeather:'glitch',desc:'故障天氣撕開的虛空漏洞，邊界不斷閃爍。',effect:'虛空漏洞',unlockRolls:1000000}
+{id:'d63',name:'深雨之核',den:62200,icon:'🌧️',color:'#75baff',weather:'rain',desc:'雨滴能量凝結而成的天氣限定骰子。',effect:'深雨之核'}
+{id:'d64',name:'錯誤代碼',den:100000000,icon:'⚠️',color:'#ff6b6b',desc:'破損的系統代碼凝結成骰，邊緣閃爍著錯誤訊號。',effect:'錯誤代碼'},
+{id:'d65',name:'異常殘響',den:7777777,icon:'⌁',color:'#b98cff',desc:'故障訊號留下的殘響，在骰面上反覆迴盪。',effect:'異常殘響'},
+{id:'d66',name:'系統崩解',den:25000000,icon:'▧',color:'#ff4f75',desc:'系統結構逐漸崩解，碎片仍維持骰子的形狀。',effect:'系統崩解'},
+{id:'d67',name:'虛空漏洞',den:800000,icon:'⦿',color:'#7df9ff',desc:'虛空中的程式漏洞形成不穩定的骰面。',effect:'虛空漏洞'}
  ];
 // 圖鑑依稀有度區間統一配色：同一階級同色，階級越高色相越突出。
 export function rarityColor(den){
@@ -76,7 +76,6 @@ export function rarityColor(den){
  return '#ffd166';
 }
 D.forEach(d=>d.color=rarityColor(d.den));
-for(const [id,color] of [['d64','#ff3d9a'],['d65','#9b6bff'],['d66','#ff5656'],['d67','#52f1e6']]){const d=D.find(x=>x.id===id);if(d)d.color=color;}
 for(const id of ['d33','d34','d35','d36']){const d=D.find(x=>x.id===id);if(d)d.iconColor='#ff8a3d';}
 export const G=[
 {id:'g0',name:'基礎手套',icon:'🧤',luck:0,speed:0,desc:'沒有額外加成，冒險從這裡開始。',price:0},
