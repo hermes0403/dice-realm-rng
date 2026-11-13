@@ -1,7 +1,7 @@
 ---
 id: T-0084
 title: 新增故障天氣、四顆故障骰子與特殊揭示動畫
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -58,5 +58,7 @@ done_at:
 - [ ] 相關測試、完整 Node 測試及差異檢查通過；GitHub Actions 與 Pages 部署成功。
 
 ## 紀錄
+
+- 2026-11-13 12:08 [叉子] 開單 PR #76 已合併至 main（merge commit `893903c9928defef3c506bf0e4de6c56fa1d7dfa`）；依最新 main Board 檢查，owner_side 有效 in_progress 任務 T-0079、T-0080、T-0083，共 3/5；未發現觸發 owner_side Communicate 優先閘門的任務。T-0084 由 open 轉為 in_progress，準備開工 PR。
 
 - 2026-11-13 12:08 [叉子] 依棒子本次需求開單；「1/128 以上骰子降低機率」已依棒子指示取消。四顆骰子暫採提案名稱，基礎機率依需求原順序記錄。
