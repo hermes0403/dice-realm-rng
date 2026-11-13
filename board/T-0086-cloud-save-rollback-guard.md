@@ -1,7 +1,7 @@
 ---
 id: T-0086
 title: 修復雲端存檔回滾與多分頁舊資料覆蓋
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -43,6 +43,7 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-14 00:40 [叉子] 程式 PR #96 已合併至 main，正式 GitHub Pages 部署 workflow #43464873607 成功；雲端存檔專項測試與登出 flush 測試通過、骰子存檔回歸測試通過、PWA 版本測試通過。完整測試套件仍有 2 項既有寵物圖片映射測試失敗（非本次修改檔案），其餘 81 項通過；因此保留為 review，待棒子以玩家帳號實際驗收。
 - 2026-11-14 00:33 [叉子] 狀態由 open 轉為 in_progress：Owner side 有效 in_progress／review 任務 2/5（T-0084、T-0085），Communicate 優先閘門未觸發；開單 PR #94 已合併至 main，開始移植既有 T-0040 差異同步修補。
 - 2026-11-14 00:32 [叉子] 依棒子本次明確指示，將既有 T-0040 差異同步方案移植到目前 main 的獨立修補任務；開工前 owner_side 有效 in_progress／review 任務 2/5（T-0084、T-0085），未發現指派給叉子且 open／in_progress 的 communicate task，兩道啟動閘門未阻擋。分支從 main HEAD `53a51642aa878c1af23b81e5c8fa4002dd945ab3` 建立，不修改 work/chazi。
 
@@ -50,8 +51,24 @@ done_at:
 
 ### 改了什麼
 
+- `services/cloud-save.js`：雲端存檔由整份 upsert 改為 `sync_player_game_save_delta`，以 `updated_at` 作為版本鎖，只傳有變動的頂層欄位；沒有變動時不呼叫存檔 RPC。版本衝突會重新讀取雲端基準，沿用原本的本機較新存檔保護。
+- 保留每 5 分鐘批次同步、本機即時保存、登出前 flush 與離頁 best-effort；沒有增加輪詢。
+- Supabase RPC 白名單加入 `lockedDice`，保留既有 SECURITY DEFINER、固定 search_path 與 authenticated 權限。
+- 更新測試、PWA cache，遊戲顯示版本 V1.20。
+
 ### 怎麼驗證的
+
+- 專項雲端存檔、寵物權威存檔、登出 flush 測試通過。
+- PWA display regression 與 dice-roll save regression 通過。
+- GitHub Pages build and deployment run #43464873607 成功。
+- Supabase 函式查核：`lockedDice` 已允許；仍為 SECURITY DEFINER，search_path 為 `public, pg_temp`，ACL 保留 authenticated 執行。
+- 完整 Node 測試套件 81/83 通過；兩項失敗為既有 `pet-image-mapping.test.js` 對活動寵物圖片數量／映射的測試，不屬本任務修改範圍。
 
 ### 沒做／做不到的
 
+- 尚未取得玩家實際回報，無法宣稱已由真實帳號完整驗收購買手套、擴充背包、登出及重新登入流程。
+- 尚無部署後的 Egress 長期數據，不能宣稱已測得確切節省 GB 數。
+
 ### 衍生任務／影響任務
+
+- 無
