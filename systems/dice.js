@@ -91,7 +91,7 @@ export function createDiceSystem(deps) {
     if (!weatherDice.length) return entries;
     const donors = entries.filter(entry => entry.weight > 10);
     const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
-    const reserve = weatherDice.length;
+    const reserve = weatherDice.reduce((sum, dice) => sum + (dice.specialWeather ? 10 : 1), 0);
     if (donorTotal <= reserve) return entries;
     donors.forEach(entry => { entry.weight -= reserve * (entry.weight / donorTotal); });
     weatherDice.forEach(dice => entries.push({ dice, weight: dice.specialWeather === weather ? 10 : 1 }));
