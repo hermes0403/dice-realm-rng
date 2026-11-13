@@ -1,0 +1,33 @@
+name: Cloud save rollback tests
+
+on:
+  push:
+    branches: [main, task/T-0086-cloud-save-rollback-guard]
+    paths:
+      - 'services/cloud-save.js'
+      - 'services/account-actions.js'
+      - 'script.js'
+      - 'tests/**'
+      - 'docs/game-save-delta-sync-locked-dice.sql'
+      - '.github/workflows/cloud-save-rollback-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/cloud-save.js'
+      - 'services/account-actions.js'
+      - 'script.js'
+      - 'tests/**'
+      - 'docs/game-save-delta-sync-locked-dice.sql'
+      - '.github/workflows/cloud-save-rollback-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  cloud-save-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run full Node regression suite
+        run: node --test tests/*.test.js
