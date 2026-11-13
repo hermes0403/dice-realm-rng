@@ -37,7 +37,6 @@ function setup({ local, localSavedAt, cloud, cloudUpdatedAt }) {
         return {
           select() { return this; },
           eq() { return this; },
-          async maybeSingle() { return { data: { save_data: cloud, updated_at: cloudUpdatedAt }, error: null }; },
           async maybeSingle() { return { data: { save_data: cloud, updated_at: cloudUpdatedAt }, error: null }; }
         };
       }
@@ -97,4 +96,27 @@ test('legacy local save with a higher roll count wins even without a local times
   assert.equal(getState().bag.d1, 126);
   assert.equal(cloudWrites[0].name, 'sync_player_game_save_delta');
   assert.equal(cloudWrites[0].args.p_save_patch.rolls, 126);
+});
+
+
+test('cloud save sends only changed fields and skips unchanged snapshots', async () => {
+  const { service, getState, cloudWrites } = setup({
+    local: { ...base },
+    localSavedAt: 0,
+    cloud: { ...base },
+    cloudUpdatedAt: '2026-11-13T23:00:00.000Z'
+  });
+
+  await service.loadCloudSave();
+  const initialWriteCount = cloudWrites.length;
+  getState().coins = 75;
+  await service.syncCloudSave();
+
+  assert.equal(cloudWrites.length, initialWriteCount + 1);
+  assert.deepEqual(Object.keys(cloudWrites.at(-1).args.p_save_patch), ['coins']);
+  assert.equal(cloudWrites.at(-1).args.p_expected_updated_at, '2026-11-14T00:34:00.000Z');
+
+  const writeCountAfterChange = cloudWrites.length;
+  await service.syncCloudSave();
+  assert.equal(cloudWrites.length, writeCountAfterChange, 'unchanged saves must not call Supabase');
 });
