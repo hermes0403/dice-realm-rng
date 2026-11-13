@@ -1,7 +1,7 @@
 ---
 id: T-0086
 title: 修復雲端存檔回滾與多分頁舊資料覆蓋
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -43,6 +43,7 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-14 00:33 [叉子] 狀態由 open 轉為 in_progress：Owner side 有效 in_progress／review 任務 2/5（T-0084、T-0085），Communicate 優先閘門未觸發；開單 PR #94 已合併至 main，開始移植既有 T-0040 差異同步修補。
 - 2026-11-14 00:32 [叉子] 依棒子本次明確指示，將既有 T-0040 差異同步方案移植到目前 main 的獨立修補任務；開工前 owner_side 有效 in_progress／review 任務 2/5（T-0084、T-0085），未發現指派給叉子且 open／in_progress 的 communicate task，兩道啟動閘門未阻擋。分支從 main HEAD `53a51642aa878c1af23b81e5c8fa4002dd945ab3` 建立，不修改 work/chazi。
 
 ## 完工回報
