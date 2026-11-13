@@ -87,14 +87,14 @@ export function createDiceSystem(deps) {
   function addWeatherOdds(entries, pool, weather) {
     const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
     if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
-    const weatherDice = pool.filter(dice => dice.weather === weather && Number(dice.den) > 2048);
+    const weatherDice = pool.filter(dice => (dice.weather === weather || dice.specialWeather === weather) && Number(dice.den) > 2048);
     if (!weatherDice.length) return entries;
     const donors = entries.filter(entry => entry.weight > 10);
     const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
     const reserve = weatherDice.length;
     if (donorTotal <= reserve) return entries;
     donors.forEach(entry => { entry.weight -= reserve * (entry.weight / donorTotal); });
-    weatherDice.forEach(dice => entries.push({ dice, weight: 1 }));
+    weatherDice.forEach(dice => entries.push({ dice, weight: dice.specialWeather === weather ? 10 : 1 }));
     return entries;
   }
 
@@ -117,6 +117,7 @@ export function createDiceSystem(deps) {
     const weather = weatherState.type || 'sunny';
     const weatherTypes = weatherState.types || [weather];
     const pool = D.filter(dice => (!dice.weather || weatherTypes.includes(dice.weather))
+      && (!dice.specialWeather || weatherTypes.includes(dice.specialWeather))
       && (!isHalloweenDice(dice) || !halloweenDiceUnavailable()));
     const boostLuck = Math.max(0, Number(luck()) || 0);
 
@@ -192,7 +193,7 @@ export function createDiceSystem(deps) {
       const rollDen = weather === 'hell' && dice.den >= 700000 ? dice.den * 0.95 : dice.den;
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
-      return (1 / Math.max(2, rollDen)) * factor;
+      return (1 / Math.max(2, rollDen)) * factor * (dice.specialWeather === weather ? 10 : 1);
     });
     const total = weights.reduce((sum, weight) => sum + weight, 0);
     let roll = Math.random() * total;
@@ -215,16 +216,22 @@ export function createDiceSystem(deps) {
       return;
     }
     const ultra = dice.den >= 100000;
-    const tier = dice.den >= 10000000 ? 'cosmic' : dice.den >= 1000000 ? 'mythic' : 'rare';
+    const glitch = dice.specialWeather === 'glitch';
+    const tier = glitch ? 'glitch' : dice.den >= 10000000 ? 'cosmic' : dice.den >= 1000000 ? 'mythic' : 'rare';
     overlay.className = 'rarity-overlay show tier-' + tier + ' ' + (ultra ? 'blackout' : 'common');
     overlay.style.setProperty('--reveal-color', dice.color);
-    documentRef.getElementById('rarityRevealTitle').textContent = ultra ? '✦ ANOMALOUS DISCOVERY ✦' : 'RARE DISCOVERY';
+    documentRef.getElementById('rarityRevealTitle').textContent = glitch ? '⚠ SYSTEM BREACH ⚠' : ultra ? '✦ ANOMALOUS DISCOVERY ✦' : 'RARE DISCOVERY';
     const icon = documentRef.getElementById('rarityRevealIcon');
     icon.textContent = dice.icon;
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
-    if (ultra) {
+    if (glitch) {
+      await wait(1250);
+      overlay.classList.remove('blackout');
+      overlay.classList.add('show');
+      await wait(4600);
+    } else if (ultra) {
       await wait(tier === 'cosmic' ? 1050 : 750);
       overlay.classList.remove('blackout');
       overlay.classList.add('show');
@@ -232,7 +239,7 @@ export function createDiceSystem(deps) {
     } else {
       await wait(1500);
     }
-    overlay.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic');
+    overlay.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic', 'tier-glitch');
   }
 
   async function playSmallReveal(dice, label = 'SPECIAL DISCOVERY') {
