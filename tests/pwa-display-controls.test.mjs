@@ -121,7 +121,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
-  assert.match(html, /V1.18/);
+  assert.match(html, /V1.19/);
 });
 
 test('Service Worker 僅處理同源靜態資源與頁面導覽，不攔截 Supabase API', async () => {
@@ -148,4 +148,16 @@ test('手機版頂部額外避開狀態列，背包依可用寬度增加每行�
     assert.ok(depth >= 0, 'CSS closing brace must have a matching opening brace');
   }
   assert.equal(depth, 0, 'CSS blocks must all be closed');
+});
+
+
+test('橫向模式全頁縮放且保留歡迎文字，直向不套用全頁縮放', async () => {
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const landscape = css.slice(css.indexOf('T-0085 landscape correction: scale the entire game surface'));
+  assert.match(landscape, /@media \(orientation: landscape\) and \(max-width: 1024px\) and \(max-height: 620px\)/);
+  assert.match(landscape, /\.shell\s*\{[\s\S]*?zoom:\s*var\(--landscape-scale\)/);
+  assert.match(landscape, /body\s*\{[\s\S]*?padding-top:\s*max\(42px, env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(landscape, /#page-roll\s*>\s*\.hero\s+#realmHeroWelcome\s*\{\s*display:\s*block !important/);
+  assert.match(landscape, /--landscape-scale:\s*\.64/);
+  assert.match(landscape, /--landscape-scale:\s*\.84/);
 });

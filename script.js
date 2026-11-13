@@ -36,7 +36,7 @@ import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-glitch-weather-phase2';
 import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-viewport-fit';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
 
 const timerManager = createTimerManager();
