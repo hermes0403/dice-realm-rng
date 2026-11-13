@@ -38,7 +38,7 @@ done_at:
 - [ ] PWA manifest 欄位正確，具備名稱、short_name、start_url、scope、theme_color、background_color、display／display_override、orientation 與可安裝尺寸圖示。
 - [ ] PWA 加入主畫面後可在支援的裝置使用獨立／全螢幕顯示；一般瀏覽器不支援時有安全回退，不阻斷遊戲。
 - [ ] 一般瀏覽器模式下，網址列／瀏覽器工具列仍存在時，頁面不被遮擋、無水平溢位且主要操作可用。
-- [ ] 橫向手機避開安全區，導覽與擲骰區善用寬度；直向、桌面版既有版面不回歸。
+- [ ] 橫向手機避開安全區，導覽與擲骰區善用寬度；文字、按鈕、骰子、卡片與間距維持正常可讀尺寸，不因橫向而整體縮小；直向、桌面版既有版面不回歸。
 - [ ] Service Worker 不攔截或快取 Supabase API、認證、存檔及玩家資料；更新版本能正常替換舊 app-shell cache。
 - [ ] 新增或更新對應測試，執行完整 Node 測試與語法／差異檢查；GitHub Actions 與 GitHub Pages 部署成功。
 - [ ] 遊戲版本由 V1.14 更新為 V1.15。
