@@ -1,3 +1,4 @@
+import { addGlitchDiceOdds, applyGlitchWeight } from './glitch-dice.js?v=20261113-t0084-glitch-weather-phase2';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
@@ -116,6 +117,7 @@ export function createDiceSystem(deps) {
     const weatherState = getWeather();
     const weather = weatherState.type || 'sunny';
     const weatherTypes = weatherState.types || [weather];
+    const isGlitchWeather = weatherTypes.includes('glitch');
     const pool = D.filter(dice => (!dice.weather || weatherTypes.includes(dice.weather))
       && (!isHalloweenDice(dice) || !halloweenDiceUnavailable()));
     const boostLuck = Math.max(0, Number(luck()) || 0);
@@ -127,7 +129,7 @@ export function createDiceSystem(deps) {
         const weights = rarePool.map(dice => {
           const den = Number(dice.den) || 4096;
           const rarityLift = 1 + Math.log2(Math.max(1, den / 4096)) * boostLuck / 100;
-          return (1 / den) * rarityLift;
+          return applyGlitchWeight(dice, (1 / den) * rarityLift, isGlitchWeather);
         });
         const total = weights.reduce((sum, weight) => sum + weight, 0);
         let roll = Math.random() * total;
@@ -154,6 +156,7 @@ export function createDiceSystem(deps) {
           dice,
           weight: heaven2Odds[dice.id] * (weather === 'hell' && dice.den >= 700000 ? 1 / 0.95 : 1)
         }));
+      entries = addGlitchDiceOdds(entries, pool, isGlitchWeather, weather);
       entries = addWeatherOdds(entries, pool, weather);
       const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
@@ -174,6 +177,7 @@ export function createDiceSystem(deps) {
       }).filter(entry => entry.dice
         && (!entry.dice.weather || entry.dice.weather === weather)
         && (!isHalloweenDice(entry.dice) || !halloweenDiceUnavailable()));
+      entries = addGlitchDiceOdds(entries, pool, isGlitchWeather, weather);
       entries = addWeatherOdds(entries, pool, weather);
       const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
@@ -192,7 +196,7 @@ export function createDiceSystem(deps) {
       const rollDen = weather === 'hell' && dice.den >= 700000 ? dice.den * 0.95 : dice.den;
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
-      return (1 / Math.max(2, rollDen)) * factor;
+      return applyGlitchWeight(dice, (1 / Math.max(2, rollDen)) * factor, isGlitchWeather);
     });
     const total = weights.reduce((sum, weight) => sum + weight, 0);
     let roll = Math.random() * total;
@@ -214,11 +218,12 @@ export function createDiceSystem(deps) {
       overlay.classList.remove('show', 'blackout', 'common');
       return;
     }
+    const isGlitchDice = !!dice.glitchBonus;
     const ultra = dice.den >= 100000;
     const tier = dice.den >= 10000000 ? 'cosmic' : dice.den >= 1000000 ? 'mythic' : 'rare';
-    overlay.className = 'rarity-overlay show tier-' + tier + ' ' + (ultra ? 'blackout' : 'common');
+    overlay.className = 'rarity-overlay show tier-' + tier + ' ' + (ultra ? 'blackout' : 'common') + (isGlitchDice ? ' glitch-reveal' : '');
     overlay.style.setProperty('--reveal-color', dice.color);
-    documentRef.getElementById('rarityRevealTitle').textContent = ultra ? '✦ ANOMALOUS DISCOVERY ✦' : 'RARE DISCOVERY';
+    documentRef.getElementById('rarityRevealTitle').textContent = isGlitchDice ? '⚠ SYSTEM BREACH DETECTED ⚠' : ultra ? '✦ ANOMALOUS DISCOVERY ✦' : 'RARE DISCOVERY';
     const icon = documentRef.getElementById('rarityRevealIcon');
     icon.textContent = dice.icon;
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
@@ -232,7 +237,7 @@ export function createDiceSystem(deps) {
     } else {
       await wait(1500);
     }
-    overlay.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic');
+    overlay.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic', 'glitch-reveal');
   }
 
   async function playSmallReveal(dice, label = 'SPECIAL DISCOVERY') {
