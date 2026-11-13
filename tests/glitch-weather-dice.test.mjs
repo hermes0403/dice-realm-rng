@@ -31,3 +31,20 @@ test('天堂藥水抽選池保留四顆故障骰子的基礎權重，故障天�
   }
   assert.equal(glitch.find(entry => entry.dice.id === ordinary.id).weight, 100);
 });
+
+test('四顆故障骰子的圖鑑基礎分母正確且屬於一般骰子', () => {
+  const expected = new Map([
+    ['d64', 100000000],
+    ['d65', 7777777],
+    ['d66', 25000000],
+    ['d67', 800000]
+  ]);
+  assert.equal(glitchDice.length, expected.size);
+  for (const [id, denominator] of expected) {
+    const dice = D.find(item => item.id === id);
+    assert.ok(dice, `missing ${id}`);
+    assert.equal(dice.den, denominator);
+    assert.equal(dice.glitchBonus, true);
+    assert.equal(dice.weather, undefined);
+  }
+});
