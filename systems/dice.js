@@ -84,10 +84,10 @@ export function createDiceSystem(deps) {
     autoWatchdog = null;
   }
 
-  function addWeatherOdds(entries, pool, weather) {
+  function addWeatherOdds(entries, pool, weather, weatherTypes = [weather]) {
     const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
     if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
-    const weatherDice = pool.filter(dice => (dice.weather === weather || dice.specialWeather === weather) && Number(dice.den) > 2048);
+    const weatherDice = pool.filter(dice => (weatherTypes.includes(dice.weather) || weatherTypes.includes(dice.specialWeather)) && Number(dice.den) > 2048);
     if (!weatherDice.length) return entries;
     const donors = entries.filter(entry => entry.weight > 10);
     const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
@@ -155,7 +155,7 @@ export function createDiceSystem(deps) {
           dice,
           weight: heaven2Odds[dice.id] * (weather === 'hell' && dice.den >= 700000 ? 1 / 0.95 : 1)
         }));
-      entries = addWeatherOdds(entries, pool, weather);
+      entries = addWeatherOdds(entries, pool, weather, weatherTypes);
       const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
       for (const entry of entries) {
@@ -193,7 +193,7 @@ export function createDiceSystem(deps) {
       const rollDen = weather === 'hell' && dice.den >= 700000 ? dice.den * 0.95 : dice.den;
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
-      return (1 / Math.max(2, rollDen)) * factor * (dice.specialWeather === weather ? 10 : 1);
+      return (1 / Math.max(2, rollDen)) * factor * (weatherTypes.includes(dice.specialWeather) ? 10 : 1);
     });
     const total = weights.reduce((sum, weight) => sum + weight, 0);
     let roll = Math.random() * total;
