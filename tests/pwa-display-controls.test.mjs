@@ -133,4 +133,3 @@ test('Service Worker 僅處理同源靜態資源與頁面導覽，不攔截 Supa
   assert.match(worker, /\/auth\/v1\//);
   assert.match(worker, /\/functions\/v1\//);
 });
-
