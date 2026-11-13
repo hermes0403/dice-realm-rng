@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { setupDisplayControls } from '../ui/display-controls.js';
 
 function createFixture({ requestFullscreen, exitFullscreen, pwaFullscreen = false, secure = true, serviceWorker = true } = {}) {
@@ -98,4 +99,37 @@ test('僅在安全來源註冊 Service Worker，並使用專案根目錄 scope',
   const blocked = setupDisplayControls(insecure);
   await blocked.serviceWorkerReady;
   assert.equal(insecure.registrations.length, 0);
+});
+
+test('PWA manifest 使用專案相對路徑、fullscreen 優先顯示模式與安裝圖示', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../manifest.webmanifest', import.meta.url), 'utf8'));
+  assert.equal(manifest.start_url, './');
+  assert.equal(manifest.scope, './');
+  assert.equal(manifest.display, 'standalone');
+  assert.deepEqual(manifest.display_override, ['fullscreen', 'standalone', 'minimal-ui']);
+  assert.equal(manifest.orientation, 'any');
+  assert.ok(manifest.icons.some(icon => icon.sizes === '192x192'));
+  assert.ok(manifest.icons.some(icon => icon.sizes === '512x512'));
+  for (const size of [192, 512]) {
+    const png = await readFile(new URL(`../assets/pwa-icon-${size}.png`, import.meta.url));
+    assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+  }
+});
+
+test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(html, /manifest\.webmanifest/);
+  assert.match(html, /id="fullscreenToggleBtn"/);
+  assert.match(html, /V1\.15/);
+});
+
+test('Service Worker 僅處理同源靜態資源與頁面導覽，不攔截 Supabase API', async () => {
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(worker, /url\.origin !== self\.location\.origin/);
+  assert.match(worker, /request\.method !== 'GET'/);
+  assert.match(worker, /request\.destination/);
+  assert.match(worker, /\/rest\/v1\//);
+  assert.match(worker, /\/auth\/v1\//);
+  assert.match(worker, /\/functions\/v1\//);
 });
