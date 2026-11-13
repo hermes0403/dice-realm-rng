@@ -1,3 +1,5 @@
+import { WEATHER_SUMMON_ODDS } from './weather-summon-odds.js';
+
 export function createWeatherSystem(dependencies) {
  const {
   D, WEATHER_TYPES, format, escapeHTML, chanceText, byId, supabaseClient, timerManager,
@@ -14,7 +16,10 @@ let serverWeatherState=null,lastWeatherAnnouncementKey='';
 let playerWeatherOverride=null,playerWeatherChannel=null,lastPlayerWeatherKey='';
 let serverWeatherRefreshBusy=false,playerWeatherRefreshBusy=false,summonDataLoadBusy=false;
 let forcedWeatherState=(()=>{try{const v=JSON.parse(localStorage.getItem('diceRealmForcedWeather')||'null');return v&&Number(v.until)>Date.now()?v:null}catch{return null}})();
-function specialWeatherLocked(now=Date.now()){return false}
+function specialWeatherLocked(now=Date.now()){
+ const types=serverWeatherState?.types||[serverWeatherState?.type];
+ return Number(serverWeatherState?.until)>now&&types.some(type=>['crystal','hell','glitch'].includes(type));
+}
 function applyServerWeatherRow(row,announce=false){
  if(!row)return;
  const now=Date.now(),updatedAt=row.updated_at?new Date(row.updated_at).getTime():0;
@@ -27,8 +32,8 @@ function applyServerWeatherRow(row,announce=false){
  if(updatedAt)lastServerWeatherUpdatedAt=Math.max(lastServerWeatherUpdatedAt,updatedAt);
  if(next&&next.type!=='sunny'){summonedWeatherGuardUntil=next.until;try{localStorage.setItem('diceRealmSummonedWeatherGuard',JSON.stringify({until:next.until,type:next.type}))}catch{}}
  if(!next&&summonedWeatherGuardUntil<=now){summonedWeatherGuardUntil=0;try{localStorage.removeItem('diceRealmSummonedWeatherGuard')}catch{}}
- const key=next&&['crystal','hell'].includes(next.type)?`${next.type}:${next.at}:${next.by}`:'';
- const changed=!!next&&['crystal','hell'].includes(next.type)&&key!==lastWeatherAnnouncementKey;
+ const key=next&&['crystal','hell','glitch'].includes(next.type)?`${next.type}:${next.at}:${next.by}`:'';
+ const changed=!!next&&['crystal','hell','glitch'].includes(next.type)&&key!==lastWeatherAnnouncementKey;
  serverWeatherState=next;
  if(next&&changed){lastWeatherAnnouncementKey=key;if(announce)announceWeatherSummon(next.type,next.by,next.at);}
  cachedWeatherMinute=-1;updateWeatherUI();renderCodex();if(document.getElementById('page-weather-summon')?.classList.contains('active'))loadWeatherSummonData(false);
@@ -120,6 +125,7 @@ function updateWeatherUI(){
  }).join('');
 }
 timerManager.setInterval(()=>{updateWeatherUI();if(!document.getElementById('weatherConvertPanel')?.hidden&&getState().equipped==='g7')renderGloves()},1000,'weather-ui');updateWeatherUI();
+function summonOddsText(){return WEATHER_SUMMON_ODDS.map(({type,percent})=>`${percent}% ${WEATHER_TYPES[type]?.label||type}`).join('、')}
 let weatherContributionPoints=0,weatherContributionDeposits={};
 function renderWeatherSummon(){
  const points=Math.max(0,Number(weatherContributionPoints)||0),remaining=Math.max(0,35000-points);
@@ -130,8 +136,8 @@ function renderWeatherSummon(){
  btn.disabled=!getCurrentUser()||points<35000||specialWeatherLocked();
  btn.textContent=specialWeatherLocked()?'特殊天氣鎖定中':'✧ 召喚特殊天氣';
  if(!getCurrentUser())status.textContent='請先登入雲端帳號；投入骰子和召喚需要同步到全服伺服器。';
- else if(specialWeatherLocked())status.textContent=`目前${WEATHER_TYPES[serverWeatherState.type]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`;
- else status.textContent=points>=35000?'可以召喚：70% 水晶天氣、30% 地獄天氣。召喚後全服持續 5 分鐘。':`還需要 ${format(remaining)} 能量。`;
+ else if(specialWeatherLocked()){const lockedType=(serverWeatherState?.types||[serverWeatherState?.type]).find(type=>['crystal','hell','glitch'].includes(type));status.textContent=`目前${WEATHER_TYPES[lockedType]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`}
+ else status.textContent=points>=35000?`可以召喚：${summonOddsText()}。召喚後全服持續 5 分鐘。`:`還需要 ${format(remaining)} 能量。`;
  const weatherDice=D.filter(d=>d.weather&&Number(getState().bag?.[d.id])>0).sort((a,b)=>({rain:0,snow:1,thunder:2,crystal:3,hell:4}[a.weather]-({rain:0,snow:1,thunder:2,crystal:3,hell:4}[b.weather])||a.den-b.den));
  if(!getCurrentUser()){list.innerHTML='<div class="empty">登入雲端帳號後，這裡會顯示可投入的天氣變異骰子。</div>';return}
  if(!weatherDice.length){list.innerHTML='<div class="empty">目前沒有可投入的天氣變異骰子。雨、雪、打雷、水晶、地獄限定骰子都可以投入。</div>';return}
@@ -165,7 +171,7 @@ async function summonSpecialWeather(){
  if(!getCurrentUser()||!supabaseClient){openAuth();toast('請先登入雲端帳號');return}
 
  if(weatherContributionPoints<35000){toast('召喚能量尚未達到 35,000 點');return}
- if(!confirm('確定召喚特殊天氣嗎？召喚結果會立即改變全伺服器的天氣，所有玩家都會受到影響。可以邀請朋友一起體驗！水晶天氣機率 70%，地獄天氣機率 30%。'))return;
+ if(!confirm(`確定召喚特殊天氣嗎？召喚結果會立即改變全伺服器的天氣，所有玩家都會受到影響。水晶 60%、地獄 27%、故障 13%。可以邀請朋友一起體驗！`))return;
  const btn=document.getElementById('summonWeatherBtn');btn.disabled=true;btn.textContent='正在吟唱召喚咒文…';
  try{
   await flushCloudSave();

@@ -22,7 +22,7 @@ export function createGlobalAnnouncements(dependencies) {
   }
 
   function triggerWeatherSurge(type) {
-    if (!['crystal', 'hell'].includes(type)) return;
+    if (!['crystal', 'hell', 'glitch'].includes(type)) return;
     timerManager.clearTimeout(weatherSurgeTimer);
     weatherSurgeTimer = null;
     const old = documentRef.querySelector('.weather-surge');
@@ -55,7 +55,7 @@ export function createGlobalAnnouncements(dependencies) {
     const line = documentRef.createElement('div');
     line.className = 'announcement-line weather-summon-announcement ' + type;
     const safeName = String(by || '玩家').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const message = type === 'hell' ? `${safeName}玩家召喚了地獄天氣　稀有骰子出現率提高` : `${safeName}玩家召喚了水晶天氣`;
+    const message = type === 'hell' ? `${safeName}玩家召喚了地獄天氣　稀有骰子出現率提高` : type === 'glitch' ? `${safeName}玩家召喚了故障天氣　四顆故障骰子權重提高 10 倍` : `${safeName}玩家召喚了水晶天氣`;
     line.textContent = message;
     list.appendChild(line);
   }
