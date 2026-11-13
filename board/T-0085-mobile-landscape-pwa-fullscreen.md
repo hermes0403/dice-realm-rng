@@ -1,7 +1,7 @@
 ---
 id: T-0085
 title: 手機橫向版面與 PWA 全螢幕支援
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -44,6 +44,8 @@ done_at:
 - [ ] 遊戲版本由 V1.14 更新為 V1.15。
 
 ## 紀錄
+
+- 2026-11-13 18:18 [叉子] 交付 PR #84 已合併至 main（merge commit `4c3fbf82259e5a95da42279963b6c5e47b2e0bf2`）；GitHub Pages workflow #43408064810 的 build 與 deploy 均成功。程式與部署交付完成，狀態送交 review，等待棒子實際手機驗收。
 
 - 2026-11-13 18:17 [叉子] 完成程式實作；PWA 顯示測試 8/8、JavaScript 語法檢查及差異空白檢查通過。完整 Node 測試為 104/106，2 項既有寵物圖片順序測試仍使用舊 39 隻清單，與本任務修改範圍無關；等待交付 PR 合併及 Pages 部署驗證。
 
