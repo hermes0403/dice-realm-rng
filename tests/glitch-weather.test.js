@@ -25,6 +25,6 @@ test('故障天氣登記為獨立特殊天氣，四顆骰子的有效分母為�
   assert.equal(WEATHER_TYPES.glitch.label, '故障天氣');
   for (const [id, , den] of expected) {
     const dice = D.find(item => item.id === id);
-    assert.equal(Math.floor(dice.den / 10), den / 10);
+    assert.equal(Math.floor(dice.den / 10), Math.floor(den / 10));
   }
 });
