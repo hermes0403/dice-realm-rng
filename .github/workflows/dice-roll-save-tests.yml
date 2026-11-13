@@ -4,6 +4,7 @@ on:
   push:
     branches: ['**']
     paths:
+      - 'data/dice.js'
       - 'systems/dice.js'
       - 'services/cloud-save.js'
       - 'core/game-state.js'
@@ -13,10 +14,12 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/glitch-dice-catalog.test.mjs'
       - 'tests/local-save-cloud-conflict.test.js'
       - '.github/workflows/dice-roll-save-tests.yml'
   pull_request:
     paths:
+      - 'data/dice.js'
       - 'systems/dice.js'
       - 'services/cloud-save.js'
       - 'core/game-state.js'
@@ -26,6 +29,7 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/glitch-dice-catalog.test.mjs'
       - '.github/workflows/dice-roll-save-tests.yml'
 
 jobs:
@@ -41,4 +45,4 @@ jobs:
       - run: node --check core/game-state.js
       - run: node --check services/account-actions.js
       - run: node --check systems/progression.js
-      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/local-save-cloud-conflict.test.js
+      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/local-save-cloud-conflict.test.js tests/glitch-dice-catalog.test.mjs
