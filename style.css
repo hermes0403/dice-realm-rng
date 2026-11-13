@@ -1704,8 +1704,8 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
   .weather-icon { font-size: 16px; }
   .profile { gap: 8px; font-size: 13px; }
   .profile .avatar { width: 36px; height: 36px; }
-  .profile #playerName,
-  .profile #gloveLabel { display: inline !important; }
+  .profile #playerName:not([hidden]),
+  .profile #gloveLabel:not([hidden]) { display: inline !important; }
   .profile #gloveLabel { font-size: 12px; }
   .announcement-panel { margin: 0 0 9px; }
   .mobile-nav {
