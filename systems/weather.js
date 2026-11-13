@@ -14,7 +14,7 @@ let serverWeatherState=null,lastWeatherAnnouncementKey='';
 let playerWeatherOverride=null,playerWeatherChannel=null,lastPlayerWeatherKey='';
 let serverWeatherRefreshBusy=false,playerWeatherRefreshBusy=false,summonDataLoadBusy=false;
 let forcedWeatherState=(()=>{try{const v=JSON.parse(localStorage.getItem('diceRealmForcedWeather')||'null');return v&&Number(v.until)>Date.now()?v:null}catch{return null}})();
-function specialWeatherLocked(now=Date.now()){return !!serverWeatherState&&['crystal','hell','glitch'].includes(serverWeatherState.type)&&Number(serverWeatherState.until)>now}
+function specialWeatherLocked(now=Date.now()){const active=serverWeatherState&&Number(serverWeatherState.until)>now?(serverWeatherState.types||[serverWeatherState.type]):[];return active.some(type=>['crystal','hell','glitch'].includes(type))}
 function applyServerWeatherRow(row,announce=false){
  if(!row)return;
  const now=Date.now(),updatedAt=row.updated_at?new Date(row.updated_at).getTime():0;
