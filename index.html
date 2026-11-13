@@ -7,7 +7,7 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=account-ui-contrast-20261113">
+<link rel="stylesheet" href="style.css?v=20261113-t0084-fixed-unlock">
 </head>
 <body class="auth-required"><div class="shell">
 <header class="top"><div class="brand">骰界 <span>RNG</span></div><div class="weather-status" id="weatherStatus" aria-live="polite"><span class="weather-icon" id="weatherIcon">☀️</span><span class="weather-name" id="weatherName">晴天</span><span class="weather-countdown" id="weatherCountdown" hidden>05:00</span></div><div class="profile"><span class="pill" id="saveStatus" hidden>本機試玩存檔</span><span class="avatar" id="avatar" hidden>旅</span><span id="playerName" hidden>旅人</span><span id="gloveLabel" hidden>基礎手套</span><button class="primary" id="authOpenBtn">登入／註冊</button></div></header><section class="announcement-panel" aria-label="全服公告"><div class="announcement-heading"><span class="announcement-live"></span><b>全服稀有公告</b><span class="announcement-caption">REALM ANNOUNCEMENTS</span></div><div id="globalAnnouncements" class="announcement-list"><div class="announcement-empty">等待稀有骰子現身……</div></div></section>
@@ -36,7 +36,7 @@
   <p class="muted">投入雨、雪、打雷、水晶或地獄等天氣骰子</p>
   <div class="stats"><div class="stat"><b id="summonPoints">0</b><span>目前能量</span></div><div class="stat"><b>35,000</b><span>召喚需求</span></div><div class="stat"><b id="summonRemaining">35,000</b><span>還差能量</span></div></div>
   <div class="summon-progress"><span id="summonProgressBar"></span></div><p class="mini" id="summonProgressText">登入雲端帳號後開始累積個人召喚能量。</p>
-  <div class="summon-outcome"><div><strong style="color:#ed75ff">💎 水晶天氣</strong><small>召喚機率 60%</small></div><div><strong style="color:#ff6038">🔥 地獄天氣</strong><small>召喚機率 27%</small></div><div><strong style="color:#ff3d9a">⚠️ 故障天氣</strong><small>召喚機率 13%</small></div></div>
+  <div class="summon-outcome"><div><strong style="color:#ed75ff">💎 水晶天氣</strong><small>召喚機率 70%</small></div><div><strong style="color:#ff6038">🔥 地獄天氣</strong><small>召喚機率 30%</small></div></div>
   <button class="primary" id="summonWeatherBtn" type="button" style="width:100%;min-height:46px" disabled>✧ 召喚特殊天氣</button>
   <div style="margin-top:12px"><p class="mini" style="margin:0 0 8px">勾選擲到後要自動投入召喚能量的天氣骰子：</p><div id="autoDepositDiceOptions" class="auto-sell-options" aria-label="自動投入天氣骰子選項"></div><div class="auto-deposit-tools" style="grid-template-columns:minmax(0,1fr)"><button type="button" id="autoDepositWeatherBtn" aria-pressed="false">自動添加：關閉</button></div></div>
   <p class="mini" id="summonStatus" role="status">只有登入雲端帳號後才能投入骰子及召喚。</p>
