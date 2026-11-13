@@ -116,7 +116,8 @@ export function createDiceSystem(deps) {
     const weatherState = getWeather();
     const weather = weatherState.type || 'sunny';
     const weatherTypes = weatherState.types || [weather];
-    const pool = D.filter(dice => (!dice.weather || weatherTypes.includes(dice.weather))
+    const pool = D.filter(dice => !dice.unlockRolls
+      && (!dice.weather || weatherTypes.includes(dice.weather))
       && (!dice.specialWeather || weatherTypes.includes(dice.specialWeather))
       && (!isHalloweenDice(dice) || !halloweenDiceUnavailable()));
     const boostLuck = Math.max(0, Number(luck()) || 0);
@@ -193,7 +194,7 @@ export function createDiceSystem(deps) {
       const rollDen = weather === 'hell' && dice.den >= 700000 ? dice.den * 0.95 : dice.den;
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
-      return (1 / Math.max(2, rollDen)) * factor * (weatherTypes.includes(dice.specialWeather) ? 10 : 1);
+      return (1 / Math.max(2, rollDen)) * factor;
     });
     const total = weights.reduce((sum, weight) => sum + weight, 0);
     let roll = Math.random() * total;
@@ -225,7 +226,7 @@ export function createDiceSystem(deps) {
     icon.textContent = dice.icon;
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
-    documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
+    documentRef.getElementById('rarityRevealOdds').textContent = dice.unlockRolls ? '解鎖條件：累積擲骰 ' + format(dice.unlockRolls) + ' 次' : chanceText(dice);
     if (glitch) {
       await wait(1250);
       overlay.classList.remove('blackout');
@@ -335,6 +336,15 @@ export function createDiceSystem(deps) {
         }
 
         currentState.quest.rolls++;
+        currentState.glitchDiceUnlocked = currentState.glitchDiceUnlocked || {};
+        const newlyUnlockedGlitchDice = [];
+        for (const unlockDice of D.filter(item => Number(item.unlockRolls) > 0
+          && Number(currentState.rolls) >= Number(item.unlockRolls)
+          && !currentState.glitchDiceUnlocked[item.id])) {
+          currentState.glitchDiceUnlocked[unlockDice.id] = true;
+          if (!currentState.first[unlockDice.id]) currentState.first[unlockDice.id] = now;
+          newlyUnlockedGlitchDice.push(unlockDice);
+        }
         currentState.rollCounts = currentState.rollCounts || {};
         currentState.rollCounts[dice.id] = (Number(currentState.rollCounts[dice.id]) || 0) + 1;
         if (!currentState.first[dice.id]) currentState.first[dice.id] = now;
@@ -412,6 +422,10 @@ export function createDiceSystem(deps) {
         if (halloweenVariant) await playSmallReveal(dice, 'HALLOWEEN VARIANT');
         else if (dice.den === 4096) await playSmallReveal(dice, 'RARE DISCOVERY');
         else if (dice.den >= 10000) await playRarityReveal(dice);
+        for (const unlockedDice of newlyUnlockedGlitchDice) {
+          toast('⚠ 固定里程碑解鎖：' + unlockedDice.name);
+          await playRarityReveal(unlockedDice);
+        }
         if (currentRollSequence !== rollSequence) return;
 
         timerManager.setTimeout(() => {
