@@ -82,7 +82,7 @@ function getWeather(now=Date.now()){
  if(state.type!=='sunny'&&now>=state.until)state={type:'sunny',until:0};
  cachedWeatherMinute=minute;cachedWeatherState=state;return state;
 }
-function activeWeatherDice(){const w=getWeather(),types=w.types||[w.type];return D.filter(d=>(d.weather&&types.includes(d.weather))||(d.specialWeather&&types.includes(d.specialWeather)))}
+function activeWeatherDice(){const w=getWeather(),types=w.types||[w.type];return D.filter(d=>d.weather&&types.includes(d.weather))}
 async function convertWeather(){
  const scope=document.getElementById('weatherConvertScope')?.value||'global';
 
