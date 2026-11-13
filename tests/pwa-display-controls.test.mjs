@@ -149,3 +149,15 @@ test('手機版頂部額外避開狀態列，背包依可用寬度增加每行�
   }
   assert.equal(depth, 0, 'CSS blocks must all be closed');
 });
+
+
+test('橫向模式全頁縮放且保留歡迎文字，直向不套用全頁縮放', async () => {
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const landscape = css.slice(css.indexOf('T-0085 landscape correction: scale the entire game surface'));
+  assert.match(landscape, /@media \(orientation: landscape\) and \(max-width: 1024px\) and \(max-height: 620px\)/);
+  assert.match(landscape, /\.shell\s*\{[\s\S]*?zoom:\s*var\(--landscape-scale\)/);
+  assert.match(landscape, /body\s*\{[\s\S]*?padding-top:\s*max\(42px, env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(landscape, /#page-roll\s*>\s*\.hero\s+#realmHeroWelcome\s*\{\s*display:\s*block !important/);
+  assert.match(landscape, /--landscape-scale:\s*\.64/);
+  assert.match(landscape, /--landscape-scale:\s*\.84/);
+});
