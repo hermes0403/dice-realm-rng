@@ -16,7 +16,7 @@ import { createProgressionSystem } from './systems/progression.js?v=20261112-t00
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261113-t0084-glitch-summon-odds';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261112-t0074-lock-persistence';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t0086-cloud-save-rollback';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
