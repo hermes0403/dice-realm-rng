@@ -33,12 +33,12 @@ export function createCodexUI(dependencies) {
       const discovered = !!S.first[dice.id] || !!S.bag[dice.id];
       const rolls = Number(S.rollCounts?.[dice.id]) || 0;
       const isHalloween = ['d33', 'd34', 'd35', 'd36'].includes(dice.id);
-      const codexColor = isHalloween ? '#ff8a3d' : dice.weather
+      const codexColor = isHalloween ? '#ff8a3d' : dice.specialWeather === 'glitch' ? dice.color : dice.weather
         ? ({ rain: '#75baff', snow: '#f4fbff', thunder: '#fff000', crystal: '#ed75ff', hell: '#ff6038' }[dice.weather] || '#9b9aff')
         : '#9b9aff';
       const exist = dice.weather && weatherDiceExistCounts && Object.prototype.hasOwnProperty.call(weatherDiceExistCounts, dice.id)
         ? Number(weatherDiceExistCounts[dice.id]) : null;
-      return `<div class="codex-entry"><div class="codex-row ${discovered ? '' : 'missing'} ${isHalloween ? 'codex-halloween' : dice.weather ? 'codex-weather-' + dice.weather : 'codex-standard'}" style="--rarity-color:${codexColor}"><div class="codex-chance" style="color:${discovered ? codexColor : '#525873'}!important">${discovered ? chanceText(dice) : '???'}</div><div class="codex-name" style="color:${discovered ? codexColor : '#525873'}!important"><span class="codex-icon" style="color:${discovered ? codexColor : '#525873'}!important">${discovered ? dice.icon : '???'}</span>${discovered ? dice.name : '???'}</div><div class="codex-count">${dice.weather ? `抽到 ${format(rolls)} 次 · exist: ${exist === null ? '統計未載入' : format(exist)}` : discovered ? (rolls ? `抽到 ${format(rolls)} 次` : '已獲得') : '???'}</div></div></div>`;
+      return `<div class="codex-entry"><div class="codex-row ${discovered ? '' : 'missing'} ${isHalloween ? 'codex-halloween' : dice.specialWeather === 'glitch' ? 'codex-glitch' : dice.weather ? 'codex-weather-' + dice.weather : 'codex-standard'}" style="--rarity-color:${codexColor}"><div class="codex-chance" style="color:${discovered ? codexColor : '#525873'}!important">${discovered ? chanceText(dice) : '???'}</div><div class="codex-name" style="color:${discovered ? codexColor : '#525873'}!important"><span class="codex-icon" style="color:${discovered ? codexColor : '#525873'}!important">${discovered ? dice.icon : '???'}</span>${discovered ? dice.name : '???'}</div><div class="codex-count">${dice.weather ? `抽到 ${format(rolls)} 次 · exist: ${exist === null ? '統計未載入' : format(exist)}` : discovered ? (rolls ? `抽到 ${format(rolls)} 次` : '已獲得') : '???'}</div></div></div>`;
     }).join('');
   }
 
