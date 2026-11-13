@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.15';
+const CACHE_NAME = 'dice-realm-shell-v1.16';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261113-t0085-landscape-pwa',
-  './style.css?v=20261113-t0085-landscape-pwa',
+  './script.js?v=20261113-t0085-landscape-scale',
+  './style.css?v=20261113-t0085-landscape-scale',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
