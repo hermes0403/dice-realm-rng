@@ -143,7 +143,7 @@ function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
 function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0))}
-function effectiveDen(d){const w=getWeather(),types=w.types||[w.type];return d&&types.includes('hell')&&Number(d.den)>=700000?Math.floor(Number(d.den)*0.95):Number(d?.den)||0}
+function effectiveDen(d){const w=getWeather(),types=w.types||[w.type];let den=Number(d?.den)||0;if(types.includes('hell')&&den>=700000)den=Math.floor(den*0.95);if(d?.specialWeather==='glitch'&&types.includes('glitch'))den=Math.max(1,Math.floor(den/10));return den}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I 專屬固定機率。加入天氣限定骰子後，會從原本大於 10% 的項目分配機率，總和仍為 100%。
 function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');timerManager.clearTimeout(e._t);const timer=timerManager.setTimeout(()=>{e.classList.remove('show');if(e._t===timer)e._t=null},2100,'toast-hide');e._t=timer}
