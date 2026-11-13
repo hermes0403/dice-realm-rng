@@ -121,7 +121,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
-  assert.match(html, /V1.17/);
+  assert.match(html, /V1.18/);
 });
 
 test('Service Worker 僅處理同源靜態資源與頁面導覽，不攔截 Supabase API', async () => {
@@ -132,4 +132,20 @@ test('Service Worker 僅處理同源靜態資源與頁面導覽，不攔截 Supa
   assert.match(worker, /\/rest\/v1\//);
   assert.match(worker, /\/auth\/v1\//);
   assert.match(worker, /\/functions\/v1\//);
+});
+
+
+test('手機版頂部額外避開狀態列，背包依可用寬度增加每行格數', async () => {
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(css, /padding-top:\s*calc\(env\(safe-area-inset-top, 0px\) \+ 18px\)/);
+  assert.match(css, /#inventoryGrid\s*\{[\s\S]*?repeat\(auto-fill, minmax\(clamp\(64px, 12vw, 92px\), 1fr\)\)/);
+  assert.match(css, /@media \(orientation: landscape\) and \(max-width: 1024px\)/);
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  let depth = 0;
+  for (const char of withoutComments) {
+    if (char === '{') depth += 1;
+    if (char === '}') depth -= 1;
+    assert.ok(depth >= 0, 'CSS closing brace must have a matching opening brace');
+  }
+  assert.equal(depth, 0, 'CSS blocks must all be closed');
 });
