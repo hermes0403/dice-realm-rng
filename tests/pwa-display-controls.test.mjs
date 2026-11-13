@@ -36,7 +36,7 @@ function createFixture({ requestFullscreen, exitFullscreen, pwaFullscreen = fals
       }
     }
   } : {};
-  return { button, buttonListeners, documentListeners, documentRef, windowRef, navigatorRef, messages, registrations };
+  return { button, buttonListeners, documentListeners, documentRef, windowRef, navigatorRef, messages, registrations, toast: message => messages.push(message) };
 }
 
 test('全螢幕按鈕可進入與退出原生全螢幕', async () => {
@@ -77,7 +77,7 @@ test('不支援 Fullscreen API 時不會阻斷頁面，並提供簡短提示', a
   const fixture = createFixture();
   setupDisplayControls(fixture);
   await fixture.buttonListeners.get('click')();
-  assert.deepEqual(fixture.messages, []);
+  assert.deepEqual(fixture.messages, ['此瀏覽器不支援全螢幕']);
 });
 
 test('PWA 已以 fullscreen 顯示時按鈕標示已啟用且不重複要求全螢幕', () => {
