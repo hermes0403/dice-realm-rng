@@ -1,7 +1,7 @@
 ---
 id: T-0085
 title: 手機橫向版面與 PWA 全螢幕支援
-status: review
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -44,6 +44,9 @@ done_at:
 - [ ] 遊戲版本由 V1.14 更新為 V1.15。
 
 ## 紀錄
+
+- 2026-11-13 19:24 [棒子] 橫向模式所有元件比例需修正為正常大小，包含文字、按鈕、骰子、卡片、導覽與間距；保留橫向雙欄配置及直向版面。
+- 2026-11-13 19:24 [叉子] 依棒子驗收回饋由 review 退回 in_progress，針對橫向版面過度縮小的尺寸逐項修正並補測。
 
 - 2026-11-13 18:18 [叉子] 交付 PR #84 已合併至 main（merge commit `4c3fbf82259e5a95da42279963b6c5e47b2e0bf2`）；GitHub Pages workflow #43408064810 的 build 與 deploy 均成功。程式與部署交付完成，狀態送交 review，等待棒子實際手機驗收。
 
