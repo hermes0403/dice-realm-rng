@@ -62,10 +62,10 @@ export const D=[
 {id:'d61',name:'熾獄之心',den:15222,icon:'🔥',color:'#ff6038',weather:'hell',desc:'地獄火焰凝結而成的天氣限定骰子。',effect:'熾獄之心'},
 {id:'d62',name:'永霜核心',den:34321,icon:'❄️',color:'#d8f2ff',weather:'snow',desc:'冰雪能量凝結而成的天氣限定骰子。',effect:'永霜核心'},
 {id:'d63',name:'深雨之核',den:62200,icon:'🌧️',color:'#75baff',weather:'rain',desc:'雨滴能量凝結而成的天氣限定骰子。',effect:'深雨之核'},
-{id:'d64',name:'錯誤代碼',den:100000000,icon:'⌘',color:'#ff3d9a',specialWeather:'glitch',desc:'故障天氣中浮現的系統錯誤代碼，字元持續重組。',effect:'錯誤代碼'},
-{id:'d65',name:'異常殘響',den:7777777,icon:'⌁',color:'#9b6bff',specialWeather:'glitch',desc:'故障天氣留下的異常訊號，在骰面間反覆迴盪。',effect:'異常殘響'},
-{id:'d66',name:'系統崩解',den:25000000,icon:'⛓',color:'#ff5656',specialWeather:'glitch',desc:'系統結構逐漸崩解，紅色裂紋蔓延整顆骰子。',effect:'系統崩解'},
-{id:'d67',name:'虛空漏洞',den:800000,icon:'⟁',color:'#52f1e6',specialWeather:'glitch',desc:'故障天氣撕開的虛空漏洞，邊界不斷閃爍。',effect:'虛空漏洞'}
+{id:'d64',name:'錯誤代碼',den:100000000,icon:'⌘',color:'#ff3d9a',specialWeather:'glitch',desc:'故障天氣中浮現的系統錯誤代碼，字元持續重組。',effect:'錯誤代碼',unlockRolls:100000},
+{id:'d65',name:'異常殘響',den:7777777,icon:'⌁',color:'#9b6bff',specialWeather:'glitch',desc:'故障天氣留下的異常訊號，在骰面間反覆迴盪。',effect:'異常殘響',unlockRolls:250000},
+{id:'d66',name:'系統崩解',den:25000000,icon:'⛓',color:'#ff5656',specialWeather:'glitch',desc:'系統結構逐漸崩解，紅色裂紋蔓延整顆骰子。',effect:'系統崩解',unlockRolls:500000},
+{id:'d67',name:'虛空漏洞',den:800000,icon:'⟁',color:'#52f1e6',specialWeather:'glitch',desc:'故障天氣撕開的虛空漏洞，邊界不斷閃爍。',effect:'虛空漏洞',unlockRolls:1000000}
  ];
 // 圖鑑依稀有度區間統一配色：同一階級同色，階級越高色相越突出。
 export function rarityColor(den){
