@@ -45,3 +45,8 @@ done_at:
 - 2026-11-13 08:20 [叉子] 依棒子更正，門檻改為分母 >= 4096；以此更正為準，低於 4096 不顯示、不廣播、不寫入稀有擲骰歷史。
 
 - 2026-11-13 09:13 [叉子] 開工准入檢查，基準為 main SHA `d901f67f39a0d2e96b352353f20da30216d5c940`：owner_side 有效 in_progress 任務為 T-0079、T-0080，共 2/5；review 任務 T-0059 不計入容量；T-0034、T-0035、T-0037、T-0039、T-0052 已依棒子明確驗收更新為 done。未找到指派給叉子的有效 Communicate 任務，兩道啟動閘門均未阻擋。T-0083 轉為 in_progress，準備建立開工 PR。
+
+## 實作進度紀錄
+
+- 2026-11-13 09:25 [叉子] 已修改 `systems/global-announcements.js`：發送端與接收端統一採分母 >= 4096；低於門檻不顯示、不 Broadcast、不寫入 `roll_announcements`；公告內容包含玩家名稱、骰子名稱及稀有度。未新增輪詢或 PostgREST 查詢。`index.html` 版本由 V1.10 升至 V1.11，更新 script.js 快取版本。
+- 新增 `tests/global-announcements-threshold.test.js`，針對 4095 不觸發、4096 觸發及接收端門檻進行測試；隔離執行 `node --test tests/global-announcements-threshold.test.js`：3/3 通過；`node --check` 模組與測試檔通過。PR #75 建立時觸發的既有 GitHub Actions 5 個工作流程均成功，但它們沒有執行本次新增測試。完整 `node --test tests/*.test.js` 尚未執行，故任務維持 in_progress，尚未合併及部署。
