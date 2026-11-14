@@ -577,7 +577,11 @@ export function createCloudSaveService(dependencies) {
       if (conflictBasePayload && conflictLocalSnapshot?.bag) {
         const localVersionMatches = latestLocalSnapshot?._cloudBaseVersion === conflictBaseVersion;
         if (!localVersionMatches) {
-          localSnapshotForMerge = { ...conflictLocalSnapshot, _cloudBaseVersion: conflictBaseVersion };
+          const currentStateSnapshot = clonePayload(getState());
+          localSnapshotForMerge = {
+            ...(currentStateSnapshot?.bag ? currentStateSnapshot : conflictLocalSnapshot),
+            _cloudBaseVersion: conflictBaseVersion
+          };
         }
       } else if (!localSnapshotForMerge?.bag && conflictLocalSnapshot?.bag) {
         localSnapshotForMerge = { ...conflictLocalSnapshot, _cloudBaseVersion: conflictBaseVersion };
