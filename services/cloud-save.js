@@ -21,6 +21,7 @@ export function createCloudSaveService(dependencies) {
   let cloudSaveVersion = null;
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
+  let cloudLoadReadyUserId = null;
   const grantCheckAtByUser = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
   const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -65,6 +66,8 @@ export function createCloudSaveService(dependencies) {
       petDiscovered: S.petDiscovered || {},
       petSkillLuckCharges: Number(S.petSkillLuckCharges) || 0,
       petSkillDaily: S.petSkillDaily || {},
+      petSkillLogin: S.petSkillLogin || { lastDate: null, streak: 0, reward: 0 },
+      petSkillSpeed: S.petSkillSpeed || { activatedAt: 0, expiresAt: 0, cooldownUntil: 0 },
       name: S.name, joined: S.joined, rolls: S.rolls, bag: S.bag,
       lockedDice: Array.isArray(S.lockedDice) ? S.lockedDice.filter(key => typeof key === 'string') : [],
       bagCapacity: S.bagCapacity, first: S.first, rollCounts: S.rollCounts || {},
@@ -300,6 +303,7 @@ export function createCloudSaveService(dependencies) {
   async function loadCloudSave({ syncAfterLoad = true } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
+    cloudLoadReadyUserId = null;
     try {
       const scopedKey = userSaveKey(user.id);
       // Keep the exact local snapshot used when the cloud request starts.
@@ -339,6 +343,7 @@ export function createCloudSaveService(dependencies) {
         await applyPendingGrants(true);
         if (syncAfterLoad) await syncCloudSave();
         await refreshLeaderboards();
+        cloudLoadReadyUserId = user.id;
         return;
       }
       const cloudRolls = Number(data?.save_data?.rolls) || 0;
@@ -364,6 +369,7 @@ export function createCloudSaveService(dependencies) {
         await applyPendingGrants(true);
         await syncCloudSave();
         await refreshLeaderboards();
+        cloudLoadReadyUserId = user.id;
         return;
       }
       let S;
@@ -428,7 +434,9 @@ export function createCloudSaveService(dependencies) {
       await applyPendingGrants(true);
       if (syncAfterLoad) await syncCloudSave();
       await refreshLeaderboards();
+      cloudLoadReadyUserId = user.id;
     } catch (e) {
+      cloudLoadReadyUserId = null;
       console.error(e);
       if (/user.?banned|banned|被停權|已停權/i.test(String(e?.message || ''))) {
         await supabaseClient?.auth.signOut().catch(() => {});
@@ -439,5 +447,7 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit };
+  function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
+
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isLoadedFor };
 }

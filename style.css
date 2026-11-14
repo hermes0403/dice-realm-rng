@@ -1105,28 +1105,8 @@ button.danger{
 .profile-version{text-align:center;margin:10px 0 0;color:#dce4ff!important;letter-spacing:.08em}
 
 
-/* T-0075: improve text contrast without changing the established backgrounds */
-:root{
-  --text:#0b1433;
-  --muted:#0b1433;
-}
-body{color:#0b1433!important}
-.muted,.mini,.hint,.help,.description,.subtitle,.result-sub,
-.tenth-progress-head,.nav small,.nav button:not(.active),
-.stat span,.item p,.toolbar label,.announcement-line,
-.announce-style-label,.admin-category-copy small,
-.sell-help,.inventory-row small,.inventory-sell small,
-.codex-row .codex-count,.pet-meta,.profile-version,
-small:not(.weather-status *){
-  color:#0b1433!important;
-  opacity:1!important;
-}
-input::placeholder,textarea::placeholder{
-  color:#29365e!important;
-  opacity:1!important;
-}
-
-
+/* T-0075: readable foreground tokens; surfaces and layout remain unchanged. */
+:root { --text: #edf0ff; --muted: #c5d5e6; }
 /* T-0076: restore the T-0061 emerald night theme while retaining current contrast and features */
 :root{
   --bg:#06130f;
@@ -1856,4 +1836,196 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
 }
 @media (orientation: landscape) and (max-width: 1024px) and (min-height: 561px) and (max-height: 620px) {
   .shell { --landscape-scale: .84; }
+}
+
+
+/* T-0067: restore subtle statistic-card surfaces and visible frames. */
+.stats > .stat,
+.stat {
+  background: linear-gradient(145deg, #142f23, #11291f) !important;
+  border: 1px solid #35664c !important;
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 #c5ffdc12, 0 2px 9px #020b0750 !important;
+}
+
+
+/* T-0088: restore section-specific colors for explanatory panels. */
+#page-roll > #realmHero {
+  border-color: #3f9368 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #55e6a133, transparent 48%),
+    linear-gradient(135deg, #102e22f5, #12382af0 58%, #0c2119f5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #c5ffdc12 !important;
+}
+#page-roll > #realmHero:after { background: #55e6a12a !important; }
+#page-roll > #realmHero .eyebrow { color: #a8f2c1 !important; }
+
+#page-codex > .hero {
+  border-color: #4b9fa0 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #4adbd02c, transparent 50%),
+    linear-gradient(135deg, #102c31f5, #12372ff0 58%, #0d241df5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #b7fff21a !important;
+}
+#page-codex > .hero:after { background: #58e5df2a !important; }
+#page-codex > .hero .eyebrow { color: #a4f0e8 !important; }
+
+#page-pets > .hero {
+  border-color: #829b5d !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #b5d8792b, transparent 50%),
+    linear-gradient(135deg, #263321f5, #1b3024f0 58%, #10251cf5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #e4ffc21a !important;
+}
+#page-pets > .hero:after { background: #b5d87926 !important; }
+#page-pets > .hero .eyebrow { color: #d5eca3 !important; }
+
+#page-event #eventLockedPanel {
+  border-color: #a98249 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #f2bd622b, transparent 50%),
+    linear-gradient(135deg, #35291cf5, #2a241cf0 58%, #17251df5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #ffe1a51a !important;
+}
+#page-event #eventLockedPanel:after { background: #f2bd6226 !important; }
+#page-event #eventLockedPanel .eyebrow { color: #ffda94 !important; }
+
+#workshop-potions-panel .hero {
+  border-color: #8d6bb4 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #bb82f32b, transparent 50%),
+    linear-gradient(135deg, #29213cf5, #20243af0 58%, #10251df5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #e7d1ff1a !important;
+}
+#workshop-potions-panel .hero:after { background: #bb82f326 !important; }
+#workshop-potions-panel .hero .eyebrow { color: #dfc1ff !important; }
+
+#page-weather-summon .weather-summon-card {
+  border-color: #8065a8 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, #a76ee72b, transparent 52%),
+    linear-gradient(135deg, #251c37f5, #1a2437f0 58%, #10251df5) !important;
+  box-shadow: inset 0 0 32px #b78aff12, 0 15px 45px #0004 !important;
+}
+#page-weather-summon .weather-summon-card:after { background: #b78aff20 !important; }
+#page-weather-summon .weather-summon-card .eyebrow { color: #d9b8ff !important; }
+
+/* The roll icon tile stays in the emerald family without becoming a solid green block. */
+#page-roll > .rollbox > .dice {
+  color: #f4fff7 !important;
+  background: radial-gradient(ellipse at 30% 18%, #34483e, #1b2b24 72%) !important;
+  border-color: #789987 !important;
+  box-shadow: 0 0 24px #9bcdb21a, inset 0 0 18px #ffffff0a !important;
+}
+
+
+/* T-0075 final contrast pass: light foregrounds on dark game surfaces. */
+:root { --text: #edf0ff; --muted: #c5d5e6; }
+body { color: #edf0ff !important; }
+h1, h2, h3, h4, .hero h1, .section-head h2 { color: #f1f4ff !important; }
+.muted, .mini, .hint, .help, .description, .subtitle, .result-sub,
+.tenth-progress-head, .nav small, .stat span, .item p, .toolbar label,
+.announcement-line, .announce-style-label, .admin-category-copy small,
+.sell-help, .inventory-row small, .inventory-sell small,
+.codex-row .codex-count, .pet-meta, .profile-version, .footer,
+.announcement-caption, .announcement-empty, .admin-empty-state,
+.admin-navigation-status, .admin-offline,
+small:not(.weather-status *) {
+  color: #c5d5e6 !important; opacity: 1 !important;
+}
+.nav button:not(.active), .admin-category-tab:not([aria-pressed="true"]),
+button:not(.primary):not(.danger) { color: #e8edf9 !important; }
+.pill, .admin-category-count { color: #e8edf9 !important; }
+.stat, .stat b { color: #f4fff7 !important; }
+.admin-category-nav, .admin-navigation-head, .admin-category-content,
+.admin-empty-state, .admin-category-group, .admin-category-title,
+.admin-search, .admin-category-icon, .admin-navigation-status,
+.admin-category-copy { color: #e8f5ec !important; }
+.admin-category-copy small, .admin-empty-state,
+.admin-navigation-status, .announcement-line { color: #c5d5c9 !important; }
+.admin-category-title > span { color: #d5e8ff !important; }
+.admin-search input::placeholder { color: #c5d5c9 !important; opacity: 1; }
+#authModal input::placeholder { color: #263b30 !important; opacity: 1; }
+#page-roll > #realmHero, #page-codex > .hero, #page-pets > .hero,
+#page-event #eventLockedPanel, #workshop-potions-panel .hero,
+#page-weather-summon .weather-summon-card { color: #f1f4ff !important; }
+#page-roll > #realmHero .eyebrow { color: #a8f2c1 !important; }
+#page-codex > .hero .eyebrow { color: #a4f0e8 !important; }
+#page-pets > .hero .eyebrow { color: #d5eca3 !important; }
+#page-event #eventLockedPanel .eyebrow { color: #ffda94 !important; }
+#workshop-potions-panel .hero .eyebrow { color: #dfc1ff !important; }
+#page-weather-summon .weather-summon-card .eyebrow { color: #d9b8ff !important; }
+#page-roll > #realmHero .muted, #page-codex > .hero .muted,
+#page-pets > .hero .muted, #page-event #eventLockedPanel .muted,
+#workshop-potions-panel .hero .muted,
+#page-weather-summon .weather-summon-card .muted { color: #f1f4ff !important; }
+
+/* Preserve individual weather colors while correcting the dark base text color. */
+.weather-status { color: #e7ecff !important; }
+.weather-status.weather-rain { color: #75baff !important; }
+.weather-status.weather-snow { color: #f4fbff !important; }
+.weather-status.weather-thunder { color: #fff000 !important; }
+.weather-status.weather-crystal { color: #f2b5ff !important; }
+.weather-status.weather-hell { color: #ffb09a !important; }
+.weather-status.weather-dumpling { color: #ffd98a !important; }
+
+
+/* T-0075 follow-up: make the latest roll result and achievement categories easy to distinguish. */
+#page-roll > .rollbox > .result-name {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 8px auto;
+  padding: 6px 14px;
+  border: 1px solid #b8d7ff88 !important;
+  border-radius: 12px;
+  background: #07111ee8 !important;
+  color: #ffffff !important;
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1.35;
+  text-shadow: 0 2px 4px #000, 0 0 12px #000b;
+  box-shadow: 0 4px 16px #0006, inset 0 1px #ffffff18;
+  overflow-wrap: anywhere;
+}
+.achievement-row {
+  position: relative;
+  overflow: hidden;
+  opacity: 1 !important;
+  border-width: 1px !important;
+  border-left-width: 4px !important;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--achievement-accent, #8ca7ff) 22%, #10251c), #0c1b17 82%) !important;
+  border-color: color-mix(in srgb, var(--achievement-accent, #8ca7ff) 58%, #28513d) !important;
+}
+.achievement-row h3,
+.achievement-row > span { color: #f3f7ff !important; }
+.achievement-row p { color: #d0dfeb !important; }
+.achievement-row.is-done {
+  border-color: color-mix(in srgb, var(--achievement-accent, #8ca7ff) 88%, #ffffff) !important;
+  box-shadow: inset 4px 0 var(--achievement-accent, #8ca7ff), 0 0 14px color-mix(in srgb, var(--achievement-accent, #8ca7ff) 18%, transparent) !important;
+}
+.achievement-row.is-pending { opacity: 1 !important; }
+.achievement-roll100, .achievement-roll1000, .achievement-roll10000,
+.achievement-roll100000, .achievement-roll200000, .achievement-roll400000 {
+  --achievement-accent: #68baff;
+}
+.achievement-collect5, .achievement-collect12, .achievement-collect20,
+.achievement-collect28 { --achievement-accent: #bd91ff; }
+.achievement-rare2048, .achievement-rare1m, .achievement-rare10m {
+  --achievement-accent: #ffd27a;
+}
+.achievement-craftVoid { --achievement-accent: #65d7ff; }
+.achievement-craftUniverse { --achievement-accent: #ff8bd0; }
+.achievement-rainCollect2 { --achievement-accent: #63aaff; }
+.achievement-snowCollect2 { --achievement-accent: #c7eeff; }
+.achievement-thunderCollect2 { --achievement-accent: #ffe36b; }
+.achievement-crystalCollect2 { --achievement-accent: #d59aff; }
+.achievement-hellCollect2 { --achievement-accent: #ff806d; }
+.achievement-daily5, .achievement-daily20 { --achievement-accent: #66dfa5; }
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 620px) {
+  #page-roll > .rollbox > .result-name {
+    margin: 0;
+    padding: 5px 9px;
+    font-size: 16px;
+  }
 }

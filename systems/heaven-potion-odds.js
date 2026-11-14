@@ -1,5 +1,3 @@
-import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
-
 export const HEAVEN_MIDDLE_IDS = [
   'd13', 'd14', 'd15', 'd16', 'd29', 'd17', 'd18', 'd19',
   'd67', 'd30', 'd20', 'd21', 'd22', 'd58', 'd65', 'd23',
@@ -13,19 +11,46 @@ export function buildHeavenBaseEntries(byId, heaven2, highLuck) {
   const errorPercent = heaven2 ? 0.07 : 0.005;
   const middle = HEAVEN_MIDDLE_IDS.filter(id => id !== fixed.id);
   const remaining = 100 - fixed.percent - errorPercent;
-  const weightTotal = middle.length * (middle.length + 1) / 2;
+  const targetId = heaven2 ? 'd23' : 'd21';
+  const targetIndex = middle.indexOf(targetId);
+  const targetPercent = 1.5;
+  let low = 0;
+  let high = 1;
+  for (let iteration = 0; iteration < 80; iteration++) {
+    const ratio = (low + high) / 2;
+    let totalWeight = 0;
+    let targetWeight = 0;
+    let factor = 1;
+    for (let index = 0; index < middle.length; index++) {
+      totalWeight += factor;
+      if (index === targetIndex) targetWeight = factor;
+      factor *= ratio;
+    }
+    const targetShare = remaining * targetWeight / totalWeight;
+    if (targetShare < targetPercent) low = ratio;
+    else high = ratio;
+  }
+  const ratio = (low + high) / 2;
   const entries = [
     { dice: byId(fixed.id), weight: fixed.percent },
     { dice: byId('d64'), weight: errorPercent }
   ];
+  let totalFactor = 0;
+  let factor = 1;
+  for (let index = 0; index < middle.length; index++) {
+    totalFactor += factor;
+    factor *= ratio;
+  }
   let allocated = 0;
+  factor = 1;
   middle.forEach((id, index) => {
     const weight = index === middle.length - 1
       ? remaining - allocated
-      : remaining * (middle.length - index) / weightTotal;
+      : remaining * factor / totalFactor;
     allocated += weight;
     const dice = byId(id);
     if (dice) entries.push({ dice, weight });
+    factor *= ratio;
   });
   return entries.filter(entry => entry.dice);
 }
@@ -39,12 +64,12 @@ export function heavenWeatherBonus(dice, weatherTypes, heaven2, angel) {
   return bonus;
 }
 
-export function applyHeavenWeatherWeights(entries, weatherTypes, heaven2, angel, isGlitchWeather) {
+export function applyHeavenWeatherWeights(entries, weatherTypes, heaven2, angel) {
   return entries.map(entry => {
     const bonus = heavenWeatherBonus(entry.dice, weatherTypes, heaven2, angel);
     return {
       dice: entry.dice,
-      weight: applyGlitchWeight(entry.dice, entry.weight * (1 + bonus / 100), isGlitchWeather)
+      weight: entry.weight * (1 + bonus / 100)
     };
   });
 }

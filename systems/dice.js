@@ -1,5 +1,5 @@
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
-import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261114-t0087-heaven-probability';
+import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261114-t0091-heaven-probability-curve';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
@@ -129,8 +129,7 @@ export function createDiceSystem(deps) {
         buildHeavenBaseEntries(byId, heaven2, boostLuck > 100),
         weatherTypes,
         heaven2,
-        angel,
-        isGlitchWeather
+        angel
       );
       const withWeatherDice = addWeatherOdds(entries, pool, weather);
       const total = withWeatherDice.reduce((sum, entry) => sum + entry.weight, 0);

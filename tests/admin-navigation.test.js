@@ -13,7 +13,7 @@ test('管理功能依操作或玩家資料分成兩大分類', () => {
     ['adminNewPlayersFold','新加入的玩家','players'],['adminAchievementCountsFold','各項成就完成玩家數','players'],
     ['adminOnlineCurveFold','近 24 小時每小時造訪數','players'],['adminPotionLogsFold','藥水使用／合成紀錄','players'],
     ['adminDeletedAccountsFold','刪除帳號紀錄','players'],['adminRareRollFold','稀有擲骰紀錄','players'],
-    ['adminSuspiciousRollFold','可疑擲骰模式檢查','players'],['adminClientAuditFold','反作弊／客戶端完整性','players'],
+    ['adminSuspiciousRollFold','可疑擲骰模式檢查','players'],
     ['adminGlobalBoostFold','全體運氣／速度加成','actions'],['adminCoinBoostFold','金錢收益倍率設定','actions'],
     ['adminWeatherControlFold','全服天氣控制','actions'],['adminPlayerWeatherFold','指定玩家天氣控制','actions'],
     ['adminWeatherHistoryFold','全服天氣紀錄','players']
@@ -46,7 +46,8 @@ test('管理員頁面的 26 個功能區塊全部可分類', () => {
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const a=html.indexOf('<section class="page" id="page-admin"'),z=html.indexOf('</section>',a),section=html.slice(a,z);
   const entries=[...section.matchAll(/<details class="admin-fold"([^>]*)>\s*<summary>(.*?)<\/summary>/gs)];
-  assert.equal(entries.length,26);
+  assert.equal(entries.length,25);
+  assert.doesNotMatch(section,/反作弊／客戶端完整性|adminClientAuditFold/);
   const categories=new Set(['actions','players']);
   for(const [,attrs,raw] of entries){const id=attrs.match(/id="([^"]+)"/)?.[1]||'';const title=raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();assert.ok(categories.has(classifyAdminFold(fold(id,title))),title);}
   assert.match(section,/id="adminActivityButton"/);

@@ -1,7 +1,7 @@
 ---
 id: T-0087
 title: 天堂藥水 I／II 四組機率表與天氣加成
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-14
 updated: 2026-11-14
 depends_on: []
 branch: task/T-0087-heaven-potion-probabilities
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 任務
@@ -65,7 +65,7 @@ done_at:
 - [x] 既有天氣限定骰子抽選邏輯保留；回歸測試通過。
 - [x] 玩家介面、公告及圖鑑不顯示內部機率表或加成數字。
 - [x] 不新增 Supabase 查詢、輪詢或資料庫結構。
-- [ ] 專項測試、相關回歸、語法檢查與 `git diff --check` 通過；完整測試集仍有既有寵物圖片映射測試失敗（40 項對 45 項），與本任務無關；GitHub Pages 部署待合併後確認。
+- [x] 天堂藥水專項測試與相關 GitHub Actions 通過；完整 Node 測試集仍有既有寵物圖片映射兩項不相關失敗（40 項對 45 項），未由本任務修改。GitHub Pages workflow #43549007509 隨後成功部署包含本任務的主線版本。
 
 ## 紀錄
 
@@ -93,3 +93,23 @@ done_at:
 - GitHub Actions：本次 PR 最新提交的相關工作流程 的天堂機率、PWA、擲骰存檔、管理員導覽、雲端存檔、背包、寵物、全服加成、自動擲骰及 Board 驗證工作流程均成功。
 - 完整 Node 測試集曾因既有 tests/pet-image-mapping.test.js 兩項測試失敗（圖片映射 40 與測試預期 45 不一致）；失敗與本次變更範圍無關，未擅自修改寵物資料或測試預期。
 - 本任務未新增 Supabase schema、RPC、Edge Function 或輪詢。
+
+
+### 改了什麼
+- PR #100 導入天堂藥水 I／II 四組機率表、運氣區間切換、天氣權重加成及故障骰子 10 倍權重的單次套用。
+- 新增專項測試，覆蓋機率總和、固定權重、中間骰子遞減、運氣邊界、天氣加成邊界及故障骰子權重。
+
+### 怎麼驗證的
+- PR #100 已合併（merge commit fcd48cf1e76f9d9d871d902285b34f2ca23f26ee）。
+- 天堂機率專項與相關 GitHub Actions 通過；四組基礎機率總和、骰子唯一性及天氣組合均有測試紀錄。
+- 正式故障天氣 RPC／check constraint 已核對；本任務未新增 Supabase schema、RPC、Edge Function、固定輪詢或額外 PostgREST 查詢。
+- GitHub Pages workflow #43549007509 成功部署包含本任務成果的主線版本。
+
+### 沒做／做不到的
+- 完整 Node 測試集仍有既有 pet-image-mapping 兩項測試失敗（實際 40、預期 45），與本任務無關；未擅自修改寵物資料或測試預期。
+
+### 衍生任務／影響任務
+- T-0084：故障天氣與故障骰子，已由棒子驗收。
+- T-0089：故障天氣期間在線玩家藥水掉落，依賴本任務與 T-0084。
+
+- 2026-11-14 12:10 [代記:棒子/叉子] 棒子明確驗收通過，任務由 review 結案並歸檔。｜來源：本對話棒子於 2026-11-14 12:10 明確表示「以上這5個我驗收成功了喔」。｜證據：PR #100 已合併；天堂機率專項及相關 CI 成功；GitHub Pages workflow #43549007509 成功部署；完整 Node 測試集既有 pet-image-mapping 失敗已如實保留。
