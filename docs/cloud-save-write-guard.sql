@@ -13,6 +13,64 @@ REVOKE INSERT, UPDATE ON TABLE public.player_profiles FROM PUBLIC, anon, authent
 -- Move the validated transaction behind a narrowly executable definer function.
 ALTER FUNCTION public.purchase_glove(text) SECURITY DEFINER;
 ALTER FUNCTION public.purchase_glove(text) SET search_path TO 'public', 'pg_temp';
+
+CREATE OR REPLACE FUNCTION public.purchase_glove(p_glove_id text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_user_id uuid := auth.uid();
+  v_price bigint;
+  v_save jsonb;
+  v_coins bigint;
+  v_gloves jsonb;
+BEGIN
+  IF v_user_id IS NULL THEN RAISE EXCEPTION '請先登入'; END IF;
+  v_price := CASE p_glove_id
+    WHEN 'g1' THEN 100000
+    WHEN 'g2' THEN 2000000
+    WHEN 'g3' THEN 15000000
+    WHEN 'g4' THEN 60000000
+    WHEN 'g5' THEN 250000000
+    WHEN 'g6' THEN 1000000000
+    ELSE NULL END;
+  IF v_price IS NULL THEN RAISE EXCEPTION '無效的手套商品'; END IF;
+
+  UPDATE public.game_saves
+     SET save_data = jsonb_set(
+       jsonb_set(
+         jsonb_set(coalesce(save_data, '{}'::jsonb), '{coins}', to_jsonb(((save_data->>'coins')::bigint) - v_price)),
+         '{gloves}', coalesce(save_data->'gloves', '{}'::jsonb) || jsonb_build_object(p_glove_id, 1)
+       ), '{equipped}', to_jsonb(p_glove_id)
+     ),
+     updated_at = now()
+   WHERE user_id = v_user_id
+     AND coalesce((save_data->>'coins')::bigint, 0) >= v_price
+     AND coalesce((save_data->'gloves'->>p_glove_id)::integer, 0) <= 0;
+
+  IF NOT FOUND THEN
+    SELECT save_data INTO v_save FROM public.game_saves WHERE user_id = v_user_id;
+    IF v_save IS NULL THEN RAISE EXCEPTION '找不到雲端存檔，請重新登入'; END IF;
+    IF coalesce((v_save->'gloves'->>p_glove_id)::integer, 0) > 0 THEN RAISE EXCEPTION '這副手套已經購買'; END IF;
+    RAISE EXCEPTION '金幣不足，請重新整理後再試';
+  END IF;
+
+  SELECT save_data INTO v_save FROM public.game_saves WHERE user_id = v_user_id;
+  v_coins := coalesce((v_save->>'coins')::bigint, 0);
+  v_gloves := coalesce(v_save->'gloves', '{}'::jsonb);
+
+  -- Keep the public leaderboard projection in the same transaction.
+  UPDATE public.player_profiles
+     SET coins = v_coins,
+         updated_at = now()
+   WHERE user_id = v_user_id;
+
+  RETURN jsonb_build_object('ok', true, 'coins', v_coins, 'gloves', v_gloves, 'equipped', v_save->>'equipped');
+END;
+$function$;
+
 REVOKE ALL ON FUNCTION public.purchase_glove(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.purchase_glove(text) TO authenticated;
 
