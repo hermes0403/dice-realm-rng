@@ -127,6 +127,18 @@ export function createCloudSaveService(dependencies) {
     return merged;
   }
 
+  function mergeMaxMap(baseValue, localValue, cloudValue) {
+    const base = baseValue && typeof baseValue === 'object' ? baseValue : {};
+    const local = localValue && typeof localValue === 'object' ? localValue : {};
+    const cloud = cloudValue && typeof cloudValue === 'object' ? cloudValue : {};
+    const merged = {};
+    for (const key of new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(cloud)])) {
+      const count = Math.max(0, Number(base[key]) || 0, Number(local[key]) || 0, Number(cloud[key]) || 0);
+      if (count > 0) merged[key] = count;
+    }
+    return merged;
+  }
+
   function mergeFirstMap(baseValue, localValue, cloudValue) {
     const base = baseValue && typeof baseValue === 'object' ? baseValue : {};
     const local = localValue && typeof localValue === 'object' ? localValue : {};
@@ -191,7 +203,7 @@ export function createCloudSaveService(dependencies) {
     const protectedFields = new Set([
       'rolls', 'rollCounts', 'bag', 'autoSold', 'first', 'best',
       'lockedDice', 'autoDeleteDice', 'autoDepositDice', 'bagCapacity',
-      'petDiscovered', 'achievements', 'halloweenUnlocked',
+      'petDiscovered', 'achievements', 'halloweenUnlocked', 'adminGrantApplied',
       'pets', 'equippedPetUids', 'petAutoSellRarities'
     ]);
 
@@ -231,6 +243,12 @@ export function createCloudSaveService(dependencies) {
     ) || cloud.bagCapacity;
 
     merged.petDiscovered = mergeObjectMap(base.petDiscovered, local.petDiscovered, cloud.petDiscovered, true);
+    merged.adminGrantApplied = mergeMaxMap(base.adminGrantApplied, local.adminGrantApplied, cloud.adminGrantApplied);
+    merged.weatherConvertAt = Math.max(
+      Number(base.weatherConvertAt) || 0,
+      Number(local.weatherConvertAt) || 0,
+      Number(cloud.weatherConvertAt) || 0
+    );
     merged.achievements = mergeObjectMap(base.achievements, local.achievements, cloud.achievements, true);
     merged.petAutoSellRarities = mergeObjectMap(base.petAutoSellRarities, local.petAutoSellRarities, cloud.petAutoSellRarities);
     merged.halloweenUnlocked = {
