@@ -36,6 +36,7 @@ export function createDiceSystem(deps) {
     documentRef
   } = deps;
 
+  const AUTO_SELL_DICE_IDS = new Set(["d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d28","d12","d13","d14","d15","d16","d29"]);
   let autoTimer = null;
   let autoWatchdog = null;
   let rolling = false;
@@ -306,7 +307,7 @@ export function createDiceSystem(deps) {
         }
         if (autoCollected) {
           sold = false;
-        } else if (!autoWeatherDeposit && !isHalloweenDice(dice)
+        } else if (!autoWeatherDeposit && AUTO_SELL_DICE_IDS.has(dice.id) && !isHalloweenDice(dice)
           && (currentState.autoDeleteDice || []).includes(dice.id)) {
           currentState.coins = (Number(currentState.coins) || 0) + 1;
           currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + 1;
