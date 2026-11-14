@@ -1,7 +1,7 @@
 ---
 id: T-0092
 title: 修正骰子自動出售清單與成就完成狀態
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -79,3 +79,5 @@ done_at:
 - 2026-11-14 18:10 [叉子] 狀態轉換：open → in_progress。容量閘門：owner_side 的 in_progress 任務為 T-0083、T-0085、T-0091，共 3/5；來源 main SHA d30654184c07e9cdce9cc00ee1f86781f0675680。Communicate 優先閘門：檢查目前 Board 任務清單，未發現指派給 owner_side 且狀態為 open／in_progress 的有效委派任務；T-0038 為 from:老查、to:barry 的流程任務，不屬 owner_side。開工 PR 合併前須再次複查兩道閘門。
 
 - 2026-11-14 18:11 [叉子] 更正開工閘門紀錄：18:10 的容量盤點不完整，該筆 3/5 不可作為啟動依據。重新逐項核對最新 main 的任務 metadata 後，owner_side 的 in_progress 任務為 T-0063、T-0064、T-0065、T-0066、T-0072、T-0083、T-0085、T-0091，共 8/5。18:10 的 open → in_progress 僅存在未合併分支，未進入 main；開工 PR #138 已關閉且未合併。T-0092 維持 open，不建立正式工作環境、不修改遊戲程式或 Supabase，待容量解除後再重新檢查雙重閘門。
+
+- 2026-11-14 18:44 [叉子] 開工閘門複查：owner_side 的 in_progress 任務為 T-0073、T-0085，共 2/5；T-0069、T-0070、T-0071、T-0091 已由棒子驗收並歸檔。Communicate 優先閘門：T-0038 為 from:老查、to:barry，不屬 owner_side；未發現指派給 owner_side 的有效 Communicate 任務。兩道閘門均未阻擋，任務由 open → in_progress，正式開始實作。來源 main SHA：73699ccd730ee3a3754fc9fbb61a5ba16c72acf1。
