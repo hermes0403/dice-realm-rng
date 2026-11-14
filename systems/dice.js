@@ -1,4 +1,4 @@
-import { addGlitchDiceOdds, applyGlitchWeight } from './glitch-dice.js?v=20261113-t0084-glitch-weather-phase2';
+import { addGlitchDiceOdds, applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
