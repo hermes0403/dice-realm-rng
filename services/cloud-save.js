@@ -200,6 +200,18 @@ export function createCloudSaveService(dependencies) {
     const local = localValue && typeof localValue === 'object' ? localValue : {};
     const cloud = cloudValue && typeof cloudValue === 'object' ? cloudValue : {};
     const merged = clonePayload(cloud) || {};
+
+    // A version-tagged local snapshot can still be stale if another tab
+    // overwrote it with older state. Lifetime counters and discovery records
+    // must never be lower than the baseline they claim to descend from.
+    if ((Number(local.rolls) || 0) < (Number(base.rolls) || 0)) return merged;
+    for (const [diceId, count] of Object.entries(base.rollCounts || {})) {
+      if ((Number(local.rollCounts?.[diceId]) || 0) < (Number(count) || 0)) return merged;
+    }
+    for (const diceId of Object.keys(base.first || {})) {
+      if (!local.first?.[diceId]) return merged;
+    }
+    if ((Number(base.best?.den) || 0) > (Number(local.best?.den) || 0)) return merged;
     const protectedFields = new Set([
       'rolls', 'rollCounts', 'bag', 'autoSold', 'first', 'best',
       'lockedDice', 'autoDeleteDice', 'autoDepositDice', 'bagCapacity',
