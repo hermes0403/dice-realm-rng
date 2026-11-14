@@ -154,7 +154,7 @@ export function createDiceSystem(deps) {
         && (!isHalloweenDice(dice) || !halloweenDiceUnavailable()))
         .map(dice => ({
           dice,
-          weight: heaven2Odds[dice.id] * (weather === 'hell' && dice.den >= 700000 ? 1 / 0.95 : 1)
+          weight: heaven2Odds[dice.id] * (weather === 'hell' && dice.den >= 1000000 && dice.den <= 100000000 ? 1.04 : 1)
         }));
       entries = addGlitchDiceOdds(entries, pool, isGlitchWeather, weather);
       entries = addWeatherOdds(entries, pool, weather);
@@ -172,7 +172,7 @@ export function createDiceSystem(deps) {
         const dice = byId(id);
         return {
           dice,
-          weight: percent * (weather === 'hell' && dice?.den >= 700000 ? 1 / 0.95 : 1)
+          weight: percent * (weather === 'hell' && dice?.den >= 1000000 && dice.den <= 100000000 ? 1.04 : 1)
         };
       }).filter(entry => entry.dice
         && (!entry.dice.weather || entry.dice.weather === weather)
@@ -193,7 +193,7 @@ export function createDiceSystem(deps) {
     const currentLuck = Math.max(0, Number(luck()) || 0);
     const effective = Math.max(0, Math.min(500, currentLuck + (tenthRoll ? 100 : 0)));
     const weights = pool.map(dice => {
-      const rollDen = weather === 'hell' && dice.den >= 700000 ? dice.den * 0.95 : dice.den;
+      const rollDen = weather === 'hell' && dice.den >= 1000000 && dice.den <= 100000000 ? dice.den / 1.04 : dice.den;
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
       return applyGlitchWeight(dice, (1 / Math.max(2, rollDen)) * factor, isGlitchWeather);
