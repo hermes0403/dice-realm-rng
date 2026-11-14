@@ -1,7 +1,7 @@
 ---
 id: T-0093
 title: 將天氣手套改為天氣轉換器並新增道具工坊
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -48,6 +48,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 20:40 [叉子] 依棒子在對話中「那用吧」的明確指示建立新需求；先保持 open，待開單 PR 合併後重新檢查五單容量與 Communicate 優先閘門，再依規範接手。
+- 2026-11-14 20:42 [叉子] 開單 PR #152 已合併至 main。依最新 origin/main Board 重新檢查：owner_side 的 in_progress 任務為 T-0085、T-0092，共 2/5；未發現 to 指派 owner_side 且狀態 open／in_progress 的有效 Communicate 任務，也未發現 from 屬 owner_side 且狀態 returned 的委派任務。兩道閘門均未阻擋，狀態由 open → in_progress，開始本任務工作。
 
 ## 完工回報
 
