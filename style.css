@@ -1857,3 +1857,83 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
 @media (orientation: landscape) and (max-width: 1024px) and (min-height: 561px) and (max-height: 620px) {
   .shell { --landscape-scale: .84; }
 }
+
+
+/* T-0067: restore subtle statistic-card surfaces and visible frames. */
+.stats > .stat,
+.stat {
+  background: linear-gradient(145deg, #142f23, #11291f) !important;
+  border: 1px solid #35664c !important;
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 #c5ffdc12, 0 2px 9px #020b0750 !important;
+}
+
+
+/* T-0088: restore section-specific colors for explanatory panels. */
+#page-roll > #realmHero {
+  border-color: #3f9368 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #55e6a133, transparent 48%),
+    linear-gradient(135deg, #102e22f5, #12382af0 58%, #0c2119f5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #c5ffdc12 !important;
+}
+#page-roll > #realmHero:after { background: #55e6a12a !important; }
+#page-roll > #realmHero .eyebrow { color: #a8f2c1 !important; }
+
+#page-codex > .hero {
+  border-color: #4b9fa0 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #4adbd02c, transparent 50%),
+    linear-gradient(135deg, #102c31f5, #12372ff0 58%, #0d241df5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #b7fff21a !important;
+}
+#page-codex > .hero:after { background: #58e5df2a !important; }
+#page-codex > .hero .eyebrow { color: #a4f0e8 !important; }
+
+#page-pets > .hero {
+  border-color: #829b5d !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #b5d8792b, transparent 50%),
+    linear-gradient(135deg, #263321f5, #1b3024f0 58%, #10251cf5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #e4ffc21a !important;
+}
+#page-pets > .hero:after { background: #b5d87926 !important; }
+#page-pets > .hero .eyebrow { color: #d5eca3 !important; }
+
+#page-event #eventLockedPanel {
+  border-color: #a98249 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #f2bd622b, transparent 50%),
+    linear-gradient(135deg, #35291cf5, #2a241cf0 58%, #17251df5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #ffe1a51a !important;
+}
+#page-event #eventLockedPanel:after { background: #f2bd6226 !important; }
+#page-event #eventLockedPanel .eyebrow { color: #ffda94 !important; }
+
+#workshop-potions-panel .hero {
+  border-color: #8d6bb4 !important;
+  background:
+    radial-gradient(ellipse at 12% 0%, #bb82f32b, transparent 50%),
+    linear-gradient(135deg, #29213cf5, #20243af0 58%, #10251df5) !important;
+  box-shadow: 0 14px 38px #020b0780, inset 0 1px #e7d1ff1a !important;
+}
+#workshop-potions-panel .hero:after { background: #bb82f326 !important; }
+#workshop-potions-panel .hero .eyebrow { color: #dfc1ff !important; }
+
+#page-weather-summon .weather-summon-card {
+  border-color: #8065a8 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, #a76ee72b, transparent 52%),
+    linear-gradient(135deg, #251c37f5, #1a2437f0 58%, #10251df5) !important;
+  box-shadow: inset 0 0 32px #b78aff12, 0 15px 45px #0004 !important;
+}
+#page-weather-summon .weather-summon-card:after { background: #b78aff20 !important; }
+#page-weather-summon .weather-summon-card .eyebrow { color: #d9b8ff !important; }
+
+/* The roll icon tile stays in the emerald family without becoming a solid green block. */
+#page-roll > .rollbox > .dice {
+  color: #f4fff7 !important;
+  background: radial-gradient(ellipse at 30% 18%, #34483e, #1b2b24 72%) !important;
+  border-color: #789987 !important;
+  box-shadow: 0 0 24px #9bcdb21a, inset 0 0 18px #ffffff0a !important;
+}

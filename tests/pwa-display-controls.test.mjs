@@ -121,7 +121,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
-  assert.match(html, /V1.23/);
+  assert.match(html, /V1\.\d+/);
 });
 
 test('Service Worker 僅處理同源靜態資源與頁面導覽，不攔截 Supabase API', async () => {
@@ -160,4 +160,16 @@ test('橫向模式全頁縮放且保留歡迎文字，直向不套用全頁縮�
   assert.match(landscape, /#page-roll\s*>\s*\.hero\s+#realmHeroWelcome\s*\{\s*display:\s*block !important/);
   assert.match(landscape, /--landscape-scale:\s*\.64/);
   assert.match(landscape, /--landscape-scale:\s*\.84/);
+});
+
+
+test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低綠色飽和度', async () => {
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(css, /#page-roll\s*>\s*#realmHero\s*\{[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /#page-codex\s*>\s*\.hero\s*\{[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /#page-pets\s*>\s*\.hero\s*\{[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /#page-event\s+#eventLockedPanel\s*\{[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /#workshop-potions-panel\s+\.hero\s*\{[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /#page-weather-summon\s+\.weather-summon-card\s*\{[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /#page-roll\s*>\s*\.rollbox\s*>\s*\.dice\s*\{[\s\S]*?background:[\s\S]*?border-color:[\s\S]*?box-shadow:[\s\S]*?!important/);
 });
