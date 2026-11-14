@@ -1,7 +1,7 @@
 ---
 id: T-0088
 title: 修復翡翠綠主題說明面板配色與主頁骰子色調
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-14
 updated: 2026-11-14
 depends_on: [T-0076]
 branch: task/T-0088-restore-panel-colors-dice-accent
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 任務
@@ -58,3 +58,6 @@ done_at:
 - 測試：PWA display、Admin navigation、Dice roll save、Cloud save rollback、Coin boost、Pet backpack/auto-sell、Pet removal/admin inventory、Heaven Potion odds 全數成功。
 - GitHub Pages workflow #43549007509 成功部署。
 - 未完成：未取得棒子手機／桌面實際畫面驗收，因此狀態維持 `review`，不標記 `done`。
+
+
+- 2026-11-14 12:11 [代記:棒子/叉子] 棒子明確驗收通過，任務由 review 結案並歸檔。｜來源：本對話棒子於 2026-11-14 12:11 明確表示「以上這5個我驗收成功了喔」。｜證據：程式交付 PR #107 已合併（merge commit 1adff7f1051bd07993a4c76028057735d0c4bf60）；Pages workflow #43549007509 成功部署；面板色彩層次及主頁骰子底框已由棒子確認。
