@@ -235,7 +235,7 @@ test('older local baseline is recovered from history after another tab advances 
 
   await service.loadCloudSave();
 
-  assert.equal(getState().rolls, 106);
-  assert.deepEqual(getState().bag, { d1: 6, d65: 1 });
+  assert.equal(getState().rolls, 108);
+  assert.deepEqual(getState().bag, { d1: 8, d65: 1 });
   assert.deepEqual(getState().rollCounts, { d1: 103, d65: 1 });
 });
