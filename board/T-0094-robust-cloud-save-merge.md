@@ -1,7 +1,7 @@
 ---
 id: T-0094
 title: 強化多分頁／多裝置存檔衝突合併與防止玩家進度倒退
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -50,3 +50,4 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 [叉子] 開單前依最新 main Board 核對：owner_side 有效 in_progress 任務為 T-0085、T-0092、T-0093，共 3/5；T-0086、T-0089 為 review，不計入容量。最新 main Board 未發現 communicate task 檔案，Communicate 優先閘門未觸發。依棒子本次明確要求建立 P0 後續修補任務；本階段只開單，尚未開始實作。
+- 2026-11-14 [叉子] 開單 PR #156 已合併至 main（merge commit `f3bb4647a0cc4cbd23e694ed0fb282d49a230fe2`）。任務分支原先僅落後 main 1 個 merge commit，已以非強制 fast-forward 更新至該 main HEAD。開工前重新核對容量仍為 3/5；未發現 communicate task，兩道閘門均未阻擋，任務轉為 in_progress。
