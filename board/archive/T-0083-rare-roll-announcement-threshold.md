@@ -1,7 +1,7 @@
 ---
 id: T-0083
 title: 將全服稀有擲骰公告門檻提高至 1/4096
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-13
-updated: 2026-11-13
+updated: 2026-11-14
 depends_on: []
 branch: task/T-0083-rare-roll-announcement-threshold-4096
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 任務
@@ -50,3 +50,6 @@ done_at:
 
 - 2026-11-13 09:25 [叉子] 已修改 `systems/global-announcements.js`：發送端與接收端統一採分母 >= 4096；低於門檻不顯示、不 Broadcast、不寫入 `roll_announcements`；公告內容包含玩家名稱、骰子名稱及稀有度。未新增輪詢或 PostgREST 查詢。`index.html` 版本由 V1.10 升至 V1.11，更新 script.js 快取版本。
 - 新增 `tests/global-announcements-threshold.test.js`，針對 4095 不觸發、4096 觸發及接收端門檻進行測試；隔離執行 `node --test tests/global-announcements-threshold.test.js`：3/3 通過；`node --check` 模組與測試檔通過。PR #75 建立時觸發的既有 GitHub Actions 5 個工作流程均成功，但它們沒有執行本次新增測試。完整 `node --test tests/*.test.js` 尚未執行，故任務維持 in_progress，尚未合併及部署。
+
+
+- 2026-11-14 [叉子] 棒子於對話明確表示「T-0083 驗收成功也好了」，依 Board §8 代記正式驗收；done_by: 棒子。
