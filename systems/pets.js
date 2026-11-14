@@ -183,41 +183,64 @@ export function createPetSystem({
     return petSkillReward;
   }
 
-  function applyPetLoginSkill() {
-    if (!equippedPetHas('s2')) return 0;
-    const S = getState();
-    const result = resolveSecretLoginReward(S.petSkillLogin || {});
-    if (!result.claimed) return 0;
-    S.petSkillLogin = result.state;
-    S.coins = (Number(S.coins) || 0) + result.reward;
-    S.quest = S.quest || {};
-    S.quest.coinsEarned = (Number(S.quest.coinsEarned) || 0) + result.reward;
-    save();
-    toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
-    return result.reward;
+  async function applyPetLoginSkill() {
+    const userId = getCurrentUser()?.id;
+    if (!userId) return 0;
+    const locks = globalThis.navigator?.locks;
+    if (!locks?.request) {
+      toast('此瀏覽器不支援多分頁登入獎勵防重複，混沌祝福暫停發放');
+      return 0;
+    }
+    return locks.request('diceRealmSecretPetS2Login:' + userId, { ifAvailable: true }, async lock => {
+      if (!lock || !equippedPetHas('s2')) return 0;
+      const S = getState();
+      const result = resolveSecretLoginReward(S.petSkillLogin || {});
+      if (!result.claimed) return 0;
+      S.petSkillLogin = result.state;
+      S.coins = (Number(S.coins) || 0) + result.reward;
+      S.quest = S.quest || {};
+      S.quest.coinsEarned = (Number(S.quest.coinsEarned) || 0) + result.reward;
+      save();
+      toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
+      return result.reward;
+    });
   }
 
-  function usePetSkillS4(uid) {
+  async function usePetSkillS4(uid) {
     const S = getState();
     const pet = (S.pets || []).find(item => item.uid === uid && item.id === 's4');
     if (!pet || !equippedPetHas('s4')) return false;
     const now = Date.now();
     const userId = getCurrentUser()?.id || 'guest';
     const markerKey = 'diceRealmSecretPetS4:' + userId;
-    let localLastUse = 0;
-    try { localLastUse = Number(localStorageRef?.getItem(markerKey)) || 0; } catch {}
-    const result = resolveSecretSpeedSkill(S.petSkillSpeed || {}, now, localLastUse);
-    if (!result.activated) {
-      toast('永寂恩賜冷卻中，約 ' + Math.ceil((result.cooldownUntil - now) / 60000) + ' 分鐘後可再次使用');
+    const locks = globalThis.navigator?.locks;
+    if (!locks?.request) {
+      toast('此瀏覽器不支援多分頁技能防重複，永寂恩賜暫停使用');
       return false;
     }
-    S.petSkillSpeed = result.state;
-    try { localStorageRef?.setItem(markerKey, String(now)); } catch {}
-    save();
-    render();
-    renderPetsPage();
-    toast('永寂恩賜已啟動：速度 +100%，持續 10 分鐘');
-    return true;
+    return locks.request(markerKey, { ifAvailable: true }, async lock => {
+      if (!lock) {
+        toast('永寂恩賜正在其他分頁處理');
+        return false;
+      }
+      const current = getState();
+      const currentPet = (current.pets || []).find(item => item.uid === uid && item.id === 's4');
+      if (!currentPet || !equippedPetHas('s4')) return false;
+      let localLastUse = 0;
+      try { localLastUse = Number(localStorageRef?.getItem(markerKey)) || 0; } catch {}
+      const result = resolveSecretSpeedSkill(current.petSkillSpeed || {}, now, localLastUse);
+      if (!result.activated) {
+        toast('永寂恩賜冷卻中，約 ' + Math.ceil((result.cooldownUntil - now) / 60000) + ' 分鐘後可再次使用');
+        return false;
+      }
+      current.petSkillSpeed = result.state;
+      try { localStorageRef?.setItem(markerKey, String(now)); } catch {}
+      save();
+      render();
+      renderPetsPage();
+      toast('永寂恩賜已啟動：速度 +100%，持續 10 分鐘');
+      return true;
+    });
   }
 
   function populateAdminPetSelects() {
