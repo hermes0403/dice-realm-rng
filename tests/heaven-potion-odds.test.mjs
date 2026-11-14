@@ -103,3 +103,47 @@ test('故障天氣將四顆故障骰子權重乘以 10，且不重複套用', ()
     assert.equal(entry.weight, applyGlitchWeight(entry.dice, expectedBase, true));
   }
 });
+
+
+test('天堂 I 創世骰子與天堂 II 終焉骰子的四組基礎機率均錨定 1.5%', () => {
+  const cases = [
+    { heaven2: false, high: false, target: 'd21' },
+    { heaven2: false, high: true, target: 'd21' },
+    { heaven2: true, high: false, target: 'd23' },
+    { heaven2: true, high: true, target: 'd23' }
+  ];
+  for (const item of cases) {
+    const entries = buildHeavenBaseEntries(byId, item.heaven2, item.high);
+    const target = entries.find(entry => entry.dice.id === item.target);
+    assert.ok(target, `missing target ${item.target}`);
+    assert.ok(Math.abs(target.weight - 1.5) < 1e-9, `unexpected ${item.target} weight: ${target.weight}`);
+    assert.ok(Math.abs(entries.reduce((sum, entry) => sum + entry.weight, 0) - 100) < 1e-10);
+  }
+});
+
+test('四組基礎表的中間骰子均依既定稀有度順序嚴格遞減', () => {
+  for (const [heaven2, high] of [[false, false], [false, true], [true, false], [true, true]]) {
+    const fixedId = heaven2 ? (high ? 'd15' : 'd14') : (high ? 'd13' : 'd12');
+    const middle = buildHeavenBaseEntries(byId, heaven2, high)
+      .filter(entry => HEAVEN_MIDDLE_IDS.includes(entry.dice.id) && entry.dice.id !== fixedId);
+    for (let index = 1; index < middle.length; index++) {
+      assert.ok(middle[index].weight < middle[index - 1].weight);
+    }
+  }
+});
+
+test('地獄與故障天氣仍加權提升符合條件的目標骰子', () => {
+  for (const [heaven2, high, targetId] of [
+    [false, false, 'd21'], [false, true, 'd21'],
+    [true, false, 'd23'], [true, true, 'd23']
+  ]) {
+    const entries = buildHeavenBaseEntries(byId, heaven2, high);
+    const baseTarget = entries.find(entry => entry.dice.id === targetId).weight;
+    for (const weatherTypes of [['hell'], ['glitch'], ['hell', 'glitch']]) {
+      const boosted = applyHeavenWeatherWeights(entries, weatherTypes, heaven2, true, weatherTypes.includes('glitch'));
+      const total = boosted.reduce((sum, entry) => sum + entry.weight, 0);
+      const actualPercent = boosted.find(entry => entry.dice.id === targetId).weight / total * 100;
+      assert.ok(actualPercent > baseTarget, `${targetId} did not gain odds in ${weatherTypes.join('+')}`);
+    }
+  }
+});
