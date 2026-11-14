@@ -1,7 +1,7 @@
 ---
 id: T-0090
 title: 調整四隻秘密寵物技能
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -45,13 +45,34 @@ done_at:
 
 - 2026-11-14 13:01 [叉子] 依棒子本次明確需求建立任務，先保持 open。開單前盤點 owner_side 有效 in_progress／review 任務：T-0083 in_progress、T-0085 in_progress、T-0086 review、T-0089 review，共 4/5；未發現有效 Communicate 委派任務。建立時未開始實作，待開工前再次檢查兩道閘門。
 - 2026-11-14 13:02 [叉子] 開工准入複查：owner_side 有效 in_progress／review 仍為 4/5（T-0083、T-0085、T-0086、T-0089）；Board 當前任務清單未發現有效 Communicate 委派單。兩道閘門均未阻擋，任務由 open 轉為 in_progress，開始實作。
+- 2026-11-14 13:26 [叉子] 四項技能實作完成，相關 Node syntax／回歸測試通過；PR #120 交付，任務轉 review 等待棒子驗收。
 
 ## 完工回報
 
 ### 改了什麼
 
+- 更新 data/pets.js 的 s2、s3、s4、s5 技能說明。
+- 新增 systems/secret-pet-skills.js：台灣時區登入連續天數獎勵、s3/s5 每日上限計算、s4 技能持續與冷卻狀態。
+- systems/pets.js：登入成功且雲端存檔載入完成後，若裝備 s2 自動領取登入獎勵；s3 每次合資格擲骰固定 1M$ 並獨立 10% 額外 1M$；s5 每抽 1% 額外 500K$；s4 寵物卡新增主動使用按鈕。
+- s2、s4 使用 Web Locks 防止同瀏覽器多分頁重複觸發；不支援 Web Locks 的瀏覽器會暫停該技能，避免重複領取／使用。
+- core/game-state.js、services/cloud-save.js 增加登入連續紀錄與 s4 冷卻／生效時間存檔欄位。
+- script.js 將 s4 的 +100% 納入速度計算；services/auth.js 在雲端存檔成功載入後執行 s2 登入技能。
+- 版本升至 V1.27；index.html、sw.js 與 PWA 快取同步。
+- 新增 tests/secret-pet-skills.test.mjs，更新 PWA 快取版本測試。
+
 ### 怎麼驗證的
+
+- GitHub Actions Dice roll save regression run #43561113811：成功，包含 Node syntax checks 及 secret-pet-skills 測試。
+- PWA display regression run #43561113777：成功。
+- Cloud save rollback #43561113851、pet fusion #43561113787、pet backpack #43561113873、pet removal #43561113866、coin boost #43561113816、heaven potion #43561113774、achievement persistence #43561113831、admin navigation #43561113836：全部成功。
+- 實作 PR：[ #120](https://github.com/hermes0403/dice-realm-rng/pull/120)。
 
 ### 沒做／做不到的
 
+- 尚未進行登入、領獎、擲骰及 s4 按鈕的實際瀏覽器手動冒煙測試，等待棒子線上驗收。
+- Web Locks 僅協調同瀏覽器來源的分頁；跨不同裝置的同時登入尚未建立伺服器端原子領取帳本。此功能沿用現有客戶端存檔／雲端備份機制。
+- 不支援 Web Locks 的瀏覽器會暫停 s2 登入獎勵及 s4 技能，避免多分頁競態。
+
 ### 衍生任務／影響任務
+
+- 其他兩隻秘密寵物、神話寵物技能及其他遊戲系統未修改。
