@@ -66,6 +66,8 @@ export function createCloudSaveService(dependencies) {
       petDiscovered: S.petDiscovered || {},
       petSkillLuckCharges: Number(S.petSkillLuckCharges) || 0,
       petSkillDaily: S.petSkillDaily || {},
+      petSkillLogin: S.petSkillLogin || { lastDate: null, streak: 0, reward: 0 },
+      petSkillSpeed: S.petSkillSpeed || { activatedAt: 0, expiresAt: 0, cooldownUntil: 0 },
       name: S.name, joined: S.joined, rolls: S.rolls, bag: S.bag,
       lockedDice: Array.isArray(S.lockedDice) ? S.lockedDice.filter(key => typeof key === 'string') : [],
       bagCapacity: S.bagCapacity, first: S.first, rollCounts: S.rollCounts || {},
