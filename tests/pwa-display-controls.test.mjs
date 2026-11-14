@@ -175,7 +175,7 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('秘密寵物技能與故障天氣模組納入 V1.32 PWA 快取殼', async () => {
+test('文字對比與 V1.32 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1\.32/);
@@ -183,4 +183,14 @@ test('秘密寵物技能與故障天氣模組納入 V1.32 PWA 快取殼', async 
   assert.match(worker, /dice-realm-shell-v1\.32/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
+});
+
+test('深色背景的次要文字與導覽不再使用深藍前景', async () => {
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const finalRules = css.slice(css.lastIndexOf('T-0075 final contrast pass:'));
+  assert.match(finalRules, /--text:\s*#edf0ff/i);
+  assert.match(finalRules, /--muted:\s*#c5d5e6/i);
+  assert.match(finalRules, /color:\s*#c5d5e6\s*!important/i);
+  assert.match(finalRules, /\.nav button:not\(\.active\)[\s\S]*?color:\s*#e8edf9\s*!important/i);
+  assert.doesNotMatch(finalRules, /color:\s*#(?:0b1433|17203f|303d69)\b/i);
 });
