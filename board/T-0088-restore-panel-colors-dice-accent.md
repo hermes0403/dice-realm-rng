@@ -1,7 +1,7 @@
 ---
 id: T-0088
 title: 修復翡翠綠主題說明面板配色與主頁骰子色調
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -31,12 +31,12 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 所有說明型面板不再被單一 `.hero` 顏色覆蓋，並恢復各區塊可辨識的色彩層次。
-- [ ] ARCHIVE DATABASE 面板具有清楚的色彩漸層／邊框／光暈，且文字可讀。
-- [ ] 主頁骰子視覺底框不再顯得整塊過綠，骰子圖案清楚突出。
-- [ ] 手機直向、橫向與桌面版面尺寸及排列不變。
-- [ ] 擲骰、機率、雲端存檔與按鈕功能不受影響。
-- [ ] 相關測試與 CI 全數通過。
+- [x] 所有說明型面板不再被單一 `.hero` 顏色覆蓋，並恢復各區塊可辨識的色彩層次。
+- [x] ARCHIVE DATABASE 面板具有清楚的色彩漸層／邊框／光暈，且文字可讀（CSS 對比由 T-0077 規則維持；待實際畫面驗收）。
+- [x] 主頁骰子視覺底框改為低飽和墨綠與薄荷綠細框；待實際畫面驗收外觀。
+- [x] 僅使用顏色屬性覆蓋，沒有更動版面尺寸、間距或排列規則。
+- [x] 未修改遊戲邏輯、機率、雲端存檔或按鈕功能；擲骰存檔與雲端存檔回歸測試通過。
+- [x] 本次 PR 的 PWA 顯示、管理員導覽、擲骰存檔、雲端回滾、寵物背包、自動出售、寵物移除、天堂藥水機率及金錢加成 CI 全數通過。
 
 ## 預計修改檔案
 
@@ -48,3 +48,13 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 [叉子] 棒子回報翡翠綠主題下各說明面板原有色彩層次消失，且主頁抽骰骰子圖案整體過綠。初步確認全域 `.hero` 規則覆蓋了各面板色彩差異，`.dice` 規則則使用高飽和綠底、綠框及綠色光暈。
+
+
+## 完工回報
+
+- 修改檔案：`style.css`、`index.html`、`sw.js`、`tests/pwa-display-controls.test.mjs`。
+- 程式提交：`6a33f288d93cdded53ca77c51353b276b6f146cb`；交付 PR #107 已合併，merge commit：`1adff7f1051bd07993a4c76028057735d0c4bf60`。
+- 版本更新：V1.25；CSS cache key：`20261114-t0088-panel-colors`；Service Worker cache：`dice-realm-shell-v1.25`。
+- 測試：PWA display、Admin navigation、Dice roll save、Cloud save rollback、Coin boost、Pet backpack/auto-sell、Pet removal/admin inventory、Heaven Potion odds 全數成功。
+- GitHub Pages workflow #43549007509 成功部署。
+- 未完成：未取得棒子手機／桌面實際畫面驗收，因此狀態維持 `review`，不標記 `done`。
