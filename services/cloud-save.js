@@ -66,7 +66,7 @@ export function createCloudSaveService(dependencies) {
   }
 
   function persistLocalSnapshot(state, userId = getCurrentUser()?.id) {
-    const snapshot = { ...state, _cloudBaseVersion: cloudSaveVersion || null };
+    const snapshot = { ...state, _cloudBaseVersion: userId ? (cloudSaveVersion || null) : null };
     try {
       const scopedKey = userSaveKey(userId);
       if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(snapshot));
@@ -404,11 +404,13 @@ export function createCloudSaveService(dependencies) {
         if (syncResult?.conflict) {
           document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在合併存檔差異…';
           const conflictBasePayload = clonePayload(lastSyncedPayload);
-          const conflictLocalPayload = clonePayload(payload);
+          const conflictBaseVersion = cloudSaveVersion;
+          const conflictLocalSnapshot = clonePayload(getState());
           await loadCloudSave({
             syncAfterLoad: false,
             conflictBasePayload,
-            conflictLocalPayload
+            conflictBaseVersion,
+            conflictLocalSnapshot
           });
           cloudSyncPending = true;
           toast('已重新比對其他分頁／裝置的存檔差異，正在保留可安全合併的進度並重新同步。');
@@ -513,7 +515,8 @@ export function createCloudSaveService(dependencies) {
   async function loadCloudSave({
     syncAfterLoad = true,
     conflictBasePayload = null,
-    conflictLocalPayload = null
+    conflictBaseVersion = null,
+    conflictLocalSnapshot = null
   } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
@@ -552,14 +555,20 @@ export function createCloudSaveService(dependencies) {
         try { latestLocalSnapshot = JSON.parse(localSaveAfterCloud || 'null'); }
         catch { latestLocalSnapshot = null; }
       }
-      if (!latestLocalSnapshot?.bag && conflictLocalPayload?.bag) {
-        latestLocalSnapshot = conflictLocalPayload;
+      let localSnapshotForMerge = latestLocalSnapshot;
+      if (conflictBasePayload && conflictLocalSnapshot?.bag) {
+        const localVersionMatches = latestLocalSnapshot?._cloudBaseVersion === conflictBaseVersion;
+        if (!localVersionMatches) {
+          localSnapshotForMerge = { ...conflictLocalSnapshot, _cloudBaseVersion: conflictBaseVersion };
+        }
+      } else if (!localSnapshotForMerge?.bag && conflictLocalSnapshot?.bag) {
+        localSnapshotForMerge = { ...conflictLocalSnapshot, _cloudBaseVersion: conflictBaseVersion };
       }
 
       let S;
       if (data?.save_data?.bag) {
         const cloudPayload = data.save_data;
-        const localSnapshotVersion = latestLocalSnapshot?._cloudBaseVersion || null;
+        const localSnapshotVersion = localSnapshotForMerge?._cloudBaseVersion || null;
         const storedBase = localSnapshotVersion
           ? readCloudBase(user.id, localSnapshotVersion)
           : null;
@@ -567,17 +576,17 @@ export function createCloudSaveService(dependencies) {
         let mergedPayload = cloudPayload;
         let usedLegacyFallback = false;
 
-        if (latestLocalSnapshot?.bag && basePayload) {
-          mergedPayload = mergeCloudSavePayload(basePayload, latestLocalSnapshot, cloudPayload);
-        } else if (latestLocalSnapshot?.bag && !basePayload) {
+        if (localSnapshotForMerge?.bag && basePayload) {
+          mergedPayload = mergeCloudSavePayload(basePayload, localSnapshotForMerge, cloudPayload);
+        } else if (localSnapshotForMerge?.bag && !basePayload) {
           // Legacy local saves have no trustworthy common version. Keep one
           // recovery copy, but never let an unversioned snapshot replace cloud.
-          preserveLegacyLocalSnapshot(user.id, latestLocalSnapshot, data.updated_at);
+          preserveLegacyLocalSnapshot(user.id, localSnapshotForMerge, data.updated_at);
           usedLegacyFallback = true;
         }
 
         S = migrateCurrency(normalizeGloves({ ...fresh(), ...mergedPayload }));
-        S.petIncomePending = Math.max(0, Number(latestLocalSnapshot?.petIncomePending) || 0);
+        S.petIncomePending = Math.max(0, Number(localSnapshotForMerge?.petIncomePending) || 0);
         if (S.petIncomePending > 0) S.coins = (Number(S.coins) || 0) + S.petIncomePending;
 
         // Pet instances are server-authoritative; never resurrect sold pets.
@@ -589,11 +598,11 @@ export function createCloudSaveService(dependencies) {
           : [];
         S.petDiscovered = {
           ...localPetDiscoveredBeforeCloud,
-          ...(latestLocalSnapshot?.petDiscovered || {}),
+          ...(localSnapshotForMerge?.petDiscovered || {}),
           ...(cloudPayload.petDiscovered || {})
         };
         S.petAutoSellRarities = {
-          ...(latestLocalSnapshot?.petAutoSellRarities || {}),
+          ...(localSnapshotForMerge?.petAutoSellRarities || {}),
           ...(cloudPayload.petAutoSellRarities || {})
         };
         S.autoDeleteDice = Array.isArray(S.autoDeleteDice)
