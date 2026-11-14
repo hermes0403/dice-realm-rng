@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveSecretLoginReward, resolveSecretRollRewards } from '../systems/secret-pet-skills.js';
+import { resolveSecretLoginReward, resolveSecretRollRewards, resolveSecretSpeedSkill } from '../systems/secret-pet-skills.js';
 
 test('混沌祝福：首日10M、連續登入每日增加3M、第30天封頂100M', () => {
   const day1 = resolveSecretLoginReward({}, '2026-11-01');
@@ -49,4 +49,16 @@ test('虛無回饋：1%獲得500K，且每日100M上限不超額', () => {
     den: 2, hasS5: true, daily: { s3: 0, s5: 0 }, random: () => 0.02
   });
   assert.equal(miss.reward, 0);
+});
+
+test('永寂恩賜：技能持續10分鐘、冷卻12小時', () => {
+  const now = 1_800_000_000_000;
+  const activated = resolveSecretSpeedSkill({}, now, 0);
+  assert.equal(activated.activated, true);
+  assert.equal(activated.state.expiresAt - now, 10 * 60 * 1000);
+  assert.equal(activated.state.cooldownUntil - now, 12 * 60 * 60 * 1000);
+  const cooling = resolveSecretSpeedSkill(activated.state, now + 11 * 60 * 60 * 1000, 0);
+  assert.equal(cooling.activated, false);
+  const ready = resolveSecretSpeedSkill(activated.state, now + 12 * 60 * 60 * 1000, 0);
+  assert.equal(ready.activated, true);
 });
