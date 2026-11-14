@@ -175,14 +175,43 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('T-0092 V1.36 PWA 快取殼同步更新', async () => {
+test('T-0093 V1.37 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.36/);
-  assert.match(html, /script\.js\?v=20261114-t0092-current-collection-progress/);
-  assert.match(worker, /dice-realm-shell-v1\.36/);
+  assert.match(html, /V1\.37/);
+  assert.match(html, /script\.js\?v=20261114-t0093-weather-converter-item-workshop/);
+  assert.match(worker, /dice-realm-shell-v1\.37/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
+});
+
+test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小時能力', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const dice = await readFile(new URL('../data/dice.js', import.meta.url), 'utf8');
+  const gloves = await readFile(new URL('../ui/gloves.js', import.meta.url), 'utf8');
+  const navigation = await readFile(new URL('../ui/navigation.js', import.meta.url), 'utf8');
+  const weather = await readFile(new URL('../systems/weather.js', import.meta.url), 'utf8');
+  const gameState = await readFile(new URL('../core/game-state.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
+
+  assert.match(html, /data-workshop-category="items">道具工坊/);
+  const glovePanel = html.slice(html.indexOf('id="workshop-gloves-panel"'), html.indexOf('id="workshop-potions-panel"'));
+  const itemPanelStart = html.indexOf('id="workshop-items-panel"');
+  const itemPanel = html.slice(itemPanelStart, html.indexOf('</section>', itemPanelStart));
+  assert.doesNotMatch(glovePanel, /weatherConvertPanel/);
+  assert.match(itemPanel, /id="itemWorkshopList"/);
+  assert.match(itemPanel, /id="weatherConvertPanel"/);
+
+  assert.match(dice, /id:'g7',name:'天氣轉換器',icon:'🌦️',luck:0,speed:0/);
+  assert.match(dice, /recipe:\[\['d39',1\],\['d42',1\],\['d47',1\],\['d51',1\],\['d55',1\]\]/);
+  assert.match(gloves, /filter\(item => item\.id !== 'g0' && item\.id !== 'g7'\)/);
+  assert.match(gloves, /60 \* 60 \* 1000/);
+  assert.match(gloves, /state\.gloves\?\.g7/);
+  assert.match(navigation, /workshop-items-panel/);
+  assert.match(weather, /需要啟用並持有天氣轉換器/);
+  assert.match(gameState, /G\.some\(g=>g\.id===key\)\?key/);
+  assert.match(gameState, /x\.equipped=\(equipped&&normalized\[equipped\]\)\?equipped:'g0'/);
+  assert.match(script, /function currentGlove\(\)\{return S\.equipped==='g7'\?glove\('g0'\):glove\(S\.equipped\)\}/);
 });
 
 test('深色背景的次要文字與導覽不再使用深藍前景', async () => {
