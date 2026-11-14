@@ -27,8 +27,8 @@ export function createGloveUI(deps) {
     const converter = G.find(item => item.id === 'g7');
     const itemWorkshopList = documentRef.getElementById('itemWorkshopList');
     if (itemWorkshopList && converter) {
-      const owned = Number(state.gloves?.g7) > 0;
-      const enabled = state.equipped === 'g7';
+      const owned = Number(state.items?.g7) > 0;
+      const enabled = state.equippedItem === 'g7';
       const materials = converter.recipe.map(([diceId, count]) => {
         const dice = byId(diceId);
         const have = Number(state.bag[diceId]) || 0;
@@ -43,15 +43,15 @@ export function createGloveUI(deps) {
       itemWorkshopList.innerHTML = '<div class="recipe"><div style="flex:1;min-width:0"><h3>' +
         converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') +
         '</h3><p>' + converter.desc + '</p><p>每小時可使用一次；不提供運氣或擲骰速度加成。</p>' +
-        materials + '</div><button ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button></div>';
+        (owned ? '' : materials) + '</div><button type="button" ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button></div>';
     }
 
     const convertPanel = documentRef.getElementById('weatherConvertPanel');
     const convertBtn = documentRef.getElementById('weatherConvertBtn');
     const convertCooldown = documentRef.getElementById('weatherConvertCooldown');
     if (convertPanel) {
-      const owned = Number(state.gloves?.g7) > 0;
-      const enabled = state.equipped === 'g7';
+      const owned = Number(state.items?.g7) > 0;
+      const enabled = state.equippedItem === 'g7';
       convertPanel.hidden = !owned;
       if (owned && convertBtn && convertCooldown) {
         const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
@@ -95,6 +95,13 @@ export function createGloveUI(deps) {
     if (!user || !supabaseClient) {
       openAuth();
       toast('請先登入雲端帳號');
+      return;
+    }
+    if (id === 'g7' && state.items?.g7) {
+      state.equippedItem = 'g7';
+      save();
+      render();
+      toast('已啟用天氣轉換器');
       return;
     }
     if (state.gloves[id]) {
@@ -208,14 +215,19 @@ export function createGloveUI(deps) {
       state.bag[diceId] = (Number(state.bag[diceId]) || 0) - count;
       if (state.bag[diceId] <= 0) delete state.bag[diceId];
     });
-    state.gloves[id] = 1;
-    state.equipped = id;
+    if (id === 'g7') {
+      state.items = state.items || {};
+      state.items.g7 = 1;
+    } else {
+      state.gloves[id] = 1;
+      state.equipped = id;
+    }
     state.quest.craft++;
     checkAchievements();
     save();
     if (getCurrentUser()) logCraft('glove', id, item.name);
     render();
-    toast(id === 'g7' ? '合成成功並啟用：' + item.name : '合成成功並裝備：' + item.name);
+    toast(id === 'g7' ? '合成成功！天氣轉換器已放入道具欄，請按「啟用」' : '合成成功並裝備：' + item.name);
   }
   let gloveUISetup = false;
   function setupGloveUI() {
