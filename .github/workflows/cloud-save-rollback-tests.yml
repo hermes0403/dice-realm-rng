@@ -5,9 +5,11 @@ on:
     branches: [main, task/T-0086-cloud-save-rollback-guard]
     paths:
       - 'services/cloud-save.js'
+      - 'services/presence.js'
       - 'services/account-actions.js'
       - 'script.js'
       - 'tests/**'
+      - 'tests/presence-profile-projection.test.js'
       - 'docs/game-save-delta-sync-locked-dice.sql'
       - '.github/workflows/cloud-save-rollback-tests.yml'
   pull_request:
@@ -32,9 +34,9 @@ jobs:
       - name: Check patch whitespace
         run: git diff --check
       - name: Check JavaScript syntax
-        run: node --input-type=module --check < services/cloud-save.js && node --input-type=module --check < script.js
+        run: node --input-type=module --check < services/cloud-save.js && node --input-type=module --check < services/presence.js && node --input-type=module --check < script.js
       - name: Run focused save and logout regression tests
-        run: node --test tests/local-save-cloud-conflict.test.js tests/cloud-save-pet-authority.test.js tests/account-logout-cloud-flush.test.js
+        run: node --test tests/local-save-cloud-conflict.test.js tests/cloud-save-pet-authority.test.js tests/account-logout-cloud-flush.test.js tests/presence-profile-projection.test.js
       - name: Run full Node regression suite (known unrelated baseline failures are non-blocking)
         run: node --test tests/*.test.js
         continue-on-error: true
