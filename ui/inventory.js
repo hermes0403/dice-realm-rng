@@ -2,13 +2,11 @@ import { lockedDiceIndexes, unlockedDiceCount, consumeUnlockedDice } from '../sy
 
 /** Keep Halloween dice out of auto-sell preferences, including stale saved IDs. */
 export function filterAutoSellDice(dice, selectedIds = []) {
-  const halloweenIds = new Set(['d33', 'd34', 'd35', 'd36']);
-  const safeIds = (Array.isArray(selectedIds) ? selectedIds : []).filter(id => !halloweenIds.has(id));
-  const categoryOrder = item => item.weather
-    ? ({ rain: 1, snow: 2, thunder: 3, crystal: 4, hell: 5 }[item.weather] ?? 6) : 0;
+  const allowedIds = new Set(["d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d28","d12","d13","d14","d15","d16","d29"]);
+  const safeIds = [...new Set((Array.isArray(selectedIds) ? selectedIds : []).filter(id => allowedIds.has(id)))];
   const options = (Array.isArray(dice) ? dice : [])
-    .filter(item => !halloweenIds.has(item.id) && Number(item.den) >= 2 && Number(item.den) <= 600000)
-    .slice().sort((a, b) => categoryOrder(a) - categoryOrder(b) || Number(a.den) - Number(b.den));
+    .filter(item => allowedIds.has(item.id))
+    .slice().sort((a, b) => Number(a.den) - Number(b.den));
   return { dice: options, selectedIds: safeIds };
 }
 
@@ -68,7 +66,7 @@ export function createInventoryUI({
       const weatherLabel = ({ rain: '雨', snow: '雪', thunder: '打雷', crystal: '水晶', hell: '地獄' })[item.weather] || '天氣';
       return `<label class="auto-sell-option"><input type="checkbox" data-auto-delete="${item.id}" ${selected ? 'checked' : ''}><span style="color:${color}!important"><b>${chanceText(item)}</b> ${item.name}${item.weather ? `（${weatherLabel}）` : ''}</span></label>`;
     };
-    box.innerHTML = dice.map(renderOne).join('');
+    box.innerHTML = `<div class="auto-sell-bulk-actions"><button type="button" class="quiet" id="autoSellSelectAllBtn">一鍵全選</button><button type="button" class="quiet" id="autoSellClearAllBtn">一鍵全取消</button></div>` + dice.map(renderOne).join('');
   }
 
   function renderAutoDepositOptions() {
@@ -186,6 +184,18 @@ export function createInventoryUI({
     persistAutoSellPrefs();
     save();
     toast(event.target.checked ? '已加入自動出售清單' : '已從自動出售清單移除');
+  });
+
+  document.getElementById('autoSellDiceOptions').addEventListener('click', event => {
+    const action = event.target.closest('#autoSellSelectAllBtn, #autoSellClearAllBtn');
+    if (!action) return;
+    const S = getState();
+    const allowed = filterAutoSellDice(D, []).dice.map(item => item.id);
+    S.autoDeleteDice = action.id === 'autoSellSelectAllBtn' ? allowed : [];
+    persistAutoSellPrefs();
+    save();
+    renderAutoSellOptions();
+    toast(action.id === 'autoSellSelectAllBtn' ? '已全選 18 種骰子' : '已取消全部自動出售');
   });
 
   document.getElementById('autoDepositDiceOptions').addEventListener('change', event => {

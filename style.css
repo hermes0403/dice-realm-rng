@@ -2029,3 +2029,11 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
     font-size: 16px;
   }
 }
+
+/* T-0092：成就完成／未完成各使用固定色系。 */
+.achievement-row.is-done{--achievement-accent:#65e6b2!important;border-color:#327b68!important;background:linear-gradient(110deg,#12352d,#101c26)!important;box-shadow:inset 4px 0 #65e6b2!important}
+.achievement-row.is-done h3,.achievement-row.is-done>span{color:#8ff0ca!important}
+.achievement-row.is-pending{--achievement-accent:#8791b0!important;border-color:#303957!important;background:linear-gradient(110deg,#111526,#0d1120)!important;box-shadow:inset 4px 0 #58627f!important;opacity:1!important}
+.achievement-row.is-pending h3,.achievement-row.is-pending>span{color:#aeb8d5!important}
+.auto-sell-bulk-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.auto-sell-bulk-actions button{padding:6px 10px;font-size:12px;min-height:30px}
