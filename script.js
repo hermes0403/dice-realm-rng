@@ -24,7 +24,7 @@ import { createAuthService } from './services/auth.js';
 import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261114-t0087-heaven-probability';
-import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0087-heaven-probability-r2';
+import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0091-heaven-probability-curve';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js';
