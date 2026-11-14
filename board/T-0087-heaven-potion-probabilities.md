@@ -1,7 +1,7 @@
 ---
 id: T-0087
 title: 天堂藥水 I／II 四組機率表與天氣加成
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -68,7 +68,8 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-14 08:27 [叉子] 依棒子前次明確需求建立任務；開工前容量閘門以 main SHA `c6e4fa251f195e9c67cab5ea17d6327282e3f5ea` 檢查，owner_side 的 T-0079、T-0080 為 2/5；Communicate 搜尋未找到有效委派任務。任務先保持 open，待開單 PR 合併後重新檢查兩道閘門。
+- 2026-11-14 08:27 [叉子] 依棒子前次明確需求建立任務；開單前容量閘門以 main SHA `c6e4fa251f195e9c67cab5ea17d6327282e3f5ea` 檢查，owner_side 的 T-0079、T-0080 為 2/5；Communicate 搜尋未找到有效委派任務。任務先保持 open。
+- 2026-11-14 08:30 [叉子] 開工准入複查：開單 PR #98 已合併，main SHA `3b44e4102f9ce617432d050b8491d32d50e2b6b4`；owner_side 有效 in_progress 任務 T-0079、T-0080 為 2/5，Communicate 搜尋未找到有效委派任務。兩道閘門均未阻擋，任務由 open 轉為 in_progress。
 
 ## 完工回報
 
