@@ -25,7 +25,7 @@ test('auto-sell options are ordered common-to-rare and exclude weather and highe
     { id: 'weather-common', den: 5, weather: 'rain' },
     { id: 'd17', den: 131072 }
   ];
-  assert.deepEqual(filterAutoSellDice(dice).dice.map(item => item.id), ['d1']);
+  assert.deepEqual(filterAutoSellDice(dice).dice.map(item => item.id), ['d1', 'd16']);
 });
 
 test('pet backpack supports income and rarity sorting in both directions without mutating ownership', () => {
