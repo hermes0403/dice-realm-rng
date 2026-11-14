@@ -1,7 +1,7 @@
 ---
 id: T-0088
 title: 修復翡翠綠主題說明面板配色與主頁骰子色調
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
