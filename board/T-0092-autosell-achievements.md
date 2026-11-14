@@ -1,7 +1,7 @@
 ---
 id: T-0092
 title: 修正骰子自動出售清單與成就完成狀態
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -75,3 +75,5 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 17:41 [叉子] 依棒子「開始吧」建立本任務。owner_side 的 in_progress 任務為 T-0091，共 1/5；未發現有效 Communicate 委派任務，兩道開工閘門目前未阻擋。任務先以 open 建立，待開工 PR 合併後重新檢查容量與 Communicate 閘門，再轉為 in_progress。
+
+- 2026-11-14 18:10 [叉子] 狀態轉換：open → in_progress。容量閘門：owner_side 的 in_progress 任務為 T-0083、T-0085、T-0091，共 3/5；來源 main SHA d30654184c07e9cdce9cc00ee1f86781f0675680。Communicate 優先閘門：檢查目前 Board 任務清單，未發現指派給 owner_side 且狀態為 open／in_progress 的有效委派任務；T-0038 為 from:老查、to:barry 的流程任務，不屬 owner_side。開工 PR 合併前須再次複查兩道閘門。
