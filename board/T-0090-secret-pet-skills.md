@@ -1,7 +1,7 @@
 ---
 id: T-0090
 title: 調整四隻秘密寵物技能
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -44,6 +44,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 13:01 [叉子] 依棒子本次明確需求建立任務，先保持 open。開單前盤點 owner_side 有效 in_progress／review 任務：T-0083 in_progress、T-0085 in_progress、T-0086 review、T-0089 review，共 4/5；未發現有效 Communicate 委派任務。建立時未開始實作，待開工前再次檢查兩道閘門。
+- 2026-11-14 13:02 [叉子] 開工准入複查：owner_side 有效 in_progress／review 仍為 4/5（T-0083、T-0085、T-0086、T-0089）；Board 當前任務清單未發現有效 Communicate 委派單。兩道閘門均未阻擋，任務由 open 轉為 in_progress，開始實作。
 
 ## 完工回報
 
