@@ -211,7 +211,7 @@ test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小�
   assert.doesNotMatch(gloves, /from\('player_profiles'\)\.upsert/);
   assert.match(navigation, /workshop-items-panel/);
   assert.match(weather, /需要先啟用天氣轉換器/);
-  assert.match(gameState, /G\.some\(g=>g\.id===key\)\?key/);
+  assert.match(gameState, /G\.some\(g=>g\.id===key&&key!=='g7'\)\?key:legacyToCurrent\[key\]/);
   assert.match(gameState, /x\.equipped=\(equipped&&normalized\[equipped\]\)\?equipped:'g0'/);
   assert.match(script, /function currentGlove\(\)\{return S\.equipped==='g7'\?glove\('g0'\):glove\(S\.equipped\)\}/);
 });
