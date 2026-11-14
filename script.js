@@ -12,7 +12,7 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261112-t0074-settings';
+import { createProgressionSystem } from './systems/progression.js?v=20261114-t0075-achievement-colors-weather-five';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261113-t0084-glitch-summon-odds';
