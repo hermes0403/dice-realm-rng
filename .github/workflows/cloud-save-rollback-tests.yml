@@ -11,6 +11,7 @@ on:
       - 'tests/**'
       - 'tests/presence-profile-projection.test.js'
       - 'docs/game-save-delta-sync-locked-dice.sql'
+      - 'docs/cloud-save-write-guard.sql'
       - '.github/workflows/cloud-save-rollback-tests.yml'
   pull_request:
     branches: [main]
