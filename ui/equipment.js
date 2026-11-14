@@ -1,5 +1,5 @@
 /** Composition facade for the independently initialized glove, item, and potion UIs. */
-import { createGloveUI } from './gloves.js?v=20261114-t0093-weather-converter-item-workshop';
+import { createGloveUI } from './gloves.js?v=20261114-t0094-weather-converter-item-slots';
 import { createPotionUI } from './potions.js';
 
 export function createEquipmentUI(deps) {
