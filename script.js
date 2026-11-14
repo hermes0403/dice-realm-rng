@@ -1,6 +1,6 @@
 import { D, G } from './data/dice.js?v=20261113-t0084-glitch-weather-phase2';
 import { POTIONS } from './data/equipment.js';
-import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261104-pet-image-fix';
+import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
 import { supabaseClient } from './services/supabase.js';
@@ -21,7 +21,7 @@ import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t008
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
-import { createPetSystem } from './systems/pets.js?v=20261104-pet-image-fix';
+import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261114-t0087-heaven-probability';
 import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0087-heaven-probability-r2';
@@ -145,7 +145,7 @@ function activePotion(category='luck'){const a=category==='speed'?S.potions?.act
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
-function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0))}
+function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0))}
 function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
@@ -194,10 +194,10 @@ petSystem=createPetSystem({
  petById, getDiceById:byId, randomPet, petIncomePerSecond, rollPetVariant, renderPetIncome,
  format, escapeHTML, save, render, toast, getCurrentUser:()=>currentUser, openAuth, recordPetFusion,
  getFusionLuckBoost:()=>globalBoostSystem?.activeFusionLuckBoost?.()||null,
- showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message)
+ showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message), localStorageRef:localStorage
 });
 const {
- equippedPetHas, applyPetSkillDailyReset, applyPetRollSkills, petBonusTotals, populateAdminPetSelects,
+ equippedPetHas, applyPetSkillDailyReset, applyPetRollSkills, applyPetLoginSkill, petBonusTotals, populateAdminPetSelects,
  petRarity, petArt, petTierFromDen, weightedPetRarity, petMutationForDice, petMutationLabel,
  rollPetWeightKg, addPet, applyPetAutoSell, ownedPetName, renderPetsPage, renderPetCodex,
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
@@ -210,7 +210,8 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
+ applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
