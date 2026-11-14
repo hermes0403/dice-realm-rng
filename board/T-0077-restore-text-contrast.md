@@ -1,7 +1,7 @@
 ---
 id: T-0077
 title: 修復翡翠綠主題全站文字可讀性
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-12
 updated: 2026-11-14
 depends_on: [T-0076]
 branch: task/T-0077-restore-text-contrast
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 需求
@@ -23,17 +23,21 @@ done_at:
 - 更新 CSS 快取版本與遊戲版本至 V1.04。
 
 ## 驗收
-- [ ] 全站主要文字與說明文字清楚可讀（程式變更已交付，待棒子實際畫面驗收）。
-- [ ] 輸入框文字及 placeholder 清楚可讀（程式變更已交付，待棒子實際畫面驗收）。
-- [ ] 黃色鎖定星星與主要／危險按鈕辨識色保留（程式變更已交付，待棒子實際畫面驗收）。
-- [x] CI 與 Pages 部署成功。
+- [x] 全站主要文字與說明文字清楚可讀（棒子已驗收）。
+- [x] 輸入框文字及 placeholder 清楚可讀（棒子已驗收）。
+- [x] 黃色鎖定星星與主要／危險按鈕辨識色保留（棒子已驗收）。
+- [x] CI 與 Pages 部署成功（PR #60 checks 全數成功）。
+
+- 2026-11-14 [impact][叉子] T-0088 將為各說明型面板恢復差異化背景與邊框；需保留本任務要求的高對比文字，並逐一檢查新底色上的文字可讀性。
+
 
 ## 完工回報
-- **修改內容：** `style.css` 提升翡翠綠深色背景上的標題、一般文字、次要說明、導覽與管理面板文字對比；保留輸入框淺底深字、按鈕辨識色與黃色鎖定星星；`index.html` 更新 CSS 快取鍵與遊戲版本至 V1.04。
-- **交付：** PR #60 已合併，merge commit `c357f000ad3d082c14cfb26e6552607e97d01c69`。
-- **驗證：** Board lifecycle validation #43210437426 成功；Dice roll save regression tests #43210437419 成功；GitHub Pages build and deployment #43210437637 成功。
-- **未完成／限制：** 尚待棒子確認實際遊戲畫面中文字對比、placeholder、管理面板及星星辨識效果；叉子未自行進行實體手機截圖驗收。
-- **衍生／影響任務：** T-0078、T-0079、T-0080 為後續個別骰子／圖鑑文字顏色保留任務。
+- **交付內容：**翡翠綠主題全站文字對比修正，保留輸入框淺底深字、按鈕辨識色及黃色鎖定星星。
+- **程式交付：**PR #60，merge commit `c357f000ad3d082c14cfb26e6552607e97d01c69`。
+- **驗證：**deploy、report-build-status、build、board-lifecycle、dice-roll-save 全部 success；GitHub Pages 部署 workflow #43210437637 成功。
+- **未完成項目：**無；棒子已於 2026-11-14 明確驗收。
+- **影響任務：**T-0078、T-0079、T-0080 已接續完成。
 
 ## 紀錄
-- 2026-11-14 10:17 [叉子] 狀態由 in_progress 轉為 review；PR #60 已合併，程式與快取版本 V1.04 已整合至 main，Pages 部署及相關 CI 成功，等待棒子進行 Owner 視覺驗收。證據：PR #60 merge commit `c357f000ad3d082c14cfb26e6552607e97d01c69`；Pages workflow #43210437637 success；Board lifecycle #43210437426 success；Dice roll save regression #43210437419 success。
+- 2026-11-14 [叉子] in_progress → review：程式交付與部署完成，等待 Owner 驗收。來源：PR #60。證據：merge commit `c357f000ad3d082c14cfb26e6552607e97d01c69`，Pages workflow #43210437637 success。
+- 2026-11-14 [棒子] review → done：棒子明確表示 T-0075～T-0080 全部驗收成功，包含本任務。來源：本對話 2026-11-14 的明確驗收指示。證據：棒子訊息「75~80全部驗收成工」。
