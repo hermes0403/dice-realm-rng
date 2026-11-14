@@ -1,0 +1,46 @@
+name: Heaven Potion odds regression tests
+
+on:
+  push:
+    branches:
+      - task/T-0087-heaven-potion-probabilities
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'data/equipment.js'
+      - 'script.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'systems/dice.js'
+      - 'systems/glitch-dice.js'
+      - 'systems/heaven-potion-odds.js'
+      - 'tests/heaven-potion-odds.test.mjs'
+      - '.github/workflows/heaven-potion-odds-tests.yml'
+
+jobs:
+  heaven-potion-odds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Heaven Potion and Glitch weather tests
+        run: node --test tests/heaven-potion-odds.test.mjs tests/glitch-weather-dice.test.mjs
+      - name: Check JavaScript syntax
+        run: |
+          node --check script.js
+          node --check systems/dice.js
+          node --check systems/glitch-dice.js
+          node --check systems/heaven-potion-odds.js
+          node --check data/equipment.js
+          node --check sw.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD

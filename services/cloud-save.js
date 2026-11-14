@@ -17,6 +17,11 @@ export function createCloudSaveService(dependencies) {
   let cloudSyncBusy = false;
   let cloudSyncPending = false;
   let lastCloudSyncAt = 0;
+  // Per-account optimistic version guard for multi-tab and multi-device writes.
+  let cloudSaveVersion = null;
+  let lastSyncedPayload = null;
+  let lastSyncedUserId = null;
+  let cloudLoadReadyUserId = null;
   const grantCheckAtByUser = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
   const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -29,6 +34,29 @@ export function createCloudSaveService(dependencies) {
     return userId ? KEY + '_local_saved_at_' + String(userId) : null;
   }
 
+  function stableSerialize(value) {
+    if (Array.isArray(value)) return '[' + value.map(stableSerialize).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stableSerialize(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  }
+
+  function clonePayload(value) {
+    return value == null ? null : JSON.parse(JSON.stringify(value));
+  }
+
+  function diffPayload(previous, current) {
+    if (!previous) return clonePayload(current) || {};
+    const patch = {};
+    for (const key of Object.keys(current)) {
+      if (stableSerialize(previous[key]) !== stableSerialize(current[key])) {
+        patch[key] = clonePayload(current[key]);
+      }
+    }
+    return patch;
+  }
+
   function savePayload() {
     const S = getState();
     return {
@@ -38,6 +66,8 @@ export function createCloudSaveService(dependencies) {
       petDiscovered: S.petDiscovered || {},
       petSkillLuckCharges: Number(S.petSkillLuckCharges) || 0,
       petSkillDaily: S.petSkillDaily || {},
+      petSkillLogin: S.petSkillLogin || { lastDate: null, streak: 0, reward: 0 },
+      petSkillSpeed: S.petSkillSpeed || { activatedAt: 0, expiresAt: 0, cooldownUntil: 0 },
       name: S.name, joined: S.joined, rolls: S.rolls, bag: S.bag,
       lockedDice: Array.isArray(S.lockedDice) ? S.lockedDice.filter(key => typeof key === 'string') : [],
       bagCapacity: S.bagCapacity, first: S.first, rollCounts: S.rollCounts || {},
@@ -127,25 +157,59 @@ export function createCloudSaveService(dependencies) {
       cloudSyncTimer = null;
     }
     const initialUser = getCurrentUser();
-    if (!initialUser || !supabaseClient) return;
+    if (!initialUser || !supabaseClient) return false;
+    if (lastSyncedUserId !== initialUser.id) {
+      document.getElementById('saveStatus').textContent = '雲端存檔尚未載入';
+      return false;
+    }
     if (cloudSyncBusy) {
       cloudSyncPending = true;
-      return;
+      return false;
     }
     cloudSyncPending = false;
     cloudSyncBusy = true;
-    lastCloudSyncAt = Date.now();
     const syncingUserId = initialUser.id;
     try {
       await applyPendingGrants();
-      if (getCurrentUser()?.id !== syncingUserId) return;
+      if (getCurrentUser()?.id !== syncingUserId) return false;
       const S = getState();
       const payload = savePayload();
-      const now = new Date().toISOString();
-      const { error } = await supabaseClient.from('game_saves')
-        .upsert({ user_id: syncingUserId, save_data: payload, updated_at: now }, { onConflict: 'user_id' });
+      const patch = diffPayload(lastSyncedPayload, payload);
+
+      // An unchanged snapshot should not produce any game_saves request.
+      if (Object.keys(patch).length === 0) {
+        document.getElementById('saveStatus').textContent = '雲端已同步';
+        return true;
+      }
+
+      const profilePayload = {
+        username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
+        unique_dice: totalUnique(),
+        rarest_den: Number(S.best?.den) || 0,
+        ...achievementStats()
+      };
+      lastCloudSyncAt = Date.now();
+      const { data: syncResult, error } = await supabaseClient.rpc('sync_player_game_save_delta', {
+        p_expected_updated_at: cloudSaveVersion,
+        p_save_patch: patch,
+        p_profile: profilePayload
+      });
       if (error) throw error;
-      if (getCurrentUser()?.id !== syncingUserId) return;
+      if (!syncResult?.ok) {
+        if (syncResult?.conflict) {
+          document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在載入最新存檔…';
+          await loadCloudSave({ syncAfterLoad: false });
+          toast('偵測到其他分頁或裝置已更新存檔，已重新比對雲端資料；請確認剛才的操作是否需要重做。');
+          return false;
+        }
+        throw new Error(syncResult?.message || 'Cloud save version check failed');
+      }
+      if (getCurrentUser()?.id !== syncingUserId) return false;
+      cloudSaveVersion = syncResult.updated_at || null;
+      if (Number.isFinite(Number(syncResult.total_rolls))) {
+        S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
+      }
+      lastSyncedPayload = clonePayload(savePayload());
       S.petIncomePending = 0;
       try {
         localStorage.setItem(KEY, JSON.stringify(S));
@@ -154,13 +218,15 @@ export function createCloudSaveService(dependencies) {
         const savedAtKey = localSavedAtKey(syncingUserId);
         if (savedAtKey) {
           const previousSavedAt = Number(localStorage.getItem(savedAtKey)) || 0;
-          localStorage.setItem(savedAtKey, String(Math.max(previousSavedAt, Date.parse(now) || Date.now())));
+          const cloudSavedAt = Date.parse(syncResult.updated_at || '') || Date.now();
+          localStorage.setItem(savedAtKey, String(Math.max(previousSavedAt, cloudSavedAt)));
         }
       } catch (e) {}
       document.getElementById('saveStatus').textContent = '雲端已同步';
       return true;
     } catch (e) {
       console.error('Cloud sync failed', e);
+      cloudSyncPending = getCurrentUser()?.id === syncingUserId;
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
       return false;
     } finally {
@@ -234,9 +300,10 @@ export function createCloudSaveService(dependencies) {
   });
   windowObject?.addEventListener?.('pagehide', () => { void flushOnExit('pagehide'); });
 
-  async function loadCloudSave() {
+  async function loadCloudSave({ syncAfterLoad = true } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
+    cloudLoadReadyUserId = null;
     try {
       const scopedKey = userSaveKey(user.id);
       // Keep the exact local snapshot used when the cloud request starts.
@@ -255,6 +322,9 @@ export function createCloudSaveService(dependencies) {
       const { data, error } = await supabaseClient.from('game_saves').select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
       if (getCurrentUser()?.id !== user.id) return;
+      cloudSaveVersion = data?.updated_at || null;
+      lastSyncedPayload = clonePayload(data?.save_data || null);
+      lastSyncedUserId = user.id;
       const localSaveAfterCloud = (() => {
         try { return scopedKey ? localStorage.getItem(scopedKey) : null; }
         catch { return null; }
@@ -271,8 +341,9 @@ export function createCloudSaveService(dependencies) {
           render();
         }
         await applyPendingGrants(true);
-        await syncCloudSave();
+        if (syncAfterLoad) await syncCloudSave();
         await refreshLeaderboards();
+        cloudLoadReadyUserId = user.id;
         return;
       }
       const cloudRolls = Number(data?.save_data?.rolls) || 0;
@@ -298,6 +369,7 @@ export function createCloudSaveService(dependencies) {
         await applyPendingGrants(true);
         await syncCloudSave();
         await refreshLeaderboards();
+        cloudLoadReadyUserId = user.id;
         return;
       }
       let S;
@@ -360,9 +432,11 @@ export function createCloudSaveService(dependencies) {
         render();
       }
       await applyPendingGrants(true);
-      await syncCloudSave();
+      if (syncAfterLoad) await syncCloudSave();
       await refreshLeaderboards();
+      cloudLoadReadyUserId = user.id;
     } catch (e) {
+      cloudLoadReadyUserId = null;
       console.error(e);
       if (/user.?banned|banned|被停權|已停權/i.test(String(e?.message || ''))) {
         await supabaseClient?.auth.signOut().catch(() => {});
@@ -373,5 +447,7 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit };
+  function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
+
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isLoadedFor };
 }

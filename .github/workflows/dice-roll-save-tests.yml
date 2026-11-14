@@ -4,7 +4,22 @@ on:
   push:
     branches: ['**']
     paths:
+      - 'data/dice.js'
       - 'systems/dice.js'
+      - 'systems/weather.js'
+      - 'systems/glitch-weather-drops.js'
+      - 'systems/secret-pet-skills.js'
+      - 'systems/pets.js'
+      - 'data/pets.js'
+      - 'services/auth.js'
+      - 'systems/secret-pet-skills.js'
+      - 'systems/pets.js'
+      - 'data/pets.js'
+      - 'services/auth.js'
+      - 'systems/global-announcements.js'
+      - 'systems/weather-summon-odds.js'
+      - 'style.css'
+      - 'docs/migrations/20261113171000_glitch_weather_summon_odds.sql'
       - 'services/cloud-save.js'
       - 'core/game-state.js'
       - 'services/account-actions.js'
@@ -13,11 +28,27 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/glitch-dice-catalog.test.mjs'
+      - 'tests/glitch-weather-dice.test.mjs'
+      - 'tests/glitch-weather-potion-drops.test.mjs'
+      - 'tests/secret-pet-skills.test.mjs'
+      - 'tests/weather-summon-odds.test.mjs'
       - 'tests/local-save-cloud-conflict.test.js'
       - '.github/workflows/dice-roll-save-tests.yml'
   pull_request:
     paths:
+      - 'data/dice.js'
       - 'systems/dice.js'
+      - 'systems/weather.js'
+      - 'systems/glitch-weather-drops.js'
+      - 'systems/secret-pet-skills.js'
+      - 'systems/pets.js'
+      - 'data/pets.js'
+      - 'services/auth.js'
+      - 'systems/global-announcements.js'
+      - 'systems/weather-summon-odds.js'
+      - 'style.css'
+      - 'docs/migrations/20261113171000_glitch_weather_summon_odds.sql'
       - 'services/cloud-save.js'
       - 'core/game-state.js'
       - 'services/account-actions.js'
@@ -26,6 +57,11 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/glitch-dice-catalog.test.mjs'
+      - 'tests/glitch-weather-dice.test.mjs'
+      - 'tests/glitch-weather-potion-drops.test.mjs'
+      - 'tests/secret-pet-skills.test.mjs'
+      - 'tests/weather-summon-odds.test.mjs'
       - '.github/workflows/dice-roll-save-tests.yml'
 
 jobs:
@@ -37,8 +73,17 @@ jobs:
         with:
           node-version: 22
       - run: node --check systems/dice.js
+      - run: node --check systems/weather.js
+      - run: node --check systems/glitch-weather-drops.js
+      - run: node --check systems/secret-pet-skills.js
+      - run: node --check systems/pets.js
+      - run: node --check script.js
+      - run: node --check data/pets.js
+      - run: node --check services/auth.js
+      - run: node --check systems/global-announcements.js
+      - run: node --check systems/weather-summon-odds.js
       - run: node --check services/cloud-save.js
       - run: node --check core/game-state.js
       - run: node --check services/account-actions.js
       - run: node --check systems/progression.js
-      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/local-save-cloud-conflict.test.js
+      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/local-save-cloud-conflict.test.js tests/glitch-dice-catalog.test.mjs tests/glitch-weather-dice.test.mjs tests/glitch-weather-potion-drops.test.mjs tests/secret-pet-skills.test.mjs tests/weather-summon-odds.test.mjs

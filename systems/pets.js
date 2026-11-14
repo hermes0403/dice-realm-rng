@@ -1,4 +1,5 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
+import { resolveSecretLoginReward, resolveSecretRollRewards, resolveSecretSpeedSkill, taipeiDateKey } from './secret-pet-skills.js?v=20261114-t0090-secret-pet-skills';
 
 /** Build codex entries while excluding retired pets for every player, including previous owners. */
 import { EVENT_PETS, PET_BASE_INCOME } from '../data/pets.js';
@@ -116,7 +117,8 @@ export function createPetSystem({
   showPetAutoSellNotice,
   documentRef,
   confirmAction,
-  getFusionLuckBoost = () => null
+  getFusionLuckBoost = () => null,
+  localStorageRef = globalThis.localStorage
 }) {
   let petSortMode = 'rarity-desc';
 
@@ -132,7 +134,7 @@ export function createPetSystem({
 
   function applyPetSkillDailyReset() {
     const S = getState();
-    const today = new Date().toLocaleDateString('en-CA');
+    const today = taipeiDateKey();
     S.petSkillDaily = S.petSkillDaily || { date: today, s3: 0, s5: 0 };
     if (S.petSkillDaily.date !== today) S.petSkillDaily = { date: today, s3: 0, s5: 0 };
   }
@@ -169,18 +171,82 @@ export function createPetSystem({
     const petLuckWasUsed = (Number(S.petSkillLuckCharges) || 0) > 0;
     if (petLuckWasUsed) S.petSkillLuckCharges = Math.max(0, (Number(S.petSkillLuckCharges) || 0) - 1);
     applyPetSkillDailyReset();
-    let petSkillReward = 0;
-    if (equippedPetHas('s3') && Number(dice.den) >= 10000 && Math.random() < 0.10 && Number(S.petSkillDaily.s3 || 0) < 500000) {
-      petSkillReward = Math.min(10000, 500000 - Number(S.petSkillDaily.s3 || 0));
-      S.petSkillDaily.s3 = Number(S.petSkillDaily.s3 || 0) + petSkillReward;
-    }
-    if (equippedPetHas('s5') && Math.random() < 0.01 && Number(S.petSkillDaily.s5 || 0) < 500000) {
-      const reward = Math.min(5000, 500000 - Number(S.petSkillDaily.s5 || 0));
-      petSkillReward += reward;
-      S.petSkillDaily.s5 = Number(S.petSkillDaily.s5 || 0) + reward;
-    }
+    const rollRewards = resolveSecretRollRewards({
+      den: dice.den,
+      daily: S.petSkillDaily,
+      hasS3: equippedPetHas('s3'),
+      hasS5: equippedPetHas('s5')
+    });
+    S.petSkillDaily = rollRewards.daily;
+    const petSkillReward = rollRewards.reward;
     if (equippedPetHas('m1') && Number(S.rolls) % 1000 === 0) S.petSkillLuckCharges = 1;
     return petSkillReward;
+  }
+
+  async function applyPetLoginSkill() {
+    const userId = getCurrentUser()?.id;
+    if (!userId) return 0;
+    const locks = globalThis.navigator?.locks;
+    if (!locks?.request) {
+      toast('此瀏覽器不支援多分頁登入獎勵防重複，混沌祝福暫停發放');
+      return 0;
+    }
+    return locks.request('diceRealmSecretPetS2Login:' + userId, { ifAvailable: true }, async lock => {
+      if (!lock || !equippedPetHas('s2')) return 0;
+      const S = getState();
+      const today = taipeiDateKey();
+      const markerKey = 'diceRealmSecretPetS2LoginDate:' + userId;
+      try {
+        if (localStorageRef?.getItem(markerKey) === today) return 0;
+      } catch {}
+      const result = resolveSecretLoginReward(S.petSkillLogin || {}, today);
+      if (!result.claimed) return 0;
+      S.petSkillLogin = result.state;
+      S.coins = (Number(S.coins) || 0) + result.reward;
+      S.quest = S.quest || {};
+      S.quest.coinsEarned = (Number(S.quest.coinsEarned) || 0) + result.reward;
+      try { localStorageRef?.setItem(markerKey, today); } catch {}
+      save();
+      toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
+      return result.reward;
+    });
+  }
+
+  async function usePetSkillS4(uid) {
+    const S = getState();
+    const pet = (S.pets || []).find(item => item.uid === uid && item.id === 's4');
+    if (!pet || !equippedPetHas('s4')) return false;
+    const now = Date.now();
+    const userId = getCurrentUser()?.id || 'guest';
+    const markerKey = 'diceRealmSecretPetS4:' + userId;
+    const locks = globalThis.navigator?.locks;
+    if (!locks?.request) {
+      toast('此瀏覽器不支援多分頁技能防重複，永寂恩賜暫停使用');
+      return false;
+    }
+    return locks.request(markerKey, { ifAvailable: true }, async lock => {
+      if (!lock) {
+        toast('永寂恩賜正在其他分頁處理');
+        return false;
+      }
+      const current = getState();
+      const currentPet = (current.pets || []).find(item => item.uid === uid && item.id === 's4');
+      if (!currentPet || !equippedPetHas('s4')) return false;
+      let localLastUse = 0;
+      try { localLastUse = Number(localStorageRef?.getItem(markerKey)) || 0; } catch {}
+      const result = resolveSecretSpeedSkill(current.petSkillSpeed || {}, now, localLastUse);
+      if (!result.activated) {
+        toast('永寂恩賜冷卻中，約 ' + Math.ceil((result.cooldownUntil - now) / 60000) + ' 分鐘後可再次使用');
+        return false;
+      }
+      current.petSkillSpeed = result.state;
+      try { localStorageRef?.setItem(markerKey, String(now)); } catch {}
+      save();
+      render();
+      renderPetsPage();
+      toast('永寂恩賜已啟動：速度 +100%，持續 10 分鐘');
+      return true;
+    });
   }
 
   function populateAdminPetSelects() {
@@ -352,6 +418,12 @@ export function createPetSystem({
           const equipped = (S.equippedPetUids || []).includes(pet.uid);
           const income = petIncomePerSecond(pet);
           const mutationTags = formatPetMutationTags(pet, PET_MUTATIONS);
+          const skillState = S.petSkillSpeed || {};
+          const skillActive = Number(skillState.expiresAt) > Date.now();
+          const skillCooling = Number(skillState.cooldownUntil) > Date.now();
+          const skillButton = definition.id === 's4'
+            ? `<button type="button" class="${equipped && !skillActive && !skillCooling ? 'primary' : 'quiet'}" data-pet-skill-use="${escapeHTML(pet.uid)}" ${!equipped || skillActive || skillCooling ? 'disabled' : ''}>${!equipped ? '裝備後可使用' : skillActive ? '技能生效中' : skillCooling ? '技能冷卻中' : '啟動速度 +100% 技能'}</button>`
+            : '';
           const mutationColors = {
             'pet-mutation-golden': '#ffe69a',
             'pet-mutation-diamond': '#b9e8ff',
@@ -366,7 +438,7 @@ export function createPetSystem({
             const color = mutationColors[tag.className] || '#ffffff';
             const rainbowStyle = color === 'rainbow' ? 'color:transparent!important;background:linear-gradient(90deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1);background-clip:text;-webkit-background-clip:text;' : `color:${color}!important;`;
             return `<span class="pet-mutation-tag ${tag.className}" style="${rainbowStyle}border-color:${color === 'rainbow' ? '#c69bff' : color}!important;text-shadow:0 0 7px ${color === 'rainbow' ? '#c69bff88' : color + '88'}">${escapeHTML(tag.label)}</span>`;
-          }).join('')}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button></div>`;
+          }).join('')}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button>${skillButton}</div>`;
         }).join('');
       }
     }
@@ -580,6 +652,11 @@ export function createPetSystem({
       toast(best.length ? `已自動裝備收益最高的 ${best.length} 隻寵物` : '目前沒有可裝備的寵物');
     });
     documentRef.getElementById('petInventoryGrid')?.addEventListener('click', event => {
+      const skillButton = event.target.closest('[data-pet-skill-use]');
+      if (skillButton) {
+        usePetSkillS4(skillButton.dataset.petSkillUse);
+        return;
+      }
       const button = event.target.closest('[data-pet-equip]');
       if (!button) return;
       const S = getState();
@@ -612,6 +689,8 @@ export function createPetSystem({
     equippedPetHas,
     applyPetSkillDailyReset,
     applyPetRollSkills,
+    applyPetLoginSkill,
+    usePetSkillS4,
     petBonusTotals,
     populateAdminPetSelects,
     petById,
