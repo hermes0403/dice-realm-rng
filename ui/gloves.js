@@ -97,13 +97,6 @@ export function createGloveUI(deps) {
       toast('請先登入雲端帳號');
       return;
     }
-    if (id === 'g7' && state.items?.g7) {
-      state.equippedItem = 'g7';
-      save();
-      render();
-      toast('已啟用天氣轉換器');
-      return;
-    }
     if (state.gloves[id]) {
       state.equipped = id;
       save();
@@ -200,6 +193,13 @@ export function createGloveUI(deps) {
   function craft(id) {
     const state = getState();
     const item = glove(id);
+    if (id === 'g7' && state.items?.g7) {
+      state.equippedItem = 'g7';
+      save();
+      render();
+      toast('已啟用天氣轉換器');
+      return;
+    }
     if (state.gloves[id]) {
       state.equipped = id;
       save();
