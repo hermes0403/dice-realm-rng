@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'core/game-state.js'
+      - 'systems/progression.js'
+      - 'tests/achievement-current-progress.test.mjs'
       - 'ui/gloves.js'
       - 'tests/achievement-persistence.test.js'
       - 'board/T-0024-achievement-unlock-persistence.md'
@@ -25,7 +27,7 @@ jobs:
         with:
           node-version: 22
       - name: Run achievement persistence tests
-        run: node --test tests/achievement-persistence.test.js
+        run: node --test tests/achievement-persistence.test.js tests/achievement-current-progress.test.mjs
       - name: Check patch whitespace
         run: |
           git fetch origin main
