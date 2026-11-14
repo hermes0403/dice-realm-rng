@@ -50,3 +50,12 @@ export function resolveSecretRollRewards({ den, daily = {}, hasS3 = false, hasS5
   }
   return { daily: next, reward };
 }
+
+export function resolveSecretSpeedSkill(skill = {}, now = Date.now(), localLastUse = 0) {
+  const cooldownUntil = Math.max(Number(skill.cooldownUntil) || 0, (Number(localLastUse) || 0) + 12 * 60 * 60 * 1000);
+  if (cooldownUntil > now) return { activated: false, cooldownUntil };
+  return {
+    activated: true,
+    state: { activatedAt: now, expiresAt: now + 10 * 60 * 1000, cooldownUntil: now + 12 * 60 * 60 * 1000 }
+  };
+}
