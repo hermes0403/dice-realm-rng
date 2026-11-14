@@ -92,8 +92,8 @@ async function convertWeather(){
  const scope=document.getElementById('weatherConvertScope')?.value||'global';
 
  if(!getCurrentUser()||!supabaseClient){openAuth();toast('全服天氣轉換需要登入雲端帳號');return}
- if(getState().equipped!=='g7'||!getState().gloves?.g7){toast('需要裝備並擁有天氣手套');return}
- const btn=document.getElementById('weatherConvertBtn');if(btn){btn.disabled=true;btn.textContent='正在轉換全服天氣…'}
+ if(getState().equipped!=='g7'||!getState().gloves?.g7){toast('需要啟用並持有天氣轉換器');return}
+ const btn=document.getElementById('weatherConvertBtn');if(btn){btn.disabled=true;btn.textContent='正在轉換天氣…'}
  try{
   const chosen=['rain','snow','thunder'][Math.floor(Math.random()*3)];
   if(scope==='local'){const until=Date.now()+5*60*1000;playerWeatherOverride={type:chosen,until,by:getState().name,at:Date.now()};getState().localWeatherConvertAt=Date.now();getState().weatherConvertAt=Date.now();cachedWeatherMinute=-1;updateWeatherUI();save();}

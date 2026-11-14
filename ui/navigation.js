@@ -37,6 +37,7 @@ export function createNavigationUI({
     document.querySelectorAll('[data-workshop-category]').forEach(button => button.classList.toggle('active', button.dataset.workshopCategory === category));
     document.getElementById('workshop-gloves-panel')?.toggleAttribute('hidden', category !== 'gloves');
     document.getElementById('workshop-potions-panel')?.toggleAttribute('hidden', category !== 'potions');
+    document.getElementById('workshop-items-panel')?.toggleAttribute('hidden', category !== 'items');
   }
 
   function go(id) {

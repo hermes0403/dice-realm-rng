@@ -1,11 +1,11 @@
-import { D, G } from './data/dice.js?v=20261113-t0084-glitch-weather-phase2';
+import { D, G } from './data/dice.js?v=20261114-t0093-weather-converter-item-workshop';
 import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
-import { createNavigationUI } from './ui/navigation.js';
+import { createNavigationUI } from './ui/navigation.js?v=20261114-t0093-weather-converter-item-workshop';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js';
@@ -15,7 +15,7 @@ import { setupPetSellingUI } from './ui/pet-selling.js';
 import { createProgressionSystem } from './systems/progression.js?v=20261114-t0075-achievement-colors-weather-five';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261113-t0084-glitch-summon-odds';
+import { createWeatherSystem } from './systems/weather.js?v=20261114-t0093-weather-converter-item-workshop';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
 import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t0086-cloud-save-rollback';
 import { createCoinBoostService } from './systems/coin-boost.js';
@@ -27,7 +27,7 @@ import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glit
 import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0091-heaven-glitch-no-x10';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
-import { createEquipmentUI } from './ui/equipment.js';
+import { createEquipmentUI } from './ui/equipment.js?v=20261114-t0093-weather-converter-item-workshop';
 import { createAdminPlayerManagement } from './admin/player-management.js';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
 import { createGameStateService } from './core/game-state.js';
@@ -140,7 +140,7 @@ function byId(id){return D.find(x=>x.id===id)}
 function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
 function totalDice(){return Object.values(S.bag).reduce((a,b)=>a+Math.max(0,Number(b)||0),0)}
-function currentGlove(){return glove(S.equipped)}
+function currentGlove(){return S.equipped==='g7'?glove('g0'):glove(S.equipped)}
 function activePotion(category='luck'){const a=category==='speed'?S.potions?.activeSpeed:S.potions?.active;if(a&&a.type&&Number(a.expiresAt)>Date.now())return POTIONS.find(p=>p.id===a.type)||null;return null}
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
