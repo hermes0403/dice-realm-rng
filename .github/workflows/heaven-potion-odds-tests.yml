@@ -1,4 +1,4 @@
-name: Heaven Potion odds and full regression tests
+name: Heaven Potion odds regression tests
 
 on:
   push:
