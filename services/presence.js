@@ -1,4 +1,12 @@
 /** Signed-in player presence and profile heartbeat. */
+export const PRESENCE_HEARTBEAT_INTERVAL = 5 * 60 * 1000;
+export const PRESENCE_ONLINE_WINDOW = 7 * 60 * 1000;
+
+export function isPlayerOnline(lastSeen, now = Date.now()) {
+  const timestamp = Date.parse(lastSeen || '');
+  return Number.isFinite(timestamp) && timestamp > 0 && now >= timestamp
+    && now - timestamp < PRESENCE_ONLINE_WINDOW;
+}
 export function createPresenceService(dependencies) {
   const {
     supabaseClient, getCurrentUser, getState, totalUnique,
@@ -6,7 +14,7 @@ export function createPresenceService(dependencies) {
   } = dependencies;
   let heartbeatBusy = false;
   let lastHeartbeatAt = 0;
-  const HEARTBEAT_INTERVAL = 60000;
+  const HEARTBEAT_INTERVAL = PRESENCE_HEARTBEAT_INTERVAL;
 
   async function heartbeat() {
     if (heartbeatBusy || !getCurrentUser() || !supabaseClient) return;
