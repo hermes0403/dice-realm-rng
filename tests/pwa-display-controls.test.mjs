@@ -175,12 +175,12 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('T-0092 V1.35 PWA 快取殼同步更新', async () => {
+test('T-0092 V1.36 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.35/);
-  assert.match(html, /script\.js\?v=20261114-t0092-achievement-history-autosell-row/);
-  assert.match(worker, /dice-realm-shell-v1\.35/);
+  assert.match(html, /V1\.36/);
+  assert.match(html, /script\.js\?v=20261114-t0092-current-collection-progress/);
+  assert.match(worker, /dice-realm-shell-v1\.36/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
 });
@@ -213,11 +213,11 @@ test('主頁最新骰子名稱清楚，成就顏色與五種天氣骰子門檻�
 });
 
 
-test('T-0092 已解鎖但目前進度不足時保留完成紀錄並標示歷史完成', async () => {
+test('T-0092 天氣收藏成就以目前進度顯示完成狀態，不顯示歷史完成標籤', async () => {
   const progression = await readFile(new URL('../systems/progression.js', import.meta.url), 'utf8');
-  assert.match(progression, /progressIncomplete=!!progressMatch&&Number\(progressMatch\[1\]\)<Number\(progressMatch\[2\]\)/);
-  assert.match(progression, /已完成（歷史紀錄）/);
-  assert.match(progression, /const unlocked=!!getState\(\)\.achievements\[id\]/);
+  assert.match(progression, /isAchievementCompleteForDisplay\(id,desc,!!getState\(\)\.achievements\[id\]\)/);
+  assert.match(progression, /if\(!a\)\{/);
+  assert.doesNotMatch(progression, /已完成（歷史紀錄）/);
 });
 
 test('T-0092 自動出售說明縮短且批次按鈕固定同列', async () => {
