@@ -1,7 +1,7 @@
 ---
 id: T-0039
 title: 調整玩家在線心跳並補齊自動擲骰與雲端同步回歸測試
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-09
-updated: 2026-11-09
+updated: 2026-11-13
 depends_on: []
 branch: task/T-0039-presence-heartbeat-cloud-sync
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-13T09:12:57+08:00
 ---
 
 ## 任務
@@ -69,3 +69,5 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-13 09:12 [棒子明確驗收／叉子代記] 棒子在對話中明確確認本任務已成功，正式驗收結案；依 Board §1.2、§8 代記，狀態更新為 done。

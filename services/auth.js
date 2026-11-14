@@ -22,6 +22,8 @@ export function createAuthService(deps) {
     heartbeat,
     refreshLeaderboards,
     loadWeatherSummonData,
+    applyPetLoginSkill = () => 0,
+    isCloudSaveReady = () => false,
     timerManager
   } = deps;
 
@@ -162,7 +164,7 @@ export function createAuthService(deps) {
       return;
     }
     if (password.length < 6 && mode !== 'reset') {
-      showAuthMessage('密碼至少需要 6 位。');
+      showAuthMessage('密碼由你自行設定，至少需要 6 位。');
       return;
     }
 
@@ -297,6 +299,7 @@ export function createAuthService(deps) {
           if (event === 'SIGNED_IN' && user.email_confirmed_at) {
             toast('信箱驗證成功！可以開始遊玩了。');
           }
+          let cloudLoadSucceeded = false;
           try {
             let cloudLoadTimeout;
             try {
@@ -310,6 +313,7 @@ export function createAuthService(deps) {
                   );
                 })
               ]);
+              cloudLoadSucceeded = !!isCloudSaveReady(user.id);
             } finally {
               timerManager.clearTimeout(cloudLoadTimeout);
             }
@@ -318,6 +322,7 @@ export function createAuthService(deps) {
             toast(loadError?.message || '雲端存檔載入失敗，請重新整理');
             document.getElementById('saveStatus').textContent = '雲端載入逾時／失敗';
           }
+          if (cloudLoadSucceeded && getCurrentUser()?.id === user.id) await applyPetLoginSkill();
           if (getCurrentUser()?.id === user.id) {
             await loadPetFusionOdds();
             await heartbeat();

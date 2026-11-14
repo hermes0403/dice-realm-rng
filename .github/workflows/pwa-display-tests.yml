@@ -1,0 +1,42 @@
+name: PWA display regression tests
+
+on:
+  push:
+    branches:
+      - task/T-0085-mobile-landscape-pwa-fullscreen
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'style.css'
+      - 'script.js'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'ui/display-controls.js'
+      - 'tests/pwa-display-controls.test.mjs'
+      - '.github/workflows/pwa-display-tests.yml'
+
+jobs:
+  pwa-display:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run PWA display tests
+        run: node --test tests/pwa-display-controls.test.mjs
+      - name: Check JavaScript syntax
+        run: |
+          node --check script.js
+          node --check ui/display-controls.js
+          node --check sw.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
