@@ -1,5 +1,5 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
-import { resolveSecretLoginReward, resolveSecretRollRewards, taipeiDateKey } from './secret-pet-skills.js?v=20261114-t0090-secret-pet-skills';
+import { resolveSecretLoginReward, resolveSecretRollRewards, resolveSecretSpeedSkill, taipeiDateKey } from './secret-pet-skills.js?v=20261114-t0090-secret-pet-skills';
 
 /** Build codex entries while excluding retired pets for every player, including previous owners. */
 import { EVENT_PETS, PET_BASE_INCOME } from '../data/pets.js';
@@ -206,13 +206,12 @@ export function createPetSystem({
     const markerKey = 'diceRealmSecretPetS4:' + userId;
     let localLastUse = 0;
     try { localLastUse = Number(localStorageRef?.getItem(markerKey)) || 0; } catch {}
-    const skill = S.petSkillSpeed || {};
-    const cooldownUntil = Math.max(Number(skill.cooldownUntil) || 0, localLastUse + 12 * 60 * 60 * 1000);
-    if (cooldownUntil > now) {
-      toast('永寂恩賜冷卻中，約 ' + Math.ceil((cooldownUntil - now) / 60000) + ' 分鐘後可再次使用');
+    const result = resolveSecretSpeedSkill(S.petSkillSpeed || {}, now, localLastUse);
+    if (!result.activated) {
+      toast('永寂恩賜冷卻中，約 ' + Math.ceil((result.cooldownUntil - now) / 60000) + ' 分鐘後可再次使用');
       return false;
     }
-    S.petSkillSpeed = { activatedAt: now, expiresAt: now + 10 * 60 * 1000, cooldownUntil: now + 12 * 60 * 60 * 1000 };
+    S.petSkillSpeed = result.state;
     try { localStorageRef?.setItem(markerKey, String(now)); } catch {}
     save();
     render();
