@@ -82,6 +82,18 @@ test('普通擲骰的地獄與故障同時存在時採加法 9% 權重，顯示�
   assert.equal(Math.floor(dice.den / (1 + heavenWeatherBonus(dice, ['hell', 'glitch'], false, false) / 100)), Math.floor(dice.den / 1.09));
 });
 
+
+test('四組機率表套用最大天氣與故障倍率後仍無負值或超過 100% 的單項', () => {
+  for (const [heaven2, high] of [[false, false], [false, true], [true, false], [true, true]]) {
+    const entries = buildHeavenBaseEntries(byId, heaven2, high);
+    for (const weatherTypes of [['hell'], ['glitch'], ['hell', 'glitch']]) {
+      const boosted = applyHeavenWeatherWeights(entries, weatherTypes, heaven2, true, weatherTypes.includes('glitch'));
+      assert.ok(boosted.every(entry => Number.isFinite(entry.weight) && entry.weight >= 0 && entry.weight <= 100));
+      assert.ok(boosted.reduce((sum, entry) => sum + entry.weight, 0) > 0);
+    }
+  }
+});
+
 test('故障天氣將四顆故障骰子權重乘以 10，且不重複套用', () => {
   const entries = D.filter(dice => dice.glitchBonus).map(dice => ({ dice, weight: 2 }));
   const boosted = applyHeavenWeatherWeights(entries, ['glitch'], false, false, true);
