@@ -46,6 +46,9 @@ done_at:
 - [ ] 版本與 PWA 快取版本同步遞增 0.01；GitHub Pages 部署完成並驗證線上版本。
 
 ## 紀錄
+- 2026-11-14 [叉子] 依棒子補充的兩種持有狀態完成前端調整：未持有顯示五項材料與合成；持有後隱藏材料並提供獨立啟用；道具欄與手套欄拆分，舊 `gloves.g7/equipped=g7` 會相容遷移至 `items.g7/equippedItem=g7`，不修改 `bag`。雲端存檔 payload 加入 `items/equippedItem`，V1.38／PWA cache 同步更新。
+- 2026-11-14 [叉子] 已在 Supabase `dice-rng` 套用 `weather_converter_item_equipment_compat`，全服 RPC 改為接受新道具欄位，同時保留舊存檔欄位相容；已查詢 `pg_get_functiondef` 確認新欄位檢查存在。尚待 PR CI、合併及 Pages 部署驗證。
+- 2026-11-14 [叉子] 背包查核：雲端存檔目前記錄 49,196 次擲骰、背包 6 顆（d8×2、d9×3、d10×1），`autoSold=46,401`，`autoDeleteDice=[d1…d7]`，自動出售門檻 256。此資料顯示大量常見骰子是由既有自動出售設定處理；未修改出售設定，也未用不完整資料回補背包。
 
 - 2026-11-14 20:40 [叉子] 依棒子在對話中「那用吧」的明確指示建立新需求；先保持 open，待開單 PR 合併後重新檢查五單容量與 Communicate 優先閘門，再依規範接手。
 - 2026-11-14 20:42 [叉子] 開單 PR #152 已合併至 main。依最新 origin/main Board 重新檢查：owner_side 的 in_progress 任務為 T-0085、T-0092，共 2/5；未發現 to 指派 owner_side 且狀態 open／in_progress 的有效 Communicate 任務，也未發現 from 屬 owner_side 且狀態 returned 的委派任務。兩道閘門均未阻擋，狀態由 open → in_progress，開始本任務工作。
