@@ -32,7 +32,6 @@ on:
       - 'tests/glitch-weather-dice.test.mjs'
       - 'tests/glitch-weather-potion-drops.test.mjs'
       - 'tests/secret-pet-skills.test.mjs'
-      - 'tests/secret-pet-skills.test.mjs'
       - 'tests/weather-summon-odds.test.mjs'
       - 'tests/local-save-cloud-conflict.test.js'
       - '.github/workflows/dice-roll-save-tests.yml'
