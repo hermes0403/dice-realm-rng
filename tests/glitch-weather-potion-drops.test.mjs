@@ -155,9 +155,24 @@ test('重新載入後沿用本機秒數標記，錯過的秒數不補發', async
   const reloaded = createFixture({ storage, randomValues: [0, 0] });
   assert.equal(await reloaded.system.tick(), false);
   assert.equal(reloaded.randomCalls, 0);
+  reloaded.setOnline(false);
+  reloaded.setNow(5000);
+  assert.equal(await reloaded.system.tick(), false);
+  reloaded.setOnline(true);
   reloaded.setNow(6000);
   reloaded.setWeather({ type: 'glitch', types: ['glitch'], until: 10000 });
   assert.equal(await reloaded.system.tick(), true);
   assert.equal(reloaded.state.potions.inventory.angel1, 1);
   assert.equal(reloaded.state.potions.inventory.luck1, 1);
+});
+
+
+test('機率門檻使用嚴格小於，未達門檻不會發放或儲存', async () => {
+  const fixture = createFixture({ randomValues: [0.001, 0.002] });
+  assert.equal(await fixture.system.tick(), false);
+  assert.equal(fixture.state.potions.inventory.angel1, 0);
+  assert.equal(fixture.state.potions.inventory.luck1, 0);
+  assert.equal(fixture.saved, 0);
+  assert.equal(fixture.rendered, 0);
+  assert.deepEqual(fixture.messages, []);
 });

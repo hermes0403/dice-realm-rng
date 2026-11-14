@@ -71,11 +71,10 @@ function logPotionAction(...args){return activityLogService?.logPotionAction(...
 function renderCodex(){return codexUI?.renderCodex()}
 function render(){return mainRenderUI?.render()}
 const weatherDiceStats={counts:{},loadedAt:0};
-let currentUser=null,cloudSaveService=null,cloudSaveReadyUserId=null;
+let currentUser=null,cloudSaveService=null;
 let petSystem=null;
 function ensurePetData(pets){if(petSystem)return petSystem.ensurePetData(pets)}
 let S;
-function setCurrentUser(value){if(currentUser?.id!==value?.id)cloudSaveReadyUserId=null;currentUser=value}
 const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetData, getCurrentUser: () => currentUser, getState: () => S, localStorageRef: localStorage });
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
@@ -130,7 +129,7 @@ function savePayload(){return cloudSaveService.savePayload()}
 function achievementStats(){return cloudSaveService.achievementStats()}
 function applyPendingGrants(){return cloudSaveService.applyPendingGrants()}
 function syncCloudSave(){return cloudSaveService.syncCloudSave()}
-async function loadCloudSave(){const userId=currentUser?.id;await cloudSaveService.loadCloudSave();if(userId&&currentUser?.id===userId&&cloudSaveService.isLoadedFor(userId))cloudSaveReadyUserId=userId}
+function loadCloudSave(){return cloudSaveService.loadCloudSave()}
 let authService=null;
 function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
@@ -209,7 +208,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser: value => { currentUser = value; }:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
 });
@@ -256,7 +255,7 @@ const glitchWeatherDropSystem = createGlitchWeatherDropSystem({
   getState: () => S,
   getCurrentUser: () => currentUser,
   getWeather,
-  isReady: userId => cloudSaveReadyUserId === userId,
+  isReady: userId => cloudSaveService.isLoadedFor(userId),
   POTIONS,
   save,
   render,
