@@ -1937,3 +1937,52 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
   border-color: #789987 !important;
   box-shadow: 0 0 24px #9bcdb21a, inset 0 0 18px #ffffff0a !important;
 }
+
+
+/* T-0075: restore readable text on the dark explanatory panels and muted labels. */
+body {
+  color: #ffffff !important;
+}
+.muted,
+.mini,
+.stat span,
+.item p,
+.toolbar label,
+.announcement-line,
+.announce-style-label,
+.admin-category-copy small,
+.nav small,
+.footer,
+.announcement-caption,
+.announcement-empty,
+.admin-empty-state,
+.admin-navigation-status,
+.admin-offline {
+  color: #17203f !important;
+}
+.nav button:not(.active),
+.admin-category-tab:not([aria-pressed="true"]) {
+  color: #17203f !important;
+}
+#page-roll > #realmHero,
+#page-codex > .hero,
+#page-pets > .hero,
+#page-event #eventLockedPanel,
+#workshop-potions-panel .hero,
+#page-weather-summon .weather-summon-card {
+  color: #f1f4ff !important;
+}
+#page-roll > #realmHero .eyebrow { color: #a8f2c1 !important; }
+#page-codex > .hero .eyebrow { color: #a4f0e8 !important; }
+#page-pets > .hero .eyebrow { color: #d5eca3 !important; }
+#page-event #eventLockedPanel .eyebrow { color: #ffda94 !important; }
+#workshop-potions-panel .hero .eyebrow { color: #dfc1ff !important; }
+#page-weather-summon .weather-summon-card .eyebrow { color: #d9b8ff !important; }
+#page-roll > #realmHero .muted,
+#page-codex > .hero .muted,
+#page-pets > .hero .muted,
+#page-event #eventLockedPanel .muted,
+#workshop-potions-panel .hero .muted,
+#page-weather-summon .weather-summon-card .muted {
+  color: #f1f4ff !important;
+}
