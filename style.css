@@ -1986,3 +1986,48 @@ body {
 #page-weather-summon .weather-summon-card .muted {
   color: #f1f4ff !important;
 }
+
+
+/* T-0075 follow-up: keep text legible on the remaining emerald statistic/admin surfaces. */
+.stat,
+.stat b {
+  color: #f4fff7 !important;
+}
+.stat span {
+  color: #cfe2d5 !important;
+}
+.admin-category-nav,
+.admin-navigation-head,
+.admin-category-content,
+.admin-empty-state,
+.admin-category-group,
+.admin-category-title,
+.admin-search,
+.admin-category-tab:not([aria-pressed="true"]),
+.admin-category-icon,
+.admin-category-count,
+.admin-navigation-status,
+.admin-category-copy,
+.announcement-line {
+  color: #e8f5ec !important;
+}
+.admin-category-copy small,
+.admin-empty-state,
+.admin-navigation-status,
+.announcement-line {
+  color: #c5d5c9 !important;
+}
+.admin-category-title > span {
+  color: #d5e8ff !important;
+}
+.admin-search input::placeholder {
+  color: #c5d5c9 !important;
+  opacity: 1;
+}
+#authModal input::placeholder {
+  color: #263b30 !important;
+  opacity: 1;
+}
+.footer {
+  color: #f1f4ff !important;
+}
