@@ -132,7 +132,7 @@ test('四組基礎表的中間骰子均依既定稀有度順序嚴格遞減', ()
   }
 });
 
-test('地獄與故障天氣仍加權提升符合條件的目標骰子', () => {
+test('地獄與故障天氣仍依原規則提高目標骰子的原始權重', () => {
   for (const [heaven2, high, targetId] of [
     [false, false, 'd21'], [false, true, 'd21'],
     [true, false, 'd23'], [true, true, 'd23']
@@ -141,9 +141,10 @@ test('地獄與故障天氣仍加權提升符合條件的目標骰子', () => {
     const baseTarget = entries.find(entry => entry.dice.id === targetId).weight;
     for (const weatherTypes of [['hell'], ['glitch'], ['hell', 'glitch']]) {
       const boosted = applyHeavenWeatherWeights(entries, weatherTypes, heaven2, true, weatherTypes.includes('glitch'));
-      const total = boosted.reduce((sum, entry) => sum + entry.weight, 0);
-      const actualPercent = boosted.find(entry => entry.dice.id === targetId).weight / total * 100;
-      assert.ok(actualPercent > baseTarget, `${targetId} did not gain odds in ${weatherTypes.join('+')}`);
+      const target = boosted.find(entry => entry.dice.id === targetId);
+      const expected = baseTarget * (1 + heavenWeatherBonus(target.dice, weatherTypes, heaven2, true) / 100);
+      assert.ok(target.weight > baseTarget);
+      assert.ok(Math.abs(target.weight - expected) < 1e-10);
     }
   }
 });
