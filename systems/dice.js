@@ -1,4 +1,5 @@
-import { addGlitchDiceOdds, applyGlitchWeight } from './glitch-dice.js?v=20261113-t0084-glitch-weather-phase2';
+import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
+import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261114-t0087-heaven-probability';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
@@ -6,7 +7,6 @@ import { addGlitchDiceOdds, applyGlitchWeight } from './glitch-dice.js?v=2026111
 export function createDiceSystem(deps) {
   const {
     D,
-    ANGEL_ODDS,
     POTIONS,
     KEY,
     timerManager,
@@ -110,6 +110,7 @@ export function createDiceSystem(deps) {
         && (now.getMonth() > 10 || (now.getMonth() === 10 && now.getDate() >= 1)));
   }
 
+
   function weightedRoll() {
     const state = getState();
     const angel = (Number(state.potions?.angelCharges) || 0) > 0;
@@ -122,70 +123,23 @@ export function createDiceSystem(deps) {
       && (!isHalloweenDice(dice) || !halloweenDiceUnavailable()));
     const boostLuck = Math.max(0, Number(luck()) || 0);
 
-    // 天堂藥水搭配高於 100% 運氣時，改走保證至少 1/4096 的隱藏稀有池。
-    if (angel && boostLuck > 100) {
-      const rarePool = pool.filter(dice => Number(dice.den) >= 4096);
-      if (rarePool.length) {
-        const weights = rarePool.map(dice => {
-          const den = Number(dice.den) || 4096;
-          const rarityLift = 1 + Math.log2(Math.max(1, den / 4096)) * boostLuck / 100;
-          return applyGlitchWeight(dice, (1 / den) * rarityLift, isGlitchWeather);
-        });
-        const total = weights.reduce((sum, weight) => sum + weight, 0);
-        let roll = Math.random() * total;
-        for (let i = 0; i < rarePool.length; i++) {
-          roll -= weights[i];
-          if (roll <= 0) return rarePool[i];
-        }
-        return rarePool[rarePool.length - 1];
-      }
-    }
-
-    if (heaven2) {
-      // 天堂藥水 II 的內部機率表不顯示於玩家介面。
-      const heaven2Odds = {
-        d14: 20, d34: 10.1218, d15: 8.6757, d16: 7.7118, d29: 6.7478,
-        d17: 6.2658, d35: 5.7838, d18: 5.3018, d19: 4.8198, d30: 5.045,
-        d20: 4.563, d21: 4.081, d22: 3.599, d23: 2.4099, d25: 1.9279,
-        d26: 1.4459, d31: 0.5, d24: 0.5, d27: 0.495, d32: 0.005
-      };
-      let entries = D.filter(dice => Object.prototype.hasOwnProperty.call(heaven2Odds, dice.id)
-        && (!dice.weather || dice.weather === weather)
-        && (!isHalloweenDice(dice) || !halloweenDiceUnavailable()))
-        .map(dice => ({
-          dice,
-          weight: heaven2Odds[dice.id] * (weather === 'hell' && dice.den >= 700000 ? 1 / 0.95 : 1)
-        }));
-      entries = addGlitchDiceOdds(entries, pool, isGlitchWeather, weather);
-      entries = addWeatherOdds(entries, pool, weather);
-      const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
-      let roll = Math.random() * total;
-      for (const entry of entries) {
-        roll -= entry.weight;
-        if (roll < 0) return entry.dice;
-      }
-      return entries[entries.length - 1]?.dice || byId('d14');
-    }
 
     if (angel) {
-      let entries = ANGEL_ODDS.map(([id, percent]) => {
-        const dice = byId(id);
-        return {
-          dice,
-          weight: percent * (weather === 'hell' && dice?.den >= 700000 ? 1 / 0.95 : 1)
-        };
-      }).filter(entry => entry.dice
-        && (!entry.dice.weather || entry.dice.weather === weather)
-        && (!isHalloweenDice(entry.dice) || !halloweenDiceUnavailable()));
-      entries = addGlitchDiceOdds(entries, pool, isGlitchWeather, weather);
-      entries = addWeatherOdds(entries, pool, weather);
-      const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+      const entries = applyHeavenWeatherWeights(
+        buildHeavenBaseEntries(byId, heaven2, boostLuck > 100),
+        weatherTypes,
+        heaven2,
+        angel,
+        isGlitchWeather
+      );
+      const withWeatherDice = addWeatherOdds(entries, pool, weather);
+      const total = withWeatherDice.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
-      for (const entry of entries) {
+      for (const entry of withWeatherDice) {
         roll -= entry.weight;
         if (roll < 0) return entry.dice;
       }
-      return entries[entries.length - 1].dice;
+      return withWeatherDice[withWeatherDice.length - 1]?.dice || byId(heaven2 ? 'd14' : 'd12');
     }
 
     // 一般擲骰沿用原本的分級運氣權重。
@@ -193,7 +147,8 @@ export function createDiceSystem(deps) {
     const currentLuck = Math.max(0, Number(luck()) || 0);
     const effective = Math.max(0, Math.min(500, currentLuck + (tenthRoll ? 100 : 0)));
     const weights = pool.map(dice => {
-      const rollDen = weather === 'hell' && dice.den >= 700000 ? dice.den * 0.95 : dice.den;
+      const weatherBonus = heavenWeatherBonus(dice, weatherTypes, false, false);
+      const rollDen = Number(dice.den) / (1 + weatherBonus / 100);
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
       return applyGlitchWeight(dice, (1 / Math.max(2, rollDen)) * factor, isGlitchWeather);
