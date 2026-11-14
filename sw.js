@@ -1,13 +1,13 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.33';
+const CACHE_NAME = 'dice-realm-shell-v1.34';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261114-t0091-heaven-glitch-no-x10',
+  './script.js?v=20261114-t0092-autosell-achievements',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
-  './style.css?v=20261114-t0075-achievement-colors-weather-five',
+  './style.css?v=20261114-t0092-autosell-achievements',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
