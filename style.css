@@ -1959,3 +1959,12 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #page-pets > .hero .muted, #page-event #eventLockedPanel .muted,
 #workshop-potions-panel .hero .muted,
 #page-weather-summon .weather-summon-card .muted { color: #f1f4ff !important; }
+
+/* Preserve individual weather colors while correcting the dark base text color. */
+.weather-status { color: #e7ecff !important; }
+.weather-status.weather-rain { color: #75baff !important; }
+.weather-status.weather-snow { color: #f4fbff !important; }
+.weather-status.weather-thunder { color: #fff000 !important; }
+.weather-status.weather-crystal { color: #f2b5ff !important; }
+.weather-status.weather-hell { color: #ffb09a !important; }
+.weather-status.weather-dumpling { color: #ffd98a !important; }
