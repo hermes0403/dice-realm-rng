@@ -147,7 +147,8 @@ export function createDiceSystem(deps) {
     const currentLuck = Math.max(0, Number(luck()) || 0);
     const effective = Math.max(0, Math.min(500, currentLuck + (tenthRoll ? 100 : 0)));
     const weights = pool.map(dice => {
-      const weatherBonus = heavenWeatherBonus(dice, weatherTypes, false, false);\n      const rollDen = Number(dice.den) / (1 + weatherBonus / 100);
+      const weatherBonus = heavenWeatherBonus(dice, weatherTypes, false, false);
+      const rollDen = Number(dice.den) / (1 + weatherBonus / 100);
       // 每 100% 運氣，稀有骰子的相對權重增加 100%；不把加成截斷在 200%。
       const factor = dice.den > 1024 ? 1 + effective / 100 : 1;
       return applyGlitchWeight(dice, (1 / Math.max(2, rollDen)) * factor, isGlitchWeather);
