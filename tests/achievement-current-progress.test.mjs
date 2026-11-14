@@ -31,22 +31,29 @@ test('an existing weather achievement record prevents duplicate reward grants', 
     potions: { inventory: {} }
   };
   const dice = Array.from({ length: 5 }, (_, i) => ({ id: `rain${i + 1}`, weather: 'rain' }));
-  const progression = createProgressionSystem({
-    getState: () => state,
-    D: dice,
-    DAILY_TASKS: [],
-    POTIONS: [],
-    format: String,
-    compactNum: String,
-    totalUnique: () => 0,
-    coinEarningMultiplier: () => 1,
-    fresh: () => ({ potions: { inventory: {} } }),
-    save() {},
-    toast() {},
-    timerManager: { clearTimeout() {}, setTimeout() { return 1; } }
-  });
+  const previousDocument = globalThis.document;
+  globalThis.document = { getElementById() { return null; }, addEventListener() {} };
+  try {
+    const progression = createProgressionSystem({
+      getState: () => state,
+      D: dice,
+      DAILY_TASKS: [],
+      POTIONS: [],
+      format: String,
+      compactNum: String,
+      totalUnique: () => 0,
+      coinEarningMultiplier: () => 1,
+      fresh: () => ({ potions: { inventory: {} } }),
+      save() {},
+      toast() {},
+      timerManager: { clearTimeout() {}, setTimeout() { return 1; } }
+    });
 
-  progression.checkAchievements();
-  assert.equal(state.coins, 100);
-  assert.deepEqual(state.achievements.rainCollect2, savedRecord);
+    progression.checkAchievements();
+    assert.equal(state.coins, 100);
+    assert.deepEqual(state.achievements.rainCollect2, savedRecord);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
 });
