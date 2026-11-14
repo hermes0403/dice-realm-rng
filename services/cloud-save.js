@@ -171,8 +171,9 @@ export function createCloudSaveService(dependencies) {
       const localChanged = !valuesEqual(base[key], local[key]);
       const cloudChanged = !valuesEqual(base[key], cloud[key]);
       if (localChanged && !cloudChanged) {
-        if (local[key] === undefined) delete merged[key];
-        else merged[key] = clonePayload(local[key]);
+        if (local[key] === undefined) {
+          if (!preserveMissing) delete merged[key];
+        } else merged[key] = clonePayload(local[key]);
       } else if (localChanged && cloudChanged && local[key] && cloud[key]
         && typeof local[key] === 'object' && typeof cloud[key] === 'object'
         && !Array.isArray(local[key]) && !Array.isArray(cloud[key])) {
@@ -517,6 +518,11 @@ export function createCloudSaveService(dependencies) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
     cloudLoadReadyUserId = null;
+    if (lastSyncedUserId !== user.id) {
+      cloudSaveVersion = null;
+      lastSyncedPayload = null;
+      lastSyncedUserId = user.id;
+    }
     try {
       const scopedKey = userSaveKey(user.id);
       const localSaveAtLoadStart = (() => {
