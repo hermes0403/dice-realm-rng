@@ -12,6 +12,7 @@ export function createCloudSaveService(dependencies) {
   const localStorage = localStorageRef;
   const document = documentRef;
   const windowObject = windowRef;
+  const localWriterId = 'writer-' + Date.now() + '-' + Math.random().toString(36).slice(2);
 
   let cloudSyncTimer = null;
   let cloudSyncBusy = false;
@@ -66,7 +67,11 @@ export function createCloudSaveService(dependencies) {
   }
 
   function persistLocalSnapshot(state, userId = getCurrentUser()?.id) {
-    const snapshot = { ...state, _cloudBaseVersion: userId ? (cloudSaveVersion || null) : null };
+    const snapshot = {
+      ...state,
+      _cloudBaseVersion: userId ? (cloudSaveVersion || null) : null,
+      _cloudWriterId: localWriterId
+    };
     try {
       const scopedKey = userSaveKey(userId);
       if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(snapshot));
@@ -580,11 +585,17 @@ export function createCloudSaveService(dependencies) {
         try { return scopedKey ? localStorage.getItem(scopedKey) : null; }
         catch { return null; }
       })();
+      const localChangedDuringLoad = localSaveAfterCloud !== localSaveAtLoadStart;
       let latestLocalSnapshot = localSaveBeforeCloud;
-      if (localSaveAfterCloud !== localSaveAtLoadStart) {
+      if (localChangedDuringLoad) {
         try { latestLocalSnapshot = JSON.parse(localSaveAfterCloud || 'null'); }
         catch { latestLocalSnapshot = null; }
       }
+      const sameTabMutationDuringLoad = !!(
+        localChangedDuringLoad &&
+        latestLocalSnapshot?._cloudWriterId === localWriterId &&
+        localSaveBeforeCloud?.bag
+      );
       let localSnapshotForMerge = latestLocalSnapshot;
       if (conflictBasePayload && conflictLocalSnapshot?.bag) {
         const localVersionMatches = latestLocalSnapshot?._cloudBaseVersion === conflictBaseVersion;
@@ -606,7 +617,8 @@ export function createCloudSaveService(dependencies) {
         const storedBase = localSnapshotVersion
           ? readCloudBase(user.id, localSnapshotVersion)
           : null;
-        const basePayload = conflictBasePayload || storedBase?.payload || null;
+        const basePayload = conflictBasePayload || storedBase?.payload ||
+          (sameTabMutationDuringLoad ? localSaveBeforeCloud : null);
         let mergedPayload = cloudPayload;
         let usedLegacyFallback = false;
 
