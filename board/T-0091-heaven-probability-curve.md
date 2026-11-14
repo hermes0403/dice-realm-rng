@@ -1,7 +1,7 @@
 ---
 id: T-0091
 title: 調整天堂藥水 I／II 稀有骰子遞減曲線
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -44,3 +44,4 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 15:46 [叉子] 依棒子要求建立調整任務。最新 main Board owner_side 有效 in_progress／review 任務為 T-0085、T-0086、T-0089，共 3/5；T-0083 為 open、T-0090 已由棒子驗收並完成結案，不計入。未找到有效 Communicate 委派任務。先建立 open 任務，不開始實作。
+- 2026-11-14 15:47 [叉子] 開工 PR #122 已合併；重新檢查 main，owner_side 有效 in_progress／review 仍為 T-0085、T-0086、T-0089，共 3/5；Communicate 優先閘門未觸發。任務由 open 轉為 in_progress，開始實作。
