@@ -3,9 +3,9 @@ export function createGloveUI(deps) {
   const {
     getState, D, G, supabaseClient, getCurrentUser, byId, glove, currentGlove,
     format, formatWalletScientific, save, flushCloudSave, render, toast,
-    achievementStats, rewardText, grantAchievementReward, showAchievementPopup,
+    rewardText, grantAchievementReward, showAchievementPopup,
     checkAchievements, logCraft, KEY, userSaveKey, documentRef, confirmAction,
-    openAuth, totalUnique, localStorageRef = globalThis.localStorage
+    openAuth, localStorageRef = globalThis.localStorage
   } = deps;
   let glovePurchaseBusy = false;
 
@@ -155,19 +155,6 @@ export function createGloveUI(deps) {
         }
       }
 
-      const now = new Date().toISOString();
-      const { error: profileError } = await supabaseClient.from('player_profiles').upsert({
-        user_id: getCurrentUser().id,
-        username: (state.name || '旅人').trim().slice(0, 20) || '旅人',
-        total_rolls: Number(state.rolls) || 0,
-        unique_dice: totalUnique(),
-        rarest_den: Number(state.best?.den) || 0,
-        coins: Number(state.coins) || 0,
-        ...achievementStats(),
-        last_seen: now,
-        updated_at: now
-      }, { onConflict: 'user_id' });
-      if (profileError) console.warn('Glove purchase profile mirror update failed; purchase is committed', profileError);
       // Purchase RPC has committed; never roll back the confirmed purchase if local save scheduling fails.
       try { save(); } catch (saveError) {
         console.warn('Glove purchase committed but save scheduling failed', saveError);

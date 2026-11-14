@@ -175,12 +175,12 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('T-0093 V1.37 PWA 快取殼同步更新', async () => {
+test('T-0094 V1.39 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.37/);
-  assert.match(html, /script\.js\?v=20261114-t0093-weather-converter-item-workshop/);
-  assert.match(worker, /dice-realm-shell-v1\.37/);
+  assert.match(html, /V1\.39/);
+  assert.match(html, /script\.js\?v=20261114-t0094-weather-converter-item-slots/);
+  assert.match(worker, /dice-realm-shell-v1\.39/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
 });
@@ -206,10 +206,12 @@ test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小�
   assert.match(dice, /recipe:\[\['d39',1\],\['d42',1\],\['d47',1\],\['d51',1\],\['d55',1\]\]/);
   assert.match(gloves, /filter\(item => item\.id !== 'g0' && item\.id !== 'g7'\)/);
   assert.match(gloves, /60 \* 60 \* 1000/);
-  assert.match(gloves, /state\.gloves\?\.g7/);
+  assert.match(gloves, /state\.items\?\.g7/);
+  assert.match(gloves, /supabaseClient\.rpc\('purchase_glove'/);
+  assert.doesNotMatch(gloves, /from\('player_profiles'\)\.upsert/);
   assert.match(navigation, /workshop-items-panel/);
-  assert.match(weather, /需要啟用並持有天氣轉換器/);
-  assert.match(gameState, /G\.some\(g=>g\.id===key\)\?key/);
+  assert.match(weather, /需要先啟用天氣轉換器/);
+  assert.match(gameState, /G\.some\(g=>g\.id===key&&key!=='g7'\)\?key:legacyToCurrent\[key\]/);
   assert.match(gameState, /x\.equipped=\(equipped&&normalized\[equipped\]\)\?equipped:'g0'/);
   assert.match(script, /function currentGlove\(\)\{return S\.equipped==='g7'\?glove\('g0'\):glove\(S\.equipped\)\}/);
 });
