@@ -208,7 +208,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser: value => { currentUser = value; }:value=>{currentUser=value}, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
 });
@@ -306,7 +306,7 @@ function loadAdminPetInventoryCounts(){return adminMonitoringSystem?.loadAdminPe
 function setPlayerBan(banned){return adminMonitoringSystem?.setPlayerBan(banned)}
 setupAccountActions({
   documentRef: document, getState: () => S, setState: value => { S = value; },
-  getCurrentUser: () => currentUser, setCurrentUser,
+  getCurrentUser: () => currentUser, setCurrentUser: value => { currentUser = value; },
   supabaseClient, SUPABASE_URL, SUPABASE_KEY, totalUnique, achievementStats,
   save, render, flushCloudSave, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
