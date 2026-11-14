@@ -77,6 +77,8 @@ jobs:
       - run: node --check systems/glitch-weather-drops.js
       - run: node --check systems/secret-pet-skills.js
       - run: node --check systems/pets.js
+      - run: node --check script.js
+      - run: node --check data/pets.js
       - run: node --check services/auth.js
       - run: node --check systems/global-announcements.js
       - run: node --check systems/weather-summon-odds.js
