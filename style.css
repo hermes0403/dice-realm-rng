@@ -1105,28 +1105,8 @@ button.danger{
 .profile-version{text-align:center;margin:10px 0 0;color:#dce4ff!important;letter-spacing:.08em}
 
 
-/* T-0075: improve text contrast without changing the established backgrounds */
-:root{
-  --text:#0b1433;
-  --muted:#0b1433;
-}
-body{color:#0b1433!important}
-.muted,.mini,.hint,.help,.description,.subtitle,.result-sub,
-.tenth-progress-head,.nav small,.nav button:not(.active),
-.stat span,.item p,.toolbar label,.announcement-line,
-.announce-style-label,.admin-category-copy small,
-.sell-help,.inventory-row small,.inventory-sell small,
-.codex-row .codex-count,.pet-meta,.profile-version,
-small:not(.weather-status *){
-  color:#0b1433!important;
-  opacity:1!important;
-}
-input::placeholder,textarea::placeholder{
-  color:#29365e!important;
-  opacity:1!important;
-}
-
-
+/* T-0075: readable foreground tokens; surfaces and layout remain unchanged. */
+:root { --text: #edf0ff; --muted: #c5d5e6; }
 /* T-0076: restore the T-0061 emerald night theme while retaining current contrast and features */
 :root{
   --bg:#06130f;
@@ -1939,95 +1919,43 @@ body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
 }
 
 
-/* T-0075: restore readable text on the dark explanatory panels and muted labels. */
-body {
-  color: #ffffff !important;
+/* T-0075 final contrast pass: light foregrounds on dark game surfaces. */
+:root { --text: #edf0ff; --muted: #c5d5e6; }
+body { color: #edf0ff !important; }
+h1, h2, h3, h4, .hero h1, .section-head h2 { color: #f1f4ff !important; }
+.muted, .mini, .hint, .help, .description, .subtitle, .result-sub,
+.tenth-progress-head, .nav small, .stat span, .item p, .toolbar label,
+.announcement-line, .announce-style-label, .admin-category-copy small,
+.sell-help, .inventory-row small, .inventory-sell small,
+.codex-row .codex-count, .pet-meta, .profile-version, .footer,
+.announcement-caption, .announcement-empty, .admin-empty-state,
+.admin-navigation-status, .admin-offline,
+small:not(.weather-status *) {
+  color: #c5d5e6 !important; opacity: 1 !important;
 }
-.muted,
-.mini,
-.stat span,
-.item p,
-.toolbar label,
-.announcement-line,
-.announce-style-label,
-.admin-category-copy small,
-.nav small,
-.footer,
-.announcement-caption,
-.announcement-empty,
-.admin-empty-state,
-.admin-navigation-status,
-.admin-offline {
-  color: #17203f !important;
-}
-.nav button:not(.active),
-.admin-category-tab:not([aria-pressed="true"]) {
-  color: #17203f !important;
-}
-#page-roll > #realmHero,
-#page-codex > .hero,
-#page-pets > .hero,
-#page-event #eventLockedPanel,
-#workshop-potions-panel .hero,
-#page-weather-summon .weather-summon-card {
-  color: #f1f4ff !important;
-}
+.nav button:not(.active), .admin-category-tab:not([aria-pressed="true"]),
+button:not(.primary):not(.danger) { color: #e8edf9 !important; }
+.pill, .admin-category-count { color: #e8edf9 !important; }
+.stat, .stat b { color: #f4fff7 !important; }
+.admin-category-nav, .admin-navigation-head, .admin-category-content,
+.admin-empty-state, .admin-category-group, .admin-category-title,
+.admin-search, .admin-category-icon, .admin-navigation-status,
+.admin-category-copy { color: #e8f5ec !important; }
+.admin-category-copy small, .admin-empty-state,
+.admin-navigation-status, .announcement-line { color: #c5d5c9 !important; }
+.admin-category-title > span { color: #d5e8ff !important; }
+.admin-search input::placeholder { color: #c5d5c9 !important; opacity: 1; }
+#authModal input::placeholder { color: #263b30 !important; opacity: 1; }
+#page-roll > #realmHero, #page-codex > .hero, #page-pets > .hero,
+#page-event #eventLockedPanel, #workshop-potions-panel .hero,
+#page-weather-summon .weather-summon-card { color: #f1f4ff !important; }
 #page-roll > #realmHero .eyebrow { color: #a8f2c1 !important; }
 #page-codex > .hero .eyebrow { color: #a4f0e8 !important; }
 #page-pets > .hero .eyebrow { color: #d5eca3 !important; }
 #page-event #eventLockedPanel .eyebrow { color: #ffda94 !important; }
 #workshop-potions-panel .hero .eyebrow { color: #dfc1ff !important; }
 #page-weather-summon .weather-summon-card .eyebrow { color: #d9b8ff !important; }
-#page-roll > #realmHero .muted,
-#page-codex > .hero .muted,
-#page-pets > .hero .muted,
-#page-event #eventLockedPanel .muted,
+#page-roll > #realmHero .muted, #page-codex > .hero .muted,
+#page-pets > .hero .muted, #page-event #eventLockedPanel .muted,
 #workshop-potions-panel .hero .muted,
-#page-weather-summon .weather-summon-card .muted {
-  color: #f1f4ff !important;
-}
-
-
-/* T-0075 follow-up: keep text legible on the remaining emerald statistic/admin surfaces. */
-.stat,
-.stat b {
-  color: #f4fff7 !important;
-}
-.stat span {
-  color: #cfe2d5 !important;
-}
-.admin-category-nav,
-.admin-navigation-head,
-.admin-category-content,
-.admin-empty-state,
-.admin-category-group,
-.admin-category-title,
-.admin-search,
-.admin-category-tab:not([aria-pressed="true"]),
-.admin-category-icon,
-.admin-category-count,
-.admin-navigation-status,
-.admin-category-copy,
-.announcement-line {
-  color: #e8f5ec !important;
-}
-.admin-category-copy small,
-.admin-empty-state,
-.admin-navigation-status,
-.announcement-line {
-  color: #c5d5c9 !important;
-}
-.admin-category-title > span {
-  color: #d5e8ff !important;
-}
-.admin-search input::placeholder {
-  color: #c5d5c9 !important;
-  opacity: 1;
-}
-#authModal input::placeholder {
-  color: #263b30 !important;
-  opacity: 1;
-}
-.footer {
-  color: #f1f4ff !important;
-}
+#page-weather-summon .weather-summon-card .muted { color: #f1f4ff !important; }
