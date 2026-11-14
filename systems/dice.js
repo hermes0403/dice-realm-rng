@@ -129,8 +129,7 @@ export function createDiceSystem(deps) {
         buildHeavenBaseEntries(byId, heaven2, boostLuck > 100),
         weatherTypes,
         heaven2,
-        angel,
-        isGlitchWeather
+        angel
       );
       const withWeatherDice = addWeatherOdds(entries, pool, weather);
       const total = withWeatherDice.reduce((sum, entry) => sum + entry.weight, 0);
