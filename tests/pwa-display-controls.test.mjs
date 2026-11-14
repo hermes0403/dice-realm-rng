@@ -175,12 +175,12 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('秘密寵物技能與故障天氣模組納入 V1.27 PWA 快取殼', async () => {
+test('秘密寵物技能與故障天氣模組納入 V1.29 PWA 快取殼', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.27/);
-  assert.match(html, /script\.js\?v=20261114-t0090-secret-pet-skills/);
-  assert.match(worker, /dice-realm-shell-v1\.27/);
+  assert.match(html, /V1\.29/);
+  assert.match(html, /script\.js\?v=20261114-t0091-heaven-glitch-no-x10/);
+  assert.match(worker, /dice-realm-shell-v1\.29/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
 });
