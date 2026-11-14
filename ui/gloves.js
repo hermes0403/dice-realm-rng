@@ -22,46 +22,70 @@ export function createGloveUI(deps) {
     documentRef.getElementById('equippedDesc').textContent = equippedGlove.desc;
     documentRef.getElementById('gloveLuck').textContent = '+' + equippedGlove.luck + '%';
     documentRef.getElementById('gloveSpeed').textContent = '+' + equippedGlove.speed + '%';
-    documentRef.getElementById('gloveOwned').textContent = Object.keys(state.gloves || {}).filter(id => state.gloves[id] > 0).length;
+    documentRef.getElementById('gloveOwned').textContent = Object.keys(state.gloves || {}).filter(id => id !== 'g7' && state.gloves[id] > 0).length;
+
+    const converter = G.find(item => item.id === 'g7');
+    const itemWorkshopList = documentRef.getElementById('itemWorkshopList');
+    if (itemWorkshopList && converter) {
+      const owned = Number(state.gloves?.g7) > 0;
+      const enabled = state.equipped === 'g7';
+      const materials = converter.recipe.map(([diceId, count]) => {
+        const dice = byId(diceId);
+        const have = Number(state.bag[diceId]) || 0;
+        const enough = have >= count;
+        const odds = dice?.den ? '（1/' + Number(dice.den).toLocaleString('en-US') + '）' : '';
+        return '<p style="color:' + (enough ? '#65e6b2' : '#ff829d') + '">' +
+          (enough ? '✓' : '缺少') + ' ' + (dice?.icon || '🎲') + ' ' + (dice?.name || diceId) +
+          ' ' + odds + ' ×' + count + '：持有 ' + format(have) + '</p>';
+      }).join('');
+      const action = enabled ? '已啟用' : owned ? '啟用' : '合成';
+      const disabled = enabled || (!owned && !canCraft(converter));
+      itemWorkshopList.innerHTML = '<div class="recipe"><div style="flex:1;min-width:0"><h3>' +
+        converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') +
+        '</h3><p>' + converter.desc + '</p><p>每小時可使用一次；不提供運氣或擲骰速度加成。</p>' +
+        materials + '</div><button ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button></div>';
+    }
 
     const convertPanel = documentRef.getElementById('weatherConvertPanel');
     const convertBtn = documentRef.getElementById('weatherConvertBtn');
     const convertCooldown = documentRef.getElementById('weatherConvertCooldown');
     if (convertPanel) {
-      const canConvert = state.equipped === 'g7' && !!state.gloves?.g7;
-      convertPanel.hidden = !canConvert;
-      if (canConvert) {
+      const owned = Number(state.gloves?.g7) > 0;
+      const enabled = state.equipped === 'g7';
+      convertPanel.hidden = !owned;
+      if (owned && convertBtn && convertCooldown) {
         const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
-        convertBtn.disabled = left > 0;
-        convertBtn.textContent = left > 0 ? '⏳ 天氣轉換冷卻中' : '🌦️ 轉換全服天氣';
-        convertCooldown.textContent = left > 0
-          ? '剩餘冷卻 ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':'
-            + String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':'
-            + String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
-          : '能力已就緒';
+        convertBtn.disabled = !enabled || left > 0;
+        convertBtn.textContent = !enabled ? '請先啟用天氣轉換器' : left > 0 ? '⏳ 天氣轉換冷卻中' : '🌦️ 轉換天氣';
+        convertCooldown.textContent = !enabled
+          ? '先啟用天氣轉換器，即可每小時使用一次。'
+          : left > 0
+            ? '剩餘冷卻 ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
+              String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
+              String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
+            : '能力已就緒';
       }
     }
 
-    documentRef.getElementById('recipeList').innerHTML = G.filter(item => item.id !== 'g0')
-      .sort((a, b) => (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER))
-      .map(item => {
-        const owned = !!state.gloves[item.id];
-        const equipped = state.equipped === item.id;
-        if (item.id === 'g7') {
-          const materials = item.recipe.map(([diceId, count]) => {
-            const dice = byId(diceId);
-            const have = Number(state.bag[diceId]) || 0;
-            const enough = have >= count;
-            return `<p style="color:${enough ? '#65e6b2' : '#ff829d'}">${enough ? '✓' : '缺少'} ${dice?.name || diceId} ×${count}：持有 ${format(have)}</p>`;
-          }).join('');
-          return `<div class="recipe"><div style="flex:1;min-width:0"><h3>${item.icon} ${item.name}${equipped ? '（已裝備）' : owned ? '（已持有）' : ''}</h3>${materials}<p>運氣 +${item.luck}% · 速度 +${item.speed}%</p></div><button ${owned ? (equipped ? 'disabled' : '') : (canCraft(item) ? '' : 'disabled')} data-craft="g7">${equipped ? '已裝備' : owned ? '裝備' : '合成'}</button></div>`;
-        }
-        const action = owned ? (equipped ? '已裝備' : '裝備') : '購買';
-        const disabled = glovePurchaseBusy || (owned ? equipped : Number(state.coins) < item.price);
-        return `<div class="recipe"><div style="flex:1;min-width:0"><h3>${item.icon} ${item.name}${equipped ? '（已裝備）' : owned ? '（已持有）' : ''}</h3><p>運氣 +${item.luck}% · 速度 +${item.speed}%</p><p style="color:#ffd27a;font-weight:800">價格：${formatWalletScientific(item.price)}</p>${!owned && Number(state.coins) < item.price ? '<p style="color:#ff829d">金幣不足</p>' : ''}</div><button ${disabled ? 'disabled' : ''} data-glove-action="${item.id}">${action}</button></div>`;
-      }).join('');
+    const recipeList = documentRef.getElementById('recipeList');
+    if (recipeList) {
+      recipeList.innerHTML = G.filter(item => item.id !== 'g0' && item.id !== 'g7')
+        .sort((a, b) => (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER))
+        .map(item => {
+          const owned = !!state.gloves[item.id];
+          const equipped = state.equipped === item.id;
+          const action = owned ? (equipped ? '已裝備' : '裝備') : '購買';
+          const disabled = glovePurchaseBusy || (owned ? equipped : Number(state.coins) < item.price);
+          return '<div class="recipe"><div style="flex:1;min-width:0"><h3>' + item.icon + ' ' + item.name +
+            (equipped ? '（已裝備）' : owned ? '（已持有）' : '') +
+            '</h3><p>運氣 +' + item.luck + '% · 速度 +' + item.speed +
+            '%</p><p style="color:#ffd27a;font-weight:800">價格：' + formatWalletScientific(item.price) +
+            '</p>' + (!owned && Number(state.coins) < item.price ? '<p style="color:#ff829d">金幣不足</p>' : '') +
+            '</div><button ' + (disabled ? 'disabled' : '') + ' data-glove-action="' + item.id + '">' +
+            action + '</button></div>';
+        }).join('');
+    }
   }
-
   async function purchaseGlove(id) {
     const state = getState();
     if (glovePurchaseBusy) return;
@@ -173,7 +197,7 @@ export function createGloveUI(deps) {
       state.equipped = id;
       save();
       render();
-      toast('已裝備' + item.name + '（同時只能裝備一副手套）');
+      toast(id === 'g7' ? '已啟用天氣轉換器' : '已裝備' + item.name + '（同時只能裝備一副手套）');
       return;
     }
     if (!item.recipe?.length || !canCraft(item)) {
@@ -191,7 +215,7 @@ export function createGloveUI(deps) {
     save();
     if (getCurrentUser()) logCraft('glove', id, item.name);
     render();
-    toast('合成成功並裝備：' + item.name);
+    toast(id === 'g7' ? '合成成功並啟用：' + item.name : '合成成功並裝備：' + item.name);
   }
   let gloveUISetup = false;
   function setupGloveUI() {
