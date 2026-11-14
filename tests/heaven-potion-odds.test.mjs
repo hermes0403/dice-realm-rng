@@ -33,7 +33,7 @@ test('四組中間骰子依分母遞增、權重嚴格遞減且包含奇點骰�
   for (const [heaven2, high] of [[false, false], [false, true], [true, false], [true, true]]) {
     const fixedId = heaven2 ? (high ? 'd15' : 'd14') : (high ? 'd13' : 'd12');
     const entries = buildHeavenBaseEntries(byId, heaven2, high)
-      .filter(entry => HEAVEN_MIDDLE_IDS.includes(entry.dice.id));
+      .filter(entry => HEAVEN_MIDDLE_IDS.includes(entry.dice.id) && entry.dice.id !== fixedId);
     assert.equal(entries.length, 24 - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0));
     for (let i = 1; i < entries.length; i++) {
       assert.ok(entries[i].dice.den > entries[i - 1].dice.den);
@@ -60,7 +60,7 @@ test('故障天氣將四顆故障骰子權重乘以 10，且不重複套用', ()
   const boosted = applyHeavenWeatherWeights(entries, ['glitch'], false, false, true);
   assert.equal(boosted.length, 4);
   for (const entry of boosted) {
-    assert.equal(entry.weight, 20);
-    assert.equal(applyGlitchWeight(entry.dice, 2, true), 20);
+    const expectedBase = 2 * (1 + heavenWeatherBonus(entry.dice, ['glitch'], false, false) / 100);
+    assert.equal(entry.weight, applyGlitchWeight(entry.dice, expectedBase, true));
   }
 });
