@@ -19,13 +19,13 @@ test('auto-sell options contain only the configured 18 ordinary dice and discard
 
 test('auto-sell options are ordered common-to-rare and exclude weather and higher-tier dice', () => {
   const dice = [
-    { id: 'rare', den: 1000 },
+    { id: 'd16', den: 65536 },
     { id: 'weather-rare', den: 5000, weather: 'rain' },
-    { id: 'common', den: 2, name: '初始骰子' },
+    { id: 'd1', den: 2, name: '初始骰子' },
     { id: 'weather-common', den: 5, weather: 'rain' },
     { id: 'd17', den: 131072 }
   ];
-  assert.deepEqual(filterAutoSellDice(dice).dice.map(item => item.id), ['common']);
+  assert.deepEqual(filterAutoSellDice(dice).dice.map(item => item.id), ['d1']);
 });
 
 test('pet backpack supports income and rarity sorting in both directions without mutating ownership', () => {
