@@ -9,7 +9,7 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-12
-updated: 2026-11-12
+updated: 2026-11-14
 depends_on: [T-0067]
 branch: task/T-0068-stat-cards-transparent
 done_by:
@@ -34,3 +34,5 @@ done_at:
 - [ ] 數字與標籤仍清楚可讀。
 - [ ] 一般按鈕、版面及功能不受影響。
 - [ ] CI 全數通過。
+
+- 2026-11-14 10:31 [impact][叉子] T-0067 已依棒子最新指示恢復統計卡片底色與細框線；本任務原先「透明底色、移除邊框」的範圍與最新方向衝突，後續不得直接套回透明／無框樣式，需由棒子確認是否調整或取消本任務。
