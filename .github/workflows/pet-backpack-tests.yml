@@ -9,6 +9,7 @@ on:
       - 'ui/inventory.js'
       - 'systems/dice.js'
       - 'systems/pets.js'
+      - 'systems/dice-locks.js'
       - 'tests/pet-backpack-sort-and-auto-sell.test.js'
       - '.github/workflows/pet-backpack-tests.yml'
 

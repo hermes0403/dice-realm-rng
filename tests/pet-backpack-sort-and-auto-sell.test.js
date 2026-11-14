@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { filterAutoSellDice } from '../ui/inventory.js';
 import { sortOwnedPets } from '../systems/pets.js';
+import { lockedDiceIndexes, unlockedDiceCount, consumeUnlockedDice } from '../systems/dice-locks.js';
 
 test('auto-sell options exclude Halloween dice and discard legacy selected IDs', () => {
   const dice = [
@@ -46,4 +47,25 @@ test('pet backpack supports income and rarity sorting in both directions without
   assert.deepEqual(sortOwnedPets(pets, { ...options, mode: 'rarity-asc' }).map(p => p.uid), ['common', 'legendary', 'secret']);
   assert.deepEqual(sortOwnedPets(pets, { ...options, mode: 'rarity-desc' }).map(p => p.uid), ['secret', 'legendary', 'common']);
   assert.deepEqual(pets.map(p => p.uid), ['legendary', 'common', 'secret']);
+});
+
+
+test('locked dice are excluded from available sale and fusion counts', () => {
+  const state = { bag: { d1: 3 }, lockedDice: ['d1:1'] };
+  assert.deepEqual([...lockedDiceIndexes(state, 'd1')], [1]);
+  assert.equal(unlockedDiceCount(state, 'd1'), 2);
+  assert.equal(consumeUnlockedDice(state, 'd1', 2), true);
+  assert.equal(state.bag.d1, 1);
+  assert.deepEqual(state.lockedDice, ['d1:0']);
+  assert.equal(unlockedDiceCount(state, 'd1'), 0);
+  assert.equal(consumeUnlockedDice(state, 'd1', 1), false);
+  assert.equal(state.bag.d1, 1);
+});
+
+test('consuming an unlocked dice keeps later locked dice attached to their instance', () => {
+  const state = { bag: { d2: 4 }, lockedDice: ['d2:3'] };
+  assert.equal(consumeUnlockedDice(state, 'd2', 1), true);
+  assert.equal(state.bag.d2, 3);
+  assert.deepEqual(state.lockedDice, ['d2:2']);
+  assert.equal(unlockedDiceCount(state, 'd2'), 2);
 });
