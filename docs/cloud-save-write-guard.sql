@@ -114,6 +114,16 @@ DECLARE
   v_new_best jsonb;
   v_old_discovered jsonb;
   v_new_discovered jsonb;
+  v_old_grants jsonb;
+  v_new_grants jsonb;
+  v_old_capacity bigint;
+  v_new_capacity bigint;
+  v_old_auto_sold bigint;
+  v_new_auto_sold bigint;
+  v_old_weather_convert bigint;
+  v_new_weather_convert bigint;
+  v_old_halloween jsonb;
+  v_new_halloween jsonb;
   v_key text;
   v_value jsonb;
   v_old_count bigint;
@@ -183,6 +193,52 @@ BEGIN
     THEN NEW.save_data->'petDiscovered' ELSE '{}'::jsonb END;
   NEW.save_data := jsonb_set(
     NEW.save_data, '{petDiscovered}', v_old_discovered || v_new_discovered, true
+  );
+
+  v_old_grants := CASE WHEN jsonb_typeof(OLD.save_data->'adminGrantApplied') = 'object'
+    THEN OLD.save_data->'adminGrantApplied' ELSE '{}'::jsonb END;
+  v_new_grants := CASE WHEN jsonb_typeof(NEW.save_data->'adminGrantApplied') = 'object'
+    THEN NEW.save_data->'adminGrantApplied' ELSE '{}'::jsonb END;
+  FOR v_key, v_value IN SELECT key, value FROM jsonb_each(v_old_grants)
+  LOOP
+    v_old_count := greatest(0, coalesce((v_value #>> '{}')::bigint, 0));
+    v_new_count := greatest(0, coalesce((v_new_grants->>v_key)::bigint, 0));
+    IF v_old_count > v_new_count THEN
+      v_new_grants := jsonb_set(v_new_grants, ARRAY[v_key], to_jsonb(v_old_count), true);
+    END IF;
+  END LOOP;
+  NEW.save_data := jsonb_set(NEW.save_data, '{adminGrantApplied}', v_new_grants, true);
+
+  v_old_capacity := coalesce(nullif(OLD.save_data->>'bagCapacity', '')::bigint, 0);
+  v_new_capacity := coalesce(nullif(NEW.save_data->>'bagCapacity', '')::bigint, 0);
+  IF v_old_capacity > v_new_capacity THEN
+    NEW.save_data := jsonb_set(NEW.save_data, '{bagCapacity}', to_jsonb(v_old_capacity), true);
+  END IF;
+
+  v_old_auto_sold := coalesce(nullif(OLD.save_data->>'autoSold', '')::bigint, 0);
+  v_new_auto_sold := coalesce(nullif(NEW.save_data->>'autoSold', '')::bigint, 0);
+  IF v_old_auto_sold > v_new_auto_sold THEN
+    NEW.save_data := jsonb_set(NEW.save_data, '{autoSold}', to_jsonb(v_old_auto_sold), true);
+  END IF;
+
+  v_old_weather_convert := coalesce(nullif(OLD.save_data->>'weatherConvertAt', '')::bigint, 0);
+  v_new_weather_convert := coalesce(nullif(NEW.save_data->>'weatherConvertAt', '')::bigint, 0);
+  IF v_old_weather_convert > v_new_weather_convert THEN
+    NEW.save_data := jsonb_set(NEW.save_data, '{weatherConvertAt}', to_jsonb(v_old_weather_convert), true);
+  END IF;
+
+  v_old_halloween := CASE WHEN jsonb_typeof(OLD.save_data->'halloweenUnlocked') = 'object'
+    THEN OLD.save_data->'halloweenUnlocked' ELSE '{}'::jsonb END;
+  v_new_halloween := CASE WHEN jsonb_typeof(NEW.save_data->'halloweenUnlocked') = 'object'
+    THEN NEW.save_data->'halloweenUnlocked' ELSE '{}'::jsonb END;
+  NEW.save_data := jsonb_set(
+    NEW.save_data,
+    '{halloweenUnlocked}',
+    jsonb_build_object(
+      'd33', coalesce((v_old_halloween->>'d33')::boolean, false) OR coalesce((v_new_halloween->>'d33')::boolean, false),
+      'd34', coalesce((v_old_halloween->>'d34')::boolean, false) OR coalesce((v_new_halloween->>'d34')::boolean, false)
+    ),
+    true
   );
 
   RETURN NEW;
