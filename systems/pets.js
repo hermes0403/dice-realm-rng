@@ -194,12 +194,18 @@ export function createPetSystem({
     return locks.request('diceRealmSecretPetS2Login:' + userId, { ifAvailable: true }, async lock => {
       if (!lock || !equippedPetHas('s2')) return 0;
       const S = getState();
-      const result = resolveSecretLoginReward(S.petSkillLogin || {});
+      const today = taipeiDateKey();
+      const markerKey = 'diceRealmSecretPetS2LoginDate:' + userId;
+      try {
+        if (localStorageRef?.getItem(markerKey) === today) return 0;
+      } catch {}
+      const result = resolveSecretLoginReward(S.petSkillLogin || {}, today);
       if (!result.claimed) return 0;
       S.petSkillLogin = result.state;
       S.coins = (Number(S.coins) || 0) + result.reward;
       S.quest = S.quest || {};
       S.quest.coinsEarned = (Number(S.quest.coinsEarned) || 0) + result.reward;
+      try { localStorageRef?.setItem(markerKey, today); } catch {}
       save();
       toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
       return result.reward;
