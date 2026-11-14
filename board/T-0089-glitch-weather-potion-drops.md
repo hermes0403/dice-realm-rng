@@ -1,7 +1,7 @@
 ---
 id: T-0089
 title: 故障天氣期間在線玩家每秒機率獲得藥水
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -51,3 +51,6 @@ done_at:
 ## 紀錄
 
 - 2026-11-14 11:34 [叉子] 依棒子需求建立新任務，先保持 open。開單前檢查 main SHA `85cfb9539a6f812af343b7642384fd64fd19afaa`；owner_side 有效 in_progress／review 任務已達 7 張，超過 5 張啟動上限，因此不得轉為 in_progress 或開始實作。新需求可先建立並保持 open，待容量閘門解除後再重新檢查。需求依目前故障天氣與天堂藥水機制，連結 T-0084、T-0087。
+
+
+- 2026-11-14 12:11 [叉子] 開工准入複查：依 main SHA f12a755d101090eb0eb81fdba13db14a862f2664，owner_side 有效 in_progress 任務 0/5；Communicate 優先閘門未觸發（Board 搜尋未找到符合 §15.9 的有效委派單）；依賴 T-0084、T-0087 均已由棒子驗收並正式結案。兩道閘門通過，任務由 open 轉為 in_progress，開始進入實作階段。
