@@ -21,6 +21,7 @@ export function getPetCodexEntries(petDefinitions = [], discoveredIds = []) {
     .map(pet => ({ ...pet, discovered: discovered.has(pet.id) }));
 }
 import { petWeightSkillMultiplier } from './pet-skills.js';
+import { unlockedDiceCount, consumeUnlockedDice } from './dice-locks.js';
 /** Increase mythic and secret pet-fusion odds while preserving a 100% total. */
 export function applyFusionLuckToRates(rates, bonusPercent = 0) {
   const adjusted = Object.fromEntries(Object.entries(rates || {}).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]));
@@ -432,15 +433,15 @@ export function createPetSystem({
     const a = documentRef.getElementById('petDiceSlotA');
     const b = documentRef.getElementById('petDiceSlotB');
     if (!a || !b) return;
-    const all = D.filter(die => (Number(S.bag[die.id]) || 0) >= 1).sort((x, y) => x.den - y.den);
+    const all = D.filter(die => unlockedDiceCount(S, die.id) >= 1).sort((x, y) => x.den - y.den);
     const oldA = a.value;
     const oldB = b.value;
     const optionsFor = otherId => all.filter(die => {
       if (!otherId) return true;
-      if (die.id === otherId) return (Number(S.bag[die.id]) || 0) >= 2;
-      return dicePairAllowed(die, getDiceById(otherId));
+      if (die.id === otherId) return unlockedDiceCount(S, die.id) >= 2;
+      return unlockedDiceCount(S, die.id) >= 1 && dicePairAllowed(die, getDiceById(otherId));
     });
-    const make = (items, placeholder) => '<option value="">' + placeholder + '</option>' + items.map(die => `<option value="${die.id}">${die.name}（1/${die.den.toLocaleString('en-US')}）×${S.bag[die.id]}</option>`).join('');
+    const make = (items, placeholder) => '<option value="">' + placeholder + '</option>' + items.map(die => `<option value="${die.id}">${die.name}（1/${die.den.toLocaleString('en-US')}）×${unlockedDiceCount(S, die.id)} 可用</option>`).join('');
     const listA = optionsFor(oldB);
     const listB = optionsFor(oldA);
     a.innerHTML = make(listA, '選擇骰子');
@@ -458,8 +459,8 @@ export function createPetSystem({
     const da = getDiceById(idA);
     const db = getDiceById(idB);
     const same = !!(da && db && idA === idB);
-    const countA = Number(S.bag[idA]) || 0;
-    const countB = Number(S.bag[idB]) || 0;
+    const countA = unlockedDiceCount(S, idA);
+    const countB = unlockedDiceCount(S, idB);
     const button = documentRef.getElementById('petDiceCraftBtn');
     for (const [die, artId, infoId] of [[da, 'petDiceArtA', 'petDiceInfoA'], [db, 'petDiceArtB', 'petDiceInfoB']]) {
       documentRef.getElementById(artId).textContent = die ? (die.icon || '🎲') : '🎲';
@@ -482,7 +483,7 @@ export function createPetSystem({
     info.textContent = petFull ? '寵物背包已滿（20/20），請先出售寵物才能繼續合成。'
       : (da && db && !ratioOK ? '兩顆骰子的機率分母比例不可超過 1,000 倍。'
         : (valid ? `已放入「${da.name}」＋「${db.name}」。合成區間依兩顆骰子的分母相加計算（${(Number(da.den) + Number(db.den)).toLocaleString('en-US')}）。${same ? '合成會消耗同種骰子 2 顆。' : '合成會各消耗 1 顆骰子。'}｜${weatherInfo}；黃金、鑽石、彩虹等外觀變異仍會另外獨立判定。`
-          : '請選擇兩顆骰子，且確認持有數量足夠。'));
+          : (da && db && ratioOK && !enough ? '未鎖定骰子數量不足，請先解除星號。' : '請選擇兩顆骰子，且確認持有數量足夠。')));
   }
 
   function onPetDiceSelectionChange(changed) {
@@ -510,10 +511,10 @@ export function createPetSystem({
     const da = getDiceById(idA);
     const db = getDiceById(idB);
     const same = idA === idB;
-    const countA = Number(S.bag[idA]) || 0;
-    const countB = Number(S.bag[idB]) || 0;
+    const countA = unlockedDiceCount(S, idA);
+    const countB = unlockedDiceCount(S, idB);
     if (!da || !db || !dicePairAllowed(da, db) || (same ? countA < 2 : (countA < 1 || countB < 1))) {
-      toast('骰子種類、持有數量或 1,000 倍比例限制不符合');
+      toast('骰子種類、未鎖定持有數量或 1,000 倍比例限制不符合');
       return;
     }
     const tier = dicePairTier(da, db);
@@ -528,6 +529,12 @@ export function createPetSystem({
     const denSum = Number(da.den) + Number(db.den);
     const fusionLuckInfo = requestedPercent > 0 ? `\n融合運氣：要求 +${requestedPercent}%、實際 +${Number(appliedPercent.toFixed(2))}%，由${donorKey || '其他品質'}扣除。` : '';
     if (!confirmAction(`確定消耗「${da.name}」＋「${db.name}」合成寵物？\n兩顆骰子分母相加：${denSum.toLocaleString('en-US')}\n合成品質機率：${preview}${fusionLuckInfo}\n${weatherInfo}\n黃金、鑽石、彩虹等外觀變異另外獨立判定，可與天氣變異同時取得。\n此操作會消耗${same ? '同種骰子 2 顆' : '兩種骰子各 1 顆'}。`)) return;
+    if ((same ? unlockedDiceCount(S, idA) < 2 : (unlockedDiceCount(S, idA) < 1 || unlockedDiceCount(S, idB) < 1))) {
+      toast('未鎖定骰子數量不足，請先解除星號');
+      refreshPetDiceSelects();
+      updatePetDicePreview();
+      return;
+    }
     const rarity = weightedPetRarity(tier);
     const pet = addPet(rarity, tier);
     if (pet) {
@@ -539,10 +546,8 @@ export function createPetSystem({
       toast('寵物背包已滿（20/20），請先出售寵物');
       return;
     }
-    S.bag[idA] -= 1;
-    if (S.bag[idA] <= 0) delete S.bag[idA];
-    S.bag[idB] -= 1;
-    if (S.bag[idB] <= 0) delete S.bag[idB];
+    consumeUnlockedDice(S, idA, 1);
+    consumeUnlockedDice(S, idB, 1);
     save();
     render();
     renderPetsPage();

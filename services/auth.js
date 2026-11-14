@@ -162,7 +162,7 @@ export function createAuthService(deps) {
       return;
     }
     if (password.length < 6 && mode !== 'reset') {
-      showAuthMessage('密碼至少需要 6 位。');
+      showAuthMessage('密碼由你自行設定，至少需要 6 位。');
       return;
     }
 

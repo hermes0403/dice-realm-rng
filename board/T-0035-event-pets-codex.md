@@ -1,7 +1,7 @@
 ---
 id: T-0035
 title: 將六隻限時活動寵物加入收藏圖鑑
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-05
-updated: 2026-11-05
+updated: 2026-11-13
 depends_on: [T-0034]
 branch: task/T-0035-add-event-pets-to-codex
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-13T09:12:57+08:00
 ---
 
 ## 任務
@@ -64,3 +64,6 @@ done_at:
 
 - 2026-11-05 [叉子] 已新增六隻活動寵物的獨立資料與收益，圖鑑會合併顯示並沿用帳號發現紀錄；活動寵物與一般融合池分離。新增專項測試並納入既有 CI 工作流程。之後已補上六隻活動寵物的圖鑑圖片資產與 ID 裁切顯示。Node 測試、`git diff --check` 尚未執行，未建立 PR 或部署；目前分支相對 main 為 ahead 12、behind 0。
 - 2026-11-05 16:48 [叉子] 已將六隻活動寵物專屬圖鑑圖整合為 sprite sheet，新增圖片資產並建立六個 ID 對應；圖鑑依寵物 ID 裁切顯示，未改動一般寵物圖片映射及融合池。測試與 git diff --check 尚未執行，未建立 PR、未合併、未部署。
+
+
+- 2026-11-13 09:12 [棒子明確驗收／叉子代記] 棒子在對話中明確確認本任務已成功，正式驗收結案；依 Board §1.2、§8 代記，狀態更新為 done。
