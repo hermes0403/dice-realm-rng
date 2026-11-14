@@ -166,6 +166,32 @@ test('three-way bag merge keeps a local sale and a remote roll of the same die',
   assert.equal(getState().rollCounts.d1, 101);
 });
 
+test('a local snapshot below its tagged baseline cannot roll back the bag', async () => {
+  const version = '2026-11-10T10:00:00.000Z';
+  const local = {
+    ...base,
+    rolls: 90,
+    bag: { d1: 2 },
+    rollCounts: { d1: 90 }
+  };
+  const cloud = {
+    ...base,
+    rolls: 110,
+    bag: { d1: 6 },
+    rollCounts: { d1: 110 }
+  };
+  const { service, getState } = setup({
+    local, base, localBaseVersion: version, cloud,
+    cloudUpdatedAt: '2026-11-14T00:30:00.000Z'
+  });
+
+  await service.loadCloudSave();
+
+  assert.equal(getState().rolls, 110);
+  assert.deepEqual(getState().bag, { d1: 6 });
+  assert.deepEqual(getState().rollCounts, { d1: 110 });
+});
+
 test('legacy local snapshot cannot win from a later timestamp or higher roll count without a baseline', async () => {
   const local = { ...base, rolls: 500, bag: { d1: 999 } };
   const cloud = { ...base, rolls: 200, bag: { d1: 10 } };
