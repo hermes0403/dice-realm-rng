@@ -92,12 +92,12 @@ async function convertWeather(){
  const scope=document.getElementById('weatherConvertScope')?.value||'global';
 
  if(!getCurrentUser()||!supabaseClient){openAuth();toast('全服天氣轉換需要登入雲端帳號');return}
- if(getState().equipped!=='g7'||!getState().gloves?.g7){toast('需要啟用並持有天氣轉換器');return}
+ if(getState().equippedItem!=='g7'||!getState().items?.g7){toast('需要先啟用天氣轉換器');return}
  const btn=document.getElementById('weatherConvertBtn');if(btn){btn.disabled=true;btn.textContent='正在轉換天氣…'}
  try{
   const chosen=['rain','snow','thunder'][Math.floor(Math.random()*3)];
   if(scope==='local'){const until=Date.now()+5*60*1000;playerWeatherOverride={type:chosen,until,by:getState().name,at:Date.now()};getState().localWeatherConvertAt=Date.now();getState().weatherConvertAt=Date.now();cachedWeatherMinute=-1;updateWeatherUI();save();}
-  else {await flushCloudSave();const {data,error}=await supabaseClient.rpc('convert_weather_with_glove');if(error)throw error;if(!data?.weather_type)throw new Error('伺服器沒有回傳天氣結果');getState().weatherConvertAt=Number(data.weather_convert_at)||Date.now();applyServerWeatherRow({weather_type:data.weather_type,ends_at:data.ends_at,summoned_by:data.summoned_by,updated_at:data.updated_at},false);save();await flushCloudSave();}
+  else {await flushCloudSave();const {data,error}=await supabaseClient.rpc('convert_weather_with_glove',{p_scope:'global'});if(error)throw error;if(!data?.weather_type)throw new Error('伺服器沒有回傳天氣結果');getState().weatherConvertAt=Number(data.weather_convert_at)||Date.now();applyServerWeatherRow({weather_type:data.weather_type,ends_at:data.ends_at,summoned_by:data.summoned_by,updated_at:data.updated_at},false);save();await flushCloudSave();}
   getState().weatherConvertAt=Date.now();save();renderGloves();
   toast((scope==='local'?'本伺服器':'全伺服器')+'天氣已變更：'+(WEATHER_TYPES[scope==='local'?chosen:(serverWeatherState?.type||chosen)]?.label||'天氣'));
  }catch(e){console.error('Shared weather conversion failed',e);toast('天氣轉換失敗：'+(e.message||'請稍後重試'))}
@@ -124,7 +124,7 @@ function updateWeatherUI(){
   return '<span class="weather-item weather-item-'+type+'" data-weather-type="'+type+'"><span class="weather-icon">'+meta.icon+'</span><span class="weather-name">'+meta.label+'</span><span class="weather-countdown">'+mm+':'+ss+'</span></span>';
  }).join('');
 }
-timerManager.setInterval(()=>{updateWeatherUI();if(!document.getElementById('weatherConvertPanel')?.hidden&&getState().equipped==='g7')renderGloves()},1000,'weather-ui');updateWeatherUI();
+timerManager.setInterval(()=>{updateWeatherUI();if(!document.getElementById('weatherConvertPanel')?.hidden&&getState().equippedItem==='g7')renderGloves()},1000,'weather-ui');updateWeatherUI();
 function summonOddsText(){return WEATHER_SUMMON_ODDS.map(({type,percent})=>`${percent}% ${WEATHER_TYPES[type]?.label||type}`).join('、')}
 let weatherContributionPoints=0,weatherContributionDeposits={};
 function renderWeatherSummon(){
