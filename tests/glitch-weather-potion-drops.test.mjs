@@ -57,7 +57,7 @@ function createFixture({
       setInterval: () => 1,
       clearInterval: () => {}
     },
-    navigatorRef: { onLine: online, locks: locks.locks },
+    navigatorRef: { get onLine() { return online; }, locks: locks.locks },
     localStorageRef: storage,
     random: () => {
       randomCalls += 1;
@@ -148,7 +148,7 @@ test('多分頁共用 Web Lock 與本機秒數標記，同一秒最多發放一�
   assert.equal(saved, 1);
 });
 
-test('重新載入後仍會沿用本機秒數標記，且離線期間不補發', async () => {
+test('重新載入後沿用本機秒數標記，錯過的秒數不補發', async () => {
   const storage = createStorage();
   const first = createFixture({ storage, randomValues: [0, 0] });
   assert.equal(await first.system.tick(), true);
