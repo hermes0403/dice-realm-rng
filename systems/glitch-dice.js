@@ -7,7 +7,7 @@ export function addGlitchDiceOdds(entries, pool, isGlitchWeather, weather = 'sun
   const baseTotal = result.reduce((sum, entry) => sum + Math.max(0, Number(entry.weight) || 0), 0);
   const poolBaseTotal = pool.reduce((sum, dice) => {
     const den = Math.max(2, Number(dice.den) || 2);
-    const adjustedDen = weather === 'hell' && den >= 700000 ? den * 0.95 : den;
+    const adjustedDen = weather === 'hell' && den >= 1000000 && den <= 100000000 ? den / 1.04 : den;
     return sum + 1 / adjustedDen;
   }, 0);
   if (baseTotal <= 0 || poolBaseTotal <= 0) return result;
@@ -19,7 +19,7 @@ export function addGlitchDiceOdds(entries, pool, isGlitchWeather, weather = 'sun
       continue;
     }
     const den = Math.max(2, Number(dice.den) || 2);
-    const adjustedDen = weather === 'hell' && den >= 700000 ? den * 0.95 : den;
+    const adjustedDen = weather === 'hell' && den >= 1000000 && den <= 100000000 ? den / 1.04 : den;
     const baseWeight = baseTotal * (1 / adjustedDen) / poolBaseTotal;
     result.push({ dice, weight: baseWeight * (isGlitchWeather ? 10 : 1) });
   }
