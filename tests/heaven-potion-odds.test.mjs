@@ -70,8 +70,9 @@ test('四顆故障骰子在普通池及四張天堂表中都有正權重，可�
       const entry = entries.find(item => item.dice.id === id);
       assert.ok(entry, `heaven table missing ${id}`);
       assert.ok(entry.weight > 0, `heaven table has no weight for ${id}`);
-      const weatherEntry = applyHeavenWeatherWeights([entry], ['glitch'], heaven2, !heaven2, true)[0];
-      assert.ok(weatherEntry.weight > 0, `glitch weather made ${id} unreachable`);
+      const weatherEntry = applyHeavenWeatherWeights([entry], ['glitch'], heaven2, !heaven2)[0];
+      const expected = entry.weight * (1 + heavenWeatherBonus(entry.dice, ['glitch'], heaven2, !heaven2) / 100);
+      assert.ok(Math.abs(weatherEntry.weight - expected) < 1e-10, `heaven mode unexpectedly applied glitch x10 to ${id}`);
     }
   }
 });
@@ -87,21 +88,29 @@ test('四組機率表套用最大天氣與故障倍率後仍無負值或超過 1
   for (const [heaven2, high] of [[false, false], [false, true], [true, false], [true, true]]) {
     const entries = buildHeavenBaseEntries(byId, heaven2, high);
     for (const weatherTypes of [['hell'], ['glitch'], ['hell', 'glitch']]) {
-      const boosted = applyHeavenWeatherWeights(entries, weatherTypes, heaven2, true, weatherTypes.includes('glitch'));
+      const boosted = applyHeavenWeatherWeights(entries, weatherTypes, heaven2, true);
       assert.ok(boosted.every(entry => Number.isFinite(entry.weight) && entry.weight >= 0 && entry.weight <= 100));
       assert.ok(boosted.reduce((sum, entry) => sum + entry.weight, 0) > 0);
     }
   }
 });
 
-test('故障天氣將四顆故障骰子權重乘以 10，且不重複套用', () => {
+test('天堂藥水期間故障骰子不套用故障天氣 x10，僅保留天堂天氣加成', () => {
   const entries = D.filter(dice => dice.glitchBonus).map(dice => ({ dice, weight: 2 }));
-  const boosted = applyHeavenWeatherWeights(entries, ['glitch'], false, false, true);
+  const boosted = applyHeavenWeatherWeights(entries, ['glitch'], false, false);
   assert.equal(boosted.length, 4);
   for (const entry of boosted) {
-    const expectedBase = 2 * (1 + heavenWeatherBonus(entry.dice, ['glitch'], false, false) / 100);
-    assert.equal(entry.weight, applyGlitchWeight(entry.dice, expectedBase, true));
+    const expected = 2 * (1 + heavenWeatherBonus(entry.dice, ['glitch'], false, false) / 100);
+    assert.ok(Math.abs(entry.weight - expected) < 1e-10);
+    assert.ok(entry.weight < applyGlitchWeight(entry.dice, expected, true));
   }
+});
+
+test('未使用天堂藥水時故障天氣仍將故障骰子權重乘以 10', () => {
+  const dice = byId('d65');
+  const baseWeight = 2;
+  assert.equal(applyGlitchWeight(dice, baseWeight, true), baseWeight * 10);
+  assert.equal(applyGlitchWeight(dice, baseWeight, false), baseWeight);
 });
 
 

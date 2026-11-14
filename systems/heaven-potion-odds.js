@@ -1,5 +1,3 @@
-import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
-
 export const HEAVEN_MIDDLE_IDS = [
   'd13', 'd14', 'd15', 'd16', 'd29', 'd17', 'd18', 'd19',
   'd67', 'd30', 'd20', 'd21', 'd22', 'd58', 'd65', 'd23',
@@ -66,12 +64,12 @@ export function heavenWeatherBonus(dice, weatherTypes, heaven2, angel) {
   return bonus;
 }
 
-export function applyHeavenWeatherWeights(entries, weatherTypes, heaven2, angel, isGlitchWeather) {
+export function applyHeavenWeatherWeights(entries, weatherTypes, heaven2, angel) {
   return entries.map(entry => {
     const bonus = heavenWeatherBonus(entry.dice, weatherTypes, heaven2, angel);
     return {
       dice: entry.dice,
-      weight: applyGlitchWeight(entry.dice, entry.weight * (1 + bonus / 100), isGlitchWeather)
+      weight: entry.weight * (1 + bonus / 100)
     };
   });
 }
