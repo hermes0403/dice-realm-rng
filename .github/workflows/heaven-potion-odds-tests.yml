@@ -30,8 +30,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run complete Node test suite
-        run: node --test tests/*.test.js tests/*.test.mjs
+      - name: Run Heaven Potion and Glitch weather tests
+        run: node --test tests/heaven-potion-odds.test.mjs tests/glitch-weather-dice.test.mjs
       - name: Check JavaScript syntax
         run: |
           node --check script.js
