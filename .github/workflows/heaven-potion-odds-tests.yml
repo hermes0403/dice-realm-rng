@@ -1,6 +1,9 @@
 name: Heaven Potion odds and full regression tests
 
 on:
+  push:
+    branches:
+      - task/T-0087-heaven-potion-probabilities
   pull_request:
     branches:
       - main
