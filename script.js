@@ -1,11 +1,11 @@
-import { D, G } from './data/dice.js?v=20261114-t0093-weather-converter-item-workshop';
+import { D, G } from './data/dice.js?v=20261114-t0094-weather-converter-item-slots';
 import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
-import { createNavigationUI } from './ui/navigation.js?v=20261114-t0093-weather-converter-item-workshop';
+import { createNavigationUI } from './ui/navigation.js?v=20261114-t0094-weather-converter-item-slots';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js';
@@ -15,9 +15,9 @@ import { setupPetSellingUI } from './ui/pet-selling.js';
 import { createProgressionSystem } from './systems/progression.js?v=20261114-t0075-achievement-colors-weather-five';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261114-t0093-weather-converter-item-workshop';
+import { createWeatherSystem } from './systems/weather.js?v=20261114-t0094-weather-converter-item-slots';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t0086-cloud-save-rollback';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t0094-weather-converter-item-slots';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
@@ -27,7 +27,7 @@ import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glit
 import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0091-heaven-glitch-no-x10';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
-import { createEquipmentUI } from './ui/equipment.js?v=20261114-t0093-weather-converter-item-workshop';
+import { createEquipmentUI } from './ui/equipment.js?v=20261114-t0094-weather-converter-item-slots';
 import { createAdminPlayerManagement } from './admin/player-management.js';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
 import { createGameStateService } from './core/game-state.js';
