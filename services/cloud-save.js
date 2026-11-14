@@ -439,5 +439,7 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit };
+  function isLoadedFor(userId) { return !!userId && lastSyncedUserId === userId; }
+
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isLoadedFor };
 }

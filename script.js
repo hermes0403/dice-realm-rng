@@ -16,6 +16,7 @@ import { createProgressionSystem } from './systems/progression.js?v=20261112-t00
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261113-t0084-glitch-summon-odds';
+import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
 import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t0086-cloud-save-rollback';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
@@ -70,10 +71,11 @@ function logPotionAction(...args){return activityLogService?.logPotionAction(...
 function renderCodex(){return codexUI?.renderCodex()}
 function render(){return mainRenderUI?.render()}
 const weatherDiceStats={counts:{},loadedAt:0};
-let currentUser=null,cloudSaveService=null;
+let currentUser=null,cloudSaveService=null,cloudSaveReadyUserId=null;
 let petSystem=null;
 function ensurePetData(pets){if(petSystem)return petSystem.ensurePetData(pets)}
 let S;
+function setCurrentUser(value){if(currentUser?.id!==value?.id)cloudSaveReadyUserId=null;currentUser=value}
 const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetData, getCurrentUser: () => currentUser, getState: () => S, localStorageRef: localStorage });
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
@@ -128,7 +130,7 @@ function savePayload(){return cloudSaveService.savePayload()}
 function achievementStats(){return cloudSaveService.achievementStats()}
 function applyPendingGrants(){return cloudSaveService.applyPendingGrants()}
 function syncCloudSave(){return cloudSaveService.syncCloudSave()}
-function loadCloudSave(){return cloudSaveService.loadCloudSave()}
+async function loadCloudSave(){const userId=currentUser?.id;await cloudSaveService.loadCloudSave();if(userId&&currentUser?.id===userId&&cloudSaveService.isLoadedFor(userId))cloudSaveReadyUserId=userId}
 let authService=null;
 function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
@@ -207,7 +209,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
 });
@@ -250,6 +252,20 @@ mainRenderUI = createMainRenderUI({
   isRolling, isAutoRolling, bagUpgradeCost, renderAutoSellOptions, renderInventory,
   renderCodex, renderGloves, renderPotions, renderQuests, renderProfile, D
 });
+const glitchWeatherDropSystem = createGlitchWeatherDropSystem({
+  getState: () => S,
+  getCurrentUser: () => currentUser,
+  getWeather,
+  isReady: userId => cloudSaveReadyUserId === userId,
+  POTIONS,
+  save,
+  render,
+  toast,
+  timerManager,
+  navigatorRef: navigator,
+  localStorageRef: localStorage
+});
+glitchWeatherDropSystem.start();
 setupAutoRollUI();
 globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
@@ -291,7 +307,7 @@ function loadAdminPetInventoryCounts(){return adminMonitoringSystem?.loadAdminPe
 function setPlayerBan(banned){return adminMonitoringSystem?.setPlayerBan(banned)}
 setupAccountActions({
   documentRef: document, getState: () => S, setState: value => { S = value; },
-  getCurrentUser: () => currentUser, setCurrentUser: value => { currentUser = value; },
+  getCurrentUser: () => currentUser, setCurrentUser,
   supabaseClient, SUPABASE_URL, SUPABASE_KEY, totalUnique, achievementStats,
   save, render, flushCloudSave, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards

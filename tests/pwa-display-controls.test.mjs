@@ -173,3 +173,13 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
   assert.match(css, /#page-weather-summon\s+\.weather-summon-card\s*\{[\s\S]*?background:[\s\S]*?!important/);
   assert.match(css, /#page-roll\s*>\s*\.rollbox\s*>\s*\.dice\s*\{[\s\S]*?background:[\s\S]*?border-color:[\s\S]*?box-shadow:[\s\S]*?!important/);
 });
+
+
+test('故障天氣藥水掉落模組納入 V1.26 PWA 快取殼', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(html, /V1\\.26/);
+  assert.match(html, /script\\.js\\?v=20261114-t0089-glitch-potion-drops/);
+  assert.match(worker, /dice-realm-shell-v1\\.26/);
+  assert.match(worker, /systems\\/glitch-weather-drops\\.js\\?v=20261114-t0089-glitch-potion-drops/);
+});
