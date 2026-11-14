@@ -45,3 +45,4 @@ done_at:
 
 - 2026-11-14 15:46 [叉子] 依棒子要求建立調整任務。最新 main Board owner_side 有效 in_progress／review 任務為 T-0085、T-0086、T-0089，共 3/5；T-0083 為 open、T-0090 已由棒子驗收並完成結案，不計入。未找到有效 Communicate 委派任務。先建立 open 任務，不開始實作。
 - 2026-11-14 15:47 [叉子] 開工 PR #122 已合併；重新檢查 main，owner_side 有效 in_progress／review 仍為 T-0085、T-0086、T-0089，共 3/5；Communicate 優先閘門未觸發。任務由 open 轉為 in_progress，開始實作。
+- 2026-11-14 15:51 [叉子] 機率曲線、版本 V1.28 與回歸測試已交付，PR #124 已合併至 main。隔離 Node 測試 10/10 通過；GitHub Actions 部署執行結果與 GitHub Pages 線上版本目前無法取得，故尚不宣稱正式部署完成，任務維持 in_progress 等待部署驗證。
