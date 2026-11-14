@@ -175,12 +175,12 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('T-0092 V1.34 PWA 快取殼同步更新', async () => {
+test('T-0092 V1.35 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.34/);
-  assert.match(html, /script\.js\?v=20261114-t0092-autosell-achievements/);
-  assert.match(worker, /dice-realm-shell-v1\.34/);
+  assert.match(html, /V1\.35/);
+  assert.match(html, /script\.js\?v=20261114-t0092-achievement-history-autosell-row/);
+  assert.match(worker, /dice-realm-shell-v1\.35/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
 });
@@ -210,4 +210,20 @@ test('主頁最新骰子名稱清楚，成就顏色與五種天氣骰子門檻�
     assert.match(progression, new RegExp("weather==='" + weather + "'.*?\\.length,5\\)}/5 種"));
   }
   assert.match(progression, /achievement-\$\{id\}/);
+});
+
+
+test('T-0092 已解鎖但目前進度不足時保留完成紀錄並標示歷史完成', async () => {
+  const progression = await readFile(new URL('../systems/progression.js', import.meta.url), 'utf8');
+  assert.match(progression, /progressIncomplete=!!progressMatch&&Number\(progressMatch\[1\]\)<Number\(progressMatch\[2\]\)/);
+  assert.match(progression, /已完成（歷史紀錄）/);
+  assert.match(progression, /const unlocked=!!getState\(\)\.achievements\[id\]/);
+});
+
+test('T-0092 自動出售說明縮短且批次按鈕固定同列', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(html, /勾選擲到後要自動出售的骰子/);
+  assert.doesNotMatch(html, /僅列出一般與天氣骰子，依常見到稀有排序/);
+  assert.match(css, /#autoSellDiceOptions \.auto-sell-bulk-actions\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });

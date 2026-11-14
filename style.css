@@ -2037,3 +2037,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .achievement-row.is-pending h3,.achievement-row.is-pending>span{color:#aeb8d5!important}
 .auto-sell-bulk-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}
 .auto-sell-bulk-actions button{padding:6px 10px;font-size:12px;min-height:30px}
+
+/* T-0092：自動出售批次按鈕固定並排一行。 */
+#autoSellDiceOptions .auto-sell-bulk-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex-wrap:nowrap;min-width:0}
+#autoSellDiceOptions .auto-sell-bulk-actions button{width:100%;min-width:0;white-space:nowrap}

@@ -11,7 +11,7 @@ priority: P2
 created: 2026-11-14
 updated: 2026-11-14
 depends_on: []
-branch: task/T-0092-autosell-achievements
+branch: task/T-0092-autosell-achievements-impl
 done_by:
 done_at:
 ---
@@ -81,3 +81,5 @@ done_at:
 - 2026-11-14 18:11 [叉子] 更正開工閘門紀錄：18:10 的容量盤點不完整，該筆 3/5 不可作為啟動依據。重新逐項核對最新 main 的任務 metadata 後，owner_side 的 in_progress 任務為 T-0063、T-0064、T-0065、T-0066、T-0072、T-0083、T-0085、T-0091，共 8/5。18:10 的 open → in_progress 僅存在未合併分支，未進入 main；開工 PR #138 已關閉且未合併。T-0092 維持 open，不建立正式工作環境、不修改遊戲程式或 Supabase，待容量解除後再重新檢查雙重閘門。
 
 - 2026-11-14 18:44 [叉子] 開工閘門複查：owner_side 的 in_progress 任務為 T-0073、T-0085，共 2/5；T-0069、T-0070、T-0071、T-0091 已由棒子驗收並歸檔。Communicate 優先閘門：T-0038 為 from:老查、to:barry，不屬 owner_side；未發現指派給 owner_side 的有效 Communicate 任務。兩道閘門均未阻擋，任務由 open → in_progress，正式開始實作。來源 main SHA：73699ccd730ee3a3754fc9fbb61a5ba16c72acf1。
+
+- 2026-11-14 19:20 [叉子] 接續修正：確認成就卡片的勾選狀態只看已保存的解鎖紀錄，進度文字則依目前收藏數重新計算，因此歷史解鎖紀錄可能出現 4/5 + 已完成。保留已發放獎勵及完成紀錄，將此狀態明確標示為「已完成（歷史紀錄）」；同步依棒子新指示縮短自動出售說明，並將兩個批次按鈕固定並排同一列。依實際 PR #145–#149 的工作分支，將 branch 欄位校正為 task/T-0092-autosell-achievements-impl；分支已快轉同步至 main SHA 3ec9c82018872a3f2a9faf61beb2d75bfb9396c4。
