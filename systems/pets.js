@@ -193,192 +193,7 @@ export function createPetSystem({
     S.quest = S.quest || {};
     S.quest.coinsEarned = (Number(S.quest.coinsEarned) || 0) + result.reward;
     save();
-    toast(`混沌祝福：連續登入第 ${result.state.streak} 天，獲得 ${format(result.reward)}/** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
-import { resolveSecretLoginReward, resolveSecretRollRewards, taipeiDateKey } from './secret-pet-skills.js?v=20261114-t0090-secret-pet-skills';
-
-/** Build codex entries while excluding retired pets for every player, including previous owners. */
-import { EVENT_PETS, PET_BASE_INCOME } from '../data/pets.js';
-export function getPetCodexEntries(petDefinitions = [], discoveredIds = []) {
-  const discovered = new Set(Array.isArray(discoveredIds) ? discoveredIds : []);
-  const definitions = Array.isArray(petDefinitions) ? petDefinitions : [];
-  const knownIds = new Set(definitions.map(pet => pet?.id).filter(Boolean));
-  const rarityOrder = ['common', 'rare', 'legendary', 'mythic', 'secret'];
-  return [...definitions, ...EVENT_PETS.filter(pet => !knownIds.has(pet.id))]
-    .filter(pet => pet && pet.unobtainable !== true)
-    .sort((a, b) => {
-      const rankA = rarityOrder.indexOf(a.rarity);
-      const rankB = rarityOrder.indexOf(b.rarity);
-      const rarityDiff = (rankA < 0 ? rarityOrder.length : rankA) - (rankB < 0 ? rarityOrder.length : rankB);
-      if (rarityDiff !== 0) return rarityDiff;
-      const incomeA = Number(PET_BASE_INCOME[a.id]) || 0;
-      const incomeB = Number(PET_BASE_INCOME[b.id]) || 0;
-      return incomeA - incomeB || String(a.name || '').localeCompare(String(b.name || ''), 'zh-Hant');
-    })
-    .map(pet => ({ ...pet, discovered: discovered.has(pet.id) }));
-}
-import { petWeightSkillMultiplier } from './pet-skills.js';
-import { unlockedDiceCount, consumeUnlockedDice } from './dice-locks.js';
-/** Increase mythic and secret pet-fusion odds while preserving a 100% total. */
-export function applyFusionLuckToRates(rates, bonusPercent = 0) {
-  const adjusted = Object.fromEntries(Object.entries(rates || {}).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]));
-  const targets = ['mythic', 'secret'];
-  const donorKey = Object.keys(adjusted).filter(key => !targets.includes(key)).sort((a, b) => adjusted[b] - adjusted[a])[0] || null;
-  const targetTotal = targets.reduce((sum, key) => sum + (adjusted[key] || 0), 0);
-  const requestedPercent = Math.max(0, Number(bonusPercent) || 0);
-  const requestedDelta = targetTotal * requestedPercent / 100;
-  const appliedDelta = Math.min(requestedDelta, donorKey ? adjusted[donorKey] : 0);
-  const appliedPercent = targetTotal > 0 ? appliedDelta / targetTotal * 100 : 0;
-  if (appliedDelta > 0) {
-    for (const key of targets) adjusted[key] = (adjusted[key] || 0) * (1 + appliedPercent / 100);
-    adjusted[donorKey] = Math.max(0, adjusted[donorKey] - appliedDelta);
-  }
-  return { rates: adjusted, appliedPercent, requestedPercent, donorKey, deductedPercent: appliedDelta };
-}
-
-
-export function sortOwnedPets(pets, { mode = 'rarity-desc', petById, petIncomePerSecond, rarityOrder }) {
-  const owned = Array.isArray(pets) ? pets : [];
-  return [...owned].sort((a, b) => {
-    const da = petById(a.id) || { rarity: 'common', name: '未知寵物' };
-    const db = petById(b.id) || { rarity: 'common', name: '未知寵物' };
-    const ra = rarityOrder.indexOf(da.rarity);
-    const rb = rarityOrder.indexOf(db.rarity);
-    const nameOrder = da.name.localeCompare(db.name, 'zh-Hant');
-    const weightOrder = (Number(a.kg) || 0) - (Number(b.kg) || 0);
-    if (mode === 'income-asc') return petIncomePerSecond(a) - petIncomePerSecond(b) || ra - rb || nameOrder || weightOrder;
-    if (mode === 'income-desc') return petIncomePerSecond(b) - petIncomePerSecond(a) || rb - ra || nameOrder || weightOrder;
-    const direction = mode === 'rarity-asc' ? 1 : -1;
-    return direction * (ra - rb) || nameOrder || weightOrder;
-  });
-}
-
-/** Returns safe, individually styled tags for appearance and weather mutations. */
-export function formatPetMutationTags(pet, PET_MUTATIONS = {}) {
-  if (!pet || typeof pet !== 'object') return [];
-  const tags = [];
-  const seen = new Set();
-  const add = (key, label, className) => {
-    if (!label || seen.has(key)) return;
-    seen.add(key);
-    tags.push({ label, className });
-  };
-  const variantStyles = {
-    golden: { label: '黃金', className: 'pet-mutation-golden' },
-    diamond: { label: '鑽石', className: 'pet-mutation-diamond' },
-    rainbow: { label: '彩虹', className: 'pet-mutation-rainbow' }
-  };
-  const variants = Array.isArray(pet.variants) ? pet.variants : (Array.isArray(pet.variant) ? pet.variant : [pet.variant]);
-  for (const variant of variants) {
-    const style = variantStyles[variant];
-    if (style) add(`variant:${variant}`, style.label, style.className);
-  }
-  const mutations = Array.isArray(pet.mutations) ? pet.mutations : (Array.isArray(pet.mutation) ? pet.mutation : [pet.mutation]);
-  for (const key of mutations) {
-    const mutation = PET_MUTATIONS[key];
-    const label = mutation?.name?.replace(/變異$/, '');
-    if (label) add(`weather:${key}`, label, `pet-mutation-weather-${key}`);
-  }
-  return tags;
-}
-
-/** Plain-text compatibility helper for prompts and tests. */
-export function formatPetMutationLabels(pet, PET_MUTATIONS = {}) {
-  return formatPetMutationTags(pet, PET_MUTATIONS).map(tag => tag.label).join('、');
-}
-
-export function createPetSystem({
-  getState,
-  PETS,
-  PET_RARITIES,
-  PET_TIER_CONFIG,
-  PET_TIER_RATES,
-  PET_MUTATIONS,
-  PET_IMAGE_ASSETS,
-  D,
-  petById,
-  getDiceById,
-  randomPet,
-  petIncomePerSecond,
-  rollPetVariant,
-  renderPetIncome,
-  format,
-  escapeHTML,
-  save,
-  render,
-  toast,
-  getCurrentUser,
-  openAuth,
-  recordPetFusion,
-  showPetAutoSellNotice,
-  documentRef,
-  confirmAction,
-  getFusionLuckBoost = () => null,
-  localStorageRef = globalThis.localStorage
-}) {
-  let petSortMode = 'rarity-desc';
-
-  function petRarity(id) {
-    return PET_RARITIES.find(rarity => rarity.id === id) || PET_RARITIES[0];
-  }
-
-  function equippedPetHas(id) {
-    const S = getState();
-    const equipped = new Set(Array.isArray(S.equippedPetUids) ? S.equippedPetUids : []);
-    return (S.pets || []).some(pet => pet.id === id && equipped.has(pet.uid));
-  }
-
-  function applyPetSkillDailyReset() {
-    const S = getState();
-    const today = taipeiDateKey();
-    S.petSkillDaily = S.petSkillDaily || { date: today, s3: 0, s5: 0 };
-    if (S.petSkillDaily.date !== today) S.petSkillDaily = { date: today, s3: 0, s5: 0 };
-  }
-
-  function petBonusTotals() {
-    const S = getState();
-    const rarityBonus = {
-      common: { luck: 1, speed: 0 },
-      rare: { luck: 1, speed: 1 },
-      legendary: { luck: 2, speed: 1 },
-      mythic: { luck: 3, speed: 3 },
-      secret: { luck: 7, speed: 7 }
-    };
-    const mutationMultiplier = { rain: 1.2, snow: 1.3, thunder: 1.4, crystal: 1.7, hell: 2 };
-    let luck = 0;
-    let speed = 0;
-    const owned = Array.isArray(S.pets) ? S.pets : [];
-    const equipped = new Set(Array.isArray(S.equippedPetUids) ? S.equippedPetUids : []);
-    for (const item of owned) {
-      if (!equipped.has(item.uid)) continue;
-      const pet = petById(item.id);
-      const bonus = rarityBonus[pet?.rarity];
-      if (bonus) {
-        const multiplier = (mutationMultiplier[item.mutation] || 1) * petWeightSkillMultiplier(item.kg);
-        luck += bonus.luck * multiplier;
-        speed += bonus.speed * multiplier;
-      }
-    }
-    return { luck, speed };
-  }
-
-  function applyPetRollSkills(dice) {
-    const S = getState();
-    const petLuckWasUsed = (Number(S.petSkillLuckCharges) || 0) > 0;
-    if (petLuckWasUsed) S.petSkillLuckCharges = Math.max(0, (Number(S.petSkillLuckCharges) || 0) - 1);
-    applyPetSkillDailyReset();
-    const rollRewards = resolveSecretRollRewards({
-      den: dice.den,
-      daily: S.petSkillDaily,
-      hasS3: equippedPetHas('s3'),
-      hasS5: equippedPetHas('s5')
-    });
-    S.petSkillDaily = rollRewards.daily;
-    const petSkillReward = rollRewards.reward;
-    if (equippedPetHas('m1') && Number(S.rolls) % 1000 === 0) S.petSkillLuckCharges = 1;
-    return petSkillReward;
-  }
-
-);
+    toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
     return result.reward;
   }
 
@@ -388,13 +203,13 @@ export function createPetSystem({
     if (!pet || !equippedPetHas('s4')) return false;
     const now = Date.now();
     const userId = getCurrentUser()?.id || 'guest';
-    const markerKey = `diceRealmSecretPetS4:${userId}`;
+    const markerKey = 'diceRealmSecretPetS4:' + userId;
     let localLastUse = 0;
     try { localLastUse = Number(localStorageRef?.getItem(markerKey)) || 0; } catch {}
     const skill = S.petSkillSpeed || {};
     const cooldownUntil = Math.max(Number(skill.cooldownUntil) || 0, localLastUse + 12 * 60 * 60 * 1000);
     if (cooldownUntil > now) {
-      toast(`永寂恩賜冷卻中，約 ${Math.ceil((cooldownUntil - now) / 60000)} 分鐘後可再次使用`);
+      toast('永寂恩賜冷卻中，約 ' + Math.ceil((cooldownUntil - now) / 60000) + ' 分鐘後可再次使用');
       return false;
     }
     S.petSkillSpeed = { activatedAt: now, expiresAt: now + 10 * 60 * 1000, cooldownUntil: now + 12 * 60 * 60 * 1000 };
