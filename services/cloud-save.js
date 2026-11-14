@@ -21,6 +21,7 @@ export function createCloudSaveService(dependencies) {
   let cloudSaveVersion = null;
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
+  let cloudLoadReadyUserId = null;
   const grantCheckAtByUser = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
   const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -300,6 +301,7 @@ export function createCloudSaveService(dependencies) {
   async function loadCloudSave({ syncAfterLoad = true } = {}) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
+    cloudLoadReadyUserId = null;
     try {
       const scopedKey = userSaveKey(user.id);
       // Keep the exact local snapshot used when the cloud request starts.
@@ -339,6 +341,7 @@ export function createCloudSaveService(dependencies) {
         await applyPendingGrants(true);
         if (syncAfterLoad) await syncCloudSave();
         await refreshLeaderboards();
+        cloudLoadReadyUserId = user.id;
         return;
       }
       const cloudRolls = Number(data?.save_data?.rolls) || 0;
@@ -364,6 +367,7 @@ export function createCloudSaveService(dependencies) {
         await applyPendingGrants(true);
         await syncCloudSave();
         await refreshLeaderboards();
+        cloudLoadReadyUserId = user.id;
         return;
       }
       let S;
@@ -428,7 +432,9 @@ export function createCloudSaveService(dependencies) {
       await applyPendingGrants(true);
       if (syncAfterLoad) await syncCloudSave();
       await refreshLeaderboards();
+      cloudLoadReadyUserId = user.id;
     } catch (e) {
+      cloudLoadReadyUserId = null;
       console.error(e);
       if (/user.?banned|banned|被停權|已停權/i.test(String(e?.message || ''))) {
         await supabaseClient?.auth.signOut().catch(() => {});
@@ -439,5 +445,7 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit };
+  function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
+
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isLoadedFor };
 }
