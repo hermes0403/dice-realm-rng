@@ -107,7 +107,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--li
 .codex-row.codex-weather-crystal{--rarity-color:#e35dff!important;border-color:color-mix(in srgb,#e35dff 60%,#29304b);background:linear-gradient(100deg,color-mix(in srgb,#e35dff 20%,#121729),#0f1423 72%);box-shadow:inset 0 0 18px #e35dff10}.codex-row.codex-weather-crystal .codex-chance,.codex-row.codex-weather-crystal .codex-icon,.codex-row.codex-weather-crystal .codex-name{color:#ed75ff;text-shadow:0 0 8px #e35dff45}
 .codex-row.codex-weather-hell{--rarity-color:#ff4b24!important;border-color:color-mix(in srgb,#ff4b24 60%,#29304b);background:linear-gradient(100deg,color-mix(in srgb,#ff4b24 20%,#121729),#0f1423 72%);box-shadow:inset 0 0 18px #ff4b2410}.codex-row.codex-weather-hell .codex-chance,.codex-row.codex-weather-hell .codex-icon,.codex-row.codex-weather-hell .codex-name{color:#ff6038;text-shadow:0 0 8px #ff4b2445}.codex-count{font-size:11px;white-space:nowrap}.codex-row .codex-count{font-variant-numeric:tabular-nums}
 .weather-status.weather-crystal{border-color:#df5cff;background:linear-gradient(120deg,#24132f,#3c1e51);color:#f2b5ff;box-shadow:0 0 14px #d94fff22}.weather-status.weather-hell{border-color:#ff542d;background:linear-gradient(120deg,#351711,#542115);color:#ffb09a;box-shadow:0 0 14px #ff4b2422}
-.weather-summon-card{position:relative;overflow:hidden;border:1px solid #6b4f9b;background:radial-gradient(ellipse at 50% 0,#34224f 0,#17152d 45%,#0d1221 100%);box-shadow:inset 0 0 40px #9e62ff0b,0 15px 45px #0003}.weather-summon-card:before{content:"✧  ·  ✦  ·  ✧";display:block;text-align:center;letter-spacing:13px;color:#cda5ff88;font-size:14px;margin:-3px 0 9px}.summon-progress{height:10px;border-radius:999px;background:#0b0e1b;border:1px solid #473d69;overflow:hidden;margin:10px 0}.summon-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#7a55d9,#e35dff,#ff764c);box-shadow:0 0 14px #cb65ff88;transition:width .25s}.summon-dice-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border:1px solid #34314f;border-radius:12px;background:#0c1020;margin:7px 0}.summon-dice-meta{min-width:0}.summon-dice-meta b{display:block;font-size:13px}.summon-dice-meta small{color:var(--muted);font-size:11px}.summon-qty{width:74px;min-width:0;padding:8px 5px!important;text-align:center}.summon-dice-row button{padding:8px 10px;white-space:nowrap}.summon-outcome{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px 0}.summon-outcome>div{border:1px solid #5a4779;border-radius:13px;padding:12px;text-align:center;background:#17152b}.summon-outcome strong{display:block;font-size:17px}.summon-outcome small{color:var(--muted)}.announcement-line.weather-summon-announcement{display:block;width:max-content;max-width:none;min-width:max-content;text-align:center;border-left:0;background:linear-gradient(90deg,transparent,#8b32ff55,#8b32ff22,transparent);color:#f8eaff;text-shadow:0 0 8px #d75cff,0 0 18px #a32cff;font-weight:950;animation:weatherSummonSlide 6.5s linear both;padding:5px 22px}.announcement-line.weather-summon-announcement.crystal{color:#f7d6ff;background:linear-gradient(90deg,transparent,#c52cff66,#922dff44,transparent);text-shadow:0 0 8px #ef9dff,0 0 20px #b42cff}.announcement-line.weather-summon-announcement.hell{color:#fff0e8;background:linear-gradient(90deg,transparent,#ff382f66,#a90c1d44,transparent);text-shadow:0 0 8px #ff6a3d,0 0 20px #e51b28}@keyframes weatherSummonSlide{0%{opacity:0;transform:translateX(100vw)}8%{opacity:1}92%{opacity:1}100%{opacity:0;transform:translateX(-110%)}}
+.weather-summon-card{position:relative;overflow:hidden;border:1px solid #6b4f9b;background:radial-gradient(ellipse at 50% 0,#34224f 0,#17152d 45%,#0d1221 100%);box-shadow:inset 0 0 40px #9e62ff0b,0 15px 45px #0003}.weather-summon-card:before{content:"✧  ·  ✦  ·  ✧";display:block;text-align:center;letter-spacing:13px;color:#cda5ff88;font-size:14px;margin:-3px 0 9px}.summon-progress{height:10px;border-radius:999px;background:#0b0e1b;border:1px solid #473d69;overflow:hidden;margin:10px 0}.summon-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#7a55d9,#e35dff,#ff764c);box-shadow:0 0 14px #cb65ff88;transition:width .25s}.summon-dice-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border:1px solid #34314f;border-radius:12px;background:#0c1020;margin:7px 0}.summon-dice-meta{min-width:0}.summon-dice-meta b{display:block;font-size:13px}.summon-dice-meta small{color:var(--muted);font-size:11px}.summon-qty{width:74px;min-width:0;padding:8px 5px!important;text-align:center}.summon-dice-row button{padding:8px 10px;white-space:nowrap}.summon-outcome{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:7px;margin:14px 0}.summon-outcome>div{border:1px solid #5a4779;border-radius:13px;padding:12px;text-align:center;background:#17152b}.summon-outcome strong{display:block;font-size:17px}.summon-outcome small{color:var(--muted)}.announcement-line.weather-summon-announcement{display:block;width:max-content;max-width:none;min-width:max-content;text-align:center;border-left:0;background:linear-gradient(90deg,transparent,#8b32ff55,#8b32ff22,transparent);color:#f8eaff;text-shadow:0 0 8px #d75cff,0 0 18px #a32cff;font-weight:950;animation:weatherSummonSlide 6.5s linear both;padding:5px 22px}.announcement-line.weather-summon-announcement.crystal{color:#f7d6ff;background:linear-gradient(90deg,transparent,#c52cff66,#922dff44,transparent);text-shadow:0 0 8px #ef9dff,0 0 20px #b42cff}.announcement-line.weather-summon-announcement.hell{color:#fff0e8;background:linear-gradient(90deg,transparent,#ff382f66,#a90c1d44,transparent);text-shadow:0 0 8px #ff6a3d,0 0 20px #e51b28}.announcement-line.weather-summon-announcement.glitch{color:#e7ffff;background:linear-gradient(90deg,transparent,#00d9ff66,#ff315a44,transparent);text-shadow:0 0 8px #00eaff,0 0 20px #ff315a}@keyframes weatherSummonSlide{0%{opacity:0;transform:translateX(100vw)}8%{opacity:1}92%{opacity:1}100%{opacity:0;transform:translateX(-110%)}}
 @media(max-width:520px){.summon-dice-row{grid-template-columns:minmax(0,1fr) 68px}.summon-dice-row button{grid-column:1/-1;width:100%}.summon-outcome strong{font-size:15px}}
 
 @media(max-width:760px){#potionList{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.potion-summary{padding:9px;gap:7px;min-height:76px}.potion-summary .potion-card-icon{flex-basis:32px;width:32px;height:32px;font-size:18px}.potion-summary-main b{font-size:12px}.potion-summary-main small{font-size:9px}}
@@ -118,7 +118,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--li
 
 body.weather-aura-crystal::before,body.weather-aura-hell::before{content:"";position:fixed;inset:0;z-index:8;pointer-events:none;opacity:.78;animation:weatherAuraPulse 2.8s ease-in-out infinite alternate}body.weather-aura-crystal::before{background:radial-gradient(ellipse at left center,#c64dff32 0%,transparent 25%),radial-gradient(ellipse at right center,#e35dff2c 0%,transparent 25%);box-shadow:inset 0 0 32px #d44dff28}body.weather-aura-hell::before{background:radial-gradient(ellipse at left center,#ff2e2435 0%,transparent 25%),radial-gradient(ellipse at right center,#ff542d30 0%,transparent 25%);box-shadow:inset 0 0 32px #ff3d2c2c}@keyframes weatherAuraPulse{from{opacity:.4}to{opacity:.9}}@media(prefers-reduced-motion:reduce){body.weather-aura-crystal::before,body.weather-aura-hell::before{animation:none;opacity:.65}}
 
-.auto-deposit-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,1fr) auto;align-items:center;gap:8px;margin-top:10px;padding:10px;border:1px solid #51416f;border-radius:12px;background:#121426}.auto-deposit-tools label{font-size:12px;color:var(--muted)}.auto-deposit-tools select{margin:0!important;min-width:0}.auto-deposit-tools button{white-space:nowrap;padding:9px 12px}.weather-surge{position:fixed;inset:0;z-index:10002;pointer-events:none;overflow:hidden;animation:weatherSurgeFade 3.4s ease-out forwards}.weather-surge.crystal{background:radial-gradient(ellipse at center,#e879ff3b 0%,#9d35ff1c 42%,transparent 75%)}.weather-surge.hell{background:radial-gradient(ellipse at center,#ff4b2f42 0%,#a20e1422 42%,transparent 76%)}.weather-surge::before{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 5px var(--surge-color),inset 0 0 70px 22px var(--surge-color);animation:weatherSurgeFlash 1.2s ease-out both}.weather-surge i{position:absolute;left:var(--x);top:var(--y);width:var(--size);height:var(--size);border-radius:50%;background:var(--surge-color);box-shadow:0 0 18px 5px var(--surge-color);animation:weatherSpark 2.6s ease-out forwards;opacity:0}.weather-surge.crystal{--surge-color:#d86bff}.weather-surge.hell{--surge-color:#ff492e}@keyframes weatherSurgeFade{0%,72%{opacity:1}100%{opacity:0}}@keyframes weatherSurgeFlash{0%{opacity:0;transform:scale(.96)}12%{opacity:1;transform:scale(1)}32%{opacity:.35}52%{opacity:.9}100%{opacity:0}}@keyframes weatherSpark{0%{opacity:0;transform:translateY(24px) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translateY(-100px) scale(0)}}
+.auto-deposit-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,1fr) auto;align-items:center;gap:8px;margin-top:10px;padding:10px;border:1px solid #51416f;border-radius:12px;background:#121426}.auto-deposit-tools label{font-size:12px;color:var(--muted)}.auto-deposit-tools select{margin:0!important;min-width:0}.auto-deposit-tools button{white-space:nowrap;padding:9px 12px}.weather-surge{position:fixed;inset:0;z-index:10002;pointer-events:none;overflow:hidden;animation:weatherSurgeFade 3.4s ease-out forwards}.weather-surge.crystal{background:radial-gradient(ellipse at center,#e879ff3b 0%,#9d35ff1c 42%,transparent 75%)}.weather-surge.hell{background:radial-gradient(ellipse at center,#ff4b2f42 0%,#a20e1422 42%,transparent 76%)}.weather-surge.glitch{background:radial-gradient(ellipse at center,#00d9ff3b 0%,#ff315a22 42%,transparent 76%)}.weather-surge::before{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 5px var(--surge-color),inset 0 0 70px 22px var(--surge-color);animation:weatherSurgeFlash 1.2s ease-out both}.weather-surge i{position:absolute;left:var(--x);top:var(--y);width:var(--size);height:var(--size);border-radius:50%;background:var(--surge-color);box-shadow:0 0 18px 5px var(--surge-color);animation:weatherSpark 2.6s ease-out forwards;opacity:0}.weather-surge.crystal{--surge-color:#d86bff}.weather-surge.hell{--surge-color:#ff492e}.weather-surge.glitch{--surge-color:#00eaff}@keyframes weatherSurgeFade{0%,72%{opacity:1}100%{opacity:0}}@keyframes weatherSurgeFlash{0%{opacity:0;transform:scale(.96)}12%{opacity:1;transform:scale(1)}32%{opacity:.35}52%{opacity:.9}100%{opacity:0}}@keyframes weatherSpark{0%{opacity:0;transform:translateY(24px) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translateY(-100px) scale(0)}}
 @media(max-width:520px){.auto-deposit-tools{grid-template-columns:1fr 1fr}.auto-deposit-tools label{grid-column:1/-1}.auto-deposit-tools button{grid-column:1/-1;width:100%}}
 
 /* 天氣場景視覺：只做背景特效，不阻擋玩家操作 */
@@ -1332,4 +1332,528 @@ body .admin-category-tab:not([aria-pressed=true]) *{
 }
 body .admin-category-tab:not([aria-pressed=true]) .admin-category-icon{
   color:#a8f2c1!important;
+}
+
+
+/* T-0078: keep per-die rarity/weather colors in inventory, auto-sell and codex */
+body :is(h1,h2,h3,h4,h5,h6,p,span,small,label,strong,b,em,i,
+  summary,a,li,dt,dd,legend,output,figcaption,th,td,caption,
+  .muted,.mini,.hint,.help,.description,.subtitle,.result-sub,
+  .eyebrow,.stat-label,.stat-value,.item-description,.pet-meta,
+  .quest-title,.achievement-title,.codex-name,.inventory-dice,
+  .admin-category-title,.admin-category-copy,.toolbar label,
+  .announcement-line,.announce-style-label,.sell-help,
+  .inventory-row small,.inventory-sell small,.nav small,
+  .profile-version):not(.inventory-tile *):not(.auto-sell-option span):not(.codex-row *){
+  color:#e8f5ec!important;
+  opacity:1!important;
+}
+/* Inventory tiles and auto-sell options already carry each die's own inline rarity/weather color. */
+#inventoryGrid .inventory-tile .tile-chance,
+#inventoryGrid .inventory-tile .tile-icon,
+#inventoryGrid .inventory-tile .tile-name{
+  color:var(--rarity-color)!important;
+}
+#inventoryGrid .inventory-tile .tile-index{color:#b9cfc0!important}
+/* Keep codex rarity colors; only make the count/details line readable. */
+#page-codex .codex-row .codex-count{color:#b9cfc0!important}
+#page-codex .codex-row .codex-chance{color:var(--rarity-color,#c5cbe0)!important}
+#page-codex .codex-row.codex-halloween .codex-name{color:#ff8a3d!important}
+#page-codex .codex-row.codex-standard .codex-chance,
+#page-codex .codex-row.codex-standard .codex-icon{color:#9b9aff!important}
+
+
+/* T-0079: force original per-die colors through all global typography overrides. */
+#inventoryGrid .inventory-tile .tile-chance,
+#inventoryGrid .inventory-tile .tile-icon,
+#inventoryGrid .inventory-tile .tile-name{
+  color:var(--rarity-color)!important;
+}
+#inventoryGrid .inventory-tile .tile-index{
+  color:#b9cfc0!important;
+}
+#autoSellDiceOptions .auto-sell-option span,
+#autoSellDiceOptions .auto-sell-option span *,
+#autoDepositDiceOptions .auto-sell-option span,
+#autoDepositDiceOptions .auto-sell-option span *{
+  color:inherit!important;
+}
+#page-codex #codexGrid .codex-row:not(.missing) .codex-chance,
+#page-codex #codexGrid .codex-row:not(.missing) .codex-name,
+#page-codex #codexGrid .codex-row:not(.missing) .codex-icon{
+  color:var(--rarity-color)!important;
+}
+#page-codex #codexGrid .codex-row.missing .codex-chance,
+#page-codex #codexGrid .codex-row.missing .codex-name,
+#page-codex #codexGrid .codex-row.missing .codex-icon{
+  color:#87938c!important;
+}
+#page-codex #codexGrid .codex-row.codex-halloween:not(.missing) .codex-name,
+#page-codex #codexGrid .codex-row.codex-halloween:not(.missing) .codex-icon{
+  color:#ff8a3d!important;
+}
+
+
+/* T-0080: restore category frames and every pet rarity color in the codex. */
+/* Weather and Halloween dice rows retain their original colored frames. */
+#page-codex #codexGrid .codex-row.codex-weather-rain{
+  --rarity-color:#75baff!important;
+  border-color:#75baff!important;
+  border-left-color:#75baff!important;
+  background-image:linear-gradient(100deg,#75baff29,#0f1423 72%)!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-snow{
+  --rarity-color:#f4fbff!important;
+  border-color:#f4fbff!important;
+  border-left-color:#f4fbff!important;
+  background-image:linear-gradient(100deg,#f4fbff25,#0f1423 72%)!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-thunder{
+  --rarity-color:#fff000!important;
+  border-color:#fff000!important;
+  border-left-color:#fff000!important;
+  background-image:linear-gradient(100deg,#fff00029,#0f1423 72%)!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-crystal{
+  --rarity-color:#e35dff!important;
+  border-color:#e35dff!important;
+  border-left-color:#e35dff!important;
+  background-image:linear-gradient(100deg,#e35dff35,#0f1423 72%)!important;
+  box-shadow:inset 0 0 18px #e35dff20,0 0 8px #e35dff18!important;
+}
+#page-codex #codexGrid .codex-row.codex-weather-hell{
+  --rarity-color:#ff4b24!important;
+  border-color:#ff4b24!important;
+  border-left-color:#ff4b24!important;
+  background-image:linear-gradient(100deg,#ff4b2438,#0f1423 72%)!important;
+  box-shadow:inset 0 0 18px #ff4b2420,0 0 8px #ff4b2418!important;
+}
+#page-codex #codexGrid .codex-row.codex-halloween{
+  --rarity-color:#ff8a3d!important;
+  border-color:#ff8a3d!important;
+  border-left-color:#ff8a3d!important;
+  background-image:linear-gradient(100deg,#ff8a3d35,#0f1423 72%)!important;
+  box-shadow:inset 0 0 16px #ff8a3d18!important;
+}
+/* Keep the weather and Halloween category tabs visibly distinct, including active state. */
+#page-codex .codex-category-btn[data-codex-category="weather"]{
+  border-color:#75baff!important;
+  color:#9bd0ff!important;
+  background:linear-gradient(145deg,#14263b,#172b43)!important;
+}
+#page-codex .codex-category-btn[data-codex-category="weather"].active{
+  color:#fff!important;
+  border-color:#a6d8ff!important;
+  background:linear-gradient(120deg,#2866a4,#398dcc)!important;
+  box-shadow:0 0 16px #75baff45!important;
+}
+#page-codex .codex-category-btn[data-codex-category="halloween"]{
+  border-color:#ff8a3d!important;
+  color:#ffb477!important;
+  background:linear-gradient(145deg,#382014,#482416)!important;
+}
+#page-codex .codex-category-btn[data-codex-category="halloween"].active{
+  color:#fff!important;
+  border-color:#ffc18a!important;
+  background:linear-gradient(120deg,#a94718,#e36b24)!important;
+  box-shadow:0 0 16px #ff8a3d45!important;
+}
+/* Restore the original rarity-tinted pet card frames and text gradients. */
+#page-codex #codexGrid .pet-card:not(.undiscovered){
+  border-color:color-mix(in srgb,var(--rarity-color) 78%,#244b3a)!important;
+  border-top-color:var(--rarity-color)!important;
+  background-image:linear-gradient(145deg,color-mix(in srgb,var(--rarity-color) 22%,#0b1d17),#0b1d17 78%)!important;
+  box-shadow:inset 0 0 18px color-mix(in srgb,var(--rarity-color) 13%,transparent),0 0 8px color-mix(in srgb,var(--rarity-color) 12%,transparent)!important;
+}
+#page-codex #codexGrid .pet-card.undiscovered{
+  border-color:#52675b!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-common,
+#page-codex #codexGrid .pet-meta.pet-rarity-common{
+  background:linear-gradient(90deg,#087b3d 0%,#7deba0 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-rare,
+#page-codex #codexGrid .pet-meta.pet-rarity-rare{
+  background:linear-gradient(90deg,#0755d9 0%,#70baff 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-legendary,
+#page-codex #codexGrid .pet-meta.pet-rarity-legendary{
+  background:linear-gradient(90deg,#d99a00 0%,#ffe58a 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-mythic,
+#page-codex #codexGrid .pet-meta.pet-rarity-mythic{
+  background:linear-gradient(90deg,#d90022 0%,#ff7888 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+#page-codex #codexGrid .pet-name.pet-rarity-secret,
+#page-codex #codexGrid .pet-meta.pet-rarity-secret{
+  background:linear-gradient(90deg,#080808 0%,#777777 50%,#ffffff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+}
+
+
+/* T-0081：多重天氣各自顯示名稱與倒數 */
+.weather-status{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 10px;white-space:normal}
+.weather-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 0}
+.weather-item .weather-icon{font-size:15px;line-height:1}
+.weather-item .weather-name{font-size:12px;font-weight:850}
+.weather-item .weather-countdown{font-variant-numeric:tabular-nums;font-size:12px;font-weight:900}
+.weather-item-rain .weather-name,.weather-item-rain .weather-countdown{color:#75baff}
+.weather-item-snow .weather-name,.weather-item-snow .weather-countdown{color:#f4fbff}
+.weather-item-thunder .weather-name,.weather-item-thunder .weather-countdown{color:#fff000}
+.weather-item-crystal .weather-name,.weather-item-crystal .weather-countdown{color:#e35dff}
+.weather-item-hell .weather-name,.weather-item-hell .weather-countdown{color:#ff6038}
+.weather-item-dumpling .weather-name,.weather-item-dumpling .weather-countdown{color:#ffcf79}
+@media(max-width:720px){.weather-status{gap:4px 8px;padding:6px 9px}.weather-item{gap:4px}.weather-item .weather-name,.weather-item .weather-countdown{font-size:11px}}
+
+
+/* T-0082：補齊深藍文字對比，維持深綠科幻主題與稀有度專屬色。 */
+body{color:#e8f5ec!important}
+body :is(.muted,.mini,.hint,.help,.description,.subtitle,.result-sub,.stat span,.item p,.toolbar label,.announcement-line,.announce-style-label,.admin-category-copy small,.sell-help,.inventory-row small,.inventory-sell small,.codex-row .codex-count,.pet-meta:not(.pet-rarity-common):not(.pet-rarity-rare):not(.pet-rarity-legendary):not(.pet-rarity-mythic):not(.pet-rarity-secret),.profile-version,.admin-empty-state,.admin-category-tab:not([aria-pressed=true])){color:#d6eee0!important;opacity:1!important}
+body :is(h1,h2,h3,h4,h5,h6,.section-head,.admin-category-title,.admin-category-copy strong,.stat b,.codex-name,.inventory-dice,.pet-name,.quest-title,.achievement-title){color:#e8f5ec!important}
+body button:not(.primary):not(.danger),body button.quiet{color:#eafff0!important}
+body .admin-category-tab:not([aria-pressed=true]) *{color:#d6eee0!important}
+body :is(input,select,textarea,.field,.toolbar input,.toolbar select,.sell-qty,.inventory-sell input,.pet-select){color:#14251b!important}
+#authModal .eyebrow{color:#a8f2c1!important}
+#authModal h2,#authModal p,#authModal label,#authModal .muted{color:#e8f5ec!important}
+#authModal input::placeholder{color:#526b5b!important}
+
+
+/* 故障天氣：保留舒適顯示，不啟用全螢幕閃爍或持續粒子。 */
+body.weather-aura-glitch #weatherStatus{border-color:#78f7e6;box-shadow:inset 0 0 18px #42e8d322,0 0 18px #42e8d322;background:linear-gradient(110deg,#102c31,#17172b)}
+body.weather-aura-glitch #weatherName{color:#91fff0;text-shadow:0 0 10px #53f6e588}
+body.weather-aura-glitch .weather-icon{filter:drop-shadow(0 0 7px #65ffe5)}
+.weather-item-glitch{color:#91fff0;text-shadow:0 0 8px #53f6e588}
+.rarity-overlay.glitch-reveal{background:repeating-linear-gradient(0deg,#070b18 0 3px,#0b1721 4px 5px),radial-gradient(ellipse at center,#173c43 0%,#03060d 72%)}
+.rarity-overlay.glitch-reveal::before{opacity:.9;background:repeating-linear-gradient(0deg,transparent 0 7px,#76ffe51c 8px 9px,transparent 10px 15px),linear-gradient(90deg,transparent 0 18%,#ff4b7a22 19% 20%,transparent 21% 78%,#69eaff22 79% 80%,transparent 81%);animation:glitchScan 1.1s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-card{border:1px solid #8dfff0;background:linear-gradient(145deg,#142b36f2,#111322f5);box-shadow:0 0 28px #52f4df99,0 0 70px #ff4c7a33,inset 0 0 30px #54ffe522;animation:glitchCard .18s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-title{color:#9dfff1;text-shadow:2px 0 #ff4b7a,-2px 0 #58eaff;letter-spacing:.18em}
+.rarity-overlay.glitch-reveal .rarity-reveal-icon{filter:drop-shadow(2px 0 #ff4b7a) drop-shadow(-2px 0 #58eaff) drop-shadow(0 0 18px #8dfff0);animation:glitchIcon .42s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-odds{color:#a5fff4}
+@keyframes glitchScan{0%,100%{transform:translateX(0);opacity:.45}35%{transform:translateX(3px);opacity:.9}70%{transform:translateX(-2px);opacity:.65}}
+@keyframes glitchCard{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}50%{transform:translate(-1px,1px)}75%{transform:translate(2px,0)}}
+@keyframes glitchIcon{0%,100%{transform:translateX(0) skewX(0)}50%{transform:translateX(2px) skewX(-2deg)}}
+@media(prefers-reduced-motion:reduce){.rarity-overlay.glitch-reveal::before,.rarity-overlay.glitch-reveal .rarity-reveal-card,.rarity-overlay.glitch-reveal .rarity-reveal-icon{animation:none!important}}
+
+
+/* T-0085: safe-area aware viewport and landscape-first mobile layout */
+@supports (height: 100dvh) {
+  body { min-height: 100dvh; }
+}
+@media (max-width: 760px) {
+  .shell {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding-left: max(10px, env(safe-area-inset-left));
+  }
+}
+#fullscreenToggleBtn { min-width: 112px; }
+#fullscreenToggleBtn:disabled { opacity: .7; cursor: default; }
+
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 620px) {
+  .shell {
+    max-width: none;
+    padding: max(7px, env(safe-area-inset-top))
+      max(9px, env(safe-area-inset-right))
+      max(7px, env(safe-area-inset-bottom))
+      max(9px, env(safe-area-inset-left));
+  }
+  .top { gap: 8px; padding: 2px 0 7px; min-height: 40px; }
+  .brand { font-size: 18px; }
+  .weather-status { min-width: 0; padding: 4px 9px; font-size: 11px; }
+  .profile { gap: 5px; }
+  .profile .avatar { width: 30px; height: 30px; }
+  .profile #playerName, .profile #gloveLabel { display: none !important; }
+  .announcement-panel { margin: 0 0 7px; }
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    z-index: 40;
+    top: calc(env(safe-area-inset-top) + 49px);
+    bottom: max(7px, env(safe-area-inset-bottom));
+    left: max(7px, env(safe-area-inset-left));
+    width: 66px;
+    margin: 0;
+    padding: 5px 3px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 12px;
+    scrollbar-width: thin;
+  }
+  .mobile-nav button {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 42px;
+    padding: 6px 2px;
+    white-space: normal;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  .layout { display: block; margin-left: 74px; }
+  .nav { display: none !important; }
+  .content { min-width: 0; }
+  #page-roll.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px;
+  }
+  #page-roll > .hero,
+  #page-roll > .stats { grid-column: 1 / -1; }
+  #page-roll > .hero { padding: 10px 14px; }
+  #page-roll > .hero h1 { font-size: 22px; }
+  #page-roll > .stats { margin: 0; gap: 7px; }
+  #page-roll > .stats .stat { padding: 7px 10px; }
+  #page-roll > .stats .stat b { font-size: 16px; }
+  #page-roll > .rollbox {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: minmax(88px, .72fr) minmax(0, 1.28fr);
+    grid-template-areas:
+      "eyebrow eyebrow"
+      "dice name"
+      "dice rarity"
+      "dice sub"
+      "dice progress"
+      "dice actions";
+    align-content: center;
+    align-items: center;
+    gap: 4px 9px;
+    margin-top: 0;
+    min-width: 0;
+    padding: 11px 9px;
+    text-align: left;
+  }
+  #page-roll > .rollbox > .eyebrow { grid-area: eyebrow; }
+  #page-roll > .rollbox > .dice {
+    grid-area: dice;
+    width: clamp(76px, 17vh, 112px);
+    height: clamp(76px, 17vh, 112px);
+    margin: 4px auto;
+    border-radius: 20px;
+    font-size: clamp(38px, 9vh, 56px);
+  }
+  #page-roll > .rollbox > .result-name { grid-area: name; margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+  #page-roll > .rollbox > .rarity { grid-area: rarity; justify-self: start; }
+  #page-roll > .rollbox > .result-sub { grid-area: sub; min-height: 0; font-size: 11px; }
+  #page-roll > .rollbox > .tenth-progress { grid-area: progress; width: 100%; max-width: none; margin: 2px 0; }
+  #page-roll > .rollbox > .roll-actions {
+    grid-area: actions;
+    justify-content: flex-start;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  #page-roll > .rollbox > .roll-actions button { min-width: 0; padding: 7px 9px; font-size: 11px; }
+  #page-roll > .card {
+    grid-column: 2;
+    align-self: stretch;
+    min-width: 0;
+    margin-top: 0 !important;
+    padding: 10px;
+  }
+  #page-roll > .card .section-head h2 { font-size: 15px; }
+  #page-roll > .card .stats { gap: 6px; }
+  #page-roll > .card .stat { padding: 7px; }
+  #page-roll > .card .stat b { font-size: 15px; }
+  .page:not(#page-roll) { min-width: 0; }
+}
+
+
+/* T-0085 follow-up: viewport-first sizing, safe top inset and denser inventory. */
+@media (max-width: 760px) {
+  .shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+    padding-right: calc(env(safe-area-inset-right, 0px) + 10px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+    padding-left: calc(env(safe-area-inset-left, 0px) + 10px);
+  }
+  .top {
+    min-height: 42px;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 3px 0 7px;
+  }
+  .section-head { margin: 10px 0 8px; }
+  .hero { padding: 14px; }
+  .card, .stat { padding: 10px; }
+  .stats { gap: 7px; margin: 8px 0; }
+  #inventoryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(64px, 12vw, 92px), 1fr)) !important;
+    gap: 5px;
+  }
+  .inventory-tile {
+    aspect-ratio: 1.16 / 1;
+    gap: 2px;
+    padding: 4px 2px;
+  }
+  .inventory-tile .tile-chance { margin-top: 0; font-size: 9px; }
+  .inventory-tile .tile-icon { font-size: 17px; }
+  .inventory-tile .tile-name { font-size: 10px; }
+}
+@media (max-width: 760px) and (max-height: 760px) {
+  .shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  }
+  .announcement-panel { margin-bottom: 6px; }
+  .section-head { margin: 7px 0 6px; }
+  .hero { padding: 10px 12px; }
+  .hero h1 { font-size: clamp(18px, 3vw, 24px); }
+  .card, .stat { padding: 8px; }
+  .stats { gap: 5px; margin: 6px 0; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 620px) {
+  .shell {
+    max-width: none;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+    padding-right: calc(env(safe-area-inset-right, 0px) + 9px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    padding-left: calc(env(safe-area-inset-left, 0px) + 9px);
+  }
+  .top { min-height: 38px; padding: 2px 0 5px; gap: 7px; }
+  .brand { font-size: 18px; }
+  .weather-status { min-width: 0; padding: 4px 8px; font-size: 11px; }
+  .profile { gap: 5px; }
+  .profile .avatar { width: 30px; height: 30px; }
+  .profile #playerName, .profile #gloveLabel { display: none !important; }
+  .mobile-nav {
+    top: calc(env(safe-area-inset-top, 0px) + 104px);
+    bottom: max(7px, env(safe-area-inset-bottom, 0px));
+    left: max(7px, env(safe-area-inset-left, 0px));
+    width: 66px;
+  }
+  .mobile-nav button { min-height: 36px; padding: 4px 2px; font-size: 10px; }
+  .layout { display: block; margin-left: 74px; }
+  .nav { display: none !important; }
+  .content { min-width: 0; }
+  .section-head { margin: 6px 0; }
+  .hero { padding: 8px 10px; border-radius: 14px; }
+  .hero h1 { font-size: 19px; }
+  .card, .stat { padding: 8px; }
+  .stats { gap: 6px; margin: 6px 0; }
+  #page-roll.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 7px;
+  }
+  #page-roll > .hero, #page-roll > .stats { grid-column: 1 / -1; }
+  #page-roll > .hero { padding: 3px 8px; }
+  #page-roll > .hero #realmHeroWelcome { display: none; }
+  #page-roll > .stats .stat { padding: 5px 8px; }
+  #page-roll > .stats .stat b { font-size: 15px; }
+  #page-roll > .rollbox {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: minmax(76px, .72fr) minmax(0, 1.28fr);
+    grid-template-areas:
+      "eyebrow eyebrow"
+      "dice name"
+      "dice rarity"
+      "dice sub"
+      "dice progress"
+      "dice actions";
+    align-content: center;
+    align-items: center;
+    gap: 3px 7px;
+    margin-top: 0;
+    min-width: 0;
+    padding: 8px 7px;
+    text-align: left;
+  }
+  #page-roll > .rollbox > .eyebrow { grid-area: eyebrow; }
+  #page-roll > .rollbox > .dice {
+    grid-area: dice;
+    width: clamp(68px, 16vh, 100px);
+    height: clamp(68px, 16vh, 100px);
+    margin: 3px auto;
+    border-radius: 18px;
+    font-size: clamp(36px, 8vh, 52px);
+  }
+  #page-roll > .rollbox > .result-name { grid-area: name; margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+  #page-roll > .rollbox > .rarity { grid-area: rarity; justify-self: start; }
+  #page-roll > .rollbox > .result-sub { grid-area: sub; min-height: 0; font-size: 10px; }
+  #page-roll > .rollbox > .tenth-progress { grid-area: progress; width: 100%; max-width: none; margin: 1px 0; }
+  #page-roll > .rollbox > .roll-actions { grid-area: actions; justify-content: flex-start; gap: 4px; margin-top: 1px; }
+  #page-roll > .rollbox > .roll-actions button { min-width: 0; padding: 6px 7px; font-size: 10px; }
+  #page-roll > .card {
+    grid-column: 2;
+    align-self: stretch;
+    min-width: 0;
+    margin-top: 0 !important;
+    padding: 8px;
+  }
+  #page-roll > .card .section-head h2 { font-size: 14px; }
+  #page-roll > .card .stats { gap: 5px; }
+  #page-roll > .card .stat { padding: 6px; }
+  #page-roll > .card .stat b { font-size: 14px; }
+  #inventoryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)) !important;
+    gap: 5px;
+  }
+  .inventory-tile { aspect-ratio: 1.2 / 1; }
+  .page:not(#page-roll) { min-width: 0; }
+  .page:not(#page-roll) > .section-head { margin: 5px 0; }
+  .page:not(#page-roll) > .hero { padding: 8px 10px; }
+  .page:not(#page-roll) > .card { padding: 8px; }
+}
+
+
+/* T-0085 landscape correction: scale the entire game surface and reserve a real top band. */
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 620px) {
+  body {
+    padding-top: max(42px, env(safe-area-inset-top, 0px));
+    min-height: 100dvh;
+  }
+  .shell {
+    --landscape-scale: .70;
+    zoom: var(--landscape-scale);
+    width: calc(100% / var(--landscape-scale));
+    max-width: none;
+    margin: 0 auto;
+    padding-top: 8px;
+  }
+  /* Keep the full welcome block visible; it is scaled together with every other page element. */
+  #page-roll > .hero #realmHeroWelcome { display: block !important; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 400px) {
+  .shell { --landscape-scale: .64; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (min-height: 401px) and (max-height: 440px) {
+  .shell { --landscape-scale: .68; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (min-height: 441px) and (max-height: 480px) {
+  .shell { --landscape-scale: .72; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (min-height: 481px) and (max-height: 520px) {
+  .shell { --landscape-scale: .76; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (min-height: 521px) and (max-height: 560px) {
+  .shell { --landscape-scale: .80; }
+}
+@media (orientation: landscape) and (max-width: 1024px) and (min-height: 561px) and (max-height: 620px) {
+  .shell { --landscape-scale: .84; }
 }

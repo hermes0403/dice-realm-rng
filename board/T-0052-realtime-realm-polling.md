@@ -1,7 +1,7 @@
 ---
 id: T-0052
 title: 將全服公告與投票改為即時廣播並降低資料庫輪詢
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,36 +9,42 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-09
-updated: 2026-11-09
+updated: 2026-11-13
 depends_on: []
-branch: work/chazi
+branch: task/T-0052-conditional-polling
 done_by: 棒子
-done_at:
+done_at: 2026-11-13T09:12:57+08:00
 ---
 
 ## 任務
 
-目前每位登入玩家每 1.5 秒查詢 `realm_admin_messages` 與 `realm_polls`，管理員有進行中的投票時還會重複讀取投票結果。將公告與投票建立／投票結果更新改用 Supabase Realtime Broadcast，連線正常時降低為 60 秒補查；Realtime 中斷時暫時恢復原本 1.5 秒輪詢，確保 3.8 秒公告仍可被接收。
+目前每位登入玩家每 1.5 秒查詢 `realm_admin_messages` 與 `realm_polls`，即使沒有投票活動也持續查詢。公告改用 Realtime 即時推送、每 60 秒補查；投票平常停止定時查詢，收到投票開始通知後每 5 秒補查，投票結束後立即停止。玩家進入遊戲或 Realtime 重新連線時立即同步。
 
 ## 範圍與禁止
 
-- 只動：`systems/realm-polls.js`、對應 Node 測試、Board 任務紀錄。
-- 不要動：`main)、Supabase schema／publication／資料／權限、玩家既有資料、GitHub Pages 部署。
+- 只動：`systems/realm-polls.js`、對應 Node 測試、版本顯示、Board 任務紀錄。
+- 不要動：Supabase schema／publication／資料／權限、玩家既有資料、GitHub Pages 部署。
 - 保留公告 3.8 秒顯示、投票時限、每人只能投一次、管理員即時查看票數。
 - 不得只把 1.5 秒輪詢直接改成長間隔而導致短公告被漏掉。
 
 ## 驗收條件
 
-- [ ] Realtime 正常時，玩家不再每 1.5 秒查詢公告與投票資料；改為 60 秒補查。
-- [ ] 管理員公告、投票建立與玩家投票結果透過 Broadcast 即時送達。
-- [ ] Realtime 連線中斷時自動回到 1.5 秒 fallback，恢復後再降頻。
-- [ ] 投票倒數更新改為每秒一次，保留秒數顯示。
-- [ ] 新增回歸測試驗證 Broadcast 註冊與 fallback／healthy interval 切換。
+- [ ] 公告透過 Broadcast 即時送達，`realm_admin_messages` 僅每 60 秒補查。
+- [ ] 投票建立／結束與玩家投票結果透過 Broadcast 即時送達。
+- [ ] 沒有進行中的投票時，不建立 `realm_polls` 定時查詢；投票進行中每 5 秒補查，結束後停止。
+- [ ] 玩家進入遊戲或 Realtime 重新連線時立即同步當前公告／投票狀態。
+- [ ] 投票倒數每秒更新，保留原本秒數顯示。
+- [ ] 新增回歸測試驗證 Broadcast 事件、60 秒公告補查、投票閒置停止與活動期間 5 秒補查。
 - [ ] `node --test tests/*.test.js` 與 `git diff --check` 通過。
 
 ## 紀錄
 
 - 2026-11-09 14:10 [叉子] 開單；確認 realmPollTick 每 1.5 秒至少查兩張表，持續在線單人每日可能產生 57,600 次查詢；管理員投票結果還會額外重讀。採用 Broadcast 保留短公告時效，避免單純降頻造成漏訊息。
+- 2026-11-12 21:04 [叉子] 依棒子「開始吧」決定重新開啟本任務；保留原驗收紀錄，新增條件式投票同步：閒置零輪詢、活動中每 5 秒；公告每 60 秒補查。
+
+## 進度紀錄
+
+- 2026-11-12 21:08 [叉子] 已完成條件式同步實作並建立 PR #68；JS 與測試檔語法檢查、核心輪詢規則靜態斷言通過。尚未執行完整 `node --test tests/*.test.js`；依原任務禁止事項，尚未合併或部署 GitHub Pages。
 
 ## 完工回報
 
@@ -49,3 +55,8 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-12 [棒子驗收] 棒子確認 T-0052 實作成功，正式驗收結案。
+
+
+- 2026-11-13 09:12 [棒子明確驗收／叉子代記] 棒子在對話中明確確認本任務已成功，正式驗收結案；依 Board §1.2、§8 代記，狀態更新為 done。
