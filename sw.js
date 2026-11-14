@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.31';
+const CACHE_NAME = 'dice-realm-shell-v1.32';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const APP_SHELL = [
   './script.js?v=20261114-t0091-heaven-glitch-no-x10',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
-  './style.css?v=20261114-t0075-dark-panel-text-v2',
+  './style.css?v=20261114-t0075-contrast-v3',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
