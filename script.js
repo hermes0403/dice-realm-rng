@@ -22,9 +22,9 @@ import { createCloudSaveService } from './services/cloud-save.js?v=20261115-t009
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-signup-cooldown';
-import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
+import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glitch-no-x10';
+import { createDiceSystem } from './systems/dice.js?v=20261115-t0098-eternal-dice';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
