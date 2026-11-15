@@ -542,7 +542,7 @@ export function createCloudSaveService(dependencies) {
     if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
     if (document?.visibilityState === 'hidden') return false;
     if (resumeRefreshPromise) return resumeRefreshPromise;
-    if (Date.now() - lastResumeRefreshAt < 2500) return false;
+    if (reason !== 'sync-complete' && Date.now() - lastResumeRefreshAt < 2500) return false;
     if (cloudSyncBusy) {
       resumeRefreshPending = true;
       return false;
