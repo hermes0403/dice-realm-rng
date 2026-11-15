@@ -268,7 +268,7 @@ test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯�
   const codex = await readFile(new URL('../ui/codex.js', import.meta.url), 'utf8');
   const admin = await readFile(new URL('../admin/ui-bindings.js', import.meta.url), 'utf8');
   const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
-  assert.match(codex, /discovered \? `抽到 \$\{format\(rolls\)\} 次` : '???'/);
+  assert.ok(codex.includes("discovered ? `抽到 ${format(rolls)} 次` : '???'"));
   assert.match(admin, /type==='aura'&&getCurrentUser\(\)\?\.id===targetUserId\)\{await applyPendingGrants\(true\);save\(\);await flushCloudSave\(\);render\(\);\}/);
   assert.match(script, /applyPendingGrants, save, flushCloudSave/);
 });
