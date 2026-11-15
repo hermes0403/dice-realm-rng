@@ -175,14 +175,17 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('V1.42 PWA 快取殼同步更新', async () => {
+test('V1.43 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.42/);
-  assert.match(html, /script\.js\?v=20261115-t0097-auth-signup-cooldown/);
-  assert.match(worker, /dice-realm-shell-v1\.42/);
+  assert.match(html, /V1\.43/);
+  assert.match(html, /script\.js\?v=20261115-t0098-eternal-update/);
+  assert.match(worker, /dice-realm-shell-v1\.43/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
+  assert.match(worker, /data\/eternal-update\.js\?v=20261115-t0098-eternal/);
+  assert.match(worker, /assets\/pets\/eternal-dawn-guardian\.svg/);
+  assert.match(worker, /assets\/pets\/eternal-starwish-deer\.svg/);
 });
 
 test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小時能力', async () => {

@@ -44,9 +44,9 @@ export function createAuthService(deps) {
 
   function updateSignupCooldownUI() {
     const remaining = getSignupCooldownRemaining();
-    const status = document.getElementById('authCooldownMessage');
-    const signupButton = document.getElementById('authSignupBtn');
-    const resetButton = document.getElementById('authResetBtn');
+    const status = globalThis.document?.getElementById('authCooldownMessage');
+    const signupButton = globalThis.document?.getElementById('authSignupBtn');
+    const resetButton = globalThis.document?.getElementById('authResetBtn');
 
     if (remaining > 0) {
       const totalSeconds = Math.ceil(remaining / 1000);
