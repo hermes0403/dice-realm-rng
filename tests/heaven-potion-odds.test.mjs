@@ -54,14 +54,13 @@ test('四組中間骰子依分母遞增、權重嚴格遞減且包含奇點骰�
   }
 });
 
-test('天氣加成只作用於 1,000,000 至 120,000,000 的骰子', () => {
+test('天氣加成仍只作用於 1,000,000 至 100,000,000 的骰子', () => {
   const dice = den => ({ den });
   assert.equal(heavenWeatherBonus(dice(999999), ['hell'], false, false), 0);
   assert.equal(heavenWeatherBonus(dice(1000000), ['hell'], false, false), 4);
   assert.equal(heavenWeatherBonus(dice(100000000), ['hell'], false, false), 4);
-  assert.equal(heavenWeatherBonus(dice(110050000), ['hell'], false, false), 4);
-  assert.equal(heavenWeatherBonus(dice(120000000), ['hell'], false, false), 4);
-  assert.equal(heavenWeatherBonus(dice(120000001), ['hell'], false, false), 0);
+  assert.equal(heavenWeatherBonus(dice(100000001), ['hell'], false, false), 0);
+  assert.equal(heavenWeatherBonus(dice(110050000), ['hell'], false, false), 0);
   assert.equal(heavenWeatherBonus(dice(1000000), ['glitch'], false, false), 5);
   assert.equal(heavenWeatherBonus(dice(1000000), ['hell'], false, true), 4.5);
   assert.equal(heavenWeatherBonus(dice(1000000), ['glitch'], false, true), 6);
