@@ -1,9 +1,6 @@
-/** Signed-in player presence and profile heartbeat. */
+/** Signed-in player presence heartbeat. Profile statistics are written by the save RPC only. */
 export function createPresenceService(dependencies) {
-  const {
-    supabaseClient, getCurrentUser, getState, totalUnique,
-    achievementStats, applyPendingGrants, scheduleSync
-  } = dependencies;
+  const { supabaseClient, getCurrentUser, applyPendingGrants, scheduleSync } = dependencies;
   let heartbeatBusy = false;
   let lastHeartbeatAt = 0;
   const HEARTBEAT_INTERVAL = 60000;
@@ -14,20 +11,9 @@ export function createPresenceService(dependencies) {
     heartbeatBusy = true;
     const user = getCurrentUser();
     try {
-      const state = getState();
-      const now = new Date().toISOString();
-      const { error } = await supabaseClient.from('player_profiles').upsert({
-        user_id: user.id,
-        username: (state.name || '旅人').trim().slice(0, 20) || '旅人',
-        total_rolls: Number(state.rolls) || 0,
-        unique_dice: totalUnique(),
-        rarest_den: Number(state.best?.den) || 0,
-        coins: Number(state.coins) || 0,
-        ...achievementStats(),
-        last_seen: now,
-        updated_at: now
-      }, { onConflict: 'user_id' });
+      const { error } = await supabaseClient.rpc('touch_player_presence');
       if (error) throw error;
+      if (getCurrentUser()?.id !== user.id) return;
       lastHeartbeatAt = Date.now();
       const grantChanged = await applyPendingGrants();
       if (grantChanged) scheduleSync();

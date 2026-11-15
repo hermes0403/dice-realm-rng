@@ -25,13 +25,17 @@ test('completed roll result is saved before async announcement and reveal work',
     'completed inventory/counter state is saved before async announcement');
 });
 
-test('cloud bootstrap preserves local progress changed while cloud request is pending', () => {
-  const request = cloudSource.indexOf("await supabaseClient.from('game_saves').select('save_data,updated_at')");
-  const compare = cloudSource.indexOf('localSaveAfterCloud !== localSaveAtLoadStart', request);
-  const staleApply = cloudSource.indexOf('S = migrateCurrency(normalizeGloves({ ...fresh(), ...data.save_data }))', request);
+test('cloud bootstrap only merges same-tab mutations made after the request began', () => {
+  const request = cloudSource.indexOf("await supabaseClient.from('game_saves')");
+  const localMutationCheck = cloudSource.indexOf('const localChangedDuringLoad = localSaveAfterCloud !== localSaveAtLoadStart', request);
+  const writerCheck = cloudSource.indexOf('latestLocalSnapshot?._cloudWriterId === localWriterId', localMutationCheck);
+  const temporaryBase = cloudSource.indexOf('(sameTabMutationDuringLoad ? localSaveBeforeCloud : null)', writerCheck);
+  const merge = cloudSource.indexOf('mergeCloudSavePayload(basePayload, localSnapshotForMerge, cloudPayload)', temporaryBase);
   assert.notEqual(request, -1, 'cloud save request exists');
-  assert.ok(compare > request && compare < staleApply,
-    'local mutation check happens after request and before applying cloud snapshot');
-  assert.ok(cloudSource.includes('await syncCloudSave();', compare),
-    'newer local progress is synced instead of discarded');
+  assert.ok(localMutationCheck > request, 'local mutation is checked after the cloud request');
+  assert.ok(writerCheck > localMutationCheck, 'only this tab’s own save is treated as an in-flight mutation');
+  assert.ok(temporaryBase > writerCheck, 'the pre-request local snapshot is used as a temporary common base');
+  assert.ok(merge > temporaryBase, 'only the in-flight local delta is merged into cloud state');
+  assert.ok(!cloudSource.includes('localIsNewerThanCloud'),
+    'the old whole-snapshot timestamp/roll-count heuristic is removed');
 });

@@ -2,7 +2,7 @@
 export function createGameStateService(dependencies) {
   const { KEY, D, G, POTIONS, ensurePetData, getCurrentUser, getState, localStorageRef = globalThis.localStorage } = dependencies;
   const localStorage = localStorageRef;
-function fresh(){return {pets:[],equippedPetUids:[],petDiscovered:{},name:'旅人',joined:new Date().toISOString(),rolls:0,bag:{},lockedDice:[],bagCapacity:35,first:{},gloves:{g0:1},equipped:'g0',best:null,coins:0,currencyVersion:2,petIncomePending:0,adminGrantApplied:{},autoSellThreshold:0,autoDeleteDice:[],autoSold:0,autoDepositWeatherEnabled:false,autoDepositThreshold:700,autoDepositDice:[],potions:{inventory:{luck1:0,luck2:0,luck3:0,speed1:0,speed2:0,angel1:0,angel2:0},active:{type:'',expiresAt:0},activeSpeed:{type:'',expiresAt:0},angelCharges:0,autoAdd:false,materials:{},autoAddPotions:[]},halloweenUnlocked:{d33:false,d34:false},questDate:new Date().toLocaleDateString('en-CA'),quest:{rolls:0,rare:0,craft:0,coinsEarned:0,rewardClaimed:false,taskIds:[]},dailyQuestCompletions:0,achievements:{},petSkillLuckCharges:0,petSkillDaily:{date:new Date().toLocaleDateString('en-CA'),s3:0,s5:0},petSkillLogin:{lastDate:null,streak:0,reward:0},petSkillSpeed:{activatedAt:0,expiresAt:0,cooldownUntil:0}}}
+function fresh(){return {pets:[],equippedPetUids:[],petDiscovered:{},name:'旅人',joined:new Date().toISOString(),rolls:0,bag:{},lockedDice:[],bagCapacity:35,first:{},gloves:{g0:1},equipped:'g0',items:{},equippedItem:'',best:null,coins:0,currencyVersion:2,petIncomePending:0,adminGrantApplied:{},autoSellThreshold:0,autoDeleteDice:[],autoSold:0,autoDepositWeatherEnabled:false,autoDepositThreshold:700,autoDepositDice:[],potions:{inventory:{luck1:0,luck2:0,luck3:0,speed1:0,speed2:0,angel1:0,angel2:0},active:{type:'',expiresAt:0},activeSpeed:{type:'',expiresAt:0},angelCharges:0,autoAdd:false,materials:{},autoAddPotions:[]},halloweenUnlocked:{d33:false,d34:false},questDate:new Date().toLocaleDateString('en-CA'),quest:{rolls:0,rare:0,craft:0,coinsEarned:0,rewardClaimed:false,taskIds:[]},dailyQuestCompletions:0,achievements:{},petSkillLuckCharges:0,petSkillDaily:{date:new Date().toLocaleDateString('en-CA'),s3:0,s5:0},petSkillLogin:{lastDate:null,streak:0,reward:0},petSkillSpeed:{activatedAt:0,expiresAt:0,cooldownUntil:0}}}
 function normalizeGloves(x){
  // 舊版手套名稱對應新名稱；只轉換存檔中確實存在且持有的項目，不新增任何手套。
  const legacyToCurrent={
@@ -14,17 +14,24 @@ function normalizeGloves(x){
   '宇宙':'g6','宇宙手套':'g6','糖果':'g6','糖果手套':'g6'
  };
  const src=(x.gloves&&typeof x.gloves==='object')?x.gloves:{};
+ const legacyConverterOwned=Number(src.g7)>0;
+ const legacyConverterEquipped=String(x.equipped||'')==='g7';
+ const items=(x.items&&typeof x.items==='object')?{...x.items}:{};
+ if(legacyConverterOwned)items.g7=1;
+ x.items=items;
+ if(!x.equippedItem&&legacyConverterEquipped&&items.g7)x.equippedItem='g7';
  const normalized={g0:1};
  for(const [key,value] of Object.entries(src)){
-  if(!(Number(value)>0))continue;
-  const id=G.some(g=>g.id===key)?key:legacyToCurrent[key];
+  if(!(Number(value)>0)||key==='g7')continue;
+  const id=G.some(g=>g.id===key&&key!=='g7')?key:legacyToCurrent[key];
   if(id)normalized[id]=1;
  }
  // 裝備欄位也只接受目前已持有的 ID；無法辨識時回到基礎手套。
  const equippedRaw=String(x.equipped||'');
- const equipped=G.some(g=>g.id===equippedRaw)?equippedRaw:legacyToCurrent[equippedRaw];
+ const equipped=G.some(g=>g.id===equippedRaw&&equippedRaw!=='g7')?equippedRaw:legacyToCurrent[equippedRaw];
  x.gloves=normalized;
  x.equipped=(equipped&&normalized[equipped])?equipped:'g0';
+ x.equippedItem=items.g7?(x.equippedItem==='g7'?'g7':'') : '';
  // craftVoid／craftUniverse 是購買鑽石／糖果手套後取得的成就。
  // 正規化手套持有狀態時保留既有成就，避免載入存檔時重置完成狀態。
  return x;

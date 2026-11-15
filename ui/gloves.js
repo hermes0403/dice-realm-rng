@@ -3,9 +3,9 @@ export function createGloveUI(deps) {
   const {
     getState, D, G, supabaseClient, getCurrentUser, byId, glove, currentGlove,
     format, formatWalletScientific, save, flushCloudSave, render, toast,
-    achievementStats, rewardText, grantAchievementReward, showAchievementPopup,
+    rewardText, grantAchievementReward, showAchievementPopup,
     checkAchievements, logCraft, KEY, userSaveKey, documentRef, confirmAction,
-    openAuth, totalUnique, localStorageRef = globalThis.localStorage
+    openAuth, localStorageRef = globalThis.localStorage
   } = deps;
   let glovePurchaseBusy = false;
 
@@ -22,46 +22,64 @@ export function createGloveUI(deps) {
     documentRef.getElementById('equippedDesc').textContent = equippedGlove.desc;
     documentRef.getElementById('gloveLuck').textContent = '+' + equippedGlove.luck + '%';
     documentRef.getElementById('gloveSpeed').textContent = '+' + equippedGlove.speed + '%';
-    documentRef.getElementById('gloveOwned').textContent = Object.keys(state.gloves || {}).filter(id => state.gloves[id] > 0).length;
+    documentRef.getElementById('gloveOwned').textContent = Object.keys(state.gloves || {}).filter(id => id !== 'g7' && state.gloves[id] > 0).length;
 
-    const convertPanel = documentRef.getElementById('weatherConvertPanel');
-    const convertBtn = documentRef.getElementById('weatherConvertBtn');
-    const convertCooldown = documentRef.getElementById('weatherConvertCooldown');
-    if (convertPanel) {
-      const canConvert = state.equipped === 'g7' && !!state.gloves?.g7;
-      convertPanel.hidden = !canConvert;
-      if (canConvert) {
-        const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
-        convertBtn.disabled = left > 0;
-        convertBtn.textContent = left > 0 ? '⏳ 天氣轉換冷卻中' : '🌦️ 轉換全服天氣';
-        convertCooldown.textContent = left > 0
-          ? '剩餘冷卻 ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':'
-            + String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':'
-            + String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
-          : '能力已就緒';
-      }
+    const converter = G.find(item => item.id === 'g7');
+    const itemWorkshopList = documentRef.getElementById('itemWorkshopList');
+    if (itemWorkshopList && converter) {
+      const owned = Number(state.items?.g7) > 0;
+      const enabled = state.equippedItem === 'g7';
+      const materials = converter.recipe.map(([diceId, count]) => {
+        const dice = byId(diceId);
+        const have = Number(state.bag[diceId]) || 0;
+        const enough = have >= count;
+        const odds = dice?.den ? '（1/' + Number(dice.den).toLocaleString('en-US') + '）' : '';
+        return '<p style="color:' + (enough ? '#65e6b2' : '#ff829d') + '">' +
+          (enough ? '✓' : '缺少') + ' ' + (dice?.icon || '🎲') + ' ' + (dice?.name || diceId) +
+          ' ' + odds + ' ×' + count + '：持有 ' + format(have) + '</p>';
+      }).join('');
+      const action = enabled ? '已啟用' : owned ? '啟用' : '合成';
+      const disabled = enabled || (!owned && !canCraft(converter));
+      const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
+      const cooldownText = !enabled ? '先啟用天氣轉換器，即可每小時使用一次。'
+        : left > 0 ? '⏳ 天氣轉換冷卻中 · ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
+          String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
+          String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
+        : '天氣轉換已就緒';
+      const controls = owned
+        ? '<label for="weatherConvertScope" class="mini" style="display:block;margin:8px 0 4px">影響範圍</label>' +
+          '<select id="weatherConvertScope" class="field" style="width:100%;margin-bottom:8px"><option value="local">本伺服器</option><option value="global">全伺服器</option></select>' +
+          (enabled
+            ? '<button class="primary" id="weatherConvertBtn" type="button" style="width:100%;min-height:38px" ' + (left > 0 ? 'disabled' : '') + '>🌦️ 轉換天氣</button>'
+            : '<button type="button" style="width:100%;min-height:36px" data-craft="g7">啟用天氣轉換器</button>') +
+          '<p class="mini" id="weatherConvertCooldown" style="margin:6px 0 0">' + cooldownText + '</p>'
+        : materials + '<button type="button" ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button>';
+      itemWorkshopList.innerHTML = '<div class="recipe weather-converter-card" style="display:block;padding:12px">' +
+        '<h3 style="margin:0 0 6px">' + converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') + '</h3>' +
+        '<p style="margin:0 0 5px">' + converter.desc + '</p>' +
+        '<p class="mini" style="margin:0 0 8px">每小時可使用一次；不提供運氣或擲骰速度加成。</p>' +
+        controls + '</div>';
     }
 
-    documentRef.getElementById('recipeList').innerHTML = G.filter(item => item.id !== 'g0')
-      .sort((a, b) => (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER))
-      .map(item => {
-        const owned = !!state.gloves[item.id];
-        const equipped = state.equipped === item.id;
-        if (item.id === 'g7') {
-          const materials = item.recipe.map(([diceId, count]) => {
-            const dice = byId(diceId);
-            const have = Number(state.bag[diceId]) || 0;
-            const enough = have >= count;
-            return `<p style="color:${enough ? '#65e6b2' : '#ff829d'}">${enough ? '✓' : '缺少'} ${dice?.name || diceId} ×${count}：持有 ${format(have)}</p>`;
-          }).join('');
-          return `<div class="recipe"><div style="flex:1;min-width:0"><h3>${item.icon} ${item.name}${equipped ? '（已裝備）' : owned ? '（已持有）' : ''}</h3>${materials}<p>運氣 +${item.luck}% · 速度 +${item.speed}%</p></div><button ${owned ? (equipped ? 'disabled' : '') : (canCraft(item) ? '' : 'disabled')} data-craft="g7">${equipped ? '已裝備' : owned ? '裝備' : '合成'}</button></div>`;
-        }
-        const action = owned ? (equipped ? '已裝備' : '裝備') : '購買';
-        const disabled = glovePurchaseBusy || (owned ? equipped : Number(state.coins) < item.price);
-        return `<div class="recipe"><div style="flex:1;min-width:0"><h3>${item.icon} ${item.name}${equipped ? '（已裝備）' : owned ? '（已持有）' : ''}</h3><p>運氣 +${item.luck}% · 速度 +${item.speed}%</p><p style="color:#ffd27a;font-weight:800">價格：${formatWalletScientific(item.price)}</p>${!owned && Number(state.coins) < item.price ? '<p style="color:#ff829d">金幣不足</p>' : ''}</div><button ${disabled ? 'disabled' : ''} data-glove-action="${item.id}">${action}</button></div>`;
-      }).join('');
+    const recipeList = documentRef.getElementById('recipeList');
+    if (recipeList) {
+      recipeList.innerHTML = G.filter(item => item.id !== 'g0' && item.id !== 'g7')
+        .sort((a, b) => (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER))
+        .map(item => {
+          const owned = !!state.gloves[item.id];
+          const equipped = state.equipped === item.id;
+          const action = owned ? (equipped ? '已裝備' : '裝備') : '購買';
+          const disabled = glovePurchaseBusy || (owned ? equipped : Number(state.coins) < item.price);
+          return '<div class="recipe"><div style="flex:1;min-width:0"><h3>' + item.icon + ' ' + item.name +
+            (equipped ? '（已裝備）' : owned ? '（已持有）' : '') +
+            '</h3><p>運氣 +' + item.luck + '% · 速度 +' + item.speed +
+            '%</p><p style="color:#ffd27a;font-weight:800">價格：' + formatWalletScientific(item.price) +
+            '</p>' + (!owned && Number(state.coins) < item.price ? '<p style="color:#ff829d">金幣不足</p>' : '') +
+            '</div><button ' + (disabled ? 'disabled' : '') + ' data-glove-action="' + item.id + '">' +
+            action + '</button></div>';
+        }).join('');
+    }
   }
-
   async function purchaseGlove(id) {
     const state = getState();
     if (glovePurchaseBusy) return;
@@ -131,19 +149,6 @@ export function createGloveUI(deps) {
         }
       }
 
-      const now = new Date().toISOString();
-      const { error: profileError } = await supabaseClient.from('player_profiles').upsert({
-        user_id: getCurrentUser().id,
-        username: (state.name || '旅人').trim().slice(0, 20) || '旅人',
-        total_rolls: Number(state.rolls) || 0,
-        unique_dice: totalUnique(),
-        rarest_den: Number(state.best?.den) || 0,
-        coins: Number(state.coins) || 0,
-        ...achievementStats(),
-        last_seen: now,
-        updated_at: now
-      }, { onConflict: 'user_id' });
-      if (profileError) console.warn('Glove purchase profile mirror update failed; purchase is committed', profileError);
       // Purchase RPC has committed; never roll back the confirmed purchase if local save scheduling fails.
       try { save(); } catch (saveError) {
         console.warn('Glove purchase committed but save scheduling failed', saveError);
@@ -169,11 +174,18 @@ export function createGloveUI(deps) {
   function craft(id) {
     const state = getState();
     const item = glove(id);
+    if (id === 'g7' && state.items?.g7) {
+      state.equippedItem = 'g7';
+      save();
+      render();
+      toast('已啟用天氣轉換器');
+      return;
+    }
     if (state.gloves[id]) {
       state.equipped = id;
       save();
       render();
-      toast('已裝備' + item.name + '（同時只能裝備一副手套）');
+      toast(id === 'g7' ? '已啟用天氣轉換器' : '已裝備' + item.name + '（同時只能裝備一副手套）');
       return;
     }
     if (!item.recipe?.length || !canCraft(item)) {
@@ -184,14 +196,19 @@ export function createGloveUI(deps) {
       state.bag[diceId] = (Number(state.bag[diceId]) || 0) - count;
       if (state.bag[diceId] <= 0) delete state.bag[diceId];
     });
-    state.gloves[id] = 1;
-    state.equipped = id;
+    if (id === 'g7') {
+      state.items = state.items || {};
+      state.items.g7 = 1;
+    } else {
+      state.gloves[id] = 1;
+      state.equipped = id;
+    }
     state.quest.craft++;
     checkAchievements();
     save();
     if (getCurrentUser()) logCraft('glove', id, item.name);
     render();
-    toast('合成成功並裝備：' + item.name);
+    toast(id === 'g7' ? '合成成功！天氣轉換器已放入道具欄，請按「啟用」' : '合成成功並裝備：' + item.name);
   }
   let gloveUISetup = false;
   function setupGloveUI() {

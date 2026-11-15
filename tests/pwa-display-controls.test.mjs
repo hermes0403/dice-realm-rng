@@ -175,14 +175,50 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('T-0092 V1.36 PWA 快取殼同步更新', async () => {
+test('V1.42 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.36/);
-  assert.match(html, /script\.js\?v=20261114-t0092-current-collection-progress/);
-  assert.match(worker, /dice-realm-shell-v1\.36/);
+  assert.match(html, /V1\.42/);
+  assert.match(html, /script\.js\?v=20261115-t0097-auth-signup-cooldown/);
+  assert.match(worker, /dice-realm-shell-v1\.42/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
+});
+
+test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小時能力', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const dice = await readFile(new URL('../data/dice.js', import.meta.url), 'utf8');
+  const gloves = await readFile(new URL('../ui/gloves.js', import.meta.url), 'utf8');
+  const navigation = await readFile(new URL('../ui/navigation.js', import.meta.url), 'utf8');
+  const weather = await readFile(new URL('../systems/weather.js', import.meta.url), 'utf8');
+  const gameState = await readFile(new URL('../core/game-state.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
+
+  assert.match(html, /data-workshop-category="items">道具工坊/);
+  const glovePanel = html.slice(html.indexOf('id="workshop-gloves-panel"'), html.indexOf('id="workshop-potions-panel"'));
+  const itemPanelStart = html.indexOf('id="workshop-items-panel"');
+  const itemPanel = html.slice(itemPanelStart, html.indexOf('</section>', itemPanelStart));
+  assert.doesNotMatch(glovePanel, /weatherConvertPanel/);
+  assert.match(itemPanel, /id="itemWorkshopList"/);
+  assert.doesNotMatch(itemPanel, /ITEM WORKSHOP|打造改變天氣的工具|收集特殊天氣骰子/);
+  assert.doesNotMatch(itemPanel, /weatherConvertPanel/);
+  assert.match(gloves, /weather-converter-card/);
+  assert.match(gloves, /id="weatherConvertScope"/);
+  assert.match(gloves, /id="weatherConvertBtn"/);
+  assert.match(gloves, /data-craft="g7"/);
+
+  assert.match(dice, /id:'g7',name:'天氣轉換器',icon:'🌦️',luck:0,speed:0/);
+  assert.match(dice, /recipe:\[\['d39',1\],\['d42',1\],\['d47',1\],\['d51',1\],\['d55',1\]\]/);
+  assert.match(gloves, /filter\(item => item\.id !== 'g0' && item\.id !== 'g7'\)/);
+  assert.match(gloves, /60 \* 60 \* 1000/);
+  assert.match(gloves, /state\.items\?\.g7/);
+  assert.match(gloves, /supabaseClient\.rpc\('purchase_glove'/);
+  assert.doesNotMatch(gloves, /from\('player_profiles'\)\.upsert/);
+  assert.match(navigation, /workshop-items-panel/);
+  assert.match(weather, /需要先啟用天氣轉換器/);
+  assert.match(gameState, /G\.some\(g=>g\.id===key&&key!=='g7'\)\?key:legacyToCurrent\[key\]/);
+  assert.match(gameState, /x\.equipped=\(equipped&&normalized\[equipped\]\)\?equipped:'g0'/);
+  assert.match(script, /function currentGlove\(\)\{return S\.equipped==='g7'\?glove\('g0'\):glove\(S\.equipped\)\}/);
 });
 
 test('深色背景的次要文字與導覽不再使用深藍前景', async () => {
@@ -226,4 +262,13 @@ test('T-0092 自動出售說明縮短且批次按鈕固定同列', async () => {
   assert.match(html, /勾選擲到後要自動出售的骰子/);
   assert.doesNotMatch(html, /僅列出一般與天氣骰子，依常見到稀有排序/);
   assert.match(css, /#autoSellDiceOptions \.auto-sell-bulk-actions\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+
+test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯示零次抽取', async () => {
+  const codex = await readFile(new URL('../ui/codex.js', import.meta.url), 'utf8');
+  const admin = await readFile(new URL('../admin/ui-bindings.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
+  assert.ok(codex.includes("discovered ? `抽到 ${format(rolls)} 次` : '???'"));
+  assert.match(admin, /type==='aura'&&getCurrentUser\(\)\?\.id===targetUserId\)\{await applyPendingGrants\(true\);save\(\);await flushCloudSave\(\);render\(\);\}/);
+  assert.match(script, /applyPendingGrants, save, flushCloudSave/);
 });
