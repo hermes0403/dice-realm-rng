@@ -157,7 +157,7 @@ function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
 function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0))}
-function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>120000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
+function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
 function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');timerManager.clearTimeout(e._t);const timer=timerManager.setTimeout(()=>{e.classList.remove('show');if(e._t===timer)e._t=null},2100,'toast-hide');e._t=timer}
