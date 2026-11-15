@@ -20,7 +20,7 @@ import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js
 import { createCloudSaveService } from './services/cloud-save.js?v=20261115-t0096-grant-dice-weather-card';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js';
+import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-signup-cooldown';
 import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glitch-no-x10';
