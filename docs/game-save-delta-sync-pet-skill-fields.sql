@@ -1,4 +1,4 @@
--- T-0094 follow-up: allow all pet-skill fields emitted by services/cloud-save.js.
+-- T-0094 follow-up: allow all fields emitted by services/cloud-save.js.
 -- CREATE OR REPLACE preserves the existing function ACL and SECURITY DEFINER settings.
 DO $$
 DECLARE
@@ -23,6 +23,22 @@ BEGIN
 
     IF v_updated_definition = v_definition THEN
       RAISE EXCEPTION 'Could not locate the expected pet skill save-patch allowlist segment';
+    END IF;
+
+    EXECUTE v_updated_definition;
+    v_definition := v_updated_definition;
+  END IF;
+
+  IF position('''items''' in v_definition) = 0
+     OR position('''equippedItem''' in v_definition) = 0 THEN
+    v_updated_definition := replace(
+      v_definition,
+      '''lockedDice'', ''gloves'', ''equipped'', ''best''',
+      '''lockedDice'', ''gloves'', ''equipped'', ''items'', ''equippedItem'', ''best'''
+    );
+
+    IF v_updated_definition = v_definition THEN
+      RAISE EXCEPTION 'Could not locate the expected item save-patch allowlist segment';
     END IF;
 
     EXECUTE v_updated_definition;
