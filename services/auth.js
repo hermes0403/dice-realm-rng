@@ -29,6 +29,59 @@ export function createAuthService(deps) {
 
   let authBusy = false;
   let authStateSubscription = null;
+  let signupCooldownInterval = null;
+  const SIGNUP_COOLDOWN_MS = 4 * 60 * 1000;
+  const SIGNUP_COOLDOWN_KEY = 'diceRealmEmailActionCooldownUntilV1';
+
+  function getSignupCooldownRemaining() {
+    try {
+      const until = Number(localStorage.getItem(SIGNUP_COOLDOWN_KEY)) || 0;
+      return Math.max(0, until - Date.now());
+    } catch {
+      return 0;
+    }
+  }
+
+  function updateSignupCooldownUI() {
+    const remaining = getSignupCooldownRemaining();
+    const status = document.getElementById('authCooldownMessage');
+    const signupButton = document.getElementById('authSignupBtn');
+    const resetButton = document.getElementById('authResetBtn');
+
+    if (remaining > 0) {
+      const totalSeconds = Math.ceil(remaining / 1000);
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      if (status) {
+        status.hidden = false;
+        status.textContent = '郵件操作冷卻中：' + minutes + ':' + seconds + '。倒數結束後才能再次註冊或申請重設密碼。';
+      }
+      if (signupButton) signupButton.disabled = true;
+      if (resetButton) resetButton.disabled = true;
+      return;
+    }
+
+    if (status) {
+      status.hidden = true;
+      status.textContent = '';
+    }
+    if (signupButton) signupButton.disabled = authBusy;
+    if (resetButton) resetButton.disabled = authBusy;
+    if (signupCooldownInterval && timerManager?.clearInterval) {
+      timerManager.clearInterval(signupCooldownInterval);
+      signupCooldownInterval = null;
+    }
+  }
+
+  function startSignupCooldown() {
+    try {
+      localStorage.setItem(SIGNUP_COOLDOWN_KEY, String(Date.now() + SIGNUP_COOLDOWN_MS));
+    } catch {}
+    updateSignupCooldownUI();
+    if (!signupCooldownInterval && timerManager?.setInterval) {
+      signupCooldownInterval = timerManager.setInterval(updateSignupCooldownUI, 1000, 'auth-signup-cooldown');
+    }
+  }
 
   function showAuthMessage(message) {
     const element = document.getElementById('authMessage');
@@ -38,6 +91,7 @@ export function createAuthService(deps) {
   function openAuth() {
     document.getElementById('authModal').style.display = 'flex';
     showAuthMessage('');
+    updateSignupCooldownUI();
   }
 
   function closeAuth() {
@@ -51,10 +105,16 @@ export function createAuthService(deps) {
   }
 
   function setAuthButtonsDisabled(disabled) {
-    ['authLoginBtn', 'authSignupBtn', 'authResetBtn', 'authGoogleBtn'].forEach(id => {
+    ['authLoginBtn', 'authGoogleBtn'].forEach(id => {
       const button = document.getElementById(id);
       if (button) button.disabled = disabled;
     });
+    const cooldownActive = getSignupCooldownRemaining() > 0;
+    ['authSignupBtn', 'authResetBtn'].forEach(id => {
+      const button = document.getElementById(id);
+      if (button) button.disabled = disabled || cooldownActive;
+    });
+    updateSignupCooldownUI();
   }
 
   function isEmailRateLimitError(error) {
@@ -147,11 +207,17 @@ export function createAuthService(deps) {
     } finally {
       authBusy = false;
       setAuthButtonsDisabled(false);
+      updateSignupCooldownUI();
     }
   }
 
   async function authAction(mode) {
     if (authBusy) return;
+    if ((mode === 'signup' || mode === 'reset') && getSignupCooldownRemaining() > 0) {
+      updateSignupCooldownUI();
+      showAuthMessage('請稍候，郵件操作冷卻結束後才能再次註冊或申請重設密碼。');
+      return;
+    }
     if (!supabaseClient) {
       showAuthMessage('登入模組載入失敗，請重新整理網頁。');
       return;
@@ -189,18 +255,20 @@ export function createAuthService(deps) {
       if (result.error) throw result.error;
 
       if (mode === 'signup') {
+        startSignupCooldown();
         if (result.data?.session && !result.data?.user?.email_confirmed_at) {
           await supabaseClient.auth.signOut().catch(() => {});
           setCurrentUser(null);
           document.body.classList.add('auth-required');
           document.getElementById('authModal').style.display = 'flex';
-          showAuthMessage('註冊已送出，但信箱尚未驗證，因此不能進入遊戲。請先點擊寄到信箱的確認連結；若連結顯示無法連結或已失效，請重新取得有效的確認信。');
+          showAuthMessage('註冊要求已送出，請前往信箱查看驗證信（也請檢查垃圾郵件）。完成驗證後即可登入。');
           return;
         }
-        showAuthMessage('已送出註冊要求。信箱驗證完成前不能進入遊戲，請查看收件匣、垃圾郵件及促銷內容。');
+        showAuthMessage('註冊要求已送出，請前往信箱查看驗證信（也請檢查垃圾郵件）。完成驗證後即可登入。');
         return;
       }
       if (mode === 'reset') {
+        startSignupCooldown();
         showAuthMessage('若此 Email 已註冊，系統會寄出重設密碼信；請稍候並檢查垃圾郵件。');
         return;
       }
@@ -231,8 +299,9 @@ export function createAuthService(deps) {
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
         document.getElementById('authModal').style.display = 'flex';
-      } else if (mode === 'signup' && isEmailRateLimitError(error)) {
-        showAuthMessage('Supabase 郵件服務目前回報寄送上限，這是伺服器端限制，網站前端無法自行解除。');
+      } else if ((mode === 'signup' || mode === 'reset') && isEmailRateLimitError(error)) {
+        startSignupCooldown();
+        showAuthMessage('Supabase 郵件服務目前回報寄送上限，這次沒有寄出郵件。請停止重複操作，等待冷卻倒數結束；伺服器寄信額度仍需由管理員處理。');
       } else if (mode === 'signup' && /database error saving new user/i.test(message)) {
         showAuthMessage('此 Gmail 可能曾用於被管理員刪除的帳號，無法再次註冊。');
       } else {
@@ -340,6 +409,11 @@ export function createAuthService(deps) {
   function unregisterAuthStateListener() {
     authStateSubscription?.data?.subscription?.unsubscribe?.();
     authStateSubscription = null;
+  }
+
+  updateSignupCooldownUI();
+  if (getSignupCooldownRemaining() > 0 && timerManager?.setInterval) {
+    signupCooldownInterval = timerManager.setInterval(updateSignupCooldownUI, 1000, 'auth-signup-cooldown');
   }
 
   return {
