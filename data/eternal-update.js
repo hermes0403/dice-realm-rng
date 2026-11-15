@@ -6,6 +6,9 @@ export const NEW_DICE = [
   { id: 'd72', name: '原初之眼', den: 974000, icon: '◉', color: '#ffd58f', desc: '凝視骰界最初的光，窺見尚未發生的結果。', effect: '原初之眼' }
 ];
 
+export const ETERNAL_PET_WEIGHTS = [60, 40];
+export const ETERNAL_PET_INCOME = { eternal_dawn_guardian: 18000, eternal_starwish_deer: 22000 };
+
 export const ETERNAL_PETS = [
   { id: 'eternal_dawn_guardian', name: '曙光守望者', icon: '🪽', rarity: 'eternal', skill: '裝備後運氣 +35%、擲骰速度 +35%。' },
   { id: 'eternal_starwish_deer', name: '星願靈鹿', icon: '🦌', rarity: 'eternal', skill: '裝備後每 24 小時可隨機獲得天堂藥水 I（40%）或幸運藥水 III（60%）。' }
