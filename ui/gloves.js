@@ -40,11 +40,17 @@ export function createGloveUI(deps) {
       }).join('');
       const action = enabled ? '已啟用' : owned ? '啟用' : '合成';
       const disabled = enabled || (!owned && !canCraft(converter));
+      const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
+      const cooldownText = !enabled ? '先啟用天氣轉換器，即可每小時使用一次。'
+        : left > 0 ? '⏳ 天氣轉換冷卻中 · ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
+          String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
+          String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
+        : '天氣轉換已就緒';
       const controls = owned
         ? '<label for="weatherConvertScope" class="mini" style="display:block;margin:8px 0 4px">影響範圍</label>' +
           '<select id="weatherConvertScope" class="field" style="width:100%;margin-bottom:8px"><option value="local">本伺服器</option><option value="global">全伺服器</option></select>' +
-          '<button class="primary" id="weatherConvertBtn" type="button" style="width:100%;min-height:38px" ' + (enabled ? 'disabled' : '') + '>🌦️ ' + (enabled ? '已啟用' : '啟用後轉換天氣') + '</button>' +
-          '<p class="mini" id="weatherConvertCooldown" style="margin:6px 0 0">' + (enabled ? '⏳ 天氣轉換冷卻狀態載入中' : '先啟用天氣轉換器，即可每小時使用一次。') + '</p>'
+          '<button class="primary" id="weatherConvertBtn" type="button" style="width:100%;min-height:38px" ' + (!enabled || left > 0 ? 'disabled' : '') + '>🌦️ 轉換天氣</button>' +
+          '<p class="mini" id="weatherConvertCooldown" style="margin:6px 0 0">' + cooldownText + '</p>'
         : materials + '<button type="button" ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button>';
       itemWorkshopList.innerHTML = '<div class="recipe weather-converter-card" style="display:block;padding:12px">' +
         '<h3 style="margin:0 0 6px">' + converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') + '</h3>' +
