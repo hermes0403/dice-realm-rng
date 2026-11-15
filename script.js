@@ -9,7 +9,7 @@ import { format, formatWalletScientific, compactNum, escapeHTML } from './core/f
 import { createNavigationUI } from './ui/navigation.js?v=20261114-t0094-weather-converter-item-slots';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js';
-import { setupAdminPetOddsUI } from './admin/pet-odds.js';
+import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';

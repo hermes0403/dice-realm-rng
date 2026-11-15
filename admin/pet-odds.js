@@ -81,9 +81,11 @@ export function setupAdminPetOddsUI({
       (data || []).forEach(row => {
         const tier = Number(row.tier);
         const rates = row.rates;
-        if (tier >= 1 && tier <= 100 && rates && typeof rates === 'object') {
+        // 第 10 區起由程式內的永恆融合設定管理；忽略資料庫舊版區間，
+        // 避免舊資料覆蓋新版 1,100,001+ 的九段機率。
+        if (tier >= 1 && tier <= 9 && rates && typeof rates === 'object') {
           PET_TIER_CONFIG[tier] = { min_den: Number(row.min_den), max_den: row.max_den == null ? null : Number(row.max_den) };
-          PET_TIER_RATES[tier] = Object.fromEntries(['common', 'rare', 'legendary', 'mythic', 'secret'].map(key => [key, Number(rates[key]) || 0]));
+          PET_TIER_RATES[tier] = Object.fromEntries(['common', 'rare', 'legendary', 'mythic', 'secret', 'eternal'].map(key => [key, Number(rates[key]) || 0]));
         }
       });
       const slotA = document.getElementById('petDiceSlotA')?.value;
