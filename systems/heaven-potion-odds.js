@@ -57,7 +57,7 @@ export function buildHeavenBaseEntries(byId, heaven2, highLuck) {
 
 export function heavenWeatherBonus(dice, weatherTypes, heaven2, angel) {
   const den = Number(dice?.den);
-  if (!Number.isFinite(den) || den < 1000000 || den > 120000000) return 0;
+  if (!Number.isFinite(den) || den < 1000000 || den > 100000000) return 0;
   let bonus = 0;
   if (weatherTypes.includes('hell')) bonus += heaven2 ? 5 : angel ? 4.5 : 4;
   if (weatherTypes.includes('glitch')) bonus += heaven2 ? 7 : angel ? 6 : 5;
