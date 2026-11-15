@@ -175,12 +175,12 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('T-0094 V1.39 PWA 快取殼同步更新', async () => {
+test('T-0095 V1.40 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.39/);
-  assert.match(html, /script\.js\?v=20261114-t0094-weather-converter-item-slots/);
-  assert.match(worker, /dice-realm-shell-v1\.39/);
+  assert.match(html, /V1\.40/);
+  assert.match(html, /script\.js\?v=20261115-t0095-resume-reconcile/);
+  assert.match(worker, /dice-realm-shell-v1\.40/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
 });
