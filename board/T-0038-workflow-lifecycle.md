@@ -276,8 +276,6 @@ done_at:
 
 **來源與版本：**棒子 2026-11-13 20:10 原話「以上的東西我全部同意」；Q1 於 20:25 選 A；Q2 於 20:25 表示「第二題不太懂」，並於 20:30 回覆「是」，意指新方案暫不啟用、現行方式維持；Q3 於 20:25 回覆「是」，意指整理完成前不清空／reset `work/chazi`。完整 `[代記:棒子/叉子]` 來源紀錄見本文件紀錄區 2026-11-13 21:21。
 
-- 2026-11-13 19:58 [老查] 依 Barry 明確指示，將 M1 新增／變更的權限及 Git 流程規則暫限定於協作者方；棒子方適用範圍待棒子本人確認。新增六題棒子方決策題，涵蓋 M1 適用範圍、角色分支與任務 PR 流程、原有七條件整合預先授權、`work/chazi` 歷史提交、GitHub App 檢查流程及權限矩陣。此紀錄不代表棒子已同意，也不改動或撤銷其既有授權。
-
 ## M2 Board 檢查適用範圍與嚴重度（待 Barry 審閱）
 
 本表是 M2 開工前的分類基準草案，不代表 validator 已實作。所有可由 Board 資料判斷的檢查都可掃描整份 Board；「全域」表示檢查會讀取雙方任務。第 1、4、5 項決策已獲棒子確認，因此權限、任務生命週期及共同 SOP 相關檢查，雙方採相同嚴格度。只有第 2 項新 Git 架構尚未啟用；角色分支、任務分支來源、PR head／base／合併方式及 Worktree 新流程不得用來阻擋棒子方。
@@ -305,6 +303,8 @@ done_at:
 **CI 遠端證據要求：**公開 ID 固定及 PR base／head 檢查須在 `pull_request` workflow 中讀取 PR base、head 與任務檔差異；workflow 僅需 `contents: read`。容量、Communicate、委派關聯等檢查必須以 PR head 的完整 Board 任務資料計算，不得只檢查 PR 變更檔而漏掉另一方現有任務。GitHub App／連線授權及 Board 遠端同步回讀只依 README 執行 SOP 核對，不列入 M2 validator 檢查清單。
 
 ## 紀錄
+
+- 2026-11-13 19:58 [老查] 依 Barry 明確指示，將 M1 新增／變更的權限及 Git 流程規則暫限定於協作者方；棒子方適用範圍待棒子本人確認。新增六題棒子方決策題，涵蓋 M1 適用範圍、角色分支與任務 PR 流程、原有七條件整合預先授權、`work/chazi` 歷史提交、GitHub App 檢查流程及權限矩陣。此紀錄不代表棒子已同意，也不改動或撤銷其既有授權。
 
 - 2026-11-11 20:15 [老查] 重開前事實紀錄：原 HEAD e2c2996cba4f0185b626652d42cf7a90a726ad6f；原分支相對 origin/main 有 12 個獨有提交（清單存於 %TEMP%\T-0038-pre-rebase.txt），均仍由 work/laocha 保留；TEMP 複本重現 cbaae3b 邊界衝突、e2c2996 邊界零衝突；已於本任務原 Worktree 執行 git rebase --onto origin/main e2c2996 task/T-0038-workflow-lifecycle（exit 0），分支現與 origin/main 同為 9ab18022991e41ed0939b7622acc0632193ece63；upstream 於 rebase 前已提前改為 origin/main（時序偏差，保留現狀）。
 - 2026-11-11 20:15 [代記:barry/老查] 授權對本任務分支執行一次 git rebase --onto origin/main e2c2996（僅限原 Worktree，不推送、不開 PR、不合併）。｜來源：約 2026-11-11 20:08 barry 對話原話「授權對 task/T-0038-workflow-lifecycle 執行一次 git rebase --onto origin/main e2c2996，僅限 T-0038 原 Worktree，不推送、不開 PR、不合併；依序存暫存檔、執行、驗證，遇任何異常即停手回報。」
