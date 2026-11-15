@@ -201,7 +201,11 @@ test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小�
   assert.doesNotMatch(glovePanel, /weatherConvertPanel/);
   assert.match(itemPanel, /id="itemWorkshopList"/);
   assert.doesNotMatch(itemPanel, /ITEM WORKSHOP|打造改變天氣的工具|收集特殊天氣骰子/);
-  assert.doesNotMatch(itemPanel, /weatherConvertPanel/);\n  assert.match(gloves, /weather-converter-card/);\n  assert.match(gloves, /id="weatherConvertScope"/);\n  assert.match(gloves, /id="weatherConvertBtn"/);\n  assert.match(gloves, /data-craft="g7"/);
+  assert.doesNotMatch(itemPanel, /weatherConvertPanel/);
+  assert.match(gloves, /weather-converter-card/);
+  assert.match(gloves, /id="weatherConvertScope"/);
+  assert.match(gloves, /id="weatherConvertBtn"/);
+  assert.match(gloves, /data-craft="g7"/);
 
   assert.match(dice, /id:'g7',name:'天氣轉換器',icon:'🌦️',luck:0,speed:0/);
   assert.match(dice, /recipe:\[\['d39',1\],\['d42',1\],\['d47',1\],\['d51',1\],\['d55',1\]\]/);
