@@ -63,3 +63,30 @@ test('五顆新骰子分母與 ID 不重複', () => {
   assert.deepEqual(NEW_DICE.map(dice => dice.den), [24888888,8050000,110050000,8255000,974000]);
   assert.equal(new Set(NEW_DICE.map(dice => dice.id)).size, 5);
 });
+
+
+test('永恆融合九段分母與四種高階品質機率完全符合指定表', () => {
+  const expected = [
+    [1100001, 5000001, 73, 25, 2, 0],
+    [5000002, 10000000, 70, 27, 3, 0],
+    [10000001, 25000000, 67, 28, 5, 0],
+    [25000001, 40000000, 60, 23, 16, 1],
+    [40000001, 60000000, 0, 49, 45, 6],
+    [60000001, 80000000, 0, 7, 75, 18],
+    [80000001, 100000000, 0, 0, 35, 65],
+    [100000001, 119999999, 0, 0, 5, 95],
+    [120000000, null, 0, 0, 0, 100]
+  ];
+  for (let i = 0; i < expected.length; i++) {
+    const [min, max, legendary, mythic, secret, eternal] = expected[i];
+    const tier = 10 + i;
+    assert.deepEqual(ETERNAL_TIER_CONFIG[tier], { min_den: min, max_den: max });
+    assert.deepEqual(
+      ['legendary', 'mythic', 'secret', 'eternal'].map(key => ETERNAL_TIER_RATES[tier][key]),
+      [legendary, mythic, secret, eternal]
+    );
+  }
+  assert.ok(Object.values(ETERNAL_TIER_RATES).every(rates =>
+    ['legendary', 'mythic', 'secret', 'eternal'].every(key => key in rates)
+  ));
+});
