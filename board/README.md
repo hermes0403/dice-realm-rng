@@ -24,9 +24,9 @@
 | `barry` 或 `老查` | 一般狀態操作由 barry、老查依授權辦理；涉及棒子最終決策時仍須棒子確認；`done` 僅由 barry 決定，老查可依 §8 代記 |
 | `棒子` 或 `叉子` | 一般狀態操作由棒子、叉子依授權辦理；叉子不得超出棒子授權，棒子保留最終決策權；`done` 僅由棒子決定，叉子可依 §8 代記 |
 
-棒子方適用部分（包含棒子／叉子的權限操作、任務分支及 PR 流程、原有叉子整合預先授權的調整）待棒子本人確認；確認前不得將本文件對棒子方新增或變更的限制視為已獲棒子同意。
+**棒子方決策結果（2026-11-13；詳見 T-0038 紀錄）：**五項決策中的第 1 項（權限隔離）、第 4 項（任務生命週期）及第 5 項（執行 SOP）已由棒子確認，與協作者方同等適用；第 2 項（角色分支／任務分支／PR／Worktree 新流程）尚未啟用，棒子方維持原有方式；第 3 項（task branch → `work/chazi` 七條件整合預先授權）完整保留，不因其他規則而推定撤銷或修改。
 
-**M1 暫行適用範圍（PR #58，merge commit `5eb2ee4`）：**本次 M1 新增或變更的權限操作及 Git 分支／PR 流程，目前僅適用協作者方（`barry`／`老查`）。棒子方（`棒子`／`叉子`）在棒子本人確認前，不受 M1 對棒子方新增或變更的限制；棒子方仍依棒子先前明確授權及既有規則運作。尤其 T-0038 原有「task branch → `work/chazi`」七條件整合預先授權，不因 PR #58 合併而視為已撤銷、修改或擴大。若既有授權與 M1 新流程發生衝突，叉子暫停該次衝突操作並提交決策題，不得自行推定新規則取代舊授權。待棒子本人確認後，才由叉子依 §8 以原話、時間及確認版本代記，再另行更新棒子方適用規則。
+**M1 暫行適用範圍（PR #58，merge commit `5eb2ee4`）：**權限操作、任務生命週期及共同執行 SOP，依棒子 2026-11-13 的決策結果適用雙方；角色分支同步、任務分支來源、PR head／base／合併方式及 Worktree 新流程，仍只適用協作者方（`barry`／`老查`）。棒子方（`棒子`／`叉子`）在第 2 項另行決定前，維持 PR #58 合併前的 `board/README.md`（commit `d4caaed`）及既有明確授權。T-0038 原有「task branch → `work/chazi`」七條件整合預先授權完整保留；若與協作者方的新 Git 流程文字看似衝突，以棒子方既有方式及七條件授權為準，不得自行擴張、撤銷或改寫。
 
 - barry 可以驗收老查開立的協作者方任務；棒子可以驗收叉子開立的棒子方任務。
 - barry／老查 **不得**變更、送審或驗收棒子／叉子開立的任務；叉子不得變更、送審或驗收 barry／老查開立的任務。
@@ -132,18 +132,17 @@
 
 ## 7. 共同基準指標、任務分支與多人協作
 
-**M1 適用界線：**以下 M1 新增或變更的角色分支同步、任務分支來源、PR head／base／合併方式及 Worktree 流程，目前只對協作者方（`barry`／`老查`）生效。棒子方（`棒子`／`叉子`）暫待棒子本人確認；確認前仍依其既有明確授權及規則，不得把以下新流程解讀為已變更或撤銷既有授權。
+**M1 Git 流程適用界線：**以下角色分支同步、任務分支來源、PR head／base／合併方式及 Worktree 新流程，只對協作者方（`barry`／`老查`）生效。棒子方（`棒子`／`叉子`）尚未同意啟用第 2 項新方案，維持 PR #58 合併前的 `board/README.md`（commit `d4caaed`）及既有操作方式；T-0038 的七條件 task branch → `work/chazi` 預先授權完整保留。第 1、4、5 項已確認適用雙方，不受本節 Git 流程例外影響。
 
-- `work/barry`、`work/laocha`、`work/bangzi`、`work/chazi` 都是共同基準的同步指標：同步完成後必須與 `origin/main` 指向同一個 commit、不得領先，且必須能以 `--ff-only` 安全同步；不得在 `work/<role>` 上實作、累積新任務提交或把它當成任務分支來源。角色分支單純落後時，以 `git merge --ff-only origin/main` 同步；若 `--ff-only` 失敗，立即停止並回報，不得 reset 或改寫歷史。
-- **過渡條款：**`work/laocha`、`work/chazi` 目前含有尚未進入 `main` 的提交。在逐任務抽出並確認保存前，不得刪除、重置、改寫這兩條分支，也不得將其作為任何新任務來源。檢查時標示 `KNOWN_DIVERGED`，並記錄獨有提交；此已知過渡狀態不視為違規。
-- **棒子方確認狀態：**本節對棒子方（叉子）的新流程限制，以及原有「task branch → `work/chazi`」七條件整合預先授權的調整，均標示「棒子方適用部分待棒子確認」。棒子本人確認前，不得宣稱已取得棒子同意或由老查代替棒子撤銷／修改既有授權；新舊規則衝突時，叉子相關整合先停止並交棒子決定。
-- **每張任務建立唯一短期任務分支**，命名為 `task/T-xxxx-short-name`，一律從建立當下的 `origin/main` 建立。任務分支只承載該任務的修改；不得從 `work/<role>`、其他任務分支或未同步的本機 `main` 建立。
-- 同一任務的「開單 PR」、「開工 PR」及「交付 PR」三個階段，都使用同一條 `task/T-xxxx-short-name` 作為 PR head，PR base 一律為 `main`，合併方式一律為 GitHub merge commit。各階段 PR 合併後，先 fetch，再將同一任務分支以 `--ff-only` 同步至最新 `origin/main`，再繼續下一階段；不得另建分支承接同一任務。
-- 任務 `branch` 欄位記錄唯一的 `task/T-xxxx-short-name`。開單與開工階段的 Board 提交，可使用只含 `board/` 變更的臨時 Worktree；推送後即移除。這種臨時 Worktree 不得承載程式實作或其他非 Board 變更。**正式任務 Worktree 必須等任務正式由 `open` 轉為 `in_progress`，且開工 PR 已合併後才建立**；任務仍為 `open` 時不得開始實作。
-- 本規則自生效後的新任務開始適用；既有任務的 `branch` 欄位是歷史紀錄，不為符合新命名而回溯改寫。
+- **協作者方（barry／老查）**的 `work/barry`、`work/laocha` 是共同基準同步指標：同步完成後必須與 `origin/main` 指向同一個 commit、不得領先，且必須能以 `--ff-only` 安全同步；不得在角色分支上實作、累積新任務提交或把它當成任務分支來源。角色分支單純落後時，以 `git merge --ff-only origin/main` 同步；若 `--ff-only` 失敗，立即停止並回報，不得 reset 或改寫歷史。棒子方的 `work/bangzi`、`work/chazi` 不套用這項新同步規則，依棒子方現行方式及既有授權運作。
+- **過渡保護條款（雙方）：**`work/laocha`、`work/chazi` 目前含有尚未進入 `main` 的提交。在逐任務抽出、確認保存位置並完成必要交接前，不得刪除、清空、reset、重置或改寫這兩條分支；尤其棒子已明確確認，`work/chazi` 整理完成前不得清空或 reset。檢查時標示 `KNOWN_DIVERGED`，並記錄獨有提交；此已知過渡狀態不視為違規。
+- **協作者方（barry／老查）每張新任務建立唯一短期任務分支**，命名為 `task/T-xxxx-short-name`，一律從建立當下的 `origin/main` 建立。任務分支只承載該任務的修改；不得從 `work/<role>`、其他任務分支或未同步的本機 `main` 建立。棒子方維持原有任務分支建立方式。
+- **協作者方（barry／老查）**同一任務的「開單 PR」、「開工 PR」及「交付 PR」三個階段，都使用同一條 `task/T-xxxx-short-name` 作為 PR head，PR base 一律為 `main`，合併方式一律為 GitHub merge commit。各階段 PR 合併後，先 fetch，再將同一任務分支以 `--ff-only` 同步至最新 `origin/main`，再繼續下一階段；不得另建分支承接同一任務。棒子方維持現行 PR／整合方式。
+- **協作者方（barry／老查）**任務 `branch` 欄位記錄唯一的 `task/T-xxxx-short-name`。開單與開工階段的 Board 提交，可使用只含 `board/` 變更的臨時 Worktree；推送後即移除。這種臨時 Worktree 不得承載程式實作或其他非 Board 變更。**正式任務 Worktree 必須等任務正式由 `open` 轉為 `in_progress`，且開工 PR 已合併後才建立**；任務仍為 `open` 時不得開始實作。棒子方的 GitHub App 工作環境依其現行方式建立，不套用此新時點限制。
+- 本規則自生效後的新協作者方任務開始適用；既有任務的 `branch` 欄位是歷史紀錄，不為符合新命名而回溯改寫。棒子方不因本段而變更既有任務分支或工作環境。
 - 預設每位協作者同時只執行一張需要寫入的任務；確有平行工作需求時，才為不同任務各自建立獨立 task branch/worktree，並先確認不會同時修改相同檔案或產生整合衝突。
-- 任務分支若落後最新 `origin/main`，先 fetch，再在任務分支執行 `git merge origin/main` 更新基準；不得 rebase。若合併有衝突或無法確認安全，停止並回報。每次 PR 合併後以 `git merge --ff-only origin/main` 同步任務分支；若 `--ff-only` 失敗，立即停止並回報，不得 reset、強制同步或改寫歷史。
-- 任務完成並通過驗證後，透過同一任務分支的交付 PR 合併至 `main`；不得先整合回 `work/<role>`。PR 建立、合併及 push 仍須符合 `AGENTS.md` 與本次明確授權；任何階段均不得把角色分支當作 PR head。
+- **協作者方（barry／老查）**任務分支若落後最新 `origin/main`，先 fetch，再在任務分支執行 `git merge origin/main` 更新基準；不得 rebase。若合併有衝突或無法確認安全，停止並回報。每次 PR 合併後以 `git merge --ff-only origin/main` 同步任務分支；若 `--ff-only` 失敗，立即停止並回報，不得 reset、強制同步或改寫歷史。棒子方不套用這項新分支同步方式。
+- **協作者方（barry／老查）**任務完成並通過驗證後，透過同一任務分支的交付 PR 合併至 `main`；不得先整合回 `work/<role>`。PR 建立、合併及 push 仍須符合 `AGENTS.md` 與本次明確授權；任何階段均不得把角色分支當作 PR head。棒子方維持原有內容整合與 PR 方式，並保留七條件 task branch → `work/chazi` 預先授權。
 - 一人一支角色分支與一任務一支短期分支只規範 Git 隔離，不改變 Board 權限。Git 寫入能力與任務狀態權限是兩件事；合併分支不等於授予送審、退回或驗收權。
 - 任務狀態更新只有在變更已整合到共同可見的 `origin/main` 後，才視為所有協作者都已同步看見。尚未整合的狀態須標示「分支內更新，尚未同步」，不得假設其他人已知悉。
 - 同一任務多人協作時，指定一位主要 `owner` 對交付負責，其餘列入 `contributors`；不得使用多人共同 owner 模糊責任。
@@ -274,7 +273,7 @@
 - **目的：**確認角色、Repository、工作環境、分支及提交關係正確安全，並判斷是否具備開始任務的條件。
 - **檢查：**確認 AI 代表角色及權限群組；確認本機或 GitHub App Repository；確認目前 branch、HEAD SHA、`origin/main`、`work/<role>` 的同步狀態、任務分支及其建立來源；檢查提交差異、ahead／behind、merge-base、獨有提交、工作區修改、staged／untracked 檔案及其他執行者。
 - **老查：**執行 `git fetch origin`，確認 `origin/main`。若目前檢出 `work/laocha`，正常同步後必須與 `origin/main` 相同、不得領先，並可 `--ff-only` 同步；已知未抽出的歷史提交依過渡條款標示 `KNOWN_DIVERGED`，不得拿來建立任務。專案根目錄仍是主要工作目錄，不另建長期角色 Worktree。列出 `git worktree list --porcelain`、`git branch -vv` 及目前工作區狀態。
-- **叉子：**以 GitHub 線上 Repository 為權威來源，檢查 `main`、`work/chazi` 的同步狀態、task branch、commit compare／PR head/base 及 GitHub App 自身工作環境。已知未抽出的歷史提交依過渡條款標示 `KNOWN_DIVERGED`，不視為違規且不得作為任務來源。若 App 無法顯示未提交狀態，明確記錄限制，不得推定沒有未保存成果。棒子方適用部分待棒子確認。
+- **叉子：**以 GitHub 線上 Repository 為權威來源，檢查 `main`、`work/chazi`、GitHub App 安裝及 Repository 權限、App 自身工作環境，以及 Board 紀錄是否已同步到指定遠端位置並可由另一方回讀。這些身分、App 權限及紀錄同步檢查與老查的本機檢查同等適用。角色分支同步、任務分支來源、PR head/base／合併方式及 Worktree 新流程則只對協作者方生效；叉子不以這些新流程判定棒子方違規。若 App 無法顯示未提交狀態，明確記錄限制，不得推定沒有未保存成果。
 - **提交關係判斷：**`SYNCED`、`BEHIND`、`AHEAD`、`DIVERGED`、`KNOWN_DIVERGED`、`UNKNOWN`。正常同步後必須 `SYNCED`，不得 `AHEAD`；落後時可安全 `--ff-only` 才能同步。已知過渡分歧標示 `KNOWN_DIVERGED`，不視為違規。不得丟棄提交、改寫歷史、強制 push 或直接選 ours／theirs。
 - **結果：**`READY`、`BLOCKED` 或 `UNKNOWN`。只有必要安全條件均確認才是 `READY`；`BLOCKED` 寫明原因及解除條件；`UNKNOWN` 指出缺少的證據及能提供的人。只有 `READY` 才進第二階段。
 
@@ -295,19 +294,19 @@
 - 先檢查有效任務與 archive，判斷新需求、既有任務延伸、後續任務或重複需求；確認 `from` 由實際開單方／有權限者決定，不得為方便冒用另一方角色。
 - 先完成可自行進行的需求、程式架構及依賴調查。純文件／流程任務不需為開單執行 Supabase SOP；涉及資料庫結構、正式資料、RLS、RPC、trigger、migration 或 Edge Function 才依任務需要取得相應證據。調查不等於獲准修改正式環境。
 - 建立新需求紀錄前，再次分別檢查 §15.3 的五單容量及 Communicate 優先兩道閘門。五單已滿、Communicate 閘門觸發或容量結果為 `UNKNOWN` 時，新需求仍可建立並保持 `open`，但不得啟動或開始實作。
-- 取得正式任務 ID 後，建立唯一 `task/T-xxxx-short-name` 分支，來源必須是當下最新 `origin/main`；此階段可用只含 `board/` 變更的臨時 Worktree 提交 Board 紀錄，推送後即移除。以該分支建立「開單 PR」，PR head 為任務分支、base 為 `main`，合併使用 merge commit。任務檔或索引推送至任何遠端分支、建立 PR 或合併至 `main`，任一條件先發生即算公開並永久固定 ID。
-- 閘門阻擋時仍可提交「開單 PR」，但不得建立正式任務 Worktree 或開始實作。只有通過兩道閘門、任務正式由 `open` 轉為 `in_progress`，且「開工 PR」已合併至 `origin/main` 後，才建立正式任務 Worktree。開工 PR 合併前再檢查一次五單容量及 Communicate 優先閘門。
-- 同一任務的「開單 PR」、「開工 PR」、「交付 PR」三階段全部沿用同一任務分支；每次 PR 都以該分支為 head、`main` 為 base，使用 merge commit。每次合併後 fetch，將同一任務分支以 `--ff-only` 同步至最新 `origin/main`，再進入下一階段；不得另建分支承接同一任務。
-- `work/<role>` 正常同步完成後必須與 `origin/main` 指向同一 commit、不得領先，且必須能 `--ff-only` 同步；已知過渡分歧依 §7 標示 `KNOWN_DIVERGED`，不視為違規。它們不得作為任務分支來源、PR head 或 Board 任務紀錄整合目的地。分別回讀任務分支與 `origin/main`，確認任務 ID、檔案、索引、branch 欄位、PR head/base、merge commit SHA 及同步結果；未同步的部分不得宣稱完成。
+- **協作者方（barry／老查）：**取得正式任務 ID 後，建立唯一 `task/T-xxxx-short-name` 分支，來源必須是當下最新 `origin/main`；此階段可用只含 `board/` 變更的臨時 Worktree 提交 Board 紀錄，推送後即移除。以該分支建立「開單 PR」，PR head 為任務分支、base 為 `main`，合併使用 merge commit。**雙方共同規則：**任務檔或索引推送至任何遠端分支、建立 PR 或合併至 `main`，任一條件先發生即算公開並永久固定 ID。棒子方建立任務及同步紀錄維持現行方式。
+- **協作者方（barry／老查）：**閘門阻擋時仍可提交「開單 PR」，但不得建立正式任務 Worktree 或開始實作。只有通過兩道閘門、任務正式由 `open` 轉為 `in_progress`，且「開工 PR」已合併至 `origin/main` 後，才建立正式任務 Worktree。開工 PR 合併前再檢查一次五單容量及 Communicate 優先閘門。棒子方 GitHub App 工作環境依現行方式處理，不套用此新時點限制。
+- **協作者方（barry／老查）：**同一任務的「開單 PR」、「開工 PR」、「交付 PR」三階段全部沿用同一任務分支；每次 PR 都以該分支為 head、`main` 為 base，使用 merge commit。每次合併後 fetch，將同一任務分支以 `--ff-only` 同步至最新 `origin/main`，再進入下一階段；不得另建分支承接同一任務。棒子方維持原有 PR 與整合方式。
+- **協作者方（barry／老查）：**`work/<role>` 正常同步完成後必須與 `origin/main` 指向同一 commit、不得領先，且必須能 `--ff-only` 同步；已知過渡分歧依 §7 標示 `KNOWN_DIVERGED`，不視為違規。它們不得作為任務分支來源、PR head 或 Board 任務紀錄整合目的地。分別回讀任務分支與 `origin/main`，確認任務 ID、檔案、索引、branch 欄位、PR head/base、merge commit SHA 及同步結果；未同步的部分不得宣稱完成。**雙方共同規則：**Board 紀錄交付後，必須回讀指定遠端位置，確認另一方可見；未完成同步不得宣稱完成。
 - **結果：**`CREATED`、`CREATED_OPEN_CAPACITY_BLOCKED`、`CREATED_OPEN_COMMUNICATE_PRIORITY_BLOCKED`、`CREATED_OPEN_GATE_UNKNOWN`、`NEED_INPUT`、`DUPLICATE`、`UNAUTHORIZED`、`BLOCKED`、`CANCELLED`。
 
 ### 15.5 第四階段：建立／確認 Task Branch 與工作環境
 
 - **目的：**確保一張任務有獨立、可追蹤且不與其他工作混用的工作位置。
-- 確認任務 ID、`from`、`to`、`owner`、`branch`、`origin/main` 來源 SHA 及開工 PR 合併 SHA。老查與叉子的任務分支來源一律是 `origin/main`；不得從 `work/<role>` 建立，也不得把 `work/<role>` 當作 upstream 或 PR 來源。
-- **Worktree 建立條件：**任務已正式為 `in_progress`，且開工 PR 已合併至 `origin/main`；在此之前不得建立本機 Worktree 或 GitHub App 任務工作環境。條件未滿足時結果為 `BLOCKED`，不得進入實作。
+- **協作者方（barry／老查）**確認任務 ID、`from`、`to`、`owner`、`branch`、`origin/main` 來源 SHA 及開工 PR 合併 SHA。任務分支來源一律是 `origin/main`；不得從 `work/<role>` 建立，也不得把 `work/<role>` 當作 upstream 或 PR 來源。棒子方依其現行方式確認任務分支及 GitHub App 工作環境。
+- **協作者方 Worktree 建立條件：**任務已正式為 `in_progress`，且開工 PR 已合併至 `origin/main`；在此之前不得建立正式任務 Worktree。條件未滿足時結果為 `BLOCKED`，不得進入實作。棒子方 GitHub App 任務工作環境依現行方式建立，不受此新時點限制。
 - 一條正式 task branch 只對應一張任務及一個正式工作環境／執行者。檢查是否已有同 ID 分支、其他執行者、未提交／未追蹤／未整合成果及來源不明修改；不得搶做、覆蓋或另開第二個工作環境。
-- 回讀並比對任務 ID、branch、Worktree／App 工作位置、來源 SHA、目前 HEAD、PR head/base、merge commit、工作區狀態及 Board `branch` 欄位；PR head 必須是任務分支，base 必須是 `main`。
+- **協作者方（barry／老查）**回讀並比對任務 ID、branch、Worktree 位置、來源 SHA、目前 HEAD、PR head/base、merge commit、工作區狀態及 Board `branch` 欄位；PR head 必須是任務分支，base 必須是 `main`。**棒子方（棒子／叉子）**回讀任務 ID、GitHub App 工作環境、實際線上分支及提交，並確認 Board 紀錄同步可見；不以協作者方的新 PR／Worktree 規則判定。
 - **結果：**全部對應且安全為 `READY`；有未保存成果或來源不明為 `BLOCKED`；缺少無法自行取得的證據為 `UNKNOWN`。只有 `READY` 才進第五階段。
 
 ### 15.6 第五階段：開發與驗證
