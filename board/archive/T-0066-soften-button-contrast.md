@@ -1,7 +1,7 @@
 ---
 id: T-0066
 title: 降低按鈕與紫藍背景的色差
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-12
-updated: 2026-11-12
+updated: 2026-11-14
 depends_on: [T-0065]
 branch: task/T-0066-soften-button-contrast
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 任務
@@ -40,3 +40,6 @@ done_at:
 ## 紀錄
 
 - 2026-11-12 [叉子] 棒子反映按鈕與背景色差太大，調整為低飽和深紫藍。
+
+
+- 2026-11-14 [叉子] 棒子於對話明確表示「T-0066 驗收成功也好了」，依 Board §8 代記正式驗收；done_by: 棒子。

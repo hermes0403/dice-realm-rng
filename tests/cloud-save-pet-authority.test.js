@@ -22,6 +22,7 @@ function createService({ localSave, cloudSave }) {
     getElementById() { return { textContent: '' }; }
   };
   const supabaseClient = {
+    async rpc(name, args) { writes.push({ name, args }); return { data: { ok: true, conflict: false, updated_at: '2026-11-14T00:34:00.000Z', total_rolls: Number(args.p_save_patch.rolls) || 0 }, error: null }; },
     from(table) {
       if (table === 'player_grants') {
         return {
@@ -34,8 +35,7 @@ function createService({ localSave, cloudSave }) {
         return {
           select() { return this; },
           eq() { return this; },
-          async maybeSingle() { return { data: { save_data: cloudSave }, error: null }; },
-          async upsert(row) { writes.push(row); return { error: null }; }
+          async maybeSingle() { return { data: { save_data: cloudSave, updated_at: '2026-11-13T23:00:00.000Z' }, error: null }; }
         };
       }
       if (table === 'player_profiles') {
@@ -95,7 +95,8 @@ test('cloud pet inventory does not merge a sold pet from a stale local snapshot'
   assert.deepEqual(getState().pets.map(pet => pet.uid), [currentPet.uid]);
   assert.deepEqual(getState().equippedPetUids, [currentPet.uid]);
   assert.equal(writes.length, 1);
-  assert.deepEqual(writes[0].save_data.pets.map(pet => pet.uid), [currentPet.uid]);
+  assert.equal(writes[0].name, 'sync_player_game_save_delta');
+  assert.ok(!writes[0].args.p_save_patch.pets || writes[0].args.p_save_patch.pets.every(pet => pet.uid === currentPet.uid));
 });
 
 test('an empty authoritative cloud pet inventory stays empty despite old local pets', async () => {
@@ -120,7 +121,8 @@ test('an empty authoritative cloud pet inventory stays empty despite old local p
   assert.deepEqual(getState().pets, []);
   assert.deepEqual(getState().equippedPetUids, []);
   assert.equal(writes.length, 1);
-  assert.deepEqual(writes[0].save_data.pets, []);
+  assert.equal(writes[0].name, 'sync_player_game_save_delta');
+  assert.ok(!writes[0].args.p_save_patch.pets || writes[0].args.p_save_patch.pets.length === 0);
 });
 
 

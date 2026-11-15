@@ -1,7 +1,7 @@
 ---
 id: T-0065
 title: 按鈕與互動元件統一紫藍配色
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-12
-updated: 2026-11-12
+updated: 2026-11-14
 depends_on: [T-0064]
 branch: task/T-0065-unified-purple-blue-buttons
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 任務
@@ -42,3 +42,6 @@ done_at:
 ## 紀錄
 
 - 2026-11-12 [叉子] 棒子反映 T-0064 上線後按鈕與部分互動元件的顏色仍不夠協調，新增此任務統一按鈕配色。
+
+
+- 2026-11-14 [叉子] 棒子於對話明確表示「T-0065 驗收成功也好了」，依 Board §8 代記正式驗收；done_by: 棒子。

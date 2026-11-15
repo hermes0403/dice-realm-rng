@@ -1,7 +1,7 @@
 ---
 id: T-0070
 title: 全站紫藍背景與框格色調加深
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-12
-updated: 2026-11-12
+updated: 2026-11-14
 depends_on: [T-0069]
 branch: task/T-0070-medium-lavender-blue-contrast
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-14
 ---
 
 ## 任務目標
@@ -30,8 +30,10 @@ done_at:
 
 ## 驗收
 
-- [ ] 全站不再過亮或發白。
-- [ ] 背景統一，框格只有細微明暗差。
-- [ ] 文字與操作清楚可讀。
-- [ ] 行動版與桌面版樣式正常。
-- [ ] CI 通過並部署。
+- [x] 全站不再過亮或發白。
+- [x] 背景統一，框格只有細微明暗差。
+- [x] 文字與操作清楚可讀。
+- [x] 行動版與桌面版樣式正常。
+- [x] CI 通過並部署。
+
+- 2026-11-14 18:44 [代記:棒子/叉子] 驗收結案；棒子明確確認本任務已完成。｜來源：棒子於 2026-11-14 對話表示「以上4個都好了啊」｜證據：本對話中的明確驗收訊息

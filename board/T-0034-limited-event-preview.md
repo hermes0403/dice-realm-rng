@@ -1,7 +1,7 @@
 ---
 id: T-0034
 title: 新增限時活動入口與管理員專屬活動預覽
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-04
-updated: 2026-11-05
+updated: 2026-11-13
 depends_on: []
 branch: task/T-0034-limited-event-preview-sync
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-13T09:12:57+08:00
 ---
 
 ## 任務
@@ -69,3 +69,6 @@ done_at:
 - 2026-11-05 [叉子] 已建立乾淨同步分支並只移植 T-0034 六個檔案；與 main 比對為 ahead 9、behind 0，差異檔案僅限本任務。靜態檢查發現六項機率 45%、30%、15.6%、8.5%、1.5%、0.4% 合計為 101%，與畫面標示 100% 及驗收條件不符；暫停比例定稿、PR 與部署，待棒子確認調整哪一項。Node 測試及正式 `git diff --check` 尚未執行。
 
 - 2026-11-05 [棒子確認／叉子執行] 依棒子同意，將晶龍哨兵機率由 15.6% 調整為 14.6%；其他五項不變，總機率修正為 100%。同步更新測試預期值，待 CI 驗證。
+
+
+- 2026-11-13 09:12 [棒子明確驗收／叉子代記] 棒子在對話中明確確認本任務已成功，正式驗收結案；依 Board §1.2、§8 代記，狀態更新為 done。

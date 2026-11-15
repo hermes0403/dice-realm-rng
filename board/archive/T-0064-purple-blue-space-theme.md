@@ -1,7 +1,7 @@
 ---
 id: T-0064
 title: 全站介面改為紫藍星空主題
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-12
-updated: 2026-11-12
+updated: 2026-11-14
 depends_on: []
 branch: task/T-0064-purple-blue-space-theme
 done_by: 棒子
-done_at:
+done_at: 2026-11-14
 ---
 
 ## 任務
@@ -50,3 +50,6 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+
+- 2026-11-14 [叉子] 棒子於對話明確表示「T-0064 驗收成功也好了」，依 Board §8 代記正式驗收；done_by: 棒子。

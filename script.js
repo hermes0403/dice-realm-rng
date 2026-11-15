@@ -1,8 +1,8 @@
-import { D, G } from './data/dice.js';
-import { POTIONS, ANGEL_ODDS } from './data/equipment.js';
-import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261104-pet-image-fix';
+import { D, G } from './data/dice.js?v=20261113-t0084-glitch-weather-phase2';
+import { POTIONS } from './data/equipment.js';
+import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
 import { DAILY_TASKS } from './data/progression.js';
-import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js';
+import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
 import { createNavigationUI } from './ui/navigation.js';
@@ -12,30 +12,33 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261112-t0074-settings';
+import { createProgressionSystem } from './systems/progression.js?v=20261114-t0075-achievement-colors-weather-five';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261112-t0074-lock-persistence';
+import { createWeatherSystem } from './systems/weather.js?v=20261113-t0084-glitch-summon-odds';
+import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261114-t0086-cloud-save-rollback';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js';
-import { createPetSystem } from './systems/pets.js?v=20261104-pet-image-fix';
+import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js';
+import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glitch-no-x10';
+import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0091-heaven-glitch-no-x10';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js';
 import { createAdminPlayerManagement } from './admin/player-management.js';
-import { createAdminMonitoringSystem } from './admin/monitoring.js';
+import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
 import { createGameStateService } from './core/game-state.js';
 import { createPresenceService } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
-import { setupAdminUIBindings } from './admin/ui-bindings.js';
+import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-glitch-weather-phase2';
 import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
 
 const timerManager = createTimerManager();
@@ -142,10 +145,10 @@ function activePotion(category='luck'){const a=category==='speed'?S.potions?.act
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
-function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0))}
-function effectiveDen(d){const w=getWeather(),types=w.types||[w.type];return d&&types.includes('hell')&&Number(d.den)>=700000?Math.floor(Number(d.den)*0.95):Number(d?.den)||0}
+function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0))}
+function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
-// 天堂藥水 I 專屬固定機率。加入天氣限定骰子後，會從原本大於 10% 的項目分配機率，總和仍為 100%。
+// 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
 function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');timerManager.clearTimeout(e._t);const timer=timerManager.setTimeout(()=>{e.classList.remove('show');if(e._t===timer)e._t=null},2100,'toast-hide');e._t=timer}
 function isAdmin(){return (currentUser?.email||'').toLowerCase()==='toby110403@gmail.com'}
 realmSocialSystem.setupRealmSocialUI();
@@ -191,10 +194,10 @@ petSystem=createPetSystem({
  petById, getDiceById:byId, randomPet, petIncomePerSecond, rollPetVariant, renderPetIncome,
  format, escapeHTML, save, render, toast, getCurrentUser:()=>currentUser, openAuth, recordPetFusion,
  getFusionLuckBoost:()=>globalBoostSystem?.activeFusionLuckBoost?.()||null,
- showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message)
+ showPetAutoSellNotice, documentRef:document, confirmAction:message=>confirm(message), localStorageRef:localStorage
 });
 const {
- equippedPetHas, applyPetSkillDailyReset, applyPetRollSkills, petBonusTotals, populateAdminPetSelects,
+ equippedPetHas, applyPetSkillDailyReset, applyPetRollSkills, applyPetLoginSkill, petBonusTotals, populateAdminPetSelects,
  petRarity, petArt, petTierFromDen, weightedPetRarity, petMutationForDice, petMutationLabel,
  rollPetWeightKg, addPet, applyPetAutoSell, ownedPetName, renderPetsPage, renderPetCodex,
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
@@ -207,7 +210,8 @@ authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData, timerManager
+ toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
+ applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
@@ -225,7 +229,7 @@ adminMonitoringSystem = createAdminMonitoringSystem({
   toast, petIncomePerSecond, loadAdminDashboard, documentRef: document, PETS
 });
 const { doRoll, stopAuto, restartAutoInterval: restartAutoIntervalImpl, isRolling, isAutoRolling, setupAutoRollUI } = createDiceSystem({
- D, ANGEL_ODDS, POTIONS, KEY, supabaseClient, timerManager, getState:()=>S, getCurrentUser:()=>currentUser,
+ D, POTIONS, KEY, supabaseClient, timerManager, getState:()=>S, getCurrentUser:()=>currentUser,
  getWeather, luck, speed, byId, format, chanceText, totalDice, go, toast,
  isLockHeld, isHeartbeatActive, scheduleUnlock, applyPetRollSkills, potionMaterialTotal,
  checkAchievements, checkDailyReward, save, autoDepositRolledWeatherDice, broadcastRareRoll,
@@ -248,6 +252,20 @@ mainRenderUI = createMainRenderUI({
   isRolling, isAutoRolling, bagUpgradeCost, renderAutoSellOptions, renderInventory,
   renderCodex, renderGloves, renderPotions, renderQuests, renderProfile, D
 });
+const glitchWeatherDropSystem = createGlitchWeatherDropSystem({
+  getState: () => S,
+  getCurrentUser: () => currentUser,
+  getWeather,
+  isReady: userId => cloudSaveService.isLoadedFor(userId),
+  POTIONS,
+  save,
+  render,
+  toast,
+  timerManager,
+  navigatorRef: navigator,
+  localStorageRef: localStorage
+});
+glitchWeatherDropSystem.start();
 setupAutoRollUI();
 globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
@@ -299,4 +317,5 @@ save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards()
 
 /* ---- merged from script2.js: achievement popup controls ---- */
 
+setupDisplayControls({ documentRef: document, windowRef: window, navigatorRef: navigator, toast });
 setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier });

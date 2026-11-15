@@ -18,7 +18,6 @@ const FOLD_CATEGORIES = {
   adminDeletedAccountsFold: 'players',
   adminRareRollFold: 'players',
   adminSuspiciousRollFold: 'players',
-  adminClientAuditFold: 'players',
   adminGlobalBoostFold: 'actions',
   adminCoinBoostFold: 'actions',
   adminWeatherControlFold: 'actions',
@@ -45,7 +44,7 @@ export function ensureFoldId(fold, index) {
     [/^全體玩家發放\s/, 'adminAllGrantFold'], [/^全體玩家發放寵物/, 'adminAllPetGrantFold'],
     [/^指定玩家發放/, 'adminSingleGrantFold'], [/^玩家停權／解封/, 'adminPlayerBanFold'],
     [/^刪除玩家帳號/, 'adminDeletePlayerFold'], [/^玩家在線狀況/, 'adminPlayersFold'],
-    [/^反作弊／客戶端完整性/, 'adminClientAuditFold'], [/^最近合成紀錄/, 'adminCraftLogsFold']
+[/^最近合成紀錄/, 'adminCraftLogsFold']
   ];
   const known = knownIds.find(([pattern]) => pattern.test(summary));
   if (known) { fold.id = known[1]; return fold.id; }
