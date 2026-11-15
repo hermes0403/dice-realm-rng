@@ -48,6 +48,13 @@ if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ i
 for (const pet of ETERNAL_PETS) if (!PETS.some(existing => existing.id === pet.id)) PETS.push(pet);
 Object.assign(PET_BASE_INCOME, ETERNAL_PET_INCOME);
 PET_INDIVIDUAL_ODDS.eternal = ETERNAL_PET_WEIGHTS.slice();
+// 永恆融合區間完整取代舊版 1,100,001 以上的分段，避免舊區間殘留或重疊。
+for (const [tier, range] of Object.entries(PET_TIER_CONFIG)) {
+  if (Number(range?.max_den) >= 1100001 || Number(range?.min_den) >= 1100001) {
+    delete PET_TIER_CONFIG[tier];
+    delete PET_TIER_RATES[tier];
+  }
+}
 Object.assign(PET_TIER_CONFIG, ETERNAL_TIER_CONFIG);
 Object.assign(PET_TIER_RATES, ETERNAL_TIER_RATES);
 for (const die of NEW_DICE) if (!HEAVEN_MIDDLE_IDS.includes(die.id)) HEAVEN_MIDDLE_IDS.push(die.id);
