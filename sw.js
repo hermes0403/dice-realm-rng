@@ -1,13 +1,13 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.42';
+const CACHE_NAME = 'dice-realm-shell-v1.43';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261115-t0097-auth-signup-cooldown',
+  './script.js?v=20261115-t0098-eternal-update',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
-  './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
-  './style.css?v=20261114-t0092-current-collection-progress',
+  './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',\n  './data/eternal-update.js?v=20261115-t0098-eternal',\n  './systems/pets.js?v=20261115-t0098-eternal-pets',\n  './systems/dice.js?v=20261115-t0098-eternal-dice',\n  './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',\n  './assets/pets/eternal-dawn-guardian.svg',\n  './assets/pets/eternal-starwish-deer.svg',
+  './style.css?v=20261115-t0098-eternal-tier',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
