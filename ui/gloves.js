@@ -40,31 +40,25 @@ export function createGloveUI(deps) {
       }).join('');
       const action = enabled ? '已啟用' : owned ? '啟用' : '合成';
       const disabled = enabled || (!owned && !canCraft(converter));
-      itemWorkshopList.innerHTML = '<div class="recipe"><div style="flex:1;min-width:0"><h3>' +
-        converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') +
-        '</h3><p>' + converter.desc + '</p><p>每小時可使用一次；不提供運氣或擲骰速度加成。</p>' +
-        (owned ? '' : materials) + '</div><button type="button" ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button></div>';
-    }
-
-    const convertPanel = documentRef.getElementById('weatherConvertPanel');
-    const convertBtn = documentRef.getElementById('weatherConvertBtn');
-    const convertCooldown = documentRef.getElementById('weatherConvertCooldown');
-    if (convertPanel) {
-      const owned = Number(state.items?.g7) > 0;
-      const enabled = state.equippedItem === 'g7';
-      convertPanel.hidden = !owned;
-      if (owned && convertBtn && convertCooldown) {
-        const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
-        convertBtn.disabled = !enabled || left > 0;
-        convertBtn.textContent = !enabled ? '請先啟用天氣轉換器' : left > 0 ? '⏳ 天氣轉換冷卻中' : '🌦️ 轉換天氣';
-        convertCooldown.textContent = !enabled
-          ? '先啟用天氣轉換器，即可每小時使用一次。'
-          : left > 0
-            ? '剩餘冷卻 ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
-              String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
-              String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
-            : '能力已就緒';
-      }
+      const left = Math.max(0, 60 * 60 * 1000 - (Date.now() - (Number(state.weatherConvertAt) || 0)));
+      const cooldownText = !enabled ? '先啟用天氣轉換器，即可每小時使用一次。'
+        : left > 0 ? '⏳ 天氣轉換冷卻中 · ' + String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
+          String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
+          String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
+        : '天氣轉換已就緒';
+      const controls = owned
+        ? '<label for="weatherConvertScope" class="mini" style="display:block;margin:8px 0 4px">影響範圍</label>' +
+          '<select id="weatherConvertScope" class="field" style="width:100%;margin-bottom:8px"><option value="local">本伺服器</option><option value="global">全伺服器</option></select>' +
+          (enabled
+            ? '<button class="primary" id="weatherConvertBtn" type="button" style="width:100%;min-height:38px" ' + (left > 0 ? 'disabled' : '') + '>🌦️ 轉換天氣</button>'
+            : '<button type="button" style="width:100%;min-height:36px" data-craft="g7">啟用天氣轉換器</button>') +
+          '<p class="mini" id="weatherConvertCooldown" style="margin:6px 0 0">' + cooldownText + '</p>'
+        : materials + '<button type="button" ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button>';
+      itemWorkshopList.innerHTML = '<div class="recipe weather-converter-card" style="display:block;padding:12px">' +
+        '<h3 style="margin:0 0 6px">' + converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') + '</h3>' +
+        '<p style="margin:0 0 5px">' + converter.desc + '</p>' +
+        '<p class="mini" style="margin:0 0 8px">每小時可使用一次；不提供運氣或擲骰速度加成。</p>' +
+        controls + '</div>';
     }
 
     const recipeList = documentRef.getElementById('recipeList');

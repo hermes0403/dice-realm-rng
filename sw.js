@@ -1,10 +1,10 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.40';
+const CACHE_NAME = 'dice-realm-shell-v1.41';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261115-t0095-resume-reconcile',
+  './script.js?v=20261115-t0096-grant-dice-weather-card',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './style.css?v=20261114-t0092-current-collection-progress',

@@ -178,9 +178,9 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 test('T-0095 V1.40 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1\.40/);
-  assert.match(html, /script\.js\?v=20261115-t0095-resume-reconcile/);
-  assert.match(worker, /dice-realm-shell-v1\.40/);
+  assert.match(html, /V1\.41/);
+  assert.match(html, /script\.js\?v=20261115-t0096-grant-dice-weather-card/);
+  assert.match(worker, /dice-realm-shell-v1\.41/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
 });
@@ -200,7 +200,12 @@ test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小�
   const itemPanel = html.slice(itemPanelStart, html.indexOf('</section>', itemPanelStart));
   assert.doesNotMatch(glovePanel, /weatherConvertPanel/);
   assert.match(itemPanel, /id="itemWorkshopList"/);
-  assert.match(itemPanel, /id="weatherConvertPanel"/);
+  assert.doesNotMatch(itemPanel, /ITEM WORKSHOP|打造改變天氣的工具|收集特殊天氣骰子/);
+  assert.doesNotMatch(itemPanel, /weatherConvertPanel/);
+  assert.match(gloves, /weather-converter-card/);
+  assert.match(gloves, /id="weatherConvertScope"/);
+  assert.match(gloves, /id="weatherConvertBtn"/);
+  assert.match(gloves, /data-craft="g7"/);
 
   assert.match(dice, /id:'g7',name:'天氣轉換器',icon:'🌦️',luck:0,speed:0/);
   assert.match(dice, /recipe:\[\['d39',1\],\['d42',1\],\['d47',1\],\['d51',1\],\['d55',1\]\]/);
@@ -257,4 +262,13 @@ test('T-0092 自動出售說明縮短且批次按鈕固定同列', async () => {
   assert.match(html, /勾選擲到後要自動出售的骰子/);
   assert.doesNotMatch(html, /僅列出一般與天氣骰子，依常見到稀有排序/);
   assert.match(css, /#autoSellDiceOptions \.auto-sell-bulk-actions\{grid-column:1\/-1;display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+
+test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯示零次抽取', async () => {
+  const codex = await readFile(new URL('../ui/codex.js', import.meta.url), 'utf8');
+  const admin = await readFile(new URL('../admin/ui-bindings.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
+  assert.ok(codex.includes("discovered ? `抽到 ${format(rolls)} 次` : '???'"));
+  assert.match(admin, /type==='aura'&&getCurrentUser\(\)\?\.id===targetUserId\)\{await applyPendingGrants\(true\);save\(\);await flushCloudSave\(\);render\(\);\}/);
+  assert.match(script, /applyPendingGrants, save, flushCloudSave/);
 });
