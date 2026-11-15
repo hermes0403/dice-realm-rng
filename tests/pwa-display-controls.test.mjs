@@ -175,7 +175,7 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('V1.42 PWA 快取殼同步更新', async () => {
+test('V1.43 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1\.42/);
