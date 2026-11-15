@@ -1,6 +1,7 @@
 import { D, G } from './data/dice.js?v=20261114-t0094-weather-converter-item-slots';
 import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
+import { NEW_DICE, ETERNAL_PETS, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261115-t0098-eternal';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
 import { supabaseClient } from './services/supabase.js';
@@ -24,7 +25,7 @@ import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-sign
 import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glitch-no-x10';
-import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0091-heaven-glitch-no-x10';
+import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js?v=20261114-t0094-weather-converter-item-slots';
@@ -40,6 +41,16 @@ import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-gl
 import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
+
+// T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
+for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
+if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ id: 'eternal', name: '永恆', cls: 'pet-rarity-eternal', a: '#9eeaff', b: '#ffaddd' });
+for (const pet of ETERNAL_PETS) if (!PETS.some(existing => existing.id === pet.id)) PETS.push(pet);
+Object.assign(PET_BASE_INCOME, { eternal_dawn_guardian: 18000, eternal_starwish_deer: 22000 });
+PET_INDIVIDUAL_ODDS.eternal = [60, 40];
+Object.assign(PET_TIER_CONFIG, ETERNAL_TIER_CONFIG);
+Object.assign(PET_TIER_RATES, ETERNAL_TIER_RATES);
+for (const die of NEW_DICE) if (!HEAVEN_MIDDLE_IDS.includes(die.id)) HEAVEN_MIDDLE_IDS.push(die.id);
 
 const timerManager = createTimerManager();
 let globalBoostState=null;
@@ -146,7 +157,7 @@ function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
 function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0))}
-function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
+function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>120000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
 function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');timerManager.clearTimeout(e._t);const timer=timerManager.setTimeout(()=>{e.classList.remove('show');if(e._t===timer)e._t=null},2100,'toast-hide');e._t=timer}
