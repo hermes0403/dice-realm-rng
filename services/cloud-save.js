@@ -481,6 +481,10 @@ export function createCloudSaveService(dependencies) {
     } finally {
       cloudSyncBusy = false;
       if (cloudSyncPending) scheduleCloudSync();
+      if (resumeRefreshPending) {
+        resumeRefreshPending = false;
+        void refreshCloudSaveOnResume('sync-complete');
+      }
     }
   }
 
@@ -529,6 +533,41 @@ export function createCloudSaveService(dependencies) {
 
   let exitFlushPromise = null;
   let lastExitFlushAt = 0;
+  let resumeRefreshPromise = null;
+  let resumeRefreshPending = false;
+  let lastResumeRefreshAt = 0;
+
+  async function refreshCloudSaveOnResume(reason = 'resume') {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
+    if (document?.visibilityState === 'hidden') return false;
+    if (resumeRefreshPromise) return resumeRefreshPromise;
+    if (Date.now() - lastResumeRefreshAt < 2500) return false;
+    if (cloudSyncBusy) {
+      resumeRefreshPending = true;
+      return false;
+    }
+
+    lastResumeRefreshAt = Date.now();
+    resumeRefreshPromise = (async () => {
+      if (getCurrentUser()?.id !== user.id) return false;
+      document.getElementById('saveStatus').textContent = '頁面恢復中，正在核對雲端存檔…';
+      await loadCloudSave({ syncAfterLoad: false });
+      const stillSignedIn = getCurrentUser()?.id === user.id;
+      const loaded = stillSignedIn && cloudLoadReadyUserId === user.id;
+      if (loaded && cloudSyncPending) scheduleCloudSync();
+      if (!loaded) console.warn('Cloud save resume reconciliation did not complete:', reason);
+      return loaded;
+    })().finally(() => {
+      resumeRefreshPromise = null;
+      if (resumeRefreshPending) {
+        resumeRefreshPending = false;
+        void refreshCloudSaveOnResume('sync-complete');
+      }
+    });
+    return resumeRefreshPromise;
+  }
+
   async function flushOnExit(reason) {
     if (!getCurrentUser() || !supabaseClient) return false;
     // visibilitychange and pagehide can fire together; share one final backup request.
@@ -544,8 +583,11 @@ export function createCloudSaveService(dependencies) {
   // Backup as soon as the player backgrounds or closes the game page.
   document?.addEventListener?.('visibilitychange', () => {
     if (document.visibilityState === 'hidden') void flushOnExit('visibilitychange');
+    else void refreshCloudSaveOnResume('visibilitychange');
   });
   windowObject?.addEventListener?.('pagehide', () => { void flushOnExit('pagehide'); });
+  windowObject?.addEventListener?.('pageshow', () => { void refreshCloudSaveOnResume('pageshow'); });
+  windowObject?.addEventListener?.('online', () => { void refreshCloudSaveOnResume('online'); });
 
   async function loadCloudSave({
     syncAfterLoad = true,
@@ -728,5 +770,5 @@ export function createCloudSaveService(dependencies) {
 
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isLoadedFor };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor };
 }
