@@ -27,7 +27,7 @@ import { unlockedDiceCount, consumeUnlockedDice } from './dice-locks.js';
 export function applyFusionLuckToRates(rates, bonusPercent = 0) {
   const adjusted = Object.fromEntries(Object.entries(rates || {}).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]));
   const targets = ['mythic', 'secret'];
-  const donorKey = Object.keys(adjusted).filter(key => !targets.includes(key)).sort((a, b) => adjusted[b] - adjusted[a])[0] || null;
+  const donorKey = ['common', 'rare', 'legendary'].filter(key => Object.prototype.hasOwnProperty.call(adjusted, key)).sort((a, b) => adjusted[b] - adjusted[a])[0] || null;
   const targetTotal = targets.reduce((sum, key) => sum + (adjusted[key] || 0), 0);
   const requestedPercent = Math.max(0, Number(bonusPercent) || 0);
   const requestedDelta = targetTotal * requestedPercent / 100;
@@ -419,7 +419,7 @@ export function createPetSystem({
     const S = getState();
     const rarity = petRarity(petById(pet.id)?.rarity).id;
     const selected = S.petAutoSellRarities || {};
-    if (!selected[rarity] || rarity === 'secret') return false;
+    if (!selected[rarity] || rarity === 'secret' || rarity === 'eternal') return false;
     const values = { common: 100, rare: 1000, legendary: 10000, mythic: 50000 };
     S.pets = (S.pets || []).filter(item => item.uid !== pet.uid);
     S.equippedPetUids = (S.equippedPetUids || []).filter(uid => uid !== pet.uid);
