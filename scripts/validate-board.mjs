@@ -83,8 +83,109 @@ function taskFiles(boardDir) {
   return files.sort();
 }
 
-function validateBoardDirectory(boardDir) {
+function splitMarkdownTableRow(line) {
+  const cells = [];
+  let cell = '';
+  let slashCount = 0;
+  for (let index = 0; index < line.length; index++) {
+    const char = line[index];
+    if (char === '|') {
+      if (slashCount % 2 === 1) {
+        cell = cell.slice(0, -1) + '|';
+      } else {
+        cells.push(cell.trim());
+        cell = '';
+      }
+      slashCount = 0;
+      continue;
+    }
+    cell += char;
+    slashCount = char === '\\' ? slashCount + 1 : 0;
+  }
+  if (cell.trim()) cells.push(cell.trim());
+  if (line.trimStart().startsWith('|') && cells[0] === '') cells.shift();
+  return cells;
+}
+
+function parseTaskIndex(readmePath) {
+  if (!fs.existsSync(readmePath)) throw new Error(`${readmePath}: required Board README is missing`);
+  const source = fs.readFileSync(readmePath, 'utf8');
+  const lines = source.split(/\r?\n/);
+  const headings = lines.map((line, index) => ({ line, index }))
+    .filter(item => /^##\s+.*目前任務索引.*$/.test(item.line));
+  if (headings.length !== 1) throw new Error(`${readmePath}: expected exactly one section heading containing 目前任務索引`);
+
+  const sectionStart = headings[0].index + 1;
+  let headerIndex = -1;
+  for (let index = sectionStart; index < lines.length && !/^##\s/.test(lines[index]); index++) {
+    if (lines[index].trim().startsWith('|')) {
+      headerIndex = index;
+      break;
+    }
+  }
+  if (headerIndex < 0) throw new Error(`${readmePath}: task index table header is missing`);
+
+  const header = splitMarkdownTableRow(lines[headerIndex]);
+  if (header.join('|') !== 'ID|任務|狀態|依賴') throw new Error(`${readmePath}: task index header must be ID | 任務 | 狀態 | 依賴`);
+  const separatorIndex = headerIndex + 1;
+  if (!/^\s*\|?\s*:?-{3,}:?\s*\|\s*:?-{3,}:?\s*\|\s*:?-{3,}:?\s*\|\s*:?-{3,}:?\s*\|?\s*$/.test(lines[separatorIndex] || '')) {
+    throw new Error(`${readmePath}: task index separator row is missing or malformed`);
+  }
+
+  const rows = [];
   const errors = [];
+  let pendingBlankLine = 0;
+  for (let index = separatorIndex + 1; index < lines.length; index++) {
+    const line = lines[index];
+    if (/^##\s/.test(line)) break;
+    if (!line.trim()) {
+      if (rows.length && !pendingBlankLine) pendingBlankLine = index + 1;
+      continue;
+    }
+    if (!line.trimStart().startsWith('|')) {
+      if (rows.length) break;
+      continue;
+    }
+    if (pendingBlankLine) {
+      errors.push(`${readmePath}:${pendingBlankLine}: blank row inside task index table`);
+      pendingBlankLine = 0;
+    }
+    const cells = splitMarkdownTableRow(line);
+    if (cells.length !== 4) {
+      errors.push(`${readmePath}:${index + 1}: task index row must contain exactly 4 columns`);
+      continue;
+    }
+    if (!/^T-\d{4}$/.test(cells[0])) errors.push(`${readmePath}:${index + 1}: invalid task index ID ${cells[0] || '(empty)'}`);
+    rows.push({ id: cells[0], title: cells[1], status: cells[2], dependencies: cells[3], line: index + 1 });
+  }
+  if (!rows.length) errors.push(`${readmePath}: task index contains no task rows`);
+
+  const seen = new Set();
+  for (const row of rows) {
+    if (seen.has(row.id)) errors.push(`${readmePath}:${row.line}: duplicate task index ID ${row.id}`);
+    seen.add(row.id);
+  }
+  const outOfOrder = rows.filter((row, index) => index > 0 && row.id < rows[index - 1].id);
+  if (outOfOrder.length) errors.push(`${readmePath}: task index IDs are not in ascending order at ${outOfOrder.map(row => row.id).join(', ')}`);
+
+  return { rows, errors };
+}
+
+function missingIdRanges(ids) {
+  const numbers = [...new Set(ids.map(id => Number(id.slice(2))))].sort((a, b) => a - b);
+  const ranges = [];
+  for (let index = 1; index < numbers.length; index++) {
+    const start = numbers[index - 1] + 1;
+    const end = numbers[index] - 1;
+    if (start > end) continue;
+    ranges.push({ start: `T-${String(start).padStart(4, '0')}`, end: `T-${String(end).padStart(4, '0')}`, count: end - start + 1 });
+  }
+  return ranges;
+}
+
+function validateBoardDirectory(boardDir, { checkIndex = true } = {}) {
+  const errors = [];
+  const warnings = [];
   const tasks = [];
   const byId = new Map();
 
@@ -185,7 +286,33 @@ function validateBoardDirectory(boardDir) {
     if (activeLocks.length > 1) errors.push(`${task.fileName}: more than one active communicate lock exists on the same original task`);
   }
 
-  return { tasks, errors };
+  if (checkIndex) {
+    const indexPath = path.join(boardDir, 'README.md');
+    try {
+      const index = parseTaskIndex(indexPath);
+      errors.push(...index.errors);
+      const indexById = new Map(index.rows.map(row => [row.id, row]));
+      for (const row of index.rows) {
+        const task = byId.get(row.id);
+        if (!task) warnings.push(`task index ${row.id} has no matching task file in board or archive`);
+        else if (row.status !== task.fields.status) {
+          errors.push(`${row.id}: task index status ${row.status} does not match task file status ${task.fields.status}`);
+        }
+      }
+      for (const task of tasks) {
+        if (!indexById.has(task.fields.id)) {
+          warnings.push(`task file ${task.fields.id} is missing from task index`);
+        }
+      }
+      for (const range of missingIdRanges(index.rows.map(row => row.id))) {
+        warnings.push(`task index ID gap: ${range.start}～${range.end}（${range.count} 個）`);
+      }
+    } catch (error) {
+      errors.push(error.message);
+    }
+  }
+
+  return { tasks, errors, warnings };
 }
 
 function printCapacityReport(tasks, side) {
@@ -207,8 +334,12 @@ if (isMain) {
   const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const boardDir = path.join(projectRoot, 'board');
   const sideArg = process.argv.find(arg => arg.startsWith('--side='))?.slice('--side='.length);
-  const { tasks, errors } = validateBoardDirectory(boardDir);
+  const { tasks, errors, warnings } = validateBoardDirectory(boardDir);
   printCapacityReport(tasks, sideArg);
+  if (warnings.length) {
+    console.warn(`\nBoard validation warnings (${warnings.length}):`);
+    for (const warning of warnings) console.warn(`- ${warning}`);
+  }
   if (errors.length) {
     console.error(`\nBoard validation failed (${errors.length} issue${errors.length === 1 ? '' : 's'}):`);
     for (const error of errors) console.error(`- ${error}`);
@@ -218,4 +349,4 @@ if (isMain) {
   }
 }
 
-export { parseFrontmatter, parseDelegation, parseLockEvents, parseTaskFile, validateBoardDirectory };
+export { parseFrontmatter, parseDelegation, parseLockEvents, parseTaskFile, splitMarkdownTableRow, parseTaskIndex, missingIdRanges, validateBoardDirectory };
