@@ -319,7 +319,7 @@ export function createCloudSaveService(dependencies) {
       autoDepositDice: S.autoDepositDice || [], questDate: S.questDate, quest: S.quest,
       dailyQuestCompletions: Number(S.dailyQuestCompletions) || 0,
       weatherConvertAt: Number(S.weatherConvertAt) || 0,
-      achievements: S.achievements, potions: S.potions,
+      achievements: S.achievements, achievementRulesVersion: 2, potions: S.potions,
       petAutoSellRarities: S.petAutoSellRarities || {},
       halloweenUnlocked: S.halloweenUnlocked || { d33: false, d34: false }
     };
