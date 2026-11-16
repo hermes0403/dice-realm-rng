@@ -319,14 +319,14 @@ export function createCloudSaveService(dependencies) {
       autoDepositDice: S.autoDepositDice || [], questDate: S.questDate, quest: S.quest,
       dailyQuestCompletions: Number(S.dailyQuestCompletions) || 0,
       weatherConvertAt: Number(S.weatherConvertAt) || 0,
-      achievements: S.achievements, potions: S.potions,
+      achievements: S.achievements, achievementRulesVersion: 2, potions: S.potions,
       petAutoSellRarities: S.petAutoSellRarities || {},
       halloweenUnlocked: S.halloweenUnlocked || { d33: false, d34: false }
     };
   }
 
   function achievementStats() {
-    const entries = Object.values(getState().achievements || {}).filter(a => a && (a.unlockedAt || a.rewardGiven));
+    const entries = Object.values(getState().achievements || {}).filter(a => a && !a.rejectedByNewThreshold && (a.unlockedAt || a.rewardGiven));
     const times = entries.map(a => a.unlockedAt).filter(Boolean).sort();
     return { achievement_count: entries.length, achievement_reached_at: times.length ? times[times.length - 1] : null };
   }
