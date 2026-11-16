@@ -47,17 +47,14 @@ export function createGloveUI(deps) {
           String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
         : '天氣轉換已就緒';
       const controls = owned
-        ? '<label for="weatherConvertScope" class="mini" style="display:block;margin:8px 0 4px">影響範圍</label>' +
-          '<select id="weatherConvertScope" class="field" style="width:100%;margin-bottom:8px"><option value="local">本伺服器</option><option value="global">全伺服器</option></select>' +
-          (enabled
+        ? (enabled
             ? '<button class="primary" id="weatherConvertBtn" type="button" style="width:100%;min-height:38px" ' + (left > 0 ? 'disabled' : '') + '>🌦️ 轉換天氣</button>'
             : '<button type="button" style="width:100%;min-height:36px" data-craft="g7">啟用天氣轉換器</button>') +
           '<p class="mini" id="weatherConvertCooldown" style="margin:6px 0 0">' + cooldownText + '</p>'
         : materials + '<button type="button" ' + (disabled ? 'disabled' : '') + ' data-craft="g7">' + action + '</button>';
       itemWorkshopList.innerHTML = '<div class="recipe weather-converter-card" style="display:block;padding:12px">' +
-        '<h3 style="margin:0 0 6px">' + converter.icon + ' ' + converter.name + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') + '</h3>' +
-        '<p style="margin:0 0 5px">' + converter.desc + '</p>' +
-        '<p class="mini" style="margin:0 0 8px">每小時可使用一次；不提供運氣或擲骰速度加成。</p>' +
+        '<h3 style="margin:0 0 6px">' + converter.icon + ' 天氣轉換器' + (enabled ? '（已啟用）' : owned ? '（已持有）' : '') + '</h3>' +
+        '<p style="margin:0 0 8px">全伺服器隨機召喚雨、雪或打雷；每小時可使用一次。不提供運氣或擲骰速度加成。</p>' +
         controls + '</div>';
     }
 
