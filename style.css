@@ -2078,3 +2078,28 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .weekly-inline-claim:hover{border-color:#c7a96b;background:#342c1d;filter:none}
 .weekly-realm-date{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#89949c;font-size:10px;line-height:1.3}
 @media(max-width:520px){.weekly-realm-panel{padding:8px 10px}.weekly-realm-line{font-size:11px;gap:8px}.weekly-inline-muted,.weekly-inline-claim{font-size:10px}.weekly-realm-date{font-size:9px}}
+
+/* v1.51 readability pass: restore the original realm-panel character */
+.weekly-realm-panel{
+  display:block;min-width:0;padding:12px 15px;
+  border:1px solid #5965a5;border-radius:14px;
+  background:radial-gradient(ellipse at 0 0,#34407855,transparent 58%),linear-gradient(135deg,#121a35,#0c1122 78%);
+  box-shadow:inset 0 1px #ffffff12,0 7px 20px #0003
+}
+.weekly-realm-line{
+  display:flex;align-items:center;gap:12px;min-width:0;min-height:28px;
+  overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:thin;
+  scrollbar-color:#626eaa transparent;color:#f1f3ff;font-size:15px;line-height:1.5
+}
+.weekly-realm-line::-webkit-scrollbar{height:3px}
+.weekly-inline-main{font-size:15px;font-weight:850;letter-spacing:.1px;color:#f1f3ff}
+.weekly-inline-muted{flex:0 0 auto;color:#bdc8e6;font-size:13px;font-weight:650}
+.weekly-inline-claim{flex:0 0 auto;padding:5px 10px;margin:0;border:1px solid #9a80dc;border-radius:7px;background:#30264d;color:#f1eaff;font-size:13px;font-weight:800;line-height:1.4}
+.weekly-inline-claim:hover{border-color:#c0a8ff;background:#403365;filter:none}
+@media(max-width:520px){
+  .weekly-realm-panel{padding:10px 12px;border-radius:12px}
+  .weekly-realm-line{min-height:28px;gap:10px;font-size:14px}
+  .weekly-inline-main{font-size:14px}
+  .weekly-inline-muted{font-size:12px}
+  .weekly-inline-claim{padding:4px 8px;font-size:12px}
+}
