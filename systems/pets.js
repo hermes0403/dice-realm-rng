@@ -27,7 +27,7 @@ import { unlockedDiceCount, consumeUnlockedDice } from './dice-locks.js';
 export function applyFusionLuckToRates(rates, bonusPercent = 0) {
   const adjusted = Object.fromEntries(Object.entries(rates || {}).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]));
   const targets = ['mythic', 'secret'];
-  const donorKey = Object.keys(adjusted).filter(key => !targets.includes(key)).sort((a, b) => adjusted[b] - adjusted[a])[0] || null;
+  const donorKey = ['common', 'rare', 'legendary'].filter(key => Object.prototype.hasOwnProperty.call(adjusted, key)).sort((a, b) => adjusted[b] - adjusted[a])[0] || null;
   const targetTotal = targets.reduce((sum, key) => sum + (adjusted[key] || 0), 0);
   const requestedPercent = Math.max(0, Number(bonusPercent) || 0);
   const requestedDelta = targetTotal * requestedPercent / 100;
@@ -146,7 +146,8 @@ export function createPetSystem({
       rare: { luck: 1, speed: 1 },
       legendary: { luck: 2, speed: 1 },
       mythic: { luck: 3, speed: 3 },
-      secret: { luck: 7, speed: 7 }
+      secret: { luck: 7, speed: 7 },
+      eternal: { luck: 35, speed: 35 }
     };
     const mutationMultiplier = { rain: 1.2, snow: 1.3, thunder: 1.4, crystal: 1.7, hell: 2 };
     let luck = 0;
@@ -158,7 +159,7 @@ export function createPetSystem({
       const pet = petById(item.id);
       const bonus = rarityBonus[pet?.rarity];
       if (bonus) {
-        const multiplier = (mutationMultiplier[item.mutation] || 1) * petWeightSkillMultiplier(item.kg);
+        const multiplier = pet?.rarity === 'eternal' ? 1 : (mutationMultiplier[item.mutation] || 1) * petWeightSkillMultiplier(item.kg);
         luck += bonus.luck * multiplier;
         speed += bonus.speed * multiplier;
       }
@@ -209,6 +210,42 @@ export function createPetSystem({
       save();
       toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
       return result.reward;
+    });
+  }
+
+  async function useEternalDailySkill(uid) {
+    const userId = getCurrentUser()?.id;
+    if (!userId) { openAuth(); toast('請先登入帳號才能領取寵物技能獎勵'); return false; }
+    const S = getState();
+    const pet = (S.pets || []).find(item => item.uid === uid && item.id === 'eternal_starwish_deer');
+    if (!pet || !equippedPetHas('eternal_starwish_deer')) { toast('請先裝備星願靈鹿'); return false; }
+    const lockName = 'diceRealmEternalDailySkill:' + userId;
+    const locks = globalThis.navigator?.locks;
+    if (!locks?.request) { toast('此瀏覽器不支援技能防重複鎖定，請使用單一分頁操作'); return false; }
+    return locks.request(lockName, { ifAvailable: true }, async lock => {
+      if (!lock) { toast('星願靈鹿技能正在其他分頁處理'); return false; }
+      const current = getState();
+      const currentPet = (current.pets || []).find(item => item.uid === uid && item.id === 'eternal_starwish_deer');
+      if (!currentPet || !equippedPetHas('eternal_starwish_deer')) return false;
+      const now = Date.now();
+      const last = Math.max(0, Number(current.petSkillEternalLastClaimAt) || 0);
+      const cooldown = 24 * 60 * 60 * 1000;
+      if (now - last < cooldown) {
+        const hours = Math.ceil((cooldown - (now - last)) / 3600000);
+        toast('星願靈鹿技能冷卻中，約 ' + hours + ' 小時後可再次領取');
+        return false;
+      }
+      const rewardId = Math.random() < 0.4 ? 'angel1' : 'luck3';
+      const rewardName = rewardId === 'angel1' ? '天堂藥水 I' : '幸運藥水 III';
+      current.potions = current.potions || {};
+      current.potions.inventory = current.potions.inventory || {};
+      current.potions.inventory[rewardId] = Math.max(0, Number(current.potions.inventory[rewardId]) || 0) + 1;
+      current.petSkillEternalLastClaimAt = now;
+      save();
+      render();
+      renderPetsPage();
+      toast('星願靈鹿帶來祝福：獲得 ' + rewardName);
+      return true;
     });
   }
 
@@ -264,7 +301,9 @@ export function createPetSystem({
       : pet.rarity === 'mythic' ? '0 0 16px #ff334f88'
         : pet.rarity === 'legendary' ? '0 0 13px #ffc53377'
           : '0 0 9px ' + rarity.a + '66';
-    const src = PET_IMAGE_ASSETS[pet.id];
+    const src = pet.id === 'eternal_dawn_guardian' ? './assets/pets/eternal-dawn-guardian.svg'
+      : pet.id === 'eternal_starwish_deer' ? './assets/pets/eternal-starwish-deer.svg'
+        : PET_IMAGE_ASSETS[pet.id];
     const eventPosition = ({
       event_crystal_bronze_beast: '0% 0%',
       event_mirror_ice_spirit: '50% 0%',
@@ -380,7 +419,7 @@ export function createPetSystem({
     const S = getState();
     const rarity = petRarity(petById(pet.id)?.rarity).id;
     const selected = S.petAutoSellRarities || {};
-    if (!selected[rarity] || rarity === 'secret') return false;
+    if (!selected[rarity] || rarity === 'secret' || rarity === 'eternal') return false;
     const values = { common: 100, rare: 1000, legendary: 10000, mythic: 50000 };
     S.pets = (S.pets || []).filter(item => item.uid !== pet.uid);
     S.equippedPetUids = (S.equippedPetUids || []).filter(uid => uid !== pet.uid);
@@ -417,13 +456,20 @@ export function createPetSystem({
           const rarity = petRarity(definition.rarity);
           const equipped = (S.equippedPetUids || []).includes(pet.uid);
           const income = petIncomePerSecond(pet);
+          const skillDescription = definition.skill ? `<div class="pet-skill-description">${escapeHTML(definition.skill)}</div>` : '';
           const mutationTags = formatPetMutationTags(pet, PET_MUTATIONS);
           const skillState = S.petSkillSpeed || {};
           const skillActive = Number(skillState.expiresAt) > Date.now();
           const skillCooling = Number(skillState.cooldownUntil) > Date.now();
+          const eternalLast = Number(S.petSkillEternalLastClaimAt) || 0;
+          const eternalReady = Date.now() - eternalLast >= 24 * 60 * 60 * 1000;
+          const eternalRemain = Math.max(0, 24 * 60 * 60 * 1000 - (Date.now() - eternalLast));
+          const eternalWait = Math.ceil(eternalRemain / 3600000);
           const skillButton = definition.id === 's4'
             ? `<button type="button" class="${equipped && !skillActive && !skillCooling ? 'primary' : 'quiet'}" data-pet-skill-use="${escapeHTML(pet.uid)}" ${!equipped || skillActive || skillCooling ? 'disabled' : ''}>${!equipped ? '裝備後可使用' : skillActive ? '技能生效中' : skillCooling ? '技能冷卻中' : '啟動速度 +100% 技能'}</button>`
-            : '';
+            : definition.id === 'eternal_starwish_deer'
+              ? `<button type="button" class="${equipped && eternalReady ? 'primary' : 'quiet'}" data-pet-daily-claim="${escapeHTML(pet.uid)}" ${!equipped || !eternalReady ? 'disabled' : ''}>${!equipped ? '裝備後可領取' : eternalReady ? '領取每日隨機藥水' : '技能冷卻中（約 ' + eternalWait + ' 小時）'}</button>`
+              : '';
           const mutationColors = {
             'pet-mutation-golden': '#ffe69a',
             'pet-mutation-diamond': '#b9e8ff',
@@ -434,7 +480,7 @@ export function createPetSystem({
             'pet-mutation-weather-snow': '#fff4e8',
             'pet-mutation-weather-rain': '#72baff'
           };
-          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => {
+          return `<div class="pet-card"><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${skillDescription}${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => {
             const color = mutationColors[tag.className] || '#ffffff';
             const rainbowStyle = color === 'rainbow' ? 'color:transparent!important;background:linear-gradient(90deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1);background-clip:text;-webkit-background-clip:text;' : `color:${color}!important;`;
             return `<span class="pet-mutation-tag ${tag.className}" style="${rainbowStyle}border-color:${color === 'rainbow' ? '#c69bff' : color}!important;text-shadow:0 0 7px ${color === 'rainbow' ? '#c69bff88' : color + '88'}">${escapeHTML(tag.label)}</span>`;
@@ -467,7 +513,7 @@ export function createPetSystem({
     grid.innerHTML = all.map(pet => {
       const discovered = pet.discovered;
       const rarity = petRarity(pet.rarity);
-      return `<div class="pet-card ${discovered ? '' : 'undiscovered'}" style="--rarity-color:${rarity.a}"><div class="pet-art">${discovered ? petArt(pet, true) : '<span style="font-size:42px;color:#50566e">?</span>'}</div><div class="pet-name ${rarity.cls}">${discovered ? pet.name : '???'}</div><div class="pet-meta ${rarity.cls}">${discovered ? rarity.name : '尚未發現'}</div></div>`;
+      return `<div class="pet-card ${discovered ? '' : 'undiscovered'}" style="--rarity-color:${rarity.a}"><div class="pet-art">${discovered ? petArt(pet, true) : '<span style="font-size:42px;color:#50566e">?</span>'}</div><div class="pet-name ${rarity.cls}">${discovered ? pet.name : '???'}</div><div class="pet-meta ${rarity.cls}">${discovered ? rarity.name : '尚未發現'}</div>${discovered && pet.skill ? `<div class="pet-skill-description">${escapeHTML(pet.skill)}</div>` : ''}</div>`;
     }).join('');
   }
 
@@ -652,6 +698,8 @@ export function createPetSystem({
       toast(best.length ? `已自動裝備收益最高的 ${best.length} 隻寵物` : '目前沒有可裝備的寵物');
     });
     documentRef.getElementById('petInventoryGrid')?.addEventListener('click', event => {
+      const dailyClaimButton = event.target.closest('[data-pet-daily-claim]');
+      if (dailyClaimButton) { useEternalDailySkill(dailyClaimButton.dataset.petDailyClaim); return; }
       const skillButton = event.target.closest('[data-pet-skill-use]');
       if (skillButton) {
         usePetSkillS4(skillButton.dataset.petSkillUse);
@@ -691,6 +739,7 @@ export function createPetSystem({
     applyPetRollSkills,
     applyPetLoginSkill,
     usePetSkillS4,
+    useEternalDailySkill,
     petBonusTotals,
     populateAdminPetSelects,
     petById,

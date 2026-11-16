@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { D } from '../data/dice.js';
+import { NEW_DICE } from '../data/eternal-update.js';
 import {
   HEAVEN_MIDDLE_IDS,
   buildHeavenBaseEntries,
@@ -9,14 +10,15 @@ import {
 } from '../systems/heaven-potion-odds.js';
 import { applyGlitchWeight } from '../systems/glitch-dice.js';
 
-const byId = id => D.find(dice => dice.id === id);
+const ALL_DICE = [...D, ...NEW_DICE];
+const byId = id => ALL_DICE.find(dice => dice.id === id);
 
 test('天堂 I／II 四組基礎表固定骰子、數量及總和正確', () => {
   const cases = [
-    { heaven2: false, high: false, fixed: 'd12', percent: 20, error: 0.005, count: 26 },
-    { heaven2: false, high: true, fixed: 'd13', percent: 19, error: 0.005, count: 25 },
-    { heaven2: true, high: false, fixed: 'd14', percent: 17, error: 0.07, count: 25 },
-    { heaven2: true, high: true, fixed: 'd15', percent: 17, error: 0.07, count: 25 }
+    { heaven2: false, high: false, fixed: 'd12', percent: 20, error: 0.005, count: 31 },
+    { heaven2: false, high: true, fixed: 'd13', percent: 19, error: 0.005, count: 30 },
+    { heaven2: true, high: false, fixed: 'd14', percent: 17, error: 0.07, count: 30 },
+    { heaven2: true, high: true, fixed: 'd15', percent: 17, error: 0.07, count: 30 }
   ];
   for (const item of cases) {
     const entries = buildHeavenBaseEntries(byId, item.heaven2, item.high);
@@ -28,13 +30,23 @@ test('天堂 I／II 四組基礎表固定骰子、數量及總和正確', () => 
   }
 });
 
+test('五顆新骰子都能進入天堂藥水 I／II 抽選池', () => {
+  for (const dice of NEW_DICE) {
+    assert.ok(HEAVEN_MIDDLE_IDS.includes(dice.id), `Heaven pool missing ${dice.id}`);
+    for (const [heaven2, high] of [[false, false], [false, true], [true, false], [true, true]]) {
+      const entries = buildHeavenBaseEntries(byId, heaven2, high);
+      assert.ok(entries.some(entry => entry.dice.id === dice.id), `table missing ${dice.id}`);
+    }
+  }
+});
+
 test('四組中間骰子依分母遞增、權重嚴格遞減且包含奇點骰子', () => {
   assert.ok(HEAVEN_MIDDLE_IDS.includes('d20'));
   for (const [heaven2, high] of [[false, false], [false, true], [true, false], [true, true]]) {
     const fixedId = heaven2 ? (high ? 'd15' : 'd14') : (high ? 'd13' : 'd12');
     const entries = buildHeavenBaseEntries(byId, heaven2, high)
       .filter(entry => HEAVEN_MIDDLE_IDS.includes(entry.dice.id) && entry.dice.id !== fixedId);
-    assert.equal(entries.length, 24 - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0));
+    assert.equal(entries.length, HEAVEN_MIDDLE_IDS.length - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0));
     for (let i = 1; i < entries.length; i++) {
       assert.ok(entries[i].dice.den > entries[i - 1].dice.den);
       assert.ok(entries[i].weight < entries[i - 1].weight);
@@ -42,12 +54,13 @@ test('四組中間骰子依分母遞增、權重嚴格遞減且包含奇點骰�
   }
 });
 
-test('天氣加成只作用於 1,000,000 至 100,000,000 的骰子', () => {
+test('天氣加成仍只作用於 1,000,000 至 100,000,000 的骰子', () => {
   const dice = den => ({ den });
   assert.equal(heavenWeatherBonus(dice(999999), ['hell'], false, false), 0);
   assert.equal(heavenWeatherBonus(dice(1000000), ['hell'], false, false), 4);
   assert.equal(heavenWeatherBonus(dice(100000000), ['hell'], false, false), 4);
   assert.equal(heavenWeatherBonus(dice(100000001), ['hell'], false, false), 0);
+  assert.equal(heavenWeatherBonus(dice(110050000), ['hell'], false, false), 0);
   assert.equal(heavenWeatherBonus(dice(1000000), ['glitch'], false, false), 5);
   assert.equal(heavenWeatherBonus(dice(1000000), ['hell'], false, true), 4.5);
   assert.equal(heavenWeatherBonus(dice(1000000), ['glitch'], false, true), 6);
@@ -58,7 +71,7 @@ test('天氣加成只作用於 1,000,000 至 100,000,000 的骰子', () => {
 
 test('四顆故障骰子在普通池及四張天堂表中都有正權重，可被抽中', () => {
   const glitchIds = ['d64', 'd65', 'd66', 'd67'];
-  const ordinaryPool = D.filter(dice => !dice.weather);
+  const ordinaryPool = ALL_DICE.filter(dice => !dice.weather);
   for (const id of glitchIds) {
     const dice = ordinaryPool.find(item => item.id === id);
     assert.ok(dice, `ordinary pool missing ${id}`);
@@ -96,7 +109,7 @@ test('四組機率表套用最大天氣與故障倍率後仍無負值或超過 1
 });
 
 test('天堂藥水期間故障骰子不套用故障天氣 x10，僅保留天堂天氣加成', () => {
-  const entries = D.filter(dice => dice.glitchBonus).map(dice => ({ dice, weight: 2 }));
+  const entries = ALL_DICE.filter(dice => dice.glitchBonus).map(dice => ({ dice, weight: 2 }));
   const boosted = applyHeavenWeatherWeights(entries, ['glitch'], false, false);
   assert.equal(boosted.length, 4);
   for (const entry of boosted) {

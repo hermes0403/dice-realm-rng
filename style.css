@@ -2041,3 +2041,8 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 /* T-0092：自動出售批次按鈕固定並排一行。 */
 #autoSellDiceOptions .auto-sell-bulk-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex-wrap:nowrap;min-width:0}
 #autoSellDiceOptions .auto-sell-bulk-actions button{width:100%;min-width:0;white-space:nowrap}
+
+/* T-0098 Eternal pet tier: pale-blue to pink gradient. */
+.pet-rarity-eternal{background:linear-gradient(90deg,#9eeaff,#d6c4ff 52%,#ffaddd);-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:0 0 12px #a9dfff88,0 0 18px #ffaddd55;font-weight:950}
+.pet-card:has(.pet-rarity-eternal){border-color:#b9cfff;box-shadow:inset 0 0 18px #a8dfff18,0 0 12px #e7b7ff20}
+.pet-skill-description{margin:6px 0 9px;padding:7px 9px;border:1px solid #a9c9ef55;border-radius:9px;background:linear-gradient(100deg,#8bdcff18,#e9aeea18);color:#dcecff;font-size:11px;line-height:1.5}

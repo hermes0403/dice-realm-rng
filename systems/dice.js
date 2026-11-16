@@ -1,5 +1,5 @@
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
-import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261114-t0091-heaven-probability-curve';
+import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.

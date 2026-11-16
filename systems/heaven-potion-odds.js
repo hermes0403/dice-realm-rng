@@ -1,7 +1,7 @@
 export const HEAVEN_MIDDLE_IDS = [
   'd13', 'd14', 'd15', 'd16', 'd29', 'd17', 'd18', 'd19',
-  'd67', 'd30', 'd20', 'd21', 'd22', 'd58', 'd65', 'd23',
-  'd25', 'd26', 'd31', 'd66', 'd24', 'd27', 'd59', 'd32'
+  'd67', 'd72', 'd30', 'd20', 'd21', 'd22', 'd58', 'd65', 'd69', 'd71', 'd23',
+  'd25', 'd26', 'd31', 'd68', 'd66', 'd24', 'd27', 'd59', 'd32', 'd70'
 ];
 
 export function buildHeavenBaseEntries(byId, heaven2, highLuck) {

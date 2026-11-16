@@ -1,6 +1,7 @@
 import { D, G } from './data/dice.js?v=20261114-t0094-weather-converter-item-slots';
 import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
+import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261115-t0098-eternal';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
 import { supabaseClient } from './services/supabase.js';
@@ -8,23 +9,23 @@ import { format, formatWalletScientific, compactNum, escapeHTML } from './core/f
 import { createNavigationUI } from './ui/navigation.js?v=20261114-t0094-weather-converter-item-slots';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js';
-import { setupAdminPetOddsUI } from './admin/pet-odds.js';
+import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261114-t0075-achievement-colors-weather-five';
+import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261114-t0094-weather-converter-item-slots';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261115-t0096-grant-dice-weather-card';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261116-achievement-recheck-leaderboard';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-signup-cooldown';
-import { createPetSystem } from './systems/pets.js?v=20261114-t0090-secret-pet-skills';
+import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js?v=20261114-t0091-heaven-glitch-no-x10';
-import { heavenWeatherBonus } from './systems/heaven-potion-odds.js?v=20261114-t0091-heaven-glitch-no-x10';
+import { createDiceSystem } from './systems/dice.js?v=20261115-t0098-eternal-dice';
+import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js?v=20261114-t0094-weather-converter-item-slots';
@@ -40,6 +41,23 @@ import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-gl
 import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
+
+// T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
+for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
+if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ id: 'eternal', name: '永恆', cls: 'pet-rarity-eternal', a: '#9eeaff', b: '#ffaddd' });
+for (const pet of ETERNAL_PETS) if (!PETS.some(existing => existing.id === pet.id)) PETS.push(pet);
+Object.assign(PET_BASE_INCOME, ETERNAL_PET_INCOME);
+PET_INDIVIDUAL_ODDS.eternal = ETERNAL_PET_WEIGHTS.slice();
+// 永恆融合區間完整取代舊版 1,100,001 以上的分段，避免舊區間殘留或重疊。
+for (const [tier, range] of Object.entries(PET_TIER_CONFIG)) {
+  if (Number(range?.max_den) >= 1100001 || Number(range?.min_den) >= 1100001) {
+    delete PET_TIER_CONFIG[tier];
+    delete PET_TIER_RATES[tier];
+  }
+}
+Object.assign(PET_TIER_CONFIG, ETERNAL_TIER_CONFIG);
+Object.assign(PET_TIER_RATES, ETERNAL_TIER_RATES);
+for (const die of NEW_DICE) if (!HEAVEN_MIDDLE_IDS.includes(die.id)) HEAVEN_MIDDLE_IDS.push(die.id);
 
 const timerManager = createTimerManager();
 let globalBoostState=null;
