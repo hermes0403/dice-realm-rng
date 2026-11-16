@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=20261116-v149-weekly-event">
+<link rel="stylesheet" href="style.css?v=20261117-v150-compact-event">
 </head>
 <body class="auth-required"><div class="shell">
 <header class="top"><div class="brand">骰界 <span>RNG</span></div><div class="weather-status" id="weatherStatus" aria-live="polite"><span class="weather-icon" id="weatherIcon">☀️</span><span class="weather-name" id="weatherName">晴天</span><span class="weather-countdown" id="weatherCountdown" hidden>05:00</span></div><div class="profile"><span class="pill" id="saveStatus" hidden>本機試玩存檔</span><span class="avatar" id="avatar" hidden>旅</span><span id="playerName" hidden>旅人</span><span id="gloveLabel" hidden>基礎手套</span><button class="primary" id="authOpenBtn">登入／註冊</button></div></header><section class="announcement-panel" aria-label="全服公告"><div class="announcement-heading"><span class="announcement-live"></span><b>全服稀有公告</b><span class="announcement-caption">REALM ANNOUNCEMENTS</span></div><div id="globalAnnouncements" class="announcement-list"><div class="announcement-empty">等待稀有骰子現身……</div></div></section>
@@ -16,13 +16,8 @@
 <section class="page active" id="page-roll">
 <div class="hero weekly-realm-hero" id="realmHero">
 <section class="weekly-realm-panel" id="weeklyRealmEvent" aria-label="全服每週活動">
-  <div class="weekly-realm-heading"><div><span class="weekly-realm-globe">🌐</span><strong>全服活動</strong></div><span class="weekly-realm-kicker">WEEKLY CHALLENGE</span></div>
-  <div class="weekly-realm-count"><strong id="weeklyRollCount">0</strong><span id="weeklyRollTarget">/ 50,000 抽</span></div>
-  <div class="weekly-realm-progress"><span id="weeklyRollProgressBar"></span></div>
-  <div class="weekly-realm-caption"><span id="weeklyRollRemaining">距離下一階段還差 50,000 抽</span><span id="weeklyRollPercent">0%</span></div>
-  <div class="weekly-reward-track" id="weeklyRewardTrack" aria-label="全服階段獎勵"></div>
-  <div class="weekly-realm-footer"><span>每 10 分鐘更新一次</span><span>活動期間：11/16 00:00－11/23 00:00（台灣時間）</span></div>
-  <p class="weekly-realm-note">達成門檻後，所有玩家皆可領取獎勵，不限本週參與抽數。</p>
+  <div class="weekly-realm-line" id="weeklyRealmLine"><span>🌐 全服活動｜載入全服抽數中…</span></div>
+  <div class="weekly-realm-date">11/17 00:00－11/23 00:00（台灣時間）｜達成門檻後所有玩家皆可領取</div>
 </section>
 <div class="limited-event-entry-wrap"><button type="button" class="limited-event-entry" data-go="event" hidden>✦ 限時活動 <small>11/6</small></button></div><div id="realmAdminActivity" hidden></div></div>
 <div class="stats"><div class="stat"><b id="totalRolls">0</b><span>累積擲骰</span></div><div class="stat"><b id="uniqueCount">0 / 64</b><span>已發現骰子</span></div><div class="stat"><b id="luckStat">+0%</b><span>額外運氣</span></div></div>
