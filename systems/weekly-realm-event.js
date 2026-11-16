@@ -30,7 +30,8 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
       : '全階段已達成';
     line.innerHTML = '<span class="weekly-inline-main">🌐 全服活動｜' + number(total) + ' 抽｜' + progressText + '</span>' +
       (claimButtons || '<span class="weekly-inline-muted">' + (next ? '獎勵達成後可領取' : '所有階段已完成') + '</span>') +
-      '<span class="weekly-inline-muted">每 10 分鐘更新</span>';
+      '<span class="weekly-inline-muted">每 10 分鐘更新</span>' +
+      '<span class="weekly-inline-muted">11/17 00:00－11/23 00:00（台灣時間）</span>';
   }
   async function refresh() {
     const user = getCurrentUser();
