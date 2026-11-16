@@ -8,7 +8,7 @@ const MILESTONES = [
   { target: 800000, icons: '🌌 🪙', reward: '天堂藥水 II ×1 · 100M$' }
 ];
 const number = value => new Intl.NumberFormat('en-US').format(Math.max(0, Number(value) || 0));
-export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localStorageRef, timerManager, documentRef, toast, onRewardClaimed = () => {} }) {
+export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localStorageRef, timerManager, documentRef, toast, isAdmin = () => false, onRewardClaimed = () => {} }) {
   let progress = { total_rolls: 0, claimed_milestones: [] };
   let refreshing = false;
   const pendingKey = () => { const user = getCurrentUser(); return user?.id ? 'diceRealmWeeklyPending:' + user.id + ':' + CAMPAIGN_START : ''; };
@@ -39,6 +39,9 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
         '<span class="weekly-reward-description">' + item.reward + '</span>' +
         status + '</div>';
     }).join('');
+    const adminControls = isAdmin()
+      ? '<div class="weekly-admin-adjust"><div class="weekly-admin-adjust-title">管理員控制台 <small>手動增加本期全服累積擲骰</small></div><div class="weekly-admin-adjust-actions"><input id="weeklyAdminRollAmount" type="number" min="1" max="1000000000" step="1" inputmode="numeric" placeholder="輸入增加次數" aria-label="手動增加擲骰次數"><button type="button" class="primary" id="weeklyAdminAddRollsBtn">增加次數</button></div><div class="weekly-admin-adjust-hint">僅管理員可操作；增加後會立即更新進度，達成門檻時照常發放全服獎勵。</div></div>'
+      : '';
     line.innerHTML =
       '<div class="weekly-realm-topline"><div class="weekly-realm-title"><span class="weekly-realm-globe">🌐</span><div><strong>全服每週擲骰挑戰</strong><small>WEEKLY REALM CHALLENGE</small></div></div><span class="weekly-realm-period">11/17 — 11/23</span></div>' +
       '<div class="weekly-realm-total"><strong>' + number(total) + '</strong><span>全服累積擲骰</span></div>' +
@@ -46,7 +49,7 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
       '<div class="weekly-realm-progress-label">' + progressText + '<span>' + Math.floor(progressPercent) + '%</span></div>' +
       '<div class="weekly-reward-heading">全服里程碑獎勵 <small>達成後每位玩家皆可領取</small></div>' +
       '<div class="weekly-reward-list">' + rewardRows + '</div>' +
-      '<div class="weekly-realm-bottom">活動期間：11/17 00:00 — 11/23 00:00（台灣時間）<span>每 10 分鐘同步進度</span></div>';
+      '<div class="weekly-realm-bottom">活動期間：11/17 00:00 — 11/23 00:00（台灣時間）<span>每 10 分鐘同步進度</span></div>' + adminControls;
   }
   async function refresh() {
     const user = getCurrentUser();
@@ -84,8 +87,36 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
       await refresh();
     } catch (error) { toast(error?.message || '領取失敗，請稍後再試'); await refresh(); }
   }
+  async function addAdminRolls() {
+    if (!isAdmin()) { toast('管理員權限不足'); return; }
+    const input = documentRef.getElementById('weeklyAdminRollAmount');
+    const button = documentRef.getElementById('weeklyAdminAddRollsBtn');
+    const amount = Number(input?.value);
+    if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1000000000) { toast('請輸入 1 至 1,000,000,000 的整數'); return; }
+    if (!confirm('確定為目前全服活動增加 ' + number(amount) + ' 次擲骰？')) return;
+    if (button) button.disabled = true;
+    try {
+      const { data, error } = await supabaseClient.rpc('admin_add_weekly_realm_rolls', { p_rolls: amount });
+      if (error) throw error;
+      if (!data || Number(data.accepted_rolls) !== amount) throw new Error('資料庫未完整接受增加次數');
+      progress = { ...progress, ...data };
+      render();
+      toast('已增加 ' + number(amount) + ' 次，全服進度已更新');
+    } catch (error) {
+      toast(error?.message || '增加失敗，請稍後再試');
+      await refresh();
+    } finally {
+      const currentButton = documentRef.getElementById('weeklyAdminAddRollsBtn');
+      if (currentButton) currentButton.disabled = false;
+    }
+  }
   function setup() {
-    documentRef.addEventListener('click', event => { const button = event.target.closest('[data-weekly-claim]'); if (button) claim(Number(button.dataset.weeklyClaim)); });
+    documentRef.addEventListener('click', event => {
+      const claimButton = event.target.closest('[data-weekly-claim]');
+      if (claimButton) claim(Number(claimButton.dataset.weeklyClaim));
+      const adminButton = event.target.closest('#weeklyAdminAddRollsBtn');
+      if (adminButton) addAdminRolls();
+    });
     render();
     refresh();
     timerManager.setInterval(refresh, 600000, 'weekly-realm-event-refresh');
