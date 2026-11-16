@@ -2066,3 +2066,15 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .update-log-date{color:#aab5d7;font-size:11px}.update-log-latest{margin-left:auto;padding:3px 7px;border-radius:6px;background:#214b43;color:#9df0cf;font-size:10px;font-weight:850}
 .update-log-card h3{margin:14px 0 8px;color:#f1f3ff;font-size:17px}.update-log-card ul{margin:0;padding-left:20px;color:#cbd4ed;font-size:13px;line-height:1.9}
 @media(max-width:520px){.weekly-realm-panel{padding:14px 12px 10px}.weekly-realm-footer{display:grid;gap:3px}.weekly-reward-card{flex-basis:105px;min-width:105px}.update-log-card{padding:14px}.update-log-latest{margin-left:auto}}
+
+/* v1.50：全服活動改為低高度單行文字，採中性深灰配色 */
+.weekly-realm-hero{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.weekly-realm-panel{display:flex;flex-direction:column;gap:4px;min-width:0;padding:9px 12px;border:1px solid #303a43;border-radius:10px;background:#10151a;box-shadow:none}
+.weekly-realm-line{display:flex;align-items:center;gap:10px;min-width:0;min-height:22px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;color:#e5e9ec;font-size:12px;line-height:1.4}
+.weekly-realm-line::-webkit-scrollbar{display:none}
+.weekly-inline-main{font-weight:750;color:#e8ecef}
+.weekly-inline-muted{color:#9aa5ad;font-size:11px}
+.weekly-inline-claim{flex:0 0 auto;padding:2px 7px;margin:0;border:1px solid #8c7446;border-radius:5px;background:#292419;color:#e5c98d;font-size:11px;font-weight:700;line-height:1.5}
+.weekly-inline-claim:hover{border-color:#c7a96b;background:#342c1d;filter:none}
+.weekly-realm-date{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#89949c;font-size:10px;line-height:1.3}
+@media(max-width:520px){.weekly-realm-panel{padding:8px 10px}.weekly-realm-line{font-size:11px;gap:8px}.weekly-inline-muted,.weekly-inline-claim{font-size:10px}.weekly-realm-date{font-size:9px}}
