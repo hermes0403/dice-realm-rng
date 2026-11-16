@@ -13,7 +13,7 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eterna
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261116-achievement-recheck-leaderboard';
+import { createProgressionSystem } from './systems/progression.js?v=20261116-achievement-recheck-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261114-t0094-weather-converter-item-slots';
