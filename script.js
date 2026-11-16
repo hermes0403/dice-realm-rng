@@ -228,7 +228,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value}, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
  applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), timerManager
