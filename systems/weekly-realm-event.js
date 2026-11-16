@@ -4,7 +4,7 @@ const MILESTONES = [
   { target: 50000, icons: '🪙', reward: '1M$' },
   { target: 150000, icons: '✦', reward: '幸運藥水 III ×1' },
   { target: 300000, icons: '💨 🪙', reward: '速度藥水 I ×5 · 100M$' },
-  { target: 500000, icons: '🌪️ ⚗️', reward: '速度藥水 II ×5 · 運氣藥水 II ×5' },
+  { target: 500000, icons: '🌪️ ⚗️', reward: '速度藥水 II ×5 · 幸運藥水 II ×5' },
   { target: 800000, icons: '🌌 🪙', reward: '天堂藥水 II ×1 · 100M$' }
 ];
 const number = value => new Intl.NumberFormat('en-US').format(Math.max(0, Number(value) || 0));
