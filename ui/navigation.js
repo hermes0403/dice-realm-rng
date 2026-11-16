@@ -6,8 +6,7 @@ export function createNavigationUI({
   loadAdminDashboard,
   refreshLeaderboards,
   loadWeatherSummonData,
-  renderPetsPage,
-  refreshWeeklyEvent = () => {}
+  renderPetsPage
 }) {
   function updateAdminVisibility() {
     const allowed = isAdmin();
@@ -56,7 +55,6 @@ export function createNavigationUI({
     if (id === 'leaderboard') refreshLeaderboards();
     if (id === 'weather-summon') loadWeatherSummonData();
     if (id === 'pets') renderPetsPage();
-    if (id === 'roll') refreshWeeklyEvent();
     if (id === 'workshop') setWorkshopCategory('gloves');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
