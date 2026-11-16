@@ -19,19 +19,34 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
     const total = Math.max(0, Number(progress.total_rolls) || 0);
     const next = MILESTONES.find(item => total < item.target) || null;
     const claimed = new Set((progress.claimed_milestones || []).map(Number));
-    const claimButtons = MILESTONES
-      .filter(item => total >= item.target && !claimed.has(item.target))
-      .map(item => '<button type="button" class="weekly-inline-claim" data-weekly-claim="' + item.target + '">領取 ' + number(item.target) + ' 抽獎勵</button>')
-      .join('');
     const line = documentRef.getElementById('weeklyRealmLine');
     if (!line) return;
+    const progressTarget = next ? next.target : MILESTONES[MILESTONES.length - 1].target;
+    const progressPercent = Math.min(100, Math.max(0, total / progressTarget * 100));
     const progressText = next
-      ? '下一階段 ' + number(next.target) + ' 抽（還差 ' + number(next.target - total) + '）'
-      : '全階段已達成';
-    line.innerHTML = '<span class="weekly-inline-main">🌐 全服活動｜' + number(total) + ' 抽｜' + progressText + '</span>' +
-      (claimButtons || '<span class="weekly-inline-muted">' + (next ? '獎勵達成後可領取' : '所有階段已完成') + '</span>') +
-      '<span class="weekly-inline-muted">每 10 分鐘更新</span>' +
-      '<span class="weekly-inline-muted">11/17 00:00－11/23 00:00（台灣時間）</span>';
+      ? '下一階段：' + number(next.target) + ' 抽，還差 ' + number(next.target - total) + ' 抽'
+      : '全階段目標已達成';
+    const rewardRows = MILESTONES.map(item => {
+      const reached = total >= item.target;
+      const isClaimed = claimed.has(item.target);
+      const status = isClaimed
+        ? '<span class="weekly-reward-status is-claimed">✓ 已領取</span>'
+        : reached
+          ? '<button type="button" class="weekly-inline-claim" data-weekly-claim="' + item.target + '">領取</button>'
+          : '<span class="weekly-reward-status">尚未達成</span>';
+      return '<div class="weekly-reward-row' + (reached ? ' is-reached' : '') + (isClaimed ? ' is-claimed' : '') + '">' +
+        '<span class="weekly-reward-target">' + number(item.target) + ' 抽</span>' +
+        '<span class="weekly-reward-description">' + item.reward + '</span>' +
+        status + '</div>';
+    }).join('');
+    line.innerHTML =
+      '<div class="weekly-realm-topline"><div class="weekly-realm-title"><span class="weekly-realm-globe">🌐</span><div><strong>全服每週擲骰挑戰</strong><small>WEEKLY REALM CHALLENGE</small></div></div><span class="weekly-realm-period">11/17 — 11/23</span></div>' +
+      '<div class="weekly-realm-total"><strong>' + number(total) + '</strong><span>全服累積擲骰</span></div>' +
+      '<div class="weekly-realm-progress"><span style="width:' + progressPercent.toFixed(2) + '%"></span></div>' +
+      '<div class="weekly-realm-progress-label">' + progressText + '<span>' + Math.floor(progressPercent) + '%</span></div>' +
+      '<div class="weekly-reward-heading">全服里程碑獎勵 <small>達成後每位玩家皆可領取</small></div>' +
+      '<div class="weekly-reward-list">' + rewardRows + '</div>' +
+      '<div class="weekly-realm-bottom">活動期間：11/17 00:00 — 11/23 00:00（台灣時間）<span>每 10 分鐘同步進度</span></div>';
   }
   async function refresh() {
     const user = getCurrentUser();
