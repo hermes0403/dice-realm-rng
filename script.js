@@ -25,6 +25,7 @@ import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-sign
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261115-t0098-eternal-dice';
+import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261116-v149-weekly-event';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
@@ -96,6 +97,7 @@ let S;
 const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetData, getCurrentUser: () => currentUser, getState: () => S, localStorageRef: localStorage });
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
+const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, localStorageRef: localStorage, timerManager, documentRef: document, toast, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
 const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum });
@@ -222,7 +224,7 @@ const {
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
@@ -251,7 +253,7 @@ const { doRoll, stopAuto, restartAutoInterval: restartAutoIntervalImpl, isRollin
  getWeather, luck, speed, byId, format, chanceText, totalDice, go, toast,
  isLockHeld, isHeartbeatActive, scheduleUnlock, applyPetRollSkills, potionMaterialTotal,
  checkAchievements, checkDailyReward, save, autoDepositRolledWeatherDice, broadcastRareRoll,
- render, documentRef:document
+ render, documentRef:document, recordWeeklyRoll: () => weeklyRealmEvent.recordRoll()
 });
 restartAutoInterval = restartAutoIntervalImpl;
 equipmentUI = createEquipmentUI({
@@ -285,6 +287,7 @@ const glitchWeatherDropSystem = createGlitchWeatherDropSystem({
 });
 glitchWeatherDropSystem.start();
 setupAutoRollUI();
+weeklyRealmEvent.setup();
 globalBoostSystem = createGlobalBoostSystem({
  supabaseClient, timerManager, getBoostState:()=>globalBoostState, setBoostState:value=>{globalBoostState=value},
  render, restartAutoInterval, loadAdminIncomeMonitor, getCoinBoost:activeGlobalCoinBoost, documentRef:document,
