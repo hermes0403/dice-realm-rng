@@ -1,5 +1,5 @@
 /** Weekly realm roll challenge. Local rolls are buffered and synced once every ten minutes. */
-const CAMPAIGN_START = '2026-11-16';
+const CAMPAIGN_START = '2026-11-17';
 const MILESTONES = [
   { target: 50000, icons: '🪙', reward: '1M$' },
   { target: 150000, icons: '✦', reward: '幸運藥水 III ×1' },
@@ -17,28 +17,20 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
   function recordRoll() { if (getCurrentUser()?.id) writePending(readPending() + 1); }
   function render() {
     const total = Math.max(0, Number(progress.total_rolls) || 0);
-    const next = MILESTONES.find(item => total < item.target) || MILESTONES[MILESTONES.length - 1];
-    const percent = Math.min(100, total / next.target * 100);
-    const count = documentRef.getElementById('weeklyRollCount');
-    const targetNode = documentRef.getElementById('weeklyRollTarget');
-    const bar = documentRef.getElementById('weeklyRollProgressBar');
-    const remaining = documentRef.getElementById('weeklyRollRemaining');
-    const percentNode = documentRef.getElementById('weeklyRollPercent');
-    if (count) count.textContent = number(total);
-    if (targetNode) targetNode.textContent = '/ ' + number(next.target) + ' 抽';
-    if (bar) bar.style.width = percent + '%';
-    if (remaining) remaining.textContent = total >= 800000 ? '全服已完成全部階段！' : '距離下一階段還差 ' + number(next.target - total) + ' 抽';
-    if (percentNode) percentNode.textContent = percent.toFixed(1) + '%';
+    const next = MILESTONES.find(item => total < item.target) || null;
     const claimed = new Set((progress.claimed_milestones || []).map(Number));
-    const track = documentRef.getElementById('weeklyRewardTrack');
-    if (track) track.innerHTML = MILESTONES.map(item => {
-      const reached = total >= item.target, isClaimed = claimed.has(item.target);
-      const status = isClaimed ? '已領取' : reached ? '可領取' : '尚未達成';
-      const button = isClaimed ? '<button type="button" disabled>已領取</button>' : reached
-        ? '<button type="button" class="primary" data-weekly-claim="' + item.target + '">領取獎勵</button>'
-        : '<button type="button" disabled>未達成</button>';
-      return '<article class="weekly-reward-card' + (isClaimed ? ' is-claimed' : reached ? ' is-reached' : '') + '"><div class="weekly-reward-threshold">' + number(item.target) + ' 抽</div><div class="weekly-reward-icons" aria-label="' + item.reward + '">' + item.icons + '</div><span class="weekly-reward-status">' + status + '</span>' + button + '</article>';
-    }).join('');
+    const claimButtons = MILESTONES
+      .filter(item => total >= item.target && !claimed.has(item.target))
+      .map(item => '<button type="button" class="weekly-inline-claim" data-weekly-claim="' + item.target + '">領取 ' + number(item.target) + ' 抽獎勵</button>')
+      .join('');
+    const line = documentRef.getElementById('weeklyRealmLine');
+    if (!line) return;
+    const progressText = next
+      ? '下一階段 ' + number(next.target) + ' 抽（還差 ' + number(next.target - total) + '）'
+      : '全階段已達成';
+    line.innerHTML = '<span class="weekly-inline-main">🌐 全服活動｜' + number(total) + ' 抽｜' + progressText + '</span>' +
+      (claimButtons || '<span class="weekly-inline-muted">' + (next ? '獎勵達成後可領取' : '所有階段已完成') + '</span>') +
+      '<span class="weekly-inline-muted">每 10 分鐘更新</span>';
   }
   async function refresh() {
     const user = getCurrentUser();
