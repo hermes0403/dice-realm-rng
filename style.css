@@ -2141,3 +2141,22 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .weekly-admin-adjust-actions button{flex:0 0 auto;padding:8px 14px;border-radius:9px;font-size:12px}
 .weekly-admin-adjust-hint{margin-top:7px;color:#aab5d0;font-size:10px;line-height:1.5}
 @media(max-width:420px){.weekly-admin-adjust{padding:10px}.weekly-admin-adjust-actions{gap:6px}.weekly-admin-adjust-actions button{padding:8px 9px;font-size:11px}}
+
+
+/* v1.54 — 自動發放全服獎勵通知視窗 */
+.weekly-reward-overlay{position:fixed;inset:0;z-index:10030;display:flex;align-items:center;justify-content:center;padding:18px;background:#050817c9;backdrop-filter:blur(9px)}
+.weekly-reward-overlay[hidden]{display:none!important}
+.weekly-reward-popup{position:relative;width:min(100%,440px);padding:25px 22px 20px;border:1px solid #6b78b866;border-radius:20px;background:radial-gradient(ellipse at 50% 0%,#7772c52c,transparent 58%),linear-gradient(145deg,#18213b 0%,#10182b 58%,#111326 100%);box-shadow:0 26px 90px #000b,inset 0 1px #ffffff18;color:#edf1ff;animation:weeklyRewardEnter .24s ease-out}
+.weekly-reward-popup-close{position:absolute;top:11px;right:12px;width:32px;height:32px;border:1px solid #8d9bc344;border-radius:10px;background:#ffffff0a;color:#dce4ff;font-size:22px;line-height:1;cursor:pointer}
+.weekly-reward-popup-symbol{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 12px;border:1px solid #9b91e977;border-radius:17px;background:linear-gradient(145deg,#6764a644,#8a6fbd22);color:#e1d8ff;font-size:28px;box-shadow:0 0 28px #9285ec22}
+.weekly-reward-popup-kicker{text-align:center;margin:0;color:#9ba9d7;font-size:9px;font-weight:900;letter-spacing:2px}
+.weekly-reward-popup h2{margin:6px 0 5px;text-align:center;color:#f1efff;font-size:21px;font-weight:950}
+.weekly-reward-popup-subtitle{margin:0 0 16px;text-align:center;color:#aeb9d7;font-size:12px}
+.weekly-reward-popup-list{display:grid;gap:7px;max-height:min(44vh,320px);overflow:auto}
+.weekly-reward-popup-row{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid #7885b52b;border-radius:11px;background:linear-gradient(100deg,#6e78b51a,#ffffff04)}
+.weekly-reward-popup-check{display:grid;place-items:center;flex:0 0 25px;width:25px;height:25px;border-radius:8px;background:#4d8d7966;color:#b7f2d9;font-weight:950}
+.weekly-reward-popup-row b{display:block;color:#bfcaf0;font-size:10px;font-weight:850}
+.weekly-reward-popup-row span:last-child{display:block;margin-top:2px;color:#f0edff;font-size:13px;font-weight:850}
+.weekly-reward-popup-confirm{width:100%;margin-top:17px;min-height:42px;border:1px solid #8c8bd0;background:linear-gradient(100deg,#555b91,#65558b);color:#fff;font-weight:900}
+@keyframes weeklyRewardEnter{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){.weekly-reward-popup{padding:22px 15px 16px;border-radius:17px}.weekly-reward-popup h2{font-size:19px}}
