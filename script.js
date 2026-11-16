@@ -13,12 +13,12 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eterna
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261116-collect-achievements-8-18-30-40';
+import { createProgressionSystem } from './systems/progression.js?v=20261116-achievement-recheck-leaderboard';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261114-t0094-weather-converter-item-slots';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261115-t0096-grant-dice-weather-card';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261116-achievement-recheck-leaderboard';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-signup-cooldown';
