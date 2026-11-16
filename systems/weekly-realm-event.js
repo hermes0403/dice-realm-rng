@@ -101,13 +101,13 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
       .subscribe();
   }
 
-  async function refresh() {
+  async function refresh({ submitPending = false } = {}) {
     const user = getCurrentUser();
     if (!supabaseClient || !user?.id || refreshing) { render(); return; }
     ensureRealtimeSubscription();
     refreshing = true;
     try {
-      const pending = readPending();
+      const pending = submitPending ? readPending() : 0;
       let response;
       if (pending > 0) {
         const batch = Math.min(4500, pending);
@@ -124,6 +124,28 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
       await applyResponse(response);
     } catch (error) { console.warn('全服活動進度更新失敗', error); }
     finally { refreshing = false; }
+  }
+
+  function millisecondsUntilNextSettlement() {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Taipei',
+      minute: '2-digit',
+      second: '2-digit',
+      hour: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(now);
+    const minute = Number(parts.find(part => part.type === 'minute')?.value || 0);
+    const second = Number(parts.find(part => part.type === 'second')?.value || 0);
+    const milliseconds = now.getMilliseconds();
+    return ((10 - (minute % 10)) * 60 - second) * 1000 - milliseconds;
+  }
+
+  function scheduleSettlement() {
+    timerManager.setTimeout(async () => {
+      await refresh({ submitPending: true });
+      scheduleSettlement();
+    }, millisecondsUntilNextSettlement(), 'weekly-realm-event-settlement');
   }
 
   async function addAdminRolls() {
@@ -158,7 +180,7 @@ export function createWeeklyRealmEvent({ supabaseClient, getCurrentUser, localSt
     render();
     ensureRealtimeSubscription();
     refresh();
-    timerManager.setInterval(refresh, 600000, 'weekly-realm-event-refresh');
+    scheduleSettlement();
   }
   return { setup, refresh, recordRoll };
 }
