@@ -33,6 +33,7 @@ export function createDiceSystem(deps) {
     autoDepositRolledWeatherDice,
     broadcastRareRoll,
     render,
+    recordWeeklyRoll = () => {},
     documentRef
   } = deps;
 
@@ -237,6 +238,7 @@ export function createDiceSystem(deps) {
     const currentRollSequence = ++rollSequence;
     // 先立即消耗本次擲骰序號並寫入本機，避免動畫期間重新整理重複取得第 10 抽雙倍。
     state.rolls = Math.max(0, Number(state.rolls) || 0) + 1;
+    recordWeeklyRoll();
     // Persist the roll counter to both local save scopes immediately.
     save();
     const face = documentRef.getElementById('diceFace');

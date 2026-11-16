@@ -2046,3 +2046,23 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-rarity-eternal{background:linear-gradient(90deg,#9eeaff,#d6c4ff 52%,#ffaddd);-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:0 0 12px #a9dfff88,0 0 18px #ffaddd55;font-weight:950}
 .pet-card:has(.pet-rarity-eternal){border-color:#b9cfff;box-shadow:inset 0 0 18px #a8dfff18,0 0 12px #e7b7ff20}
 .pet-skill-description{margin:6px 0 9px;padding:7px 9px;border:1px solid #a9c9ef55;border-radius:9px;background:linear-gradient(100deg,#8bdcff18,#e9aeea18);color:#dcecff;font-size:11px;line-height:1.5}
+
+/* v1.49 — weekly realm challenge */
+.weekly-realm-hero{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.weekly-realm-panel{min-width:0;padding:17px 16px 12px;border:1px solid #5965a5;border-radius:17px;background:radial-gradient(ellipse at 0 0,#34407855,transparent 58%),linear-gradient(135deg,#121a35,#0c1122 78%);box-shadow:inset 0 1px #ffffff12,0 10px 28px #0004}
+.weekly-realm-heading,.weekly-realm-heading>div{display:flex;align-items:center;gap:8px}.weekly-realm-heading{justify-content:space-between}.weekly-realm-heading strong{font-size:18px;color:#f1f3ff}.weekly-realm-globe{font-size:20px}.weekly-realm-kicker{font-size:9px;letter-spacing:1.5px;color:#91a5df;font-weight:900}
+.weekly-realm-count{display:flex;align-items:baseline;gap:7px;margin:12px 0 8px;font-variant-numeric:tabular-nums}.weekly-realm-count strong{font-size:clamp(27px,5vw,36px);font-weight:950;letter-spacing:-1px;color:#d8c7ff;text-shadow:0 0 16px #a78bfa55}.weekly-realm-count span{font-size:13px;color:#b5c1e8;font-weight:800}
+.weekly-realm-progress{height:8px;overflow:hidden;border-radius:99px;background:#252d4a;border:1px solid #ffffff12}.weekly-realm-progress>span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c8cff,#c18bff);box-shadow:0 0 12px #a78bfa88;transition:width .35s ease}
+.weekly-realm-caption{display:flex;justify-content:space-between;gap:8px;margin-top:6px;color:#c5cce4;font-size:11px}.weekly-realm-caption #weeklyRollPercent{color:#bda8ff;font-weight:900}
+.weekly-reward-track{display:flex;gap:9px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:12px 1px 8px;margin-top:4px;scrollbar-width:thin;scrollbar-color:#626eaa #171d32}
+.weekly-reward-card{position:relative;flex:0 0 112px;min-width:112px;padding:9px 8px 8px;border:1px solid #3a456e;border-radius:12px;background:linear-gradient(155deg,#1b2444,#11182d);scroll-snap-align:start;text-align:center}
+.weekly-reward-card.is-reached{border-color:#9d83ef;background:linear-gradient(155deg,#30264f,#171d36);box-shadow:inset 0 0 16px #a78bfa17}.weekly-reward-card.is-claimed{border-color:#4d9d83;background:linear-gradient(155deg,#18382f,#111d2a)}
+.weekly-reward-threshold{font-size:10px;color:#b8c4e9;font-weight:900;letter-spacing:.2px}.weekly-reward-icons{display:flex;justify-content:center;align-items:center;gap:5px;min-height:34px;margin:5px 0;font-size:22px;white-space:nowrap}
+.weekly-reward-status{display:block;min-height:15px;color:#aab5d7;font-size:10px}.weekly-reward-card button{width:100%;margin-top:5px;padding:5px 4px;min-height:27px;border-radius:8px;font-size:10px;font-weight:850}.weekly-reward-card button:disabled{opacity:.55}
+.weekly-realm-footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:5px;color:#aab5d7;font-size:10px}.weekly-realm-note{margin:5px 0 0;color:#c4cbe0;font-size:10px}
+.update-log-card{position:relative;overflow:hidden;padding:17px 18px;border:1px solid #3b466f;border-radius:16px;background:linear-gradient(135deg,#171f3b,#101629 72%);box-shadow:inset 0 1px #ffffff10,0 8px 24px #0003}
+.update-log-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(#9e8bff,#69c9ff)}
+.update-log-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.update-log-version{padding:4px 9px;border:1px solid #8273c8;border-radius:7px;background:#4c3c8055;color:#e2d8ff;font-size:12px;font-weight:950;letter-spacing:.4px}
+.update-log-date{color:#aab5d7;font-size:11px}.update-log-latest{margin-left:auto;padding:3px 7px;border-radius:6px;background:#214b43;color:#9df0cf;font-size:10px;font-weight:850}
+.update-log-card h3{margin:14px 0 8px;color:#f1f3ff;font-size:17px}.update-log-card ul{margin:0;padding-left:20px;color:#cbd4ed;font-size:13px;line-height:1.9}
+@media(max-width:520px){.weekly-realm-panel{padding:14px 12px 10px}.weekly-realm-footer{display:grid;gap:3px}.weekly-reward-card{flex-basis:105px;min-width:105px}.update-log-card{padding:14px}.update-log-latest{margin-left:auto}}
