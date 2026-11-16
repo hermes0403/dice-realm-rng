@@ -326,7 +326,7 @@ export function createCloudSaveService(dependencies) {
   }
 
   function achievementStats() {
-    const entries = Object.values(getState().achievements || {}).filter(a => a && (a.unlockedAt || a.rewardGiven));
+    const entries = Object.values(getState().achievements || {}).filter(a => a && !a.rejectedByNewThreshold && (a.unlockedAt || a.rewardGiven));
     const times = entries.map(a => a.unlockedAt).filter(Boolean).sort();
     return { achievement_count: entries.length, achievement_reached_at: times.length ? times[times.length - 1] : null };
   }
