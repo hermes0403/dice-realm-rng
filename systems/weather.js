@@ -26,6 +26,13 @@ function applyServerWeatherRow(row,announce=false){
  // 舊的 realtime／輪詢回應不得蓋掉更新的天氣狀態。
  if(updatedAt&&lastServerWeatherUpdatedAt&&updatedAt<lastServerWeatherUpdatedAt)return;
  const until=row.ends_at?new Date(row.ends_at).getTime():0;
+ if (Object.prototype.hasOwnProperty.call(row, 'time_crystal_pending')) {
+  const pending = !!row.time_crystal_pending;
+  if (getState().timeCrystalPending !== pending) {
+   getState().timeCrystalPending = pending;
+   renderGloves();
+  }
+ }
  // 召喚成功後，若短時間內讀到舊的晴天資料，保留召喚天氣直到原定結束時間。
  if(row.weather_type==='sunny'&&(!row.weather_type_2||row.weather_type_2==='sunny')&&summonedWeatherGuardUntil>now)return;
  const valid=['sunny','rain','snow','thunder','crystal','hell','dumpling','glitch'];const next=until>now&&valid.includes(row.weather_type)?{type:row.weather_type,types:[row.weather_type,...(valid.includes(row.weather_type_2)&&row.weather_type_2!==row.weather_type?[row.weather_type_2]:[])],until,by:row.summoned_by||'玩家',at:updatedAt||now}:null;
@@ -62,7 +69,7 @@ function setupPlayerWeatherSubscription(){
 async function refreshServerWeather(announce=false){
  if(serverWeatherRefreshBusy||!supabaseClient)return;
  serverWeatherRefreshBusy=true;
- try{const {data,error}=await supabaseClient.from('realm_weather_state').select('weather_type,weather_type_2,ends_at,summoned_by,updated_at').eq('singleton',true).maybeSingle();if(error)throw error;if(data)applyServerWeatherRow(data,announce)}
+ try{const {data,error}=await supabaseClient.from('realm_weather_state').select('weather_type,weather_type_2,ends_at,summoned_by,updated_at,time_crystal_pending').eq('singleton',true).maybeSingle();if(error)throw error;if(data)applyServerWeatherRow(data,announce)}
  catch(e){console.debug('Shared weather state unavailable',e)}finally{serverWeatherRefreshBusy=false}
 }
 function applyForcedWeather(payload){if(!payload||!['sunny','rain','snow','thunder','glitch'].includes(payload.type))return;const until=Number(payload.until)||0;forcedWeatherState={type:payload.type,until};try{if(until>Date.now())localStorage.setItem('diceRealmForcedWeather',JSON.stringify(forcedWeatherState));else localStorage.removeItem('diceRealmForcedWeather')}catch{}cachedWeatherMinute=-1;updateWeatherUI();renderCodex();}
@@ -98,7 +105,7 @@ async function convertWeather(){
   if(error)throw error;
   if(!data?.weather_type)throw new Error('伺服器沒有回傳天氣結果');
   getState().weatherConvertAt=Number(data.weather_convert_at)||Date.now();
-  applyServerWeatherRow({weather_type:data.weather_type,ends_at:data.ends_at,summoned_by:data.summoned_by,updated_at:data.updated_at},false);
+  applyServerWeatherRow({weather_type:data.weather_type,ends_at:data.ends_at,summoned_by:data.summoned_by,updated_at:data.updated_at,time_crystal_pending:data.time_crystal_pending},false);
   save();
   await flushCloudSave();
   getState().weatherConvertAt=Date.now();save();renderGloves();
@@ -181,7 +188,7 @@ async function summonSpecialWeather(){
   const {data,error}=await supabaseClient.rpc('summon_realm_weather');if(error)throw error;
   if(!data?.weather_type)throw new Error('伺服器沒有回傳召喚結果');
   weatherContributionPoints=Number(data.remaining_points)||0;
-  applyServerWeatherRow({weather_type:data.weather_type,ends_at:data.ends_at,summoned_by:data.summoned_by,updated_at:data.updated_at},true);
+  applyServerWeatherRow({weather_type:data.weather_type,ends_at:data.ends_at,summoned_by:data.summoned_by,updated_at:data.updated_at,time_crystal_pending:data.time_crystal_pending},true);
   if(getAnnouncementChannel())getAnnouncementChannel().send({type:'broadcast',event:'weather_summoned',payload:data}).catch?.(()=>{});
   await loadWeatherSummonData(false);render();toast(`召喚成功：${WEATHER_TYPES[data.weather_type]?.label||data.weather_type}！全服天氣已改變`);
  }catch(e){console.error('Weather summon failed',e);toast('召喚失敗：'+(e.message||'請稍後再試'))}
