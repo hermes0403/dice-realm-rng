@@ -51,7 +51,7 @@ export function createGloveUI(deps) {
     const enough = timeCount >= 1 && voidCount >= 1 && glitchCount >= 1;
     const statusReady = !!user && timeCrystalStatusUserId === user.id && !!timeCrystalStatus && !timeCrystalStatus.error;
     const owned = statusReady && !!timeCrystalStatus.owned;
-    const pending = !!state.timeCrystalPending || !!timeCrystalStatus?.pending;
+    const pending = !!state.timeCrystalPending;
     const cooldownUntil = Date.parse(timeCrystalStatus?.cooldown_until || '') || 0;
     const left = Math.max(0, cooldownUntil - Date.now());
     const timeText = left > 0
