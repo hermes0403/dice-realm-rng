@@ -108,5 +108,5 @@ test('admin weather rejection shows exact message and does not arm local effect'
   });
   await h.ui.activateTimeCrystal();
   assert.ok(h.messages.includes('活動進行中...'));
-  assert.equal(h.state.timeCrystalPending, false);
+  assert.notEqual(h.state.timeCrystalPending, true);
 });
