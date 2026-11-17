@@ -20,6 +20,15 @@ export function getAuthEmailRateLimitMessage(mode, error) {
   return 'Supabase 郵件服務目前達到寄送上限，這次沒有寄出' + emailType + '。請先停止重複操作；這是伺服器端限制，網站無法自行提高額度。';
 }
 
+function isCloudRestrictionError(error) {
+  const message = [error?.message, error?.details, error?.hint, error?.code]
+    .filter(Boolean).join(' ').toLowerCase();
+  return Number(error?.status ?? error?.statusCode ?? error?.code) === 402
+    || message.includes('exceed_egress_quota')
+    || message.includes('project is restricted')
+    || message.includes('egress quota');
+}
+
 export async function runCloudSessionInitialization({
   userId,
   loadCloudSave,
@@ -31,19 +40,28 @@ export async function runCloudSessionInitialization({
   recordGameVisit,
   setupPlayerWeatherSubscription,
   applyPetLoginSkill,
-  onboardingMaybeShow
+  onboardingMaybeShow,
+  onCloudRestriction = () => {},
+  isCloudSyncBlocked = () => false
 }) {
-  if (!isCurrentUser(userId)) return false;
-  if (!isCloudSaveReady(userId)) await loadCloudSave();
-  if (!isCurrentUser(userId) || !isCloudSaveReady(userId)) return false;
+  if (!isCurrentUser(userId) || isCloudSyncBlocked()) return false;
+  if (!isCloudSaveReady(userId)) {
+    try {
+      await loadCloudSave();
+    } catch (error) {
+      if (isCloudRestrictionError(error)) onCloudRestriction(error);
+      throw error;
+    }
+  }
+  if (!isCurrentUser(userId) || !isCloudSaveReady(userId) || isCloudSyncBlocked()) return false;
 
   const steps = [
+    applyPetLoginSkill,
     loadPetFusionOdds,
     heartbeat,
     () => loadWeatherSummonData?.(false),
     recordGameVisit,
     setupPlayerWeatherSubscription,
-    applyPetLoginSkill,
     onboardingMaybeShow
   ];
   for (const step of steps) {
@@ -51,10 +69,18 @@ export async function runCloudSessionInitialization({
     try {
       await step();
     } catch (error) {
+      if (isCloudRestrictionError(error)) {
+        onCloudRestriction(error);
+        return false;
+      }
       console.warn('Non-critical post-login initialization failed', error);
     }
+    if (isCloudSyncBlocked()) {
+      onCloudRestriction();
+      return false;
+    }
   }
-  return isCurrentUser(userId) && isCloudSaveReady(userId);
+  return isCurrentUser(userId) && isCloudSaveReady(userId) && !isCloudSyncBlocked();
 }
 
 /**
@@ -79,7 +105,6 @@ export function createAuthService(deps) {
     loadCloudSave,
     loadPetFusionOdds,
     heartbeat,
-    refreshLeaderboards,
     loadWeatherSummonData,
     applyPetLoginSkill = () => 0,
     isCloudSaveReady = () => false,
@@ -123,7 +148,7 @@ export function createAuthService(deps) {
       const seconds = String(totalSeconds % 60).padStart(2, '0');
       if (status) {
         status.hidden = false;
-        status.textContent = '郵件操作冷卻中：' + minutes + ':' + seconds + '。倒數結束後才能再次註冊或申請重設密碼。';
+        status.textContent = '郵件操作冷卻中：' + minutes + ':' + seconds + '。倒數結束後才能重新註冊、寄送驗證信或申請重設密碼。';
       }
       if (signupButton) signupButton.disabled = true;
       if (resetButton) resetButton.disabled = true;
@@ -332,7 +357,8 @@ export function createAuthService(deps) {
       recordGameVisit: () => recordGameVisit('visit'),
       setupPlayerWeatherSubscription,
       applyPetLoginSkill,
-      onboardingMaybeShow
+      onboardingMaybeShow,
+      onCloudRestriction: () => { authServiceRestricted = true; }
     });
     const timeout = new Promise((_, reject) => {
       timeoutId = timerManager.setTimeout(
@@ -362,7 +388,9 @@ export function createAuthService(deps) {
           document.body.classList.add('auth-required');
           document.getElementById('authCloseBtn').hidden = true;
           if (retryButton) retryButton.hidden = false;
-          showAuthMessage(error?.message || '雲端存檔載入失敗，請稍後重試。');
+          showAuthMessage(authServiceRestricted
+            ? 'Supabase 雲端服務目前受到額度限制，暫時無法完成登入載入。請待服務恢復後再試；本機資料不會因此清除。'
+            : error?.message || '雲端存檔載入失敗，請稍後重試。');
           document.getElementById('saveStatus').textContent = '雲端載入逾時／失敗';
         }
         return false;
@@ -449,7 +477,7 @@ export function createAuthService(deps) {
           await supabaseClient.auth.signOut().catch(() => {});
           setCurrentUser(null);
         }
-        showAuthMessage('註冊要求已送出。請開啟收件匣中的「骰界 RNG」驗證信，點擊「驗證信箱並進入骰界」；若沒看到，請檢查垃圾郵件。驗證完成後會自動返回遊戲。');
+        showAuthMessage('如果此 Email 尚未註冊，系統會寄出「骰界 RNG」驗證信，點擊「驗證信箱並進入骰界」；若沒看到，請檢查垃圾郵件。驗證完成後會自動返回遊戲。');
         return;
       }
       if (mode === 'resend') {
@@ -590,7 +618,13 @@ export function createAuthService(deps) {
     const message = /otp_expired|access_denied|email_not_confirmed/i.test(code)
       ? '驗證連結已過期或已失效。請輸入 Email，按「重新寄送驗證信」取得新的連結。'
       : '驗證連結無法使用。請確認連結完整，或重新寄送一封驗證信。';
+    document.getElementById('authOpenBtn').hidden = false;
+    document.getElementById('authCloseBtn').hidden = true;
     showAuthMessage(message);
+    const location = globalThis.window?.location;
+    if (location && globalThis.window?.history?.replaceState) {
+      globalThis.window.history.replaceState({}, document.title, location.pathname + (location.hash || ''));
+    }
   }
 
   function registerAuthStateListener() {
