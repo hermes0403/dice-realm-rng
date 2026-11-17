@@ -60,6 +60,24 @@ test('cloud initialization waits for cloud save before starting dependent servic
   ]);
 });
 
+test('cloud save egress restriction is reported to auth and stops initialization', async () => {
+  const calls = [];
+  let restricted = false;
+  const result = await runCloudSessionInitialization({
+    userId: 'player-1',
+    loadCloudSave: async () => calls.push('cloud-save'),
+    isCloudSaveReady: () => false,
+    getCloudLoadError: () => Object.assign(new Error('exceed_egress_quota'), { status: 402 }),
+    isCurrentUser: () => true,
+    loadPetFusionOdds: async () => calls.push('pet-odds'),
+    onCloudRestriction: () => { restricted = true; }
+  });
+
+  assert.equal(result, false);
+  assert.equal(restricted, true);
+  assert.deepEqual(calls, ['cloud-save']);
+});
+
 test('cloud save failure prevents all post-login cloud requests', async () => {
   const calls = [];
   const result = await runCloudSessionInitialization({
