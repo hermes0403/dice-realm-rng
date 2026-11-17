@@ -8,6 +8,84 @@ export function createGloveUI(deps) {
     openAuth, localStorageRef = globalThis.localStorage
   } = deps;
   let glovePurchaseBusy = false;
+  let timeCrystalBusy = false;
+  let timeCrystalStatus = null;
+  let timeCrystalStatusUserId = null;
+  let timeCrystalStatusLoading = false;
+
+  async function loadTimeCrystalStatus(force = false) {
+    const user = getCurrentUser();
+    const userId = user?.id || null;
+    if (!userId || !supabaseClient) {
+      timeCrystalStatus = null;
+      timeCrystalStatusUserId = null;
+      return null;
+    }
+    if (!force && (timeCrystalStatusUserId === userId || timeCrystalStatusLoading)) return timeCrystalStatus;
+    timeCrystalStatusUserId = userId;
+    timeCrystalStatusLoading = true;
+    try {
+      const { data, error } = await supabaseClient.rpc('get_time_crystal_status');
+      if (error) throw error;
+      if (getCurrentUser()?.id !== userId) return null;
+      timeCrystalStatus = data || {};
+      getState().timeCrystalPending = !!data?.pending;
+      return timeCrystalStatus;
+    } catch (error) {
+      console.warn('Time Crystal status unavailable', error);
+      timeCrystalStatus = { error: true };
+      return null;
+    } finally {
+      timeCrystalStatusLoading = false;
+      if (getCurrentUser()?.id === userId) renderGloves();
+    }
+  }
+
+  function renderTimeCrystalCard(itemWorkshopList) {
+    const state = getState();
+    const user = getCurrentUser();
+    const glitchDice = D.filter(dice => dice.glitchBonus);
+    const glitchCount = glitchDice.reduce((sum, dice) => sum + Math.max(0, Number(state.bag?.[dice.id]) || 0), 0);
+    const timeCount = Math.max(0, Number(state.bag?.d15) || 0);
+    const voidCount = Math.max(0, Number(state.bag?.d14) || 0);
+    const enough = timeCount >= 1 && voidCount >= 1 && glitchCount >= 1;
+    const statusReady = !!user && timeCrystalStatusUserId === user.id && !!timeCrystalStatus && !timeCrystalStatus.error;
+    const owned = statusReady && !!timeCrystalStatus.owned;
+    const pending = !!state.timeCrystalPending || !!timeCrystalStatus?.pending;
+    const cooldownUntil = Date.parse(timeCrystalStatus?.cooldown_until || '') || 0;
+    const left = Math.max(0, cooldownUntil - Date.now());
+    const timeText = left > 0
+      ? String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
+        String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
+        String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
+      : '';
+    const materials = [
+      { label: '時序骰子', icon: '⌛', have: timeCount },
+      { label: '虛空骰子', icon: '◉', have: voidCount },
+      { label: '故障骰子（任一故障系列）', icon: '⚠️', have: glitchCount }
+    ].map(item => {
+      const enoughItem = item.have >= 1;
+      return '<p style="color:' + (enoughItem ? '#65e6b2' : '#ff829d') + '">' +
+        (enoughItem ? '✓' : '缺少') + ' ' + item.icon + ' ' + item.label +
+        ' ×1：持有 ' + format(item.have) + '</p>';
+    }).join('');
+    let status = '合成後可重複使用，每次使用冷卻 1 小時。';
+    if (!user) status = '登入雲端帳號後即可合成與使用。';
+    else if (!statusReady) status = timeCrystalStatus?.error ? '雲端狀態讀取失敗，重新整理後再試。' : '正在讀取道具狀態…';
+    else if (pending) status = '效果已啟用：下一次玩家召喚天氣將延長 20%。';
+    else if (left > 0) status = '⏳ 冷卻中 · ' + timeText;
+    const button = owned
+      ? '<button class="primary" type="button" style="width:100%;min-height:38px" data-use-time-crystal ' +
+        (timeCrystalBusy || pending || left > 0 ? 'disabled' : '') + '>⌛ 使用時序結晶</button>'
+      : '<button type="button" style="width:100%;min-height:36px" data-craft-time-crystal ' +
+        (timeCrystalBusy || !statusReady || !enough ? 'disabled' : '') + '>合成時序結晶</button>';
+    itemWorkshopList.innerHTML +=
+      '<div class="recipe weather-converter-card" style="display:block;padding:12px;margin-top:10px">' +
+      '<h3 style="margin:0 0 6px">⌛ 時序結晶' + (owned ? '（已持有）' : '') + '</h3>' +
+      '<p style="margin:0 0 8px">可使下個天氣延長20%時間</p>' +
+      (owned ? '' : materials) + button +
+      '<p class="mini" style="margin:6px 0 0">' + status + '</p></div>';
+  }
 
   function canCraft(item) {
     const state = getState();
@@ -57,6 +135,7 @@ export function createGloveUI(deps) {
         '<p style="margin:0 0 8px">全伺服器隨機召喚雨、雪或打雷；每小時可使用一次。不提供運氣或擲骰速度加成。</p>' +
         controls + '</div>';
     }
+    if (itemWorkshopList) renderTimeCrystalCard(itemWorkshopList);
 
     const recipeList = documentRef.getElementById('recipeList');
     if (recipeList) {
@@ -207,6 +286,62 @@ export function createGloveUI(deps) {
     render();
     toast(id === 'g7' ? '合成成功！天氣轉換器已放入道具欄，請按「啟用」' : '合成成功並裝備：' + item.name);
   }
+  async function craftTimeCrystal() {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) {
+      openAuth();
+      toast('請先登入雲端帳號');
+      return;
+    }
+    if (timeCrystalBusy) return;
+    timeCrystalBusy = true;
+    renderGloves();
+    try {
+      await flushCloudSave();
+      const { data, error } = await supabaseClient.rpc('craft_time_crystal');
+      if (error) throw error;
+      if (!data?.ok || !data?.bag) throw new Error('伺服器未確認合成結果');
+      getState().bag = data.bag;
+      save();
+      await loadTimeCrystalStatus(true);
+      render();
+      toast('合成成功：時序結晶已放入道具工坊');
+    } catch (error) {
+      console.error('Time Crystal crafting failed', error);
+      toast(error.message || '時序結晶合成失敗，請稍後再試');
+    } finally {
+      timeCrystalBusy = false;
+      renderGloves();
+    }
+  }
+
+  async function activateTimeCrystal() {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) {
+      openAuth();
+      toast('請先登入雲端帳號');
+      return;
+    }
+    if (timeCrystalBusy) return;
+    timeCrystalBusy = true;
+    renderGloves();
+    try {
+      const { data, error } = await supabaseClient.rpc('activate_time_crystal');
+      if (error) throw error;
+      if (!data?.ok || !data?.pending) throw new Error('伺服器未確認時序結晶效果');
+      getState().timeCrystalPending = true;
+      await loadTimeCrystalStatus(true);
+      render();
+      toast('時序結晶已啟用：下一次玩家召喚天氣延長 20%');
+    } catch (error) {
+      console.error('Time Crystal activation failed', error);
+      toast(error.message || '時序結晶啟用失敗，請稍後再試');
+    } finally {
+      timeCrystalBusy = false;
+      renderGloves();
+    }
+  }
+
   let gloveUISetup = false;
   function setupGloveUI() {
     if (gloveUISetup) return false;
@@ -215,8 +350,12 @@ export function createGloveUI(deps) {
       const target = event.target;
       const purchaseButton = target.closest('[data-glove-action]');
       const craftGloveButton = target.closest('[data-craft]');
+      const craftTimeCrystalButton = target.closest('[data-craft-time-crystal]');
+      const useTimeCrystalButton = target.closest('[data-use-time-crystal]');
       if (purchaseButton) purchaseGlove(purchaseButton.dataset.gloveAction);
       if (craftGloveButton) craft(craftGloveButton.dataset.craft);
+      if (craftTimeCrystalButton) craftTimeCrystal();
+      if (useTimeCrystalButton) activateTimeCrystal();
       const equipButton = target.closest('[data-equip]');
       if (equipButton) {
         const state = getState();
