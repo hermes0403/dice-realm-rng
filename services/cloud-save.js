@@ -591,12 +591,12 @@ export function createCloudSaveService(dependencies) {
   windowObject?.addEventListener?.('online', () => { void refreshCloudSaveOnResume('online'); });
 
   async function loadCloudSave({
-    lastCloudLoadError = null;
     syncAfterLoad = true,
     conflictBasePayload = null,
     conflictBaseVersion = null,
     conflictLocalSnapshot = null
   } = {}) {
+    lastCloudLoadError = null;
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
     cloudLoadReadyUserId = null;
