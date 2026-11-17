@@ -735,6 +735,7 @@ export function createAuthService(deps) {
       document.getElementById('authModal').style.display = 'flex';
       document.body.classList.add('auth-required');
       setRecoveryMode(false);
+      document.getElementById('authCloseBtn').hidden = true;
       updateAdminVisibility();
       timerManager.setTimeout(() => {
         if (getCurrentUser()?.id === incomingUser.id) {
