@@ -1,0 +1,41 @@
+name: Auth flow regression tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'services/auth.js'
+      - 'services/supabase.js'
+      - 'services/cloud-save.js'
+      - 'index.html'
+      - 'script.js'
+      - 'tests/auth-flow.test.js'
+      - 'docs/supabase-auth-email-templates.md'
+      - '.github/workflows/auth-flow-tests.yml'
+
+jobs:
+  auth-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Auth regression tests
+        run: node --test tests/auth-flow.test.js
+      - name: Check JavaScript syntax
+        run: |
+          node --check services/auth.js
+          node --check services/supabase.js
+          node --check services/cloud-save.js
+          node --check script.js
+          node --check tests/auth-flow.test.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD

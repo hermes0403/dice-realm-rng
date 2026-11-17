@@ -1,3 +1,96 @@
+export function getLoginFailureMessage(error) {
+  const message = String(error?.message || error?.msg || error?.error_description || '').toLowerCase();
+  if (error?.status === 429 || message.includes('too many requests') || message.includes('rate limit')) {
+    return '登入嘗試太頻繁，請先停止重複操作，稍後再試。';
+  }
+  if (message.includes('invalid login credentials') || message.includes('invalid_credentials')
+    || message.includes('email or password') || message.includes('user not found')) {
+    return '帳號或密碼不正確。第一次使用請按「建立新帳號」；已經註冊則請檢查 Email 和密碼，或使用「忘記密碼」。';
+  }
+  return error?.message || '登入失敗，請確認帳號資料後再試。';
+}
+
+export function getAuthEmailRateLimitMessage(mode, error) {
+  const rawMessage = String(error?.message || error?.msg || error?.error_description || '');
+  const cooldown = rawMessage.match(/only request this after\s+(\d+)\s+seconds?/i);
+  const emailType = mode === 'reset' ? '密碼重設信' : '註冊驗證信';
+  if (cooldown) {
+    return '郵件請求太密集，伺服器要求再等待 ' + cooldown[1] + ' 秒。這次沒有寄出' + emailType + '，請等待後再試，不要連續按按鈕。';
+  }
+  return 'Supabase 郵件服務目前達到寄送上限，這次沒有寄出' + emailType + '。請先停止重複操作；這是伺服器端限制，網站無法自行提高額度。';
+}
+
+function isCloudRestrictionError(error) {
+  const candidates = [error, error?.cause, error?.cause?.cause].filter(Boolean);
+  const message = candidates.flatMap(candidate => [
+    candidate?.message, candidate?.details, candidate?.hint, candidate?.code
+  ]).filter(Boolean).join(' ').toLowerCase();
+  return candidates.some(candidate =>
+    Number(candidate?.status ?? candidate?.statusCode ?? candidate?.code) === 402
+  ) || message.includes('exceed_egress_quota')
+    || message.includes('project is restricted')
+    || message.includes('egress quota');
+}
+
+export async function runCloudSessionInitialization({
+  userId,
+  loadCloudSave,
+  isCloudSaveReady,
+  getCloudLoadError = () => null,
+  isCurrentUser = () => true,
+  loadPetFusionOdds,
+  heartbeat,
+  loadWeatherSummonData,
+  recordGameVisit,
+  setupPlayerWeatherSubscription,
+  applyPetLoginSkill,
+  onboardingMaybeShow,
+  onCloudRestriction = () => {},
+  isCloudSyncBlocked = () => false
+}) {
+  if (!isCurrentUser(userId) || isCloudSyncBlocked()) return false;
+  if (!isCloudSaveReady(userId)) {
+    try {
+      await loadCloudSave();
+    } catch (error) {
+      if (isCloudRestrictionError(error)) onCloudRestriction(error);
+      throw error;
+    }
+  }
+  if (!isCurrentUser(userId) || !isCloudSaveReady(userId) || isCloudSyncBlocked()) {
+    const loadError = getCloudLoadError();
+    if (isCloudRestrictionError(loadError)) onCloudRestriction(loadError);
+    return false;
+  }
+
+  const steps = [
+    applyPetLoginSkill,
+    loadPetFusionOdds,
+    heartbeat,
+    () => loadWeatherSummonData?.(false),
+    recordGameVisit,
+    setupPlayerWeatherSubscription,
+    onboardingMaybeShow
+  ];
+  for (const step of steps) {
+    if (typeof step !== 'function' || !isCurrentUser(userId)) continue;
+    try {
+      await step();
+    } catch (error) {
+      if (isCloudRestrictionError(error)) {
+        onCloudRestriction(error);
+        return false;
+      }
+      console.warn('Non-critical post-login initialization failed', error);
+    }
+    if (isCloudSyncBlocked()) {
+      onCloudRestriction();
+      return false;
+    }
+  }
+  return isCurrentUser(userId) && isCloudSaveReady(userId) && !isCloudSyncBlocked();
+}
+
 /**
  * Authentication UI, device-account policy and signed-in session lifecycle.
  *
@@ -20,16 +113,24 @@ export function createAuthService(deps) {
     loadCloudSave,
     loadPetFusionOdds,
     heartbeat,
-    refreshLeaderboards,
     loadWeatherSummonData,
     applyPetLoginSkill = () => 0,
     isCloudSaveReady = () => false,
+    getCloudLoadError = () => null,
     onboardingMaybeShow = () => false,
     timerManager
   } = deps;
 
   let authBusy = false;
+  let authServiceRestricted = false;
   let authStateSubscription = null;
+  let sessionInitPromise = null;
+  let sessionInitUserId = null;
+  let sessionInitAttemptedUserId = null;
+  let sessionGeneration = 0;
+  let cloudLoadPromise = null;
+  let cloudLoadUserId = null;
+  let recoveryMode = false;
   let signupCooldownInterval = null;
   const SIGNUP_COOLDOWN_MS = 4 * 60 * 1000;
   const SIGNUP_COOLDOWN_KEY = 'diceRealmEmailActionCooldownUntilV1';
@@ -48,6 +149,7 @@ export function createAuthService(deps) {
     const status = globalThis.document?.getElementById('authCooldownMessage');
     const signupButton = globalThis.document?.getElementById('authSignupBtn');
     const resetButton = globalThis.document?.getElementById('authResetBtn');
+    const resendButton = globalThis.document?.getElementById('authResendBtn');
 
     if (remaining > 0) {
       const totalSeconds = Math.ceil(remaining / 1000);
@@ -55,10 +157,11 @@ export function createAuthService(deps) {
       const seconds = String(totalSeconds % 60).padStart(2, '0');
       if (status) {
         status.hidden = false;
-        status.textContent = '郵件操作冷卻中：' + minutes + ':' + seconds + '。倒數結束後才能再次註冊或申請重設密碼。';
+        status.textContent = '郵件操作冷卻中：' + minutes + ':' + seconds + '。倒數結束後才能重新註冊、寄送驗證信或申請重設密碼。';
       }
       if (signupButton) signupButton.disabled = true;
       if (resetButton) resetButton.disabled = true;
+      if (resendButton) resendButton.disabled = true;
       return;
     }
 
@@ -68,15 +171,17 @@ export function createAuthService(deps) {
     }
     if (signupButton) signupButton.disabled = authBusy;
     if (resetButton) resetButton.disabled = authBusy;
+    if (resendButton) resendButton.disabled = authBusy;
     if (signupCooldownInterval && timerManager?.clearInterval) {
       timerManager.clearInterval(signupCooldownInterval);
       signupCooldownInterval = null;
     }
   }
 
-  function startSignupCooldown() {
+  function startSignupCooldown(durationMs = SIGNUP_COOLDOWN_MS) {
+    const safeDuration = Math.max(1000, Number(durationMs) || SIGNUP_COOLDOWN_MS);
     try {
-      localStorage.setItem(SIGNUP_COOLDOWN_KEY, String(Date.now() + SIGNUP_COOLDOWN_MS));
+      localStorage.setItem(SIGNUP_COOLDOWN_KEY, String(Date.now() + safeDuration));
     } catch {}
     updateSignupCooldownUI();
     if (!signupCooldownInterval && timerManager?.setInterval) {
@@ -89,14 +194,25 @@ export function createAuthService(deps) {
     if (element) element.textContent = message;
   }
 
+  function setRecoveryMode(enabled) {
+    recoveryMode = !!enabled;
+    const loginPanel = document.getElementById('authLoginPanel');
+    const recoveryPanel = document.getElementById('authRecoveryPanel');
+    const closeButton = document.getElementById('authCloseBtn');
+    if (loginPanel) loginPanel.hidden = recoveryMode;
+    if (recoveryPanel) recoveryPanel.hidden = !recoveryMode;
+    if (closeButton) closeButton.hidden = recoveryMode || !getCurrentUser();
+  }
+
   function openAuth() {
+    setRecoveryMode(false);
     document.getElementById('authModal').style.display = 'flex';
     showAuthMessage('');
     updateSignupCooldownUI();
   }
 
   function closeAuth() {
-    if (!getCurrentUser()) {
+    if (!getCurrentUser() || recoveryMode) {
       document.body.classList.add('auth-required');
       document.getElementById('authModal').style.display = 'flex';
       return;
@@ -106,12 +222,13 @@ export function createAuthService(deps) {
   }
 
   function setAuthButtonsDisabled(disabled) {
-    ['authLoginBtn', 'authGoogleBtn'].forEach(id => {
+    ['authLoginBtn', 'authSignupBtn', 'authResetBtn', 'authResendBtn',
+      'authPasswordUpdateBtn', 'authPasswordCancelBtn', 'authRetryCloudBtn'].forEach(id => {
       const button = document.getElementById(id);
       if (button) button.disabled = disabled;
     });
     const cooldownActive = getSignupCooldownRemaining() > 0;
-    ['authSignupBtn', 'authResetBtn'].forEach(id => {
+    ['authSignupBtn', 'authResetBtn', 'authResendBtn'].forEach(id => {
       const button = document.getElementById(id);
       if (button) button.disabled = disabled || cooldownActive;
     });
@@ -177,46 +294,142 @@ export function createAuthService(deps) {
     return false;
   }
 
-  async function googleSignIn() {
-    if (authBusy) return;
-    if (!supabaseClient?.auth?.signInWithOAuth) {
-      showAuthMessage('Google 登入模組尚未就緒，請重新整理網頁。');
-      return;
+  function isProjectRestrictionError(error) {
+    const candidates = [error, error?.cause, error?.cause?.cause].filter(Boolean);
+    const message = candidates.flatMap(candidate => [
+      candidate?.message, candidate?.details, candidate?.hint, candidate?.code
+    ]).filter(Boolean).join(' ').toLowerCase();
+    return candidates.some(candidate =>
+      Number(candidate?.status ?? candidate?.statusCode ?? candidate?.code) === 402
+    ) || message.includes('exceed_egress_quota')
+      || message.includes('project is restricted')
+      || message.includes('egress quota');
+  }
+
+  function getServerCooldownMs(error) {
+    const raw = String(error?.message || error?.msg || error?.error_description || '');
+    const match = raw.match(/only request this after\s+(\d+)\s+seconds?/i);
+    return match ? (Number(match[1]) + 1) * 1000 : SIGNUP_COOLDOWN_MS;
+  }
+
+  function loadCloudSaveOnce(userId) {
+    if (isCloudSaveReady(userId)) return Promise.resolve(true);
+    if (cloudLoadPromise) {
+      if (cloudLoadUserId === userId) return cloudLoadPromise;
+      return cloudLoadPromise.catch(() => {}).then(() => loadCloudSaveOnce(userId));
+    }
+    cloudLoadUserId = userId;
+    cloudLoadPromise = Promise.resolve()
+      .then(() => loadCloudSave())
+      .finally(() => {
+        cloudLoadPromise = null;
+        cloudLoadUserId = null;
+      });
+    return cloudLoadPromise;
+  }
+
+  function startSessionInitialization(user, event = 'INITIAL_SESSION', force = false) {
+    if (!user?.id) return Promise.resolve(false);
+    if (authServiceRestricted) {
+      showAuthMessage('Supabase 雲端服務目前受到額度限制，暫時無法完成登入載入。請待服務恢復後再試。');
+      return Promise.resolve(false);
+    }
+    if (sessionInitPromise && sessionInitUserId === user.id) return sessionInitPromise;
+    if (!force && sessionInitAttemptedUserId === user.id) {
+      return Promise.resolve(!!isCloudSaveReady(user.id));
     }
 
-    authBusy = true;
-    setAuthButtonsDisabled(true);
-    showAuthMessage('正在開啟 Google 帳號選擇…');
-    try {
-      const result = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'https://hermes0403.github.io/dice-realm-rng/',
-          queryParams: { prompt: 'select_account' }
+    sessionInitAttemptedUserId = user.id;
+    sessionInitUserId = user.id;
+    const generation = ++sessionGeneration;
+    const state = getState();
+    if (state.name === '旅人' || !state.name) {
+      const base = (user.email || '玩家').split('@')[0]
+        .replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
+      state.name = base + '_' + user.id.slice(0, 4);
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
+
+    document.getElementById('authModal').style.display = 'flex';
+    document.body.classList.add('auth-required');
+    document.getElementById('authOpenBtn').hidden = true;
+    document.getElementById('authCloseBtn').hidden = true;
+    const retryButton = document.getElementById('authRetryCloudBtn');
+    if (retryButton) retryButton.hidden = true;
+    showAuthMessage('登入成功，正在載入雲端存檔…');
+
+    let timeoutId = null;
+    let initializationCancelled = false;
+    const initialization = runCloudSessionInitialization({
+      userId: user.id,
+      loadCloudSave: () => loadCloudSaveOnce(user.id),
+      isCloudSaveReady,
+      getCloudLoadError,
+      isCurrentUser: id => !initializationCancelled && getCurrentUser()?.id === id,
+      loadPetFusionOdds,
+      heartbeat,
+      loadWeatherSummonData,
+      recordGameVisit: () => recordGameVisit('visit'),
+      setupPlayerWeatherSubscription,
+      applyPetLoginSkill,
+      onboardingMaybeShow,
+      onCloudRestriction: () => { authServiceRestricted = true; }
+    });
+    const timeout = new Promise((_, reject) => {
+      timeoutId = timerManager.setTimeout(
+        () => reject(new Error('雲端存檔載入逾時。請檢查網路後按「重新載入雲端存檔」；若仍失敗，請重新整理頁面。')),
+        20000,
+        'auth-cloud-load-timeout'
+      );
+    });
+
+    sessionInitPromise = Promise.race([initialization, timeout])
+      .then(ready => {
+        if (!ready) throw new Error('雲端存檔尚未完成載入，遊戲暫時保持鎖定。');
+        if (generation !== sessionGeneration || getCurrentUser()?.id !== user.id) return false;
+        document.getElementById('playerName').textContent = user.email || state.name;
+        document.getElementById('authCloseBtn').hidden = false;
+        if (retryButton) retryButton.hidden = true;
+        closeAuth();
+        if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') {
+          toast(event === 'PASSWORD_RECOVERY' ? '密碼已更新，登入成功。' : '登入成功！可以開始遊玩了。');
+        }
+        return true;
+      })
+      .catch(error => {
+        initializationCancelled = true;
+        if (generation === sessionGeneration && getCurrentUser()?.id === user.id) {
+          console.error('Cloud session initialization failed', error);
+          document.getElementById('authModal').style.display = 'flex';
+          document.body.classList.add('auth-required');
+          document.getElementById('authCloseBtn').hidden = true;
+          if (retryButton) retryButton.hidden = false;
+          showAuthMessage(authServiceRestricted
+            ? 'Supabase 雲端服務目前受到額度限制，暫時無法完成登入載入。請待服務恢復後再試；本機資料不會因此清除。'
+            : error?.message || '雲端存檔載入失敗，請稍後重試。');
+          document.getElementById('saveStatus').textContent = '雲端載入逾時／失敗';
+        }
+        return false;
+      })
+      .finally(() => {
+        timerManager.clearTimeout(timeoutId);
+        if (generation === sessionGeneration) {
+          sessionInitPromise = null;
+          sessionInitUserId = null;
         }
       });
-      if (result.error) throw result.error;
-    } catch (error) {
-      const message = String(error?.message || error?.msg || error?.error_description || '');
-      if (error?.status === 402 || /exceed_egress_quota|project.*restricted|service.*restricted/i.test(message)) {
-        showAuthMessage('Supabase 雲端服務目前受到額度限制，暫時無法登入。請待服務恢復後再試。');
-      } else if (/provider.*(disabled|not enabled|unsupported)|unsupported provider/i.test(message)) {
-        showAuthMessage('Google 登入尚未在 Supabase 啟用，請確認管理員已儲存 Provider 設定。');
-      } else {
-        showAuthMessage(error?.message || '無法啟動 Google 登入，請稍後重試。');
-      }
-    } finally {
-      authBusy = false;
-      setAuthButtonsDisabled(false);
-      updateSignupCooldownUI();
-    }
+    return sessionInitPromise;
   }
 
   async function authAction(mode) {
     if (authBusy) return;
-    if ((mode === 'signup' || mode === 'reset') && getSignupCooldownRemaining() > 0) {
+    if (authServiceRestricted) {
+      showAuthMessage('Supabase 雲端服務目前受到額度限制，暫時無法登入或寄送郵件。請待專案服務恢復後再試。');
+      return;
+    }
+    if (['signup', 'reset', 'resend'].includes(mode) && getSignupCooldownRemaining() > 0) {
       updateSignupCooldownUI();
-      showAuthMessage('請稍候，郵件操作冷卻結束後才能再次註冊或申請重設密碼。');
+      showAuthMessage('郵件操作暫停中，請等待畫面上的倒數結束後再試。');
       return;
     }
     if (!supabaseClient) {
@@ -230,14 +443,14 @@ export function createAuthService(deps) {
       showAuthMessage('請輸入有效的 Email 地址。');
       return;
     }
-    if (password.length < 6 && mode !== 'reset') {
-      showAuthMessage('密碼由你自行設定，至少需要 6 位。');
+    if (['signup', 'login'].includes(mode) && password.length < 6) {
+      showAuthMessage('密碼至少需要 6 位。');
       return;
     }
 
     authBusy = true;
     setAuthButtonsDisabled(true);
-    showAuthMessage(mode === 'signup' ? '正在送出註冊要求…' : '處理中…');
+    showAuthMessage(mode === 'signup' ? '正在建立帳號…' : mode === 'resend' ? '正在重新寄送驗證信…' : '處理中…');
     try {
       let result;
       if (mode === 'signup') {
@@ -248,6 +461,12 @@ export function createAuthService(deps) {
         });
       } else if (mode === 'login') {
         result = await supabaseClient.auth.signInWithPassword({ email, password });
+      } else if (mode === 'resend') {
+        result = await supabaseClient.auth.resend({
+          type: 'signup',
+          email,
+          options: { emailRedirectTo: 'https://hermes0403.github.io/dice-realm-rng/' }
+        });
       } else {
         result = await supabaseClient.auth.resetPasswordForEmail(email, {
           redirectTo: 'https://hermes0403.github.io/dice-realm-rng/'
@@ -257,20 +476,34 @@ export function createAuthService(deps) {
 
       if (mode === 'signup') {
         startSignupCooldown();
-        if (result.data?.session && !result.data?.user?.email_confirmed_at) {
-          await supabaseClient.auth.signOut().catch(() => {});
-          setCurrentUser(null);
-          document.body.classList.add('auth-required');
-          document.getElementById('authModal').style.display = 'flex';
-          showAuthMessage('註冊要求已送出，請前往信箱查看驗證信（也請檢查垃圾郵件）。完成驗證後即可登入。');
+        const signedUser = result.data?.user;
+        if (result.data?.session && signedUser?.email_confirmed_at) {
+          const accountResult = checkAndRecordDeviceAccount(signedUser.email);
+          if (!accountResult.allowed) {
+            await supabaseClient.auth.signOut().catch(() => {});
+            setCurrentUser(null);
+            showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置。');
+            return;
+          }
+          setCurrentUser(signedUser);
+          await startSessionInitialization(signedUser, 'SIGNED_IN', true);
           return;
         }
-        showAuthMessage('註冊要求已送出，請前往信箱查看驗證信（也請檢查垃圾郵件）。完成驗證後即可登入。');
+        if (result.data?.session && signedUser && !signedUser.email_confirmed_at) {
+          await supabaseClient.auth.signOut().catch(() => {});
+          setCurrentUser(null);
+        }
+        showAuthMessage('如果此 Email 尚未註冊，系統會寄出「骰界 RNG」驗證信，點擊「驗證信箱並進入骰界」；若沒看到，請檢查垃圾郵件。驗證完成後會自動返回遊戲。');
+        return;
+      }
+      if (mode === 'resend') {
+        startSignupCooldown();
+        showAuthMessage('若此 Email 有尚未完成的註冊，系統會重新寄送驗證信。請檢查收件匣與垃圾郵件；完成驗證後點擊信中的按鈕返回遊戲。');
         return;
       }
       if (mode === 'reset') {
         startSignupCooldown();
-        showAuthMessage('若此 Email 已註冊，系統會寄出重設密碼信；請稍候並檢查垃圾郵件。');
+        showAuthMessage('若此 Email 已註冊，系統會寄出密碼重設信。請點擊信中的連結，返回遊戲後設定新密碼。');
         return;
       }
 
@@ -280,10 +513,12 @@ export function createAuthService(deps) {
         setCurrentUser(null);
         document.body.classList.add('auth-required');
         document.getElementById('authModal').style.display = 'flex';
-        showAuthMessage('此帳號的信箱尚未驗證，不能進入遊戲。請先點擊信箱中的確認連結；若連結無法使用，請重新取得有效的確認信。');
+        setRecoveryMode(false);
+        showAuthMessage('此帳號的信箱尚未驗證，不能進入遊戲。請先完成 Email 驗證；若尚未收到信件，可按「重新寄送驗證信」。');
         return;
       }
-      if (!checkAndRecordDeviceAccount(signedUser.email)) {
+      const accountResult = checkAndRecordDeviceAccount(signedUser.email);
+      if (!accountResult.allowed) {
         await supabaseClient.auth.signOut().catch(() => {});
         setCurrentUser(null);
         document.body.classList.add('auth-required');
@@ -292,21 +527,27 @@ export function createAuthService(deps) {
         showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置；已使用過的 3 個帳號仍可繼續登入。');
         return;
       }
-      showAuthMessage('登入成功，正在載入雲端存檔…');
+      setCurrentUser(signedUser);
+      await startSessionInitialization(signedUser, 'SIGNED_IN', true);
     } catch (error) {
       const message = String(error?.message || error?.msg || error?.error_description || '');
-      if (/user.?banned|banned|被停權|已停權/i.test(message)) {
+      if (isProjectRestrictionError(error)) {
+        authServiceRestricted = true;
+        showAuthMessage('Supabase 雲端服務目前因流量額度限制而暫停，暫時無法登入或寄送郵件。請待專案服務恢復後再試；本機已保存的資料不會因這個提示而被清除。');
+      } else if (['signup', 'reset', 'resend'].includes(mode) && isEmailRateLimitError(error)) {
+        startSignupCooldown(getServerCooldownMs(error));
+        showAuthMessage(getAuthEmailRateLimitMessage(mode, error));
+      } else if (/user.?banned|banned|被停權|已停權/i.test(message)) {
         await supabaseClient.auth.signOut().catch(() => {});
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
         document.getElementById('authModal').style.display = 'flex';
-      } else if ((mode === 'signup' || mode === 'reset') && isEmailRateLimitError(error)) {
-        startSignupCooldown();
-        showAuthMessage('Supabase 郵件服務目前回報寄送上限，這次沒有寄出郵件。請停止重複操作，等待冷卻倒數結束；伺服器寄信額度仍需由管理員處理。');
+      } else if (mode === 'login') {
+        showAuthMessage(getLoginFailureMessage(error));
       } else if (mode === 'signup' && /database error saving new user/i.test(message)) {
-        showAuthMessage('此 Gmail 可能曾用於被管理員刪除的帳號，無法再次註冊。');
+        showAuthMessage('目前無法建立此帳號，請稍後再試；若持續發生，請聯絡管理員。');
       } else {
-        showAuthMessage(error.message || '操作失敗，請稍後重試。');
+        showAuthMessage(error?.message || '操作失敗，請稍後重試。');
       }
     } finally {
       authBusy = false;
@@ -314,99 +555,195 @@ export function createAuthService(deps) {
     }
   }
 
+  async function updateRecoveredPassword() {
+    if (authBusy || !recoveryMode || !getCurrentUser()) return;
+    const password = document.getElementById('authNewPassword').value;
+    const confirmation = document.getElementById('authNewPasswordConfirm').value;
+    if (password.length < 6) {
+      showAuthMessage('新密碼至少需要 6 位。');
+      return;
+    }
+    if (password !== confirmation) {
+      showAuthMessage('兩次輸入的新密碼不一致，請重新確認。');
+      return;
+    }
+    authBusy = true;
+    setAuthButtonsDisabled(true);
+    showAuthMessage('正在更新密碼…');
+    try {
+      const { data, error } = await supabaseClient.auth.updateUser({ password });
+      if (error) throw error;
+      const user = data?.user || getCurrentUser();
+      if (!user?.id) throw new Error('無法確認帳號狀態，請重新登入。');
+      setCurrentUser(user);
+      setRecoveryMode(false);
+      document.getElementById('authNewPassword').value = '';
+      document.getElementById('authNewPasswordConfirm').value = '';
+      await startSessionInitialization(user, 'PASSWORD_RECOVERY', true);
+    } catch (error) {
+      if (isProjectRestrictionError(error)) {
+        authServiceRestricted = true;
+        showAuthMessage('Supabase 雲端服務目前受到限制，暫時無法更新密碼。請稍後再試。');
+      } else {
+        showAuthMessage(error?.message || '更新密碼失敗，請重新取得有效的重設連結。');
+      }
+    } finally {
+      authBusy = false;
+      setAuthButtonsDisabled(false);
+    }
+  }
+
+  async function cancelPasswordRecovery() {
+    if (authBusy) return;
+    authBusy = true;
+    setAuthButtonsDisabled(true);
+    try {
+      await supabaseClient.auth.signOut();
+      setRecoveryMode(false);
+      showAuthMessage('已取消密碼更新，請使用 Email 與密碼登入。');
+    } catch (error) {
+      showAuthMessage(error?.message || '無法取消密碼更新，請重新整理頁面。');
+    } finally {
+      authBusy = false;
+      setAuthButtonsDisabled(false);
+    }
+  }
+
+  async function retryCloudLoad() {
+    const user = getCurrentUser();
+    if (!user || authBusy) return;
+    authBusy = true;
+    setAuthButtonsDisabled(true);
+    showAuthMessage('正在重新載入雲端存檔…');
+    try {
+      await startSessionInitialization(user, 'RETRY', true);
+    } finally {
+      authBusy = false;
+      setAuthButtonsDisabled(false);
+    }
+  }
+
+  function showAuthCallbackError() {
+    const location = globalThis.window?.location;
+    const params = new URLSearchParams(location?.search || '');
+    const hashParams = new URLSearchParams((location?.hash || '').replace(/^#/, ''));
+    const code = params.get('error_code') || params.get('error')
+      || hashParams.get('error_code') || hashParams.get('error') || '';
+    if (!code && !params.get('error_description') && !hashParams.get('error_description')) return;
+    setRecoveryMode(false);
+    document.getElementById('authModal').style.display = 'flex';
+    document.body.classList.add('auth-required');
+    const message = /otp_expired|access_denied|email_not_confirmed/i.test(code)
+      ? '驗證連結已過期或已失效。請輸入 Email，按「重新寄送驗證信」取得新的連結。'
+      : '驗證連結無法使用。請確認連結完整，或重新寄送一封驗證信。';
+    document.getElementById('authOpenBtn').hidden = false;
+    document.getElementById('authCloseBtn').hidden = true;
+    showAuthMessage(message);
+    if (location && globalThis.window?.history?.replaceState) {
+      const cleanSearch = new URLSearchParams(params);
+      ['error', 'error_code', 'error_description'].forEach(key => cleanSearch.delete(key));
+      const query = cleanSearch.toString();
+      const cleanHash = hashParams.has('error') || hashParams.has('error_code')
+        || hashParams.has('error_description') ? '' : (location.hash || '');
+      globalThis.window.history.replaceState({}, document.title,
+        location.pathname + (query ? '?' + query : '') + cleanHash);
+    }
+  }
+
   function registerAuthStateListener() {
     if (!supabaseClient) return null;
     if (authStateSubscription) return authStateSubscription;
-    authStateSubscription = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    authStateSubscription = supabaseClient.auth.onAuthStateChange((event, session) => {
       const previousUser = getCurrentUser();
       const incomingUser = session?.user || null;
+
       if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')
         && incomingUser && previousUser?.id === incomingUser.id) {
         setCurrentUser(incomingUser);
         updateAdminVisibility();
         return;
       }
+
+      if (event === 'PASSWORD_RECOVERY' && incomingUser) {
+        if (!incomingUser.email_confirmed_at) {
+          setCurrentUser(null);
+          setRecoveryMode(false);
+          document.getElementById('authModal').style.display = 'flex';
+          document.body.classList.add('auth-required');
+          showAuthMessage('此帳號的信箱尚未驗證，不能更新密碼或進入遊戲。請先完成 Email 驗證。');
+          timerManager.setTimeout(() => supabaseClient.auth.signOut().catch(() => {}), 0, 'auth-recovery-unverified-signout');
+          return;
+        }
+        if (!enforceDeviceAccountLimit(incomingUser)) return;
+        setCurrentUser(incomingUser);
+        setRecoveryMode(true);
+        document.getElementById('authModal').style.display = 'flex';
+        document.body.classList.add('auth-required');
+        document.getElementById('authOpenBtn').hidden = true;
+        document.getElementById('authCloseBtn').hidden = true;
+        updateAdminVisibility();
+        showAuthMessage('已確認重設密碼連結。請輸入並確認新密碼，完成後即可返回遊戲。');
+        return;
+      }
+
       if (incomingUser && !incomingUser.email_confirmed_at) {
         setCurrentUser(null);
+        setRecoveryMode(false);
         document.body.classList.add('auth-required');
         document.getElementById('authModal').style.display = 'flex';
         document.getElementById('authCloseBtn').hidden = true;
         document.getElementById('authOpenBtn').hidden = false;
         updateAdminVisibility();
-        showAuthMessage('信箱尚未驗證，不能進入遊戲。請先完成 Email 確認；若確認連結顯示無法連結或已失效，請重新取得有效的確認信。');
+        showAuthMessage('信箱尚未驗證，不能進入遊戲。請先完成 Email 確認；若尚未收到信件，可按「重新寄送驗證信」。');
         timerManager.setTimeout(() => supabaseClient.auth.signOut().catch(() => {}), 0, 'auth-signout');
         return;
       }
+
       if (incomingUser && !enforceDeviceAccountLimit(incomingUser)) return;
-      if (!incomingUser && previousUser) await releaseDeviceLock(previousUser.id);
+
+      if (!incomingUser) {
+        sessionGeneration++;
+        sessionInitPromise = null;
+        sessionInitUserId = null;
+        sessionInitAttemptedUserId = null;
+        recoveryMode = false;
+        if (previousUser) {
+          timerManager.setTimeout(() => {
+            Promise.resolve(releaseDeviceLock(previousUser.id)).catch(error => {
+              console.warn('Device lock release after sign-out failed', error);
+            });
+          }, 0, 'auth-release-device-lock');
+        }
+        setCurrentUser(null);
+        setRecoveryMode(false);
+        timerManager.setTimeout(() => {
+          try { setupPlayerWeatherSubscription(); }
+          catch (error) { console.warn('Player weather unsubscribe failed', error); }
+        }, 0, 'auth-clear-player-weather');
+        document.getElementById('authOpenBtn').hidden = false;
+        document.getElementById('authCloseBtn').hidden = true;
+        document.getElementById('authModal').style.display = 'flex';
+        document.getElementById('saveStatus').textContent = '本機存檔';
+        updateAdminVisibility();
+        timerManager.setTimeout(() => recordGameVisit('visit'), 700, 'auth-visit-record');
+        return;
+      }
 
       setCurrentUser(incomingUser);
-      timerManager.setTimeout(() => recordGameVisit('visit'), 700, 'auth-visit-record');
-      setupPlayerWeatherSubscription();
-      document.getElementById('authOpenBtn').hidden = !!getCurrentUser();
-      document.body.classList.toggle('auth-required', !getCurrentUser());
-      if (!getCurrentUser()) {
-        document.getElementById('authModal').style.display = 'flex';
-        document.getElementById('authCloseBtn').hidden = true;
-      } else {
-        document.getElementById('authCloseBtn').hidden = false;
-      }
+      document.getElementById('authOpenBtn').hidden = true;
+      document.getElementById('authCloseBtn').hidden = true;
+      document.getElementById('authModal').style.display = 'flex';
+      document.body.classList.add('auth-required');
+      setRecoveryMode(false);
+      document.getElementById('authCloseBtn').hidden = true;
       updateAdminVisibility();
-
-      if (getCurrentUser()) {
-        const user = getCurrentUser();
-        timerManager.setTimeout(async () => {
-          if (!getCurrentUser() || getCurrentUser().id !== user.id) return;
-          const state = getState();
-          if (state.name === '旅人' || !state.name) {
-            const base = (user.email || '玩家').split('@')[0]
-              .replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
-            state.name = base + '_' + user.id.slice(0, 4);
-            localStorage.setItem(KEY, JSON.stringify(state));
-          }
-          document.getElementById('playerName').textContent = getCurrentUser().email || state.name;
-          closeAuth();
-          if (event === 'SIGNED_IN' && user.email_confirmed_at) {
-            toast('信箱驗證成功！可以開始遊玩了。');
-          }
-          let cloudLoadSucceeded = false;
-          try {
-            let cloudLoadTimeout;
-            try {
-              await Promise.race([
-                loadCloudSave(),
-                new Promise((_, reject) => {
-                  cloudLoadTimeout = timerManager.setTimeout(
-                    () => reject(new Error('雲端存檔載入逾時（20 秒）。請檢查網路後重新整理；若仍發生，請提供此訊息。')),
-                    20000,
-                    'auth-cloud-load-timeout'
-                  );
-                })
-              ]);
-              cloudLoadSucceeded = !!isCloudSaveReady(user.id);
-            } finally {
-              timerManager.clearTimeout(cloudLoadTimeout);
-            }
-          } catch (loadError) {
-            console.error('Cloud save load timeout/failure', loadError);
-            toast(loadError?.message || '雲端存檔載入失敗，請重新整理');
-            document.getElementById('saveStatus').textContent = '雲端載入逾時／失敗';
-          }
-          if (cloudLoadSucceeded && getCurrentUser()?.id === user.id) {
-            await applyPetLoginSkill();
-            onboardingMaybeShow();
-          }
-          if (getCurrentUser()?.id === user.id) {
-            await loadPetFusionOdds();
-            await heartbeat();
-            await refreshLeaderboards();
-            await loadWeatherSummonData(false);
-          }
-        }, 0, 'auth-session-init');
-      } else {
-        document.getElementById('saveStatus').textContent = '本機存檔';
-      }
+      timerManager.setTimeout(() => {
+        if (getCurrentUser()?.id === incomingUser.id) {
+          void startSessionInitialization(incomingUser, event);
+        }
+      }, 0, 'auth-session-init');
     });
+    showAuthCallbackError();
     return authStateSubscription;
   }
 
@@ -425,7 +762,9 @@ export function createAuthService(deps) {
     openAuth,
     closeAuth,
     authAction,
-    googleSignIn,
+    updateRecoveredPassword,
+    cancelPasswordRecovery,
+    retryCloudLoad,
     registerAuthStateListener,
     unregisterAuthStateListener
   };
