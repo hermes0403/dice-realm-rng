@@ -7,6 +7,7 @@ on:
     paths:
       - 'services/auth.js'
       - 'services/supabase.js'
+      - 'services/cloud-save.js'
       - 'index.html'
       - 'script.js'
       - 'tests/auth-flow.test.js'
@@ -31,6 +32,7 @@ jobs:
         run: |
           node --check services/auth.js
           node --check services/supabase.js
+          node --check services/cloud-save.js
           node --check script.js
           node --check tests/auth-flow.test.js
       - name: Check patch whitespace
