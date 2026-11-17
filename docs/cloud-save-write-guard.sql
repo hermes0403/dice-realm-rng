@@ -302,3 +302,9 @@ BEGIN
   RETURN NEW;
 END;
 $function$;
+
+-- Attach the cumulative-history guard to cloud save updates.
+DROP TRIGGER IF EXISTS trg_prevent_game_save_roll_regression ON public.game_saves;
+CREATE TRIGGER trg_prevent_game_save_roll_regression
+BEFORE UPDATE OF save_data ON public.game_saves
+FOR EACH ROW EXECUTE FUNCTION public.prevent_game_save_roll_regression();
