@@ -375,5 +375,5 @@ export function createGloveUI(deps) {
     return true;
   }
 
-  return { canCraft, renderGloves, purchaseGlove, craft, setupGloveUI };
+  return { canCraft, renderGloves, purchaseGlove, craft, craftTimeCrystal, activateTimeCrystal, loadTimeCrystalStatus, setupGloveUI };
 }
