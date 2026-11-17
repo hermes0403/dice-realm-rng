@@ -1,7 +1,7 @@
 ---
 id: T-0097
 title: 修正骰子鎖定紀錄殘留造成新骰子誤顯示星號
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -43,13 +43,32 @@ done_at:
 
 - 2026-11-17 12:40 [叉子] 建立任務，先盤點鎖定索引的載入、消耗及新增流程；待完成准入檢查後再開始實作。
 - 2026-11-17 12:40 [叉子] 開單 PR #183 已合併；最新 main 的棒子方 in_progress 任務為 T-0085、T-0092、T-0093、T-0096，共 4 張，低於 5 張上限；Board 未見有效 communicate task，容量與優先閘門通過，開始實作。
+- 2026-11-17 12:43 [叉子] 程式修正與回歸測試已完成，送交 review；相關 Node 測試通過，另有兩組既有測試因未修改檔案的舊斷言失敗，詳見完工回報。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `systems/dice-locks.js`：新增鎖定紀錄正規化，移除格式錯誤、重複及超出持有數量的索引；新增骰子前先清理過期索引。
+- `core/game-state.js`：載入本機存檔時清理無效鎖定索引。
+- `systems/dice.js`：擲骰新增骰子改走安全新增函式。
+- `script.js`、`sw.js`：更新骰子模組版本鍵及 PWA cache v1.55。
+- 新增 `tests/dice-locks.test.mjs`，並納入 Node CI。
+- 未更動骰子機率、持有數量、出售收益或合成機率。
+
 ### 怎麼驗證的
+
+- GitHub Actions `dice-roll-save`：35/35 通過，包含 4 項新鎖定回歸測試。
+- GitHub Actions `pet-backpack-and-auto-sell`：5/5 通過。
+- `cloud-save-regression`、`achievement-persistence`、`heaven-potion-odds`、`auto-roll-watchdog`、`coin-boost`：通過。
+- `pwa-display` 有 3 項既有斷言失敗（測試仍要求舊版 PWA 標記及未修改的 T-0092／T-0093 內容）；`pet-removal-and-admin-counts` 有 2 項既有寵物圖片對應測試失敗。這些失敗涉及本任務未修改的檔案，未擴大修正範圍。
+- 尚未進行玩家帳號的線上實際操作驗證。
 
 ### 沒做／做不到的
 
+- 無法從目前存檔單憑索引判斷「仍在有效範圍內」的星號是否歷史殘留；為避免誤解鎖玩家刻意保留的骰子，本次保留所有有效索引，只清除無效索引並阻止新骰子繼承過期索引。
+- GitHub Pages 尚待合併後確認部署結果。
+
 ### 衍生任務／影響任務
+
+- 無。
