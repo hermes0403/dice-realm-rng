@@ -42,6 +42,7 @@ import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-gl
 import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
+import { setupOnboardingUI } from './ui/onboarding.js?v=20261117-t0101-tutorial-milestone';
 
 // T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
 for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
@@ -226,12 +227,13 @@ const {
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
+const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
- applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), timerManager
+ applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
