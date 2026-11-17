@@ -204,8 +204,26 @@ export function createAuthService(deps) {
     if (closeButton) closeButton.hidden = recoveryMode || !getCurrentUser();
   }
 
+  function setUsernameSignupMode(enabled) {
+    const loginPanel = document.getElementById('authLoginPanel');
+    const signupPanel = document.getElementById('authUsernameSignupPanel');
+    if (loginPanel) loginPanel.hidden = !!enabled;
+    if (signupPanel) signupPanel.hidden = !enabled;
+    showAuthMessage('');
+  }
+
+  function openUsernameSignup() {
+    setRecoveryMode(false);
+    setUsernameSignupMode(true);
+  }
+
+  function closeUsernameSignup() {
+    setUsernameSignupMode(false);
+  }
+
   function openAuth() {
     setRecoveryMode(false);
+    setUsernameSignupMode(false);
     document.getElementById('authModal').style.display = 'flex';
     showAuthMessage('');
     updateSignupCooldownUI();
@@ -222,7 +240,7 @@ export function createAuthService(deps) {
   }
 
   function setAuthButtonsDisabled(disabled) {
-    ['authLoginBtn', 'authSignupBtn', 'authResetBtn', 'authResendBtn',
+    ['authLoginBtn', 'authSignupBtn', 'authUsernameSignupOpenBtn', 'authUsernameSignupSubmitBtn', 'authUsernameSignupCancelBtn', 'authResetBtn', 'authResendBtn',
       'authPasswordUpdateBtn', 'authPasswordCancelBtn', 'authRetryCloudBtn'].forEach(id => {
       const button = document.getElementById(id);
       if (button) button.disabled = disabled;
@@ -344,7 +362,7 @@ export function createAuthService(deps) {
     const generation = ++sessionGeneration;
     const state = getState();
     if (state.name === '旅人' || !state.name) {
-      const base = (user.email || '玩家').split('@')[0]
+      const base = String(user.user_metadata?.username || (user.email || '玩家').split('@')[0])
         .replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
       state.name = base + '_' + user.id.slice(0, 4);
       localStorage.setItem(KEY, JSON.stringify(state));
@@ -387,7 +405,7 @@ export function createAuthService(deps) {
       .then(ready => {
         if (!ready) throw new Error('雲端存檔尚未完成載入，遊戲暫時保持鎖定。');
         if (generation !== sessionGeneration || getCurrentUser()?.id !== user.id) return false;
-        document.getElementById('playerName').textContent = user.email || state.name;
+        document.getElementById('playerName').textContent = state.name || '玩家';
         document.getElementById('authCloseBtn').hidden = false;
         if (retryButton) retryButton.hidden = true;
         closeAuth();
@@ -439,8 +457,16 @@ export function createAuthService(deps) {
 
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showAuthMessage('請輸入有效的 Email 地址。');
+    const isEmailIdentifier = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (mode === 'usernameSignup') {
+      const username = document.getElementById('authUsernameSignupName').value.trim();
+      const signupPassword = document.getElementById('authUsernameSignupPassword').value;
+      const confirm = document.getElementById('authUsernameSignupPasswordConfirm').value;
+      if (!username) { showAuthMessage('請輸入玩家名稱。'); return; }
+      if (signupPassword.length < 8) { showAuthMessage('新密碼至少需要 8 位。'); return; }
+      if (signupPassword !== confirm) { showAuthMessage('兩次輸入的密碼不一致。'); return; }
+    } else if (!email || (mode !== 'login' && !isEmailIdentifier) || (mode === 'login' && !isEmailIdentifier && !/^[\p{L}\p{N}_-]{3,20}$/u.test(email.normalize('NFKC').trim()))) {
+      showAuthMessage(mode === 'login' ? '請輸入玩家名稱或有效的 Gmail。' : '請輸入有效的 Email 地址。');
       return;
     }
     if (['signup', 'login'].includes(mode) && password.length < 6) {
@@ -453,6 +479,33 @@ export function createAuthService(deps) {
     showAuthMessage(mode === 'signup' ? '正在建立帳號…' : mode === 'resend' ? '正在重新寄送驗證信…' : '處理中…');
     try {
       let result;
+      if (mode === 'usernameSignup' || (mode === 'login' && !isEmailIdentifier)) {
+        const action = mode === 'usernameSignup' ? 'username_register' : 'username_login';
+        const username = mode === 'usernameSignup'
+          ? document.getElementById('authUsernameSignupName').value.trim()
+          : email;
+        const signupPassword = mode === 'usernameSignup'
+          ? document.getElementById('authUsernameSignupPassword').value
+          : password;
+        const { data, error } = await supabaseClient.functions.invoke('dice-rng-auth', {
+          body: { action, username, password: signupPassword }
+        });
+        if (error) throw new Error(data?.error || error.message || '玩家名稱登入服務暫時無法使用。');
+        if (data?.error) throw new Error(data.error);
+        if (data?.session) {
+          const { error: sessionError } = await supabaseClient.auth.setSession(data.session);
+          if (sessionError) throw sessionError;
+          if (mode === 'usernameSignup') {
+            document.getElementById('authUsernameSignupName').value = '';
+            document.getElementById('authUsernameSignupPassword').value = '';
+            document.getElementById('authUsernameSignupPasswordConfirm').value = '';
+            setUsernameSignupMode(false);
+          }
+          return;
+        }
+        showAuthMessage(data?.message || '操作完成，請返回登入。');
+        return;
+      }
       if (mode === 'signup') {
         result = await supabaseClient.auth.signUp({
           email,
@@ -761,6 +814,8 @@ export function createAuthService(deps) {
     showAuthMessage,
     openAuth,
     closeAuth,
+    openUsernameSignup,
+    closeUsernameSignup,
     authAction,
     updateRecoveredPassword,
     cancelPasswordRecovery,
