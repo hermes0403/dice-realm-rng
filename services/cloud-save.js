@@ -177,6 +177,30 @@ export function createCloudSaveService(dependencies) {
     return [...merged];
   }
 
+  function mergePetInstances(baseValue, localValue, cloudValue) {
+    const toMap = value => new Map(
+      (Array.isArray(value) ? value : [])
+        .filter(pet => pet && typeof pet === 'object' && typeof pet.uid === 'string' && pet.uid)
+        .map(pet => [pet.uid, pet])
+    );
+    const base = toMap(baseValue);
+    const local = toMap(localValue);
+    const cloudList = Array.isArray(cloudValue) ? cloudValue : [];
+    const legacyCloudPets = cloudList.filter(pet => !pet || typeof pet.uid !== 'string' || !pet.uid);
+    const merged = toMap(cloudList);
+
+    // Keep legacy cloud pets without UIDs intact. New fusion results always
+    // have UIDs, so only identifiable instances participate in delta merging.
+    // A stale local copy cannot bring back a pet that the cloud has since removed.
+    for (const uid of base.keys()) {
+      if (!local.has(uid)) merged.delete(uid);
+    }
+    for (const [uid, pet] of local) {
+      if (!base.has(uid) && !merged.has(uid)) merged.set(uid, clonePayload(pet));
+    }
+    return [...legacyCloudPets, ...merged.values()];
+  }
+
   function mergeObjectMap(baseValue, localValue, cloudValue, preserveMissing = false) {
     const base = baseValue && typeof baseValue === 'object' ? baseValue : {};
     const local = localValue && typeof localValue === 'object' ? localValue : {};
@@ -280,10 +304,12 @@ export function createCloudSaveService(dependencies) {
       );
     }
 
-    // Pets and equipped pet IDs remain server-authoritative. A stale local
-    // snapshot must never resurrect a pet already sold on the server.
-    if (Array.isArray(cloud.pets)) merged.pets = clonePayload(cloud.pets);
-    if (Array.isArray(cloud.equippedPetUids)) merged.equippedPetUids = clonePayload(cloud.equippedPetUids);
+    // Merge pet inventory by UID delta from the shared baseline. This preserves
+    // a locally-created pet during a concurrent cloud update while respecting
+    // sales/removals made by either device.
+    merged.pets = mergePetInstances(base.pets, local.pets, cloud.pets);
+    merged.equippedPetUids = mergeSetDelta(base.equippedPetUids, local.equippedPetUids, cloud.equippedPetUids)
+      .filter(uid => merged.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3);
     return merged;
   }
 
@@ -679,11 +705,12 @@ export function createCloudSaveService(dependencies) {
         S.petIncomePending = Math.max(0, Number(localSnapshotForMerge?.petIncomePending) || 0);
         if (S.petIncomePending > 0) S.coins = (Number(S.coins) || 0) + S.petIncomePending;
 
-        // Pet instances are server-authoritative; never resurrect sold pets.
-        S.pets = Array.isArray(cloudPayload.pets) ? cloudPayload.pets.slice(0, 20) : [];
+        // Keep the UID-delta pet merge produced above. Cloud-only deletions
+        // stay deleted; local additions/removals made since the baseline survive.
+        S.pets = Array.isArray(S.pets) ? S.pets.slice(0, 20) : [];
         ensurePetData(S.pets);
-        S.equippedPetUids = Array.isArray(cloudPayload.equippedPetUids)
-          ? [...new Set(cloudPayload.equippedPetUids)]
+        S.equippedPetUids = Array.isArray(S.equippedPetUids)
+          ? [...new Set(S.equippedPetUids)]
             .filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
           : [];
         S.petDiscovered = {
