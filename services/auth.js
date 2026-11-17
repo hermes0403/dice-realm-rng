@@ -321,6 +321,10 @@ export function createAuthService(deps) {
 
   function startSessionInitialization(user, event = 'INITIAL_SESSION', force = false) {
     if (!user?.id) return Promise.resolve(false);
+    if (authServiceRestricted) {
+      showAuthMessage('Supabase 雲端服務目前受到額度限制，暫時無法完成登入載入。請待服務恢復後再試。');
+      return Promise.resolve(false);
+    }
     if (sessionInitPromise && sessionInitUserId === user.id) return sessionInitPromise;
     if (!force && sessionInitAttemptedUserId === user.id) {
       return Promise.resolve(!!isCloudSaveReady(user.id));
@@ -610,10 +614,12 @@ export function createAuthService(deps) {
   }
 
   function showAuthCallbackError() {
-    const search = globalThis.window?.location?.search || '';
-    const params = new URLSearchParams(search);
-    const code = params.get('error_code') || params.get('error') || '';
-    if (!code && !params.get('error_description')) return;
+    const location = globalThis.window?.location;
+    const params = new URLSearchParams(location?.search || '');
+    const hashParams = new URLSearchParams((location?.hash || '').replace(/^#/, ''));
+    const code = params.get('error_code') || params.get('error')
+      || hashParams.get('error_code') || hashParams.get('error') || '';
+    if (!code && !params.get('error_description') && !hashParams.get('error_description')) return;
     setRecoveryMode(false);
     document.getElementById('authModal').style.display = 'flex';
     document.body.classList.add('auth-required');
@@ -623,9 +629,14 @@ export function createAuthService(deps) {
     document.getElementById('authOpenBtn').hidden = false;
     document.getElementById('authCloseBtn').hidden = true;
     showAuthMessage(message);
-    const location = globalThis.window?.location;
     if (location && globalThis.window?.history?.replaceState) {
-      globalThis.window.history.replaceState({}, document.title, location.pathname + (location.hash || ''));
+      const cleanSearch = new URLSearchParams(params);
+      ['error', 'error_code', 'error_description'].forEach(key => cleanSearch.delete(key));
+      const query = cleanSearch.toString();
+      const cleanHash = hashParams.has('error') || hashParams.has('error_code')
+        || hashParams.has('error_description') ? '' : (location.hash || '');
+      globalThis.window.history.replaceState({}, document.title,
+        location.pathname + (query ? '?' + query : '') + cleanHash);
     }
   }
 
@@ -685,7 +696,10 @@ export function createAuthService(deps) {
         }
         setCurrentUser(null);
         setRecoveryMode(false);
-        setupPlayerWeatherSubscription();
+        timerManager.setTimeout(() => {
+          try { setupPlayerWeatherSubscription(); }
+          catch (error) { console.warn('Player weather unsubscribe failed', error); }
+        }, 0, 'auth-clear-player-weather');
         document.getElementById('authOpenBtn').hidden = false;
         document.getElementById('authCloseBtn').hidden = true;
         document.getElementById('authModal').style.display = 'flex';
