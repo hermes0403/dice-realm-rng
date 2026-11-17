@@ -346,11 +346,12 @@ export function createAuthService(deps) {
     showAuthMessage('登入成功，正在載入雲端存檔…');
 
     let timeoutId = null;
+    let initializationCancelled = false;
     const initialization = runCloudSessionInitialization({
       userId: user.id,
       loadCloudSave: () => loadCloudSaveOnce(user.id),
       isCloudSaveReady,
-      isCurrentUser: id => getCurrentUser()?.id === id,
+      isCurrentUser: id => !initializationCancelled && getCurrentUser()?.id === id,
       loadPetFusionOdds,
       heartbeat,
       loadWeatherSummonData,
@@ -382,6 +383,7 @@ export function createAuthService(deps) {
         return true;
       })
       .catch(error => {
+        initializationCancelled = true;
         if (generation === sessionGeneration && getCurrentUser()?.id === user.id) {
           console.error('Cloud session initialization failed', error);
           document.getElementById('authModal').style.display = 'flex';
