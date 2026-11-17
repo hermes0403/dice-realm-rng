@@ -8,6 +8,18 @@ const SIDES = new Map([
   ['barry', 'collaborator_side'], ['老查', 'collaborator_side']
 ]);
 const STATUSES = new Set(['open', 'in_progress', 'blocked', 'review', 'returned', 'done', 'cancelled']);
+const RECORD_EFFECTIVE_DATE = '2026-11-11';
+const ACCEPTANCE_SECTIONS = new Set([
+  '紀錄', '驗收紀錄', '補充驗收紀錄', 'Owner 驗收紀錄', '技術驗收結案紀錄', '驗收'
+]);
+const TIMESTAMP_SECTIONS = new Set([
+  ...ACCEPTANCE_SECTIONS, '進度紀錄', '實作進度紀錄', '完工回報'
+]);
+const HUMAN_ROLES = new Set(['棒子', 'barry']);
+const PROXY_LABELS = new Map([
+  ['代記:棒子/叉子', { human: '棒子', gpt: '叉子' }],
+  ['代記:barry/老查', { human: 'barry', gpt: '老查' }]
+]);
 const REQUIRED_FIELDS = [
   'id', 'title', 'status', 'from', 'to', 'owner', 'contributors', 'reviewer',
   'priority', 'created', 'updated', 'depends_on', 'branch', 'done_by', 'done_at'
@@ -66,6 +78,166 @@ function parseTaskFile(filePath) {
     delegation,
     lockEvents: parseLockEvents(body)
   };
+}
+
+function markdownSections(body) {
+  const lines = body.split(/\r?\n/);
+  const sections = [];
+  let current = null;
+  for (let index = 0; index < lines.length; index++) {
+    const heading = lines[index].match(/^##\s+(.+?)\s*$/);
+    if (heading) {
+      if (current) current.endLine = index;
+      current = { title: heading[1], startLine: index + 1, endLine: lines.length, lines: [] };
+      sections.push(current);
+    } else if (current) {
+      current.lines.push({ text: lines[index], line: index + 1 });
+    }
+  }
+  return sections;
+}
+
+function parseSectionRecords(section) {
+  const records = [];
+  let current = null;
+  for (const entry of section.lines) {
+    if (/^-\s+\d{4}-\d{2}-\d{2}(?:\s|$)/.test(entry.text)) {
+      if (current) records.push(current);
+      current = { lines: [entry], line: entry.line };
+    } else if (current) {
+      current.lines.push(entry);
+    }
+  }
+  if (current) records.push(current);
+  return records.map(record => ({
+    ...record,
+    text: record.lines.map(entry => entry.text).join('\n')
+  }));
+}
+
+function parseRecordAuthor(recordText) {
+  const header = recordText.match(/^-\s+\d{4}-\d{2}-\d{2}(?:\s+\d{1,2}:[^\s]+)?\s+(?:\[impact\])?\[([^\]]+)\](?!\s*\[)/);
+  const label = header?.[1] || '';
+  if (!label) return { label: '', side: 'UNKNOWN_SIDE', human: null, gpt: null, impact: false };
+  if (PROXY_LABELS.has(label)) {
+    const proxy = PROXY_LABELS.get(label);
+    return { label, side: SIDES.get(proxy.human), human: proxy.human, gpt: proxy.gpt, impact: /^-\s+\d{4}-\d{2}-\d{2}(?:\s+\d{1,2}:[^\s]+)?\s+\[impact\]/.test(recordText) };
+  }
+  if (SIDES.has(label)) {
+    return {
+      label,
+      side: SIDES.get(label),
+      human: HUMAN_ROLES.has(label) ? label : null,
+      gpt: HUMAN_ROLES.has(label) ? null : label,
+      impact: /^-\s+\d{4}-\d{2}-\d{2}(?:\s+\d{1,2}:[^\s]+)?\s+\[impact\]/.test(recordText)
+    };
+  }
+  return { label, side: 'UNKNOWN_SIDE', human: null, gpt: null, impact: /^-\s+\d{4}-\d{2}-\d{2}(?:\s+\d{1,2}:[^\s]+)?\s+\[impact\]/.test(recordText) };
+}
+
+function isValidCalendarDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function recordTimestampIssue(record) {
+  const match = record.lines[0].text.match(/^-\s+(\d{4}-\d{2}-\d{2})(.*)$/);
+  if (!match) return null;
+  const [, date, remainder] = match;
+  if (date < RECORD_EFFECTIVE_DATE) return null;
+  if (!isValidCalendarDate(date)) return `invalid calendar date ${date}`;
+
+  const tail = remainder.trimStart();
+  const timeMatch = tail.match(/^(\d{2}):(\d{2})(?::(\d{2}))?(?=\s|$)/);
+  if (!timeMatch) {
+    if (/^\d{1,2}:/.test(tail)) return `malformed time in ${date} ${tail.split(/\s+/)[0]}`;
+    return `missing time in ${date}`;
+  }
+  const [, hourText, minuteText, secondText] = timeMatch;
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = secondText === undefined ? 0 : Number(secondText);
+  if (hour > 23 || minute > 59 || second > 59) {
+    return `out-of-range time ${hourText}:${minuteText}${secondText === undefined ? '' : `:${secondText}`}`;
+  }
+  return null;
+}
+
+function recordSeverity(recordChecks, check, side) {
+  const fallback = recordChecks === 'error' ? 'error' : 'warning';
+  if (!recordChecks || recordChecks === 'warning' || recordChecks === 'error') return fallback;
+  const configured = recordChecks[check];
+  if (typeof configured === 'string') return configured;
+  if (configured && typeof configured === 'object') return configured[side] || configured.default || 'warning';
+  return 'warning';
+}
+
+function addRecordIssue(message, severity, errors, warnings) {
+  (severity === 'error' ? errors : warnings).push(message);
+}
+
+function hasNonEmptyRecordField(recordText, label) {
+  const pattern = new RegExp(`${label}[：:][ \\t]*([^\\r\\n]*?)(?=(?:[ \\t]*[｜|][ \\t]*)?(?:來源|證據)[：:]|$)`, 'm');
+  return Boolean(recordText.match(pattern)?.[1]?.trim());
+}
+
+function hasPositiveAcceptanceDecision(recordText) {
+  return /(?<!未)(?<!尚未)(?<!沒)(?<!不)(?<!待)(?<!等待)(?<!不得視為)驗收(?:直接)?(?:通過|成功|完成|結案)/.test(recordText);
+}
+
+function validateTaskRecords(task, recordChecks, errors, warnings) {
+  const sections = markdownSections(task.body);
+  const acceptanceRecords = sections
+    .filter(section => ACCEPTANCE_SECTIONS.has(section.title))
+    .flatMap(section => parseSectionRecords(section).map(record => ({ ...record, section: section.title })));
+  const timestampRecords = sections
+    .filter(section => TIMESTAMP_SECTIONS.has(section.title))
+    .flatMap(section => parseSectionRecords(section).map(record => ({ ...record, section: section.title })));
+
+  for (const record of timestampRecords) {
+    const issue = recordTimestampIssue(record);
+    if (!issue) continue;
+    const author = parseRecordAuthor(record.lines[0].text);
+    const severity = author.side === 'UNKNOWN_SIDE'
+      ? 'warning'
+      : recordSeverity(recordChecks, 'check3', author.side);
+    addRecordIssue(`${task.fields.id}:${record.line} [檢查 3] ${issue} (${record.section}; ${author.side})`, severity, errors, warnings);
+    if (author.side === 'UNKNOWN_SIDE') {
+      warnings.push(`${task.fields.id}:${record.line} [檢查 3] UNKNOWN_SIDE label=${author.label || '(missing)'}`);
+    }
+  }
+
+  const { fields, fileName } = task;
+  const effectiveTask = fields.status === 'done'
+    && [fields.created, fields.done_at].some(value => {
+      const date = (value || '').match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
+      return Boolean(date && isValidCalendarDate(date) && date >= RECORD_EFFECTIVE_DATE);
+    });
+  if (!effectiveTask) return;
+
+  const fromSide = SIDES.get(fields.from);
+  const doneBy = (fields.done_by || '').match(/^(棒子|叉子|barry|老查)(?:（[^）]+）)?$/)?.[1] || null;
+  const acceptanceAuthors = acceptanceRecords.map(record => ({ record, author: parseRecordAuthor(record.lines[0].text) }));
+  for (const { record, author } of acceptanceAuthors) {
+    if (author.side === 'UNKNOWN_SIDE') {
+      warnings.push(`${fields.id}:${record.line} [檢查 2] UNKNOWN_SIDE label=${author.label || '(missing)'} cannot qualify as acceptance`);
+    }
+  }
+  const validAcceptance = acceptanceAuthors.some(({ record, author }) => {
+    if (author.side === 'UNKNOWN_SIDE' || author.impact || !hasPositiveAcceptanceDecision(record.text)) return false;
+    if (!author.human || author.side !== fromSide || SIDES.get(author.human) !== fromSide) return false;
+    if (doneBy !== author.human) return false;
+    if (!hasNonEmptyRecordField(record.text, '來源') || !hasNonEmptyRecordField(record.text, '證據')) return false;
+    const date = record.lines[0].text.match(/^-\s+(\d{4}-\d{2}-\d{2})/)?.[1];
+    return Boolean(date && isValidCalendarDate(date) && date >= RECORD_EFFECTIVE_DATE);
+  });
+
+  if (!validAcceptance) {
+    const severity = recordSeverity(recordChecks, 'check2', fromSide);
+    addRecordIssue(`${fileName} [檢查 2] status=done requires a valid human acceptance record matching from=${fields.from} and done_by=${fields.done_by || '(empty)'}, with same-record 來源： and 證據：`, severity, errors, warnings);
+  }
 }
 
 function taskFiles(boardDir) {
@@ -183,7 +355,7 @@ function missingIdRanges(ids) {
   return ranges;
 }
 
-function validateBoardDirectory(boardDir, { checkIndex = true } = {}) {
+function validateBoardDirectory(boardDir, { checkIndex = true, recordChecks = 'warning' } = {}) {
   const errors = [];
   const warnings = [];
   const tasks = [];
@@ -272,6 +444,8 @@ function validateBoardDirectory(boardDir, { checkIndex = true } = {}) {
     if (fields.status === 'returned' && !lock) errors.push(`${fileName}: returned task must keep its original task locked until accepted`);
   }
 
+  for (const task of tasks) validateTaskRecords(task, recordChecks, errors, warnings);
+
   for (const task of tasks) {
     for (const event of task.lockEvents) {
       const communicateTask = byId.get(event.communicateTaskId);
@@ -334,7 +508,7 @@ if (isMain) {
   const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const boardDir = path.join(projectRoot, 'board');
   const sideArg = process.argv.find(arg => arg.startsWith('--side='))?.slice('--side='.length);
-  const { tasks, errors, warnings } = validateBoardDirectory(boardDir);
+  const { tasks, errors, warnings } = validateBoardDirectory(boardDir, { recordChecks: 'warning' });
   printCapacityReport(tasks, sideArg);
   if (warnings.length) {
     console.warn(`\nBoard validation warnings (${warnings.length}):`);
@@ -349,4 +523,8 @@ if (isMain) {
   }
 }
 
-export { parseFrontmatter, parseDelegation, parseLockEvents, parseTaskFile, splitMarkdownTableRow, parseTaskIndex, missingIdRanges, validateBoardDirectory };
+export {
+  parseFrontmatter, parseDelegation, parseLockEvents, parseTaskFile, splitMarkdownTableRow,
+  parseTaskIndex, missingIdRanges, markdownSections, parseSectionRecords, parseRecordAuthor,
+  recordTimestampIssue, validateBoardDirectory
+};
