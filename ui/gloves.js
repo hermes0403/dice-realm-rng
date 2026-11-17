@@ -74,11 +74,13 @@ export function createGloveUI(deps) {
     else if (!statusReady) status = timeCrystalStatus?.error ? '雲端狀態讀取失敗，重新整理後再試。' : '正在讀取道具狀態…';
     else if (pending) status = '效果已啟用：下一次玩家召喚天氣將延長 20%。';
     else if (left > 0) status = '⏳ 冷卻中 · ' + timeText;
-    const button = owned
-      ? '<button class="primary" type="button" style="width:100%;min-height:38px" data-use-time-crystal ' +
-        (timeCrystalBusy || pending || left > 0 ? 'disabled' : '') + '>⌛ 使用時序結晶</button>'
-      : '<button type="button" style="width:100%;min-height:36px" data-craft-time-crystal ' +
-        (timeCrystalBusy || !statusReady || !enough ? 'disabled' : '') + '>合成時序結晶</button>';
+    const button = timeCrystalStatus?.error
+      ? '<button type="button" style="width:100%;min-height:36px" data-refresh-time-crystal>重新讀取道具狀態</button>'
+      : owned
+        ? '<button class="primary" type="button" style="width:100%;min-height:38px" data-use-time-crystal ' +
+          (timeCrystalBusy || pending || left > 0 ? 'disabled' : '') + '>⌛ 使用時序結晶</button>'
+        : '<button type="button" style="width:100%;min-height:36px" data-craft-time-crystal ' +
+          (timeCrystalBusy || !statusReady || !enough ? 'disabled' : '') + '>合成時序結晶</button>';
     itemWorkshopList.innerHTML +=
       '<div class="recipe weather-converter-card" style="display:block;padding:12px;margin-top:10px">' +
       '<h3 style="margin:0 0 6px">⌛ 時序結晶' + (owned ? '（已持有）' : '') + '</h3>' +
@@ -95,7 +97,7 @@ export function createGloveUI(deps) {
   function renderGloves() {
     const activeUser = getCurrentUser();
     if (activeUser?.id) {
-      if (timeCrystalStatusUserId !== activeUser.id && !timeCrystalStatusLoading) void loadTimeCrystalStatus();
+      if (timeCrystalStatusUserId !== activeUser.id && !timeCrystalStatusLoading && !timeCrystalBusy) void loadTimeCrystalStatus();
     } else if (timeCrystalStatusUserId) {
       timeCrystalStatus = null;
       timeCrystalStatusUserId = null;
@@ -359,10 +361,12 @@ export function createGloveUI(deps) {
       const craftGloveButton = target.closest('[data-craft]');
       const craftTimeCrystalButton = target.closest('[data-craft-time-crystal]');
       const useTimeCrystalButton = target.closest('[data-use-time-crystal]');
+      const refreshTimeCrystalButton = target.closest('[data-refresh-time-crystal]');
       if (purchaseButton) purchaseGlove(purchaseButton.dataset.gloveAction);
       if (craftGloveButton) craft(craftGloveButton.dataset.craft);
       if (craftTimeCrystalButton) craftTimeCrystal();
       if (useTimeCrystalButton) activateTimeCrystal();
+      if (refreshTimeCrystalButton) loadTimeCrystalStatus(true).then(renderGloves);
       const equipButton = target.closest('[data-equip]');
       if (equipButton) {
         const state = getState();
