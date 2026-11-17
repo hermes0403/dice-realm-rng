@@ -16,7 +16,7 @@ import { setupPetSellingUI } from './ui/pet-selling.js';
 import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal';
+import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal-realtime-polling';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
 import { createCloudSaveService } from './services/cloud-save.js?v=20261116-achievement-recheck-leaderboard';
 import { createCoinBoostService } from './systems/coin-boost.js';
@@ -27,7 +27,7 @@ import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261117-t0097-dice-lock-cleanup';
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261117-v154-auto-rewards';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
-import { createGlobalBoostSystem } from './systems/global-boost.js';
+import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js';
@@ -156,7 +156,7 @@ function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
 function closeAuth(){return authService?.closeAuth()}
 function authAction(mode){return authService?.authAction(mode)}
-setupGlobalAnnouncements();refreshServerWeather(false);loadWeatherSummonData(false);
+setupGlobalAnnouncements();weatherSystem.setupServerWeatherSubscription();loadWeatherSummonData(false);
 function byId(id){return D.find(x=>x.id===id)}
 function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
