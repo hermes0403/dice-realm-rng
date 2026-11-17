@@ -665,6 +665,16 @@ export function createAuthService(deps) {
       }
 
       if (event === 'PASSWORD_RECOVERY' && incomingUser) {
+        if (!incomingUser.email_confirmed_at) {
+          setCurrentUser(null);
+          setRecoveryMode(false);
+          document.getElementById('authModal').style.display = 'flex';
+          document.body.classList.add('auth-required');
+          showAuthMessage('此帳號的信箱尚未驗證，不能更新密碼或進入遊戲。請先完成 Email 驗證。');
+          timerManager.setTimeout(() => supabaseClient.auth.signOut().catch(() => {}), 0, 'auth-recovery-unverified-signout');
+          return;
+        }
+        if (!enforceDeviceAccountLimit(incomingUser)) return;
         setCurrentUser(incomingUser);
         setRecoveryMode(true);
         document.getElementById('authModal').style.display = 'flex';
