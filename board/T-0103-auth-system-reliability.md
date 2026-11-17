@@ -1,7 +1,7 @@
 ---
 id: T-0103
 title: 修復 Email 登入、註冊驗證與密碼復原流程
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -47,3 +47,4 @@ done_at:
 ## 紀錄
 
 - 2026-11-17 21:27 [叉子] 建立任務，先保持 open；依 Board 規範完成准入閘門檢查後再接手。
+- 2026-11-17 21:28 [叉子] 狀態轉換：open → in_progress。重新檢查最新 main Board：owner_side 有效 in_progress 任務為 T-0085、T-0102，共 2/5；Communicate 優先閘門未觸發。登入相關的 T-0057 僅存在於已知分歧的 work/chazi 歷史分支，保留其成果並在本任務選擇性參考，不覆蓋該分支。開始 T-0103 實作。
