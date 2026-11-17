@@ -7,6 +7,7 @@ const APP_SHELL = [
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './script.js?v=20261117-t0103-auth-flow',
   './services/auth.js?v=20261117-t0103-auth-flow',
+  './services/cloud-save.js?v=20261117-t0103-auth-cloud-error',
   './ui/equipment.js?v=20261117-t0102-void-startrail-gloves',
   './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
   './systems/weather.js?v=20261117-t0098-time-crystal',
