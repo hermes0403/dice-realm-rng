@@ -24,6 +24,7 @@ export function createAuthService(deps) {
     loadWeatherSummonData,
     applyPetLoginSkill = () => 0,
     isCloudSaveReady = () => false,
+    onboardingMaybeShow = () => false,
     timerManager
   } = deps;
 
@@ -391,7 +392,10 @@ export function createAuthService(deps) {
             toast(loadError?.message || '雲端存檔載入失敗，請重新整理');
             document.getElementById('saveStatus').textContent = '雲端載入逾時／失敗';
           }
-          if (cloudLoadSucceeded && getCurrentUser()?.id === user.id) await applyPetLoginSkill();
+          if (cloudLoadSucceeded && getCurrentUser()?.id === user.id) {
+            await applyPetLoginSkill();
+            onboardingMaybeShow();
+          }
           if (getCurrentUser()?.id === user.id) {
             await loadPetFusionOdds();
             await heartbeat();
