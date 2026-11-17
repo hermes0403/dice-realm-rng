@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<!-- PWA shell V1.50 -->
+<!-- PWA shell V1.51 -->
 <meta name="theme-color" content="#090b16"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./assets/pwa-icon-192.png"><title>骰界 RNG</title>
 <link rel="icon" href="./favicon.ico" type="image/x-icon">
 
@@ -51,7 +51,16 @@
 <section class="page" id="page-quests"><div class="section-head"><h2>任務與成就</h2><span class="pill">每日更新：原型版暫用本機日期</span></div><div class="two"><div class="card"><h3>今日任務</h3><p class="muted">完成全部 3 項每日任務，可獲得 20K$。</p><div id="questList"></div></div><div class="card"><h3>成就檔案</h3><p class="muted">里程碑將記錄在你的個人資料。</p><div id="achievementList"></div></div></div></section>
 <section class="page" id="page-updates"><div class="section-head"><h2>遊戲更新日誌</h2><span class="pill">REALM PATCH NOTES</span></div>
   <article class="update-log-card update-log-current">
-    <div class="update-log-top"><span class="update-log-version">v1.50</span><span class="update-log-date">2026/11/17</span><span class="update-log-latest">最新版本</span></div>
+    <div class="update-log-top"><span class="update-log-version">v1.51</span><span class="update-log-date">2026/11/17</span><span class="update-log-latest">最新版本</span></div>
+    <h3>全新手套與道具</h3>
+    <ul>
+      <li>新增虛空手套：運氣 +35%、速度 +33%，價格 $5B。</li>
+      <li>新增星軌手套：運氣 +38%、速度 +36%，價格 $18B。</li>
+      <li>道具工坊收錄時序結晶：可使下一次玩家召喚的天氣延長 20%；管理員天氣不受影響。</li>
+    </ul>
+  </article>
+  <article class="update-log-card">
+    <div class="update-log-top"><span class="update-log-version">v1.50</span><span class="update-log-date">2026/11/17</span></div>
     <h3>時序結晶</h3>
     <ul><li>新增時序結晶，可使下一次玩家召喚的天氣延長 20%。</li><li>管理員天氣不受影響，待生效效果會保留至下一次玩家召喚。</li></ul>
   </article>
@@ -61,7 +70,7 @@
     <ul><li>新增全服活動</li><li>修復細微的 bug</li></ul>
   </article>
 </section>
-<section class="page" id="page-profile"><div class="section-head"><h2>設定</h2></div><div class="card"><div class="section-head" style="margin-top:0"><h3 style="margin:0">玩家名稱</h3></div><div class="toolbar" style="margin-top:8px;justify-content:space-between"><strong id="profileCurrentName">旅人</strong><button class="primary" id="saveName" type="button">更改名稱</button></div><div class="section-head"><h3 style="margin:0">顯示</h3></div><div class="toolbar"><button class="quiet" id="fullscreenToggleBtn" type="button" aria-pressed="false">全螢幕</button></div><div class="section-head"><h3 style="margin:0">教學</h3></div><div class="toolbar"><button class="quiet" id="replayTutorialBtn" type="button">重新觀看新手教學</button></div><div class="section-head"><h3 style="margin:0">帳號</h3></div><div class="toolbar"><button class="quiet" id="profileLogoutBtn" type="button">登出</button><button class="danger" id="resetBtn" type="button">刪除本機帳號</button></div><p id="accountActionMessage" class="mini" role="status"></p></div><p class="mini profile-version">v1.50</p></section>
+<section class="page" id="page-profile"><div class="section-head"><h2>設定</h2></div><div class="card"><div class="section-head" style="margin-top:0"><h3 style="margin:0">玩家名稱</h3></div><div class="toolbar" style="margin-top:8px;justify-content:space-between"><strong id="profileCurrentName">旅人</strong><button class="primary" id="saveName" type="button">更改名稱</button></div><div class="section-head"><h3 style="margin:0">顯示</h3></div><div class="toolbar"><button class="quiet" id="fullscreenToggleBtn" type="button" aria-pressed="false">全螢幕</button></div><div class="section-head"><h3 style="margin:0">教學</h3></div><div class="toolbar"><button class="quiet" id="replayTutorialBtn" type="button">重新觀看新手教學</button></div><div class="section-head"><h3 style="margin:0">帳號</h3></div><div class="toolbar"><button class="quiet" id="profileLogoutBtn" type="button">登出</button><button class="danger" id="resetBtn" type="button">刪除本機帳號</button></div><p id="accountActionMessage" class="mini" role="status"></p></div><p class="mini profile-version">v1.51</p></section>
 <section class="page" id="page-leaderboard"><div class="section-head"><h2>全服排行榜</h2><button class="primary" id="refreshLeaderboardBtn">↻ 重新整理</button></div><div class="my-rank-strip" id="myRankStrip"><div class="my-rank-card"><span class="my-rank-label">累積擲骰</span><div class="my-rank-value">—</div></div><div class="my-rank-card"><span class="my-rank-label">最稀有骰子</span><div class="my-rank-value">—</div></div><div class="my-rank-card"><span class="my-rank-label">成就</span><div class="my-rank-value">—</div></div></div><div class="leaderboard-folds"><details class="leaderboard-fold"><summary>🎲 累積擲骰 TOP 10 <span class="mini">點擊展開／收縮</span></summary><div class="leaderboard-fold-body" id="localRank"><div class="empty">正在載入排行榜…</div></div></details><details class="leaderboard-fold"><summary>✦ 最稀有骰子 TOP 10 <span class="mini">點擊展開／收縮</span></summary><div class="leaderboard-fold-body" id="rareRank"><div class="empty">正在載入排行榜…</div></div></details><details class="leaderboard-fold"><summary>🏆 完成成就 TOP 10 <span class="mini">完成成就數量；先達成者優先</span></summary><div class="leaderboard-fold-body" id="moneyRank"><div class="empty">正在載入排行榜…</div></div></details></div></section>
 <section class="page" id="page-admin" hidden><div class="section-head"><h2>管理員面板</h2><button class="primary" id="adminRefreshBtn">重新整理</button></div><div class="notice">此面板只對指定管理員帳號顯示，所有管理操作仍由 Supabase 雲端驗證權限。下方各區塊可點擊收合。</div>
 <div class="admin-category-title">🎓 新手教學面板</div><div class="card admin-tutorial-panel"><div class="eyebrow">ONBOARDING PREVIEW CONSOLE</div><h3>新手教學測試</h3><p class="mini">以測試模式從第一步開始播放，不會修改任何玩家的新手教學完成紀錄。</p><button type="button" class="primary" id="adminTutorialTestBtn">開啟新手教學測試</button></div>
