@@ -1,7 +1,7 @@
 ---
 id: T-0098
 title: 新增時序結晶道具並延長下一次玩家召喚天氣
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -58,3 +58,27 @@ done_at:
 - 2026-11-17 17:29 [叉子] 依棒子明確指示建立任務。棒子確認 T-0092、T-0093、T-0094、T-0095、T-0096 已完成；對應 PR 均已整合，其中 T-0094 的 SQL source PR #159、#160 已於本次接續合併。開單後重新核對 owner_side 容量與 Communicate 閘門，通過後再依流程接手。
 
 - 2026-11-17 17:29 [叉子] 狀態轉換：open → in_progress。開工前以最新 main Board（b81cd237fe039fa9d318da4fa7ab988256ae5d99）複查 owner_side 有效任務：T-0085（in_progress）、T-0086（review）、T-0089（review）、T-0097（review），依 AGENTS.md 較嚴格口徑共 4/5；未發現有效 Communicate 優先閘門。兩道閘門均未阻擋，開始實作。
+
+## 完工回報
+
+### 改了什麼
+- 道具工坊新增時序結晶，顯示指定文案與時序骰子、虛空骰子、任一故障系列骰子的配方。
+- 合成、持有狀態、啟用與一小時冷卻由 Supabase RPC 權威處理；道具本體不會在使用時消耗。
+- 玩家下一次召喚水晶、地獄、故障或經天氣轉換器召喚雨、雪、打雷時，延長 20%；管理員天氣不延長，也不清除待生效狀態。
+- 使用現有 12 秒天氣同步讀取待生效狀態，沒有新增輪詢。
+- 遊戲版本更新至 v1.50，PWA cache 更新至 v1.58。
+
+### 怎麼驗證的
+- Supabase migration `20261117101418` 已在正式專案 migration history 中確認。
+- Time Crystal regression workflow 通過：道具文案／配方、伺服器合成回傳、管理員活動中拒絕啟用等測試，以及 JavaScript syntax 與 diff whitespace 檢查。
+- PR #191 已合併，merge commit：`35aa010d5df64ef0000e97c3b25dc9079311977c`。
+- GitHub Pages deployment run `44066311990` 的 build、deploy、report-build-status 均成功。
+- 既有 PWA display regression workflow 有三項與目前 main 原始碼不一致的舊斷言（舊版 PWA 標記、天氣轉換器 scope 控制、成就 helper 參數）；其餘 PR 回歸 workflow 通過，這三項未納入本任務修改。
+
+### 沒做／做不到的
+- 尚待棒子使用實際登入帳號在遊戲中驗收合成、啟用、管理員天氣期間及下一次玩家召喚的完整流程。
+
+### 衍生任務
+- 虛空手套與星軌手套依棒子新增需求另開任務，避免與本任務的時序結晶修改混在同一範圍。
+
+- 2026-11-17 18:37 [叉子] 狀態轉換：in_progress → review。程式 PR 已合併且 Pages 部署成功，交由棒子進行實際帳號驗收。
