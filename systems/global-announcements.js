@@ -86,6 +86,7 @@ export function createGlobalAnnouncements(dependencies) {
       dice_name: String(d?.name || ''),
       dice_den: Number(d?.den) || 0,
       pet_id: String(p?.id || ''),
+      pet_uid: String(p?.uid || ''),
       pet_name: String(petById(p?.id)?.name || ''),
       rarity: String(rarity || ''),
       created_at: new Date().toISOString()
