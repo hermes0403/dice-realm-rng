@@ -93,6 +93,13 @@ export function createGloveUI(deps) {
   }
 
   function renderGloves() {
+    const activeUser = getCurrentUser();
+    if (activeUser?.id) {
+      if (timeCrystalStatusUserId !== activeUser.id && !timeCrystalStatusLoading) void loadTimeCrystalStatus();
+    } else if (timeCrystalStatusUserId) {
+      timeCrystalStatus = null;
+      timeCrystalStatusUserId = null;
+    }
     const state = getState();
     const equippedGlove = currentGlove();
     documentRef.getElementById('gloveLabel').textContent = equippedGlove.name;
