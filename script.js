@@ -18,7 +18,7 @@ import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal-realtime-polling';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261116-achievement-recheck-leaderboard';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261117-t0103-auth-cloud-error';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261117-t0103-auth-flow';
