@@ -140,6 +140,9 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(boost.setupGlobalBoostUI(), false);
   assert.equal(boostDocument.listeners.get('click').length, 1);
   assert.equal(timers.manager.getStats().scopes['global-boost-refresh'].intervals, 1);
+  assert.equal(timers.manager.getStats().scopes['global-boost-status'].intervals, 1);
+  assert.equal([...timers.intervals.values()].find(timer => timer.delay === 10000)?.delay, 10000);
+  assert.equal([...timers.intervals.values()].find(timer => timer.delay === 1000)?.delay, 1000);
 
   const realmDocument = createFakeDocument(['adminBroadcastSendBtn', 'adminPollStartBtn', 'realmPollButtons']);
   const realm = createRealmPolls({
@@ -237,19 +240,22 @@ test('player weather subscription replaces the previous account channel', async 
     }
   };
   try {
+    const weatherTimers = createFakeTimerManager();
     const weather = createWeatherSystem({
       WEATHER_TYPES,
       supabaseClient,
       getCurrentUser: () => currentUser,
-      timerManager: createFakeTimerManager().manager,
+      timerManager: weatherTimers.manager,
       renderCodex() {}
     });
+    weather.setupServerWeatherSubscription();
     weather.setupPlayerWeatherSubscription();
     currentUser = { id: 'user-b' };
     weather.setupPlayerWeatherSubscription();
     await new Promise(resolve => setImmediate(resolve));
-    assert.deepEqual(channels.map(channel => channel.name), ['player-weather-user-a', 'player-weather-user-b']);
-    assert.deepEqual(removedChannels, [channels[0]]);
+    assert.deepEqual(channels.map(channel => channel.name), ['realm-weather-state', 'player-weather-user-a', 'player-weather-user-b']);
+    assert.deepEqual(removedChannels, [channels[1]]);
+    assert.equal([...weatherTimers.intervals.values()].some(timer => timer.delay === 20000), true);
   } finally {
     if (previousStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previousStorage;
