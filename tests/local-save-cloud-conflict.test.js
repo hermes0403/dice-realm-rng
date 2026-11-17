@@ -211,7 +211,7 @@ test('legacy local snapshot cannot win from a later timestamp or higher roll cou
   assert.equal(recovery.snapshot.bag.d1, 999, 'the legacy snapshot is retained for recovery');
 });
 
-test('cloud wins for transaction-backed coins and pet inventory when both sides changed', async () => {
+test('cloud wins transaction-backed coins while local pet additions survive concurrent cloud removals', async () => {
   const version = '2026-11-10T10:00:00.000Z';
   const baseState = {
     ...base,
@@ -239,8 +239,8 @@ test('cloud wins for transaction-backed coins and pet inventory when both sides 
   await service.loadCloudSave();
 
   assert.equal(getState().coins, 80);
-  assert.deepEqual(getState().pets, []);
-  assert.deepEqual(getState().equippedPetUids, []);
+  assert.deepEqual(getState().pets.map(pet => pet.uid), ['pet-local']);
+  assert.deepEqual(getState().equippedPetUids, ['pet-local']);
 });
 
 test('older local baseline is recovered from history after another tab advances the current baseline', async () => {
