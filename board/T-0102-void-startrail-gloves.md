@@ -1,17 +1,17 @@
 ---
 id: T-0102
 title: 新增虛空手套與星軌手套
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
-owner:
+owner: 叉子
 contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-17
 updated: 2026-11-17
 depends_on: []
-branch:
+branch: task/T-0102-void-startrail-gloves
 done_by:
 done_at:
 ---
@@ -49,3 +49,5 @@ done_at:
 
 <!-- 只增不改。格式：- YYYY-MM-DD HH:MM [作者] 內容 -->
 - 2026-11-17 18:39 [叉子] 依棒子新增需求建立，先保持 open；待完成准入閘門檢查後再轉為 in_progress。
+
+- 2026-11-17 18:40 [叉子] 狀態轉換：open → in_progress。最新 main Board 的 owner_side 有效 in_progress 任務為 T-0002、T-0038、T-0085，共 3/5；Communicate 優先閘門未觸發。從 main 建立專用任務分支，開始實作。
