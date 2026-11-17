@@ -185,9 +185,12 @@ export function createCloudSaveService(dependencies) {
     );
     const base = toMap(baseValue);
     const local = toMap(localValue);
-    const merged = toMap(cloudValue);
+    const cloudList = Array.isArray(cloudValue) ? cloudValue : [];
+    const legacyCloudPets = cloudList.filter(pet => !pet || typeof pet.uid !== 'string' || !pet.uid);
+    const merged = toMap(cloudList);
 
-    // Apply only this device's pet additions/removals since its known baseline.
+    // Keep legacy cloud pets without UIDs intact. New fusion results always
+    // have UIDs, so only identifiable instances participate in delta merging.
     // A stale local copy cannot bring back a pet that the cloud has since removed.
     for (const uid of base.keys()) {
       if (!local.has(uid)) merged.delete(uid);
@@ -195,7 +198,7 @@ export function createCloudSaveService(dependencies) {
     for (const [uid, pet] of local) {
       if (!base.has(uid) && !merged.has(uid)) merged.set(uid, clonePayload(pet));
     }
-    return [...merged.values()];
+    return [...legacyCloudPets, ...merged.values()];
   }
 
   function mergeObjectMap(baseValue, localValue, cloudValue, preserveMissing = false) {
