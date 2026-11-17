@@ -1,5 +1,5 @@
 /** Composition facade for the independently initialized glove, item, and potion UIs. */
-import { createGloveUI } from './gloves.js?v=20261117-t0098-time-crystal';
+import { createGloveUI } from './gloves.js?v=20261117-t0102-void-startrail-gloves';
 import { createPotionUI } from './potions.js';
 
 export function createEquipmentUI(deps) {
