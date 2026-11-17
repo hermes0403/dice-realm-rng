@@ -16,7 +16,7 @@ import { setupPetSellingUI } from './ui/pet-selling.js';
 import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261114-t0094-weather-converter-item-slots';
+import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
 import { createCloudSaveService } from './services/cloud-save.js?v=20261116-achievement-recheck-leaderboard';
 import { createCoinBoostService } from './systems/coin-boost.js';
@@ -29,7 +29,7 @@ import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=202611
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js';
 import { createRealmSocialSystem } from './systems/realm-social.js';
-import { createEquipmentUI } from './ui/equipment.js?v=20261114-t0094-weather-converter-item-slots';
+import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
 import { createGameStateService } from './core/game-state.js';

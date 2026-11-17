@@ -1,0 +1,45 @@
+name: Time Crystal regression tests
+
+on:
+  push:
+    branches:
+      - task/T-0098-time-crystal-weather-extension
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ui/gloves.js'
+      - 'systems/weather.js'
+      - 'ui/equipment.js'
+      - 'tests/time-crystal-ui.test.mjs'
+      - 'docs/migrations/20261117101418_t0098_time_crystal_weather_extension.sql'
+      - 'index.html'
+      - 'script.js'
+      - 'sw.js'
+      - '.github/workflows/time-crystal-tests.yml'
+
+jobs:
+  time-crystal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Time Crystal and weather regression tests
+        run: node --test tests/time-crystal-ui.test.mjs tests/weather-summon-odds.test.mjs tests/glitch-weather-dice.test.mjs
+      - name: Check JavaScript syntax
+        run: |
+          node --check ui/gloves.js
+          node --check systems/weather.js
+          node --check ui/equipment.js
+          node --check script.js
+          node --check sw.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
