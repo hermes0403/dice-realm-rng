@@ -1,7 +1,7 @@
 ---
 id: T-0096
 title: 修正管理員骰子發放即時同步與天氣轉換器版面
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-15
-updated: 2026-11-15
+updated: 2026-11-17
 depends_on: [T-0094, T-0095]
 branch: task/T-0096-grant-dice-and-weather-converter-layout
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-17
 ---
 
 ## 任務

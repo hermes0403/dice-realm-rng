@@ -6,6 +6,7 @@ on:
     paths:
       - 'data/dice.js'
       - 'systems/dice.js'
+      - 'systems/dice-locks.js'
       - 'systems/weather.js'
       - 'systems/glitch-weather-drops.js'
       - 'systems/secret-pet-skills.js'
@@ -28,6 +29,7 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/dice-locks.test.mjs'
       - 'tests/glitch-dice-catalog.test.mjs'
       - 'tests/glitch-weather-dice.test.mjs'
       - 'tests/glitch-weather-potion-drops.test.mjs'
@@ -73,6 +75,7 @@ jobs:
         with:
           node-version: 22
       - run: node --check systems/dice.js
+      - run: node --check systems/dice-locks.js
       - run: node --check systems/weather.js
       - run: node --check systems/glitch-weather-drops.js
       - run: node --check systems/secret-pet-skills.js
@@ -86,4 +89,4 @@ jobs:
       - run: node --check core/game-state.js
       - run: node --check services/account-actions.js
       - run: node --check systems/progression.js
-      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/local-save-cloud-conflict.test.js tests/glitch-dice-catalog.test.mjs tests/glitch-weather-dice.test.mjs tests/glitch-weather-potion-drops.test.mjs tests/secret-pet-skills.test.mjs tests/weather-summon-odds.test.mjs
+      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/dice-locks.test.mjs tests/local-save-cloud-conflict.test.js tests/glitch-dice-catalog.test.mjs tests/glitch-weather-dice.test.mjs tests/glitch-weather-potion-drops.test.mjs tests/secret-pet-skills.test.mjs tests/weather-summon-odds.test.mjs

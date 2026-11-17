@@ -1,19 +1,23 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.48';
+const CACHE_NAME = 'dice-realm-shell-v1.57';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261116-reward-balance-v1',
+  './script.js?v=20261117-t0101-tutorial-milestone',
+  './ui/onboarding.js?v=20261117-t0101-tutorial-milestone',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './data/eternal-update.js?v=20261115-t0098-eternal',
   './systems/pets.js?v=20261115-t0098-eternal-pets',
-  './systems/dice.js?v=20261115-t0098-eternal-dice',
+  './systems/dice.js?v=20261117-t0097-dice-lock-cleanup',
+  './systems/dice-locks.js',
+  './core/game-state.js',
+  './systems/weekly-realm-event.js?v=20261117-v154-auto-rewards',
   './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261115-t0098-eternal-tier',
+  './style.css?v=20261117-t0101-tutorial-milestone',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];

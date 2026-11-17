@@ -1,4 +1,5 @@
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
+import { addDiceToBag } from './dice-locks.js';
 import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
@@ -33,6 +34,7 @@ export function createDiceSystem(deps) {
     autoDepositRolledWeatherDice,
     broadcastRareRoll,
     render,
+    recordWeeklyRoll = () => {},
     documentRef
   } = deps;
 
@@ -237,6 +239,7 @@ export function createDiceSystem(deps) {
     const currentRollSequence = ++rollSequence;
     // 先立即消耗本次擲骰序號並寫入本機，避免動畫期間重新整理重複取得第 10 抽雙倍。
     state.rolls = Math.max(0, Number(state.rolls) || 0) + 1;
+    recordWeeklyRoll();
     // Persist the roll counter to both local save scopes immediately.
     save();
     const face = documentRef.getElementById('diceFace');
@@ -314,7 +317,7 @@ export function createDiceSystem(deps) {
           currentState.autoSold = (Number(currentState.autoSold) || 0) + 1;
           sold = true;
         } else {
-          currentState.bag[dice.id] = (currentState.bag[dice.id] || 0) + 1;
+          addDiceToBag(currentState, dice.id, 1);
         }
 
         if (!currentState.best || dice.den > currentState.best.den) {

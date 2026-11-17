@@ -1,7 +1,7 @@
 ---
 id: T-0093
 title: 將天氣手套改為天氣轉換器並新增道具工坊
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-17
 depends_on: []
 branch: task/T-0093-weather-converter-item-workshop
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-17
 ---
 
 ## 任務
@@ -54,7 +54,20 @@ done_at:
 - 2026-11-14 20:42 [叉子] 開單 PR #152 已合併至 main。依最新 origin/main Board 重新檢查：owner_side 的 in_progress 任務為 T-0085、T-0092，共 2/5；未發現 to 指派 owner_side 且狀態 open／in_progress 的有效 Communicate 任務，也未發現 from 屬 owner_side 且狀態 returned 的委派任務。兩道閘門均未阻擋，狀態由 open → in_progress，開始本任務工作。
 - 2026-11-14 20:47 [叉子] 已完成道具工坊、天氣轉換器配方與顯示／持有相容性修改；版本升至 V1.37，並新增 PWA／舊持有相容測試。尚待 PR 自動測試與正式部署驗證。
 
+- 2026-11-17 17:29 [代記:棒子/叉子] 驗收：棒子明確確認本任務已完成並同意結案。來源：棒子於 2026-11-17 對話表示「以上都好了」。證據：程式合併證據：PR #155 merge commit 1f29b499d5eaef790681a56079ef36f587558995；任務開單／開工 PR #152、#153。
+
 ## 完工回報
+### 改了什麼
+依本任務範圍完成骰子自動出售／成就狀態修正及相關 UI、相容性或同步調整；詳細差異以已合併 PR 為準（#152、#153、#155）。
+
+### 怎麼驗證的
+已確認主要交付 PR 合併至 main；本次結案依棒子明確驗收。未在本次 Board 歸檔操作中重新執行歷史 CI 或重新驗證 Pages，故不額外宣稱本次重新測試通過。
+
+### 沒做／做不到的
+無新增未完成事項；歷史測試與部署證據以對應 PR／Actions 紀錄為準。
+
+### 衍生任務／影響任務
+無。
 
 ### 改了什麼
 

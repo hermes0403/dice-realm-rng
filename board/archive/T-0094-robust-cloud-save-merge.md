@@ -1,7 +1,7 @@
 ---
 id: T-0094
 title: 強化多分頁／多裝置存檔衝突合併與防止玩家進度倒退
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P0
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-17
 depends_on: [T-0086]
 branch: task/T-0094-robust-cloud-save-merge
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-17
 ---
 
 ## 任務
@@ -55,3 +55,19 @@ done_at:
 
 - 2026-11-14 [叉子] 開單前依最新 main Board 核對：owner_side 有效 in_progress 任務為 T-0085、T-0092、T-0093，共 3/5；T-0086、T-0089 為 review，不計入容量。最新 main Board 未發現 communicate task 檔案，Communicate 優先閘門未觸發。依棒子本次明確要求建立 P0 後續修補任務；本階段只開單，尚未開始實作。
 - 2026-11-14 [叉子] 開單 PR #156 已合併至 main（merge commit `f3bb4647a0cc4cbd23e694ed0fb282d49a230fe2`）。任務分支原先僅落後 main 1 個 merge commit，已以非強制 fast-forward 更新至該 main HEAD。開工前重新核對容量仍為 3/5；未發現 communicate task，兩道閘門均未阻擋，任務轉為 in_progress。
+
+
+- 2026-11-17 17:29 [代記:棒子/叉子] 驗收：棒子明確確認本任務已完成並同意結案。來源：棒子於 2026-11-17 對話表示「以上都好了」。證據：程式與 SQL 來源合併證據：PR #158 merge commit e0306ae3f2544b99b50bf0c1df683787acf0f828、PR #159 merge commit bc7a9608aa25d64d751a702d0b3d1303b00d17a2、PR #160 merge commit 3ce1b20cfde870a7a0638964e61caa48b421d002。
+
+## 完工回報
+### 改了什麼
+依本任務範圍完成雲端存檔衝突合併／舊分頁恢復核對及相關 SQL、權限或回歸測試同步；詳細差異以合併 PR 為準。
+
+### 怎麼驗證的
+已確認列出的交付 PR 均合併至 main；本次結案依棒子明確驗收。未在本次 Board 歸檔操作中重新執行歷史 CI 或重新驗證正式 Supabase／Pages，故不額外宣稱本次重新測試通過。
+
+### 沒做／做不到的
+無新增未完成事項；歷史測試及正式環境查核以對應 PR／Actions／migration 紀錄為準。
+
+### 衍生任務／影響任務
+無。
