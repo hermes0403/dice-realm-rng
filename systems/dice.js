@@ -1,4 +1,5 @@
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
+import { addDiceToBag } from './dice-locks.js';
 import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
@@ -316,7 +317,7 @@ export function createDiceSystem(deps) {
           currentState.autoSold = (Number(currentState.autoSold) || 0) + 1;
           sold = true;
         } else {
-          currentState.bag[dice.id] = (currentState.bag[dice.id] || 0) + 1;
+          addDiceToBag(currentState, dice.id, 1);
         }
 
         if (!currentState.best || dice.den > currentState.best.den) {
