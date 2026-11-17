@@ -33,6 +33,7 @@ export async function runCloudSessionInitialization({
   userId,
   loadCloudSave,
   isCloudSaveReady,
+  getCloudLoadError = () => null,
   isCurrentUser = () => true,
   loadPetFusionOdds,
   heartbeat,
@@ -53,7 +54,11 @@ export async function runCloudSessionInitialization({
       throw error;
     }
   }
-  if (!isCurrentUser(userId) || !isCloudSaveReady(userId) || isCloudSyncBlocked()) return false;
+  if (!isCurrentUser(userId) || !isCloudSaveReady(userId) || isCloudSyncBlocked()) {
+    const loadError = getCloudLoadError();
+    if (isCloudRestrictionError(loadError)) onCloudRestriction(loadError);
+    return false;
+  }
 
   const steps = [
     applyPetLoginSkill,
@@ -108,6 +113,7 @@ export function createAuthService(deps) {
     loadWeatherSummonData,
     applyPetLoginSkill = () => 0,
     isCloudSaveReady = () => false,
+    getCloudLoadError = () => null,
     onboardingMaybeShow = () => false,
     timerManager
   } = deps;
@@ -355,6 +361,7 @@ export function createAuthService(deps) {
       userId: user.id,
       loadCloudSave: () => loadCloudSaveOnce(user.id),
       isCloudSaveReady,
+      getCloudLoadError,
       isCurrentUser: id => !initializationCancelled && getCurrentUser()?.id === id,
       loadPetFusionOdds,
       heartbeat,
