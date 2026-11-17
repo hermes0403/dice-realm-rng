@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.56';
+const CACHE_NAME = 'dice-realm-shell-v1.57';
 const APP_SHELL = [
   './',
   './index.html',
