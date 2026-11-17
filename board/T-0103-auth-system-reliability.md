@@ -22,7 +22,7 @@ done_at:
 
 ## 範圍與禁止
 
-- 只修改登入／註冊／密碼復原所需的 services/auth.js、必要的 index.html／script.js 綁定、services/supabase.js（僅在驗證發現設定錯誤時）、Auth 專項測試，以及可供 Owner 貼入 Supabase Dashboard 的繁體中文驗證信／重設密碼信範本文件。
+- 只修改登入／註冊／密碼復原所需的 services/auth.js、services/cloud-save.js、必要的 index.html／script.js 綁定、services/supabase.js（僅在驗證發現設定錯誤時）、Auth 專項測試，以及可供 Owner 貼入 Supabase Dashboard 的繁體中文驗證信／重設密碼信範本文件。
 - 保留 Supabase persistSession、autoRefreshToken、detectSessionInUrl 與現有 Email／密碼帳號，不重新加入 Google OAuth。
 - 保留每日裝置帳號限制、未驗證帳號禁止進入遊戲、既有玩家存檔及帳號資料；不得重設、刪除或合併玩家資料。
 - 修復註冊驗證信的清楚提示、驗證成功／失效回跳處理、必要時重新寄送驗證信，以及密碼重設連結後設定新密碼的完整流程。
