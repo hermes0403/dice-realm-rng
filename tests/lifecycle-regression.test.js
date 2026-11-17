@@ -261,7 +261,9 @@ test('player weather subscription replaces the previous account channel', async 
       supabaseClient,
       getCurrentUser: () => currentUser,
       timerManager: weatherTimers.manager,
-      renderCodex() {}
+      renderCodex() {},
+      announceWeatherSummon() {},
+      triggerWeatherSurge() {}
     });
     weather.setupServerWeatherSubscription();
     weather.setupPlayerWeatherSubscription();
