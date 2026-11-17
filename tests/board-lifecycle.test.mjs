@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { parseTaskIndex, splitMarkdownTableRow, validateBoardDirectory } from '../scripts/validate-board.mjs';
+import {
+  parseRecordAuthor, parseTaskIndex, recordTimestampIssue, splitMarkdownTableRow, validateBoardDirectory
+} from '../scripts/validate-board.mjs';
 
 function makeBoard(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-'));
@@ -184,6 +186,297 @@ test('the receiving permission group may create the communicate task for the ori
   }));
   const result = validateTestBoard(board);
   assert.deepEqual(result.errors, []);
+});
+
+function writeDoneTask(board, { id = 'T-0001', from = 'barry', doneBy = 'barry', section = '紀錄', record, newline = '\n' } = {}) {
+  const body = [`## ${section}`, '', record, ''].join(newline);
+  const content = taskFile({
+    id, status: 'done', from, doneBy, doneAt: '2026-11-11', body
+  }).replace(/\r?\n/g, newline);
+  writeTask(board, id, content);
+}
+
+test('a valid human proxy acceptance in an approved section satisfies Check 2', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    record: '- 2026-11-11 10:30 [代記:barry/老查] 驗收通過。來源：Barry 明確同意結案。證據：PR #1 已合併。'
+  });
+  const result = validateTestBoard(board);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.warnings, []);
+});
+
+test('Check 2 accepts the explicit 驗收 section but not 完工回報', t => {
+  const board = makeBoard(t);
+  const accepted = '- 2026-11-11 10:30 [棒子] 驗收通過。來源：棒子明確同意。證據：PR #1。';
+  writeDoneTask(board, { from: '棒子', doneBy: '棒子', section: '驗收', record: accepted });
+  assert.deepEqual(validateTestBoard(board).warnings, []);
+
+  writeDoneTask(board, { id: 'T-0002', from: '棒子', doneBy: '棒子', section: '完工回報', record: accepted });
+  const result = validateTestBoard(board);
+  assert.ok(result.warnings.some(warning => warning.includes('T-0002-test.md [檢查 2]')));
+});
+
+test('Check 2 requires human authority from the task from-side and matching done_by', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    from: '棒子', doneBy: '棒子',
+    record: '- 2026-11-11 10:30 [barry] 驗收通過。來源：Barry 指示。證據：PR #1。'
+  });
+  const result = validateTestBoard(board);
+  assert.ok(result.warnings.some(warning => warning.includes('T-0001-test.md [檢查 2]')));
+});
+
+test('GPT-only and UNKNOWN_SIDE labels cannot qualify as human acceptance', t => {
+  for (const label of ['叉子', '棒子明確驗收／叉子代記']) {
+    const board = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-case-'));
+    const archive = path.join(board, 'archive');
+    fs.mkdirSync(archive, { recursive: true });
+    const cleanup = () => fs.rmSync(board, { recursive: true, force: true });
+    try {
+      writeDoneTask(board, {
+        from: '棒子', doneBy: '棒子',
+        record: `- 2026-11-11 10:30 [${label}] 驗收通過。來源：人類決定。證據：PR #1。`
+      });
+      const result = validateTestBoard(board);
+      assert.ok(result.warnings.some(warning => warning.includes('T-0001-test.md [檢查 2]')));
+      if (label.includes('／')) {
+        assert.ok(result.warnings.some(warning => warning.includes('UNKNOWN_SIDE')));
+      }
+    } finally {
+      cleanup();
+    }
+  }
+});
+
+test('done_by must be the human decision-maker, and impact notifications are not acceptance', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    from: '棒子', doneBy: '叉子',
+    record: '- 2026-11-11 10:30 [棒子] 驗收通過。來源：棒子明確同意。證據：PR #1。'
+  });
+  writeDoneTask(board, {
+    id: 'T-0002', from: '棒子', doneBy: '棒子',
+    record: '- 2026-11-11 10:30 [impact][棒子] 驗收通過。來源：棒子明確同意。證據：PR #1。'
+  });
+  const result = validateTestBoard(board);
+  assert.ok(result.warnings.some(warning => warning.includes('T-0001-test.md [檢查 2]')));
+  assert.ok(result.warnings.some(warning => warning.includes('T-0002-test.md [檢查 2]')));
+});
+
+test('Check 2 requires 來源 and 證據 in the same record', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    record: [
+      '- 2026-11-11 10:30 [代記:barry/老查] 驗收通過。來源：Barry 明確同意。',
+      '- 2026-11-11 10:31 [老查] 證據：PR #1 已合併。'
+    ].join('\n')
+  });
+  assert.ok(validateTestBoard(board).warnings.some(warning => warning.includes('[檢查 2]')));
+});
+
+test('Check 2 rejects an empty 來源 or 證據 field', t => {
+  for (const record of [
+    '- 2026-11-11 10:30 [barry] 驗收通過。來源： 證據：PR #1。',
+    '- 2026-11-11 10:30 [barry] 驗收通過。來源：Barry 明確同意。證據：'
+  ]) {
+    const board = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-empty-evidence-'));
+    fs.mkdirSync(path.join(board, 'archive'), { recursive: true });
+    try {
+      writeDoneTask(board, { record });
+      assert.ok(validateTestBoard(board).warnings.some(warning => warning.includes('[檢查 2]')));
+    } finally {
+      fs.rmSync(board, { recursive: true, force: true });
+    }
+  }
+});
+
+test('Check 2 rejects empty child-bullet 來源 and 證據 values but accepts both populated', t => {
+  const cases = [
+    {
+      record: '- 2026-11-11 10:30 [barry] 驗收通過。\n  - 來源：\n  - 證據：PR #1。',
+      expected: '缺來源'
+    },
+    {
+      record: '- 2026-11-11 10:30 [barry] 驗收通過。\n  - 來源：Barry 明確同意。\n  - 證據：',
+      expected: '缺證據'
+    }
+  ];
+  for (const { record } of cases) {
+    const board = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-child-empty-'));
+    fs.mkdirSync(path.join(board, 'archive'), { recursive: true });
+    try {
+      writeDoneTask(board, { record });
+      assert.ok(validateTestBoard(board).warnings.some(warning => warning.includes('[檢查 2]')));
+    } finally {
+      fs.rmSync(board, { recursive: true, force: true });
+    }
+  }
+
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    record: '- 2026-11-11 10:30 [barry] 驗收通過。\n  - 來源：Barry 明確同意。\n  - 證據：PR #1。'
+  });
+  assert.deepEqual(validateTestBoard(board).warnings, []);
+});
+
+test('Check 2 excludes negated acceptance decisions', t => {
+  for (const phrase of ['尚未驗收通過', '未驗收完成', '等待驗收完成', '不得視為驗收通過']) {
+    const board = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-negated-acceptance-'));
+    fs.mkdirSync(path.join(board, 'archive'), { recursive: true });
+    try {
+      writeDoneTask(board, {
+        record: `- 2026-11-11 10:30 [barry] ${phrase}。來源：Barry 說明。證據：PR #1。`
+      });
+      assert.ok(validateTestBoard(board).warnings.some(warning => warning.includes('[檢查 2]')), phrase);
+    } finally {
+      fs.rmSync(board, { recursive: true, force: true });
+    }
+  }
+});
+
+test('record author labels must immediately follow the date and optional time', () => {
+  assert.equal(parseRecordAuthor('- 2026-11-11 10:30 [barry] 驗收通過').label, 'barry');
+  assert.equal(parseRecordAuthor('- 2026-11-14 16:xx [叉子] malformed timestamp').side, 'owner_side');
+  assert.equal(parseRecordAuthor('- 2026-11-11 10:30 驗收通過 [T-0019]').side, 'UNKNOWN_SIDE');
+});
+
+test('UNKNOWN_SIDE warnings are collected even after an earlier valid acceptance', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    record: [
+      '- 2026-11-11 10:30 [barry] 驗收通過。來源：Barry 明確同意。證據：PR #1。',
+      '- 2026-11-11 10:31 [not-a-role] 補充紀錄。'
+    ].join('\n')
+  });
+  const result = validateTestBoard(board);
+  assert.deepEqual(result.errors, []);
+  assert.ok(result.warnings.some(warning => warning.includes('UNKNOWN_SIDE label=not-a-role')));
+});
+
+test('a pending or generic mention of 驗收 is not an acceptance decision', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    record: '- 2026-11-11 10:30 [barry] 等待驗收。來源：Barry 的待驗收通知。證據：PR #1。'
+  });
+  assert.ok(validateTestBoard(board).warnings.some(warning => warning.includes('[檢查 2]')));
+});
+
+test('Check 2 ignores tasks completed before the effective date', t => {
+  const board = makeBoard(t);
+  writeTask(board, 'T-0001', taskFile({ id: 'T-0001', status: 'done', doneBy: 'barry', doneAt: '2026-11-10' }));
+  assert.deepEqual(validateTestBoard(board).warnings, []);
+});
+
+test('Check 2 recognizes an ISO timestamp in done_at when applying the effective date', t => {
+  const board = makeBoard(t);
+  const content = taskFile({ id: 'T-0001', status: 'done', doneBy: 'barry', doneAt: '2026-11-11T10:00:00+08:00' });
+  writeTask(board, 'T-0001', content);
+  const result = validateTestBoard(board);
+  assert.ok(result.warnings.some(warning => warning.includes('[檢查 2]')));
+});
+
+test('recordChecks defaults to warnings and error mode promotes record violations', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, { record: '- 2026-11-11 [老查] 已完成。' });
+  const warningResult = validateTestBoard(board);
+  assert.deepEqual(warningResult.errors, []);
+  assert.ok(warningResult.warnings.some(warning => warning.includes('[檢查 2]')));
+
+  const errorResult = validateBoardDirectory(board, { checkIndex: false, recordChecks: 'error' });
+  assert.ok(errorResult.errors.some(error => error.includes('[檢查 2]')));
+});
+
+test('recordChecks supports M2 side-specific severities for later PR-diff validation', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, { from: '棒子', doneBy: '棒子', record: '- 2026-11-11 [叉子] 已完成。' });
+  writeTask(board, 'T-0002', taskFile({
+    id: 'T-0002', from: 'barry', body: '## 紀錄\n\n- 2026-11-11 [老查] collaborator-side record\n'
+  }));
+  const result = validateBoardDirectory(board, {
+    checkIndex: false,
+    recordChecks: { check2: 'error', check3: { owner_side: 'warning', collaborator_side: 'error' } }
+  });
+  assert.ok(result.warnings.some(warning => warning.includes('[檢查 3]') && warning.includes('owner_side')));
+  assert.ok(result.errors.some(error => error.includes('[檢查 2]')));
+  assert.ok(result.errors.some(error => error.includes('[檢查 3]') && error.includes('collaborator_side')));
+});
+
+test('side-specific record checks block Barry violations and warn for Owner violations', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    id: 'T-0001', from: 'barry', doneBy: 'barry',
+    record: '- 2026-11-11 [老查] implementation completed'
+  });
+  writeDoneTask(board, {
+    id: 'T-0002', from: '棒子', doneBy: '棒子',
+    record: '- 2026-11-11 [叉子] implementation completed'
+  });
+  writeTask(board, 'T-0003', taskFile({
+    id: 'T-0003', from: 'barry', body: '## 紀錄\n\n- 2026-11-11 [老查] missing time\n'
+  }));
+  writeTask(board, 'T-0004', taskFile({
+    id: 'T-0004', from: '棒子', body: '## 紀錄\n\n- 2026-11-11 [叉子] missing time\n'
+  }));
+
+  const result = validateBoardDirectory(board, {
+    checkIndex: false,
+    recordChecks: {
+      check2: { owner_side: 'warning', collaborator_side: 'error' },
+      check3: { owner_side: 'warning', collaborator_side: 'error' }
+    }
+  });
+
+  assert.ok(result.errors.some(error => error.includes('T-0001-test.md [檢查 2]')));
+  assert.ok(result.errors.some(error => error.includes('T-0003:') && error.includes('[檢查 3]')));
+  assert.ok(result.warnings.some(warning => warning.includes('T-0002-test.md [檢查 2]')));
+  assert.ok(result.warnings.some(warning => warning.includes('T-0004:') && warning.includes('[檢查 3]')));
+});
+
+test('timestamp validation accepts HH:MM and HH:MM:SS and rejects invalid ranges and dates', () => {
+  const record = line => ({ lines: [{ text: line }] });
+  assert.equal(recordTimestampIssue(record('- 2026-11-11 19:36 [barry] update')), null);
+  assert.equal(recordTimestampIssue(record('- 2026-11-11 19:36:00 [barry] update')), null);
+  assert.match(recordTimestampIssue(record('- 2026-11-11 [barry] update')), /missing time/);
+  assert.match(recordTimestampIssue(record('- 2026-11-11 16:xx [叉子] update')), /malformed time/);
+  assert.match(recordTimestampIssue(record('- 2026-11-11 24:00 [叉子] update')), /out-of-range/);
+  assert.match(recordTimestampIssue(record('- 2026-11-11 19:60 [叉子] update')), /out-of-range/);
+  assert.match(recordTimestampIssue(record('- 2026-11-11 19:36:60 [叉子] update')), /out-of-range/);
+  assert.match(recordTimestampIssue(record('- 2026-11-31 19:36 [叉子] update')), /invalid calendar date/);
+  assert.equal(recordTimestampIssue(record('- 2026-11-10 [叉子] historical')), null);
+});
+
+test('timestamp scanning includes 完工回報 while acceptance validation excludes it', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    from: '棒子', doneBy: '棒子', section: '完工回報',
+    record: '- 2026-11-11 [叉子] implementation report'
+  });
+  const result = validateTestBoard(board);
+  assert.ok(result.warnings.some(warning => warning.includes('[檢查 3] missing time')));
+  assert.ok(result.warnings.some(warning => warning.includes('[檢查 2]')));
+});
+
+test('timestamp scanning handles LF and CRLF records without treating child bullets as new records', t => {
+  for (const newline of ['\n', '\r\n']) {
+    const board = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-newline-'));
+    fs.mkdirSync(path.join(board, 'archive'), { recursive: true });
+    try {
+      writeDoneTask(board, {
+        newline,
+        record: [
+          '- 2026-11-11 19:36 [代記:barry/老查] 驗收通過。',
+          '  - 來源：Barry 明確同意。',
+          '  - 證據：PR #1。'
+        ].join(newline)
+      });
+      const result = validateTestBoard(board);
+      assert.deepEqual(result.errors, []);
+      assert.deepEqual(result.warnings, []);
+    } finally {
+      fs.rmSync(board, { recursive: true, force: true });
+    }
+  }
 });
 
 test('an escaped pipe in a task title remains inside its Markdown table cell', () => {
