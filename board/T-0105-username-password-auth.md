@@ -1,7 +1,7 @@
 ---
 id: T-0105
 title: 新增玩家名稱密碼登入與免 Email 註冊
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -59,6 +59,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-18 07:11 [叉子] 開立任務。已確認 T-0103 PR #201 合併，並完成目前 Auth service、Supabase Auth 文件、玩家資料表及指定三個公開玩家名稱的唯讀盤點。T-0105 先保持 open；開工前仍須依 Board §15.3 重新檢查容量與 Communicate 優先閘門。
+- 2026-11-18 07:12 [叉子] 開工前重新檢查最新 main：owner_side in_progress 任務為 T-0085、T-0102、T-0103，共 3/5；Communicate 優先閘門未觸發；depends_on 為空，沒有已知委派鎖定。T-0105 由 open 轉為 in_progress，沿用同一任務分支。
 
 ## 完工回報
 
