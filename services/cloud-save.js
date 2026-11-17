@@ -23,6 +23,7 @@ export function createCloudSaveService(dependencies) {
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
   let cloudLoadReadyUserId = null;
+  let lastCloudLoadError = null;
   const grantCheckAtByUser = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
   const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -590,6 +591,7 @@ export function createCloudSaveService(dependencies) {
   windowObject?.addEventListener?.('online', () => { void refreshCloudSaveOnResume('online'); });
 
   async function loadCloudSave({
+    lastCloudLoadError = null;
     syncAfterLoad = true,
     conflictBasePayload = null,
     conflictBaseVersion = null,
@@ -758,17 +760,22 @@ export function createCloudSaveService(dependencies) {
       cloudLoadReadyUserId = user.id;
     } catch (e) {
       cloudLoadReadyUserId = null;
+      lastCloudLoadError = e;
       console.error(e);
       if (/user.?banned|banned|被停權|已停權/i.test(String(e?.message || ''))) {
         await supabaseClient?.auth.signOut().catch(() => {});
         openAuth();
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
-      } else toast('讀取雲端存檔失敗，請重新登入');
+      } else if (Number(e?.status ?? e?.statusCode) === 402
+        || /exceed_egress_quota|project is restricted|egress quota/i.test(String(e?.message || e?.code || ''))) {
+        toast('Supabase 雲端服務目前受到流量額度限制，暫時無法載入雲端存檔。本機資料不會因此清除。');
+      } else toast('讀取雲端存檔失敗，請檢查網路後重試');
     }
   }
 
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
+  function getLastCloudLoadError() { return lastCloudLoadError; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
 }
