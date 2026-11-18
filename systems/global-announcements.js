@@ -89,6 +89,11 @@ export function createGlobalAnnouncements(dependencies) {
       pet_uid: String(p?.uid || ''),
       pet_name: String(petById(p?.id)?.name || ''),
       rarity: String(rarity || ''),
+      pet_kg: Number.isFinite(Number(p?.kg)) ? Math.max(1, Math.floor(Number(p.kg))) : null,
+      pet_variant: p?.variant == null ? null : String(p.variant),
+      pet_mutation: p?.mutation == null ? null : String(p.mutation),
+      pet_source_tier: Number.isFinite(Number(p?.sourceTier)) ? Math.floor(Number(p.sourceTier)) : null,
+      auto_sold: p?.autoSold === true,
       created_at: new Date().toISOString()
     };
     try {
