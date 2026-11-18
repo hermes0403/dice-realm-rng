@@ -792,7 +792,7 @@ export function createCloudSaveService(dependencies) {
           // First-time accounts receive a unique game nickname from their
           // login name, never the previous account's in-memory state.
           const baseName = String(user.user_metadata?.username || '玩家')
-            .normalize('NFKC').replace(/[^\\p{L}\\p{N}_-]/gu, '').slice(0, 12) || '玩家';
+            .normalize('NFKC').replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
           S.name = (baseName + '_' + String(user.id).slice(0, 4)).slice(0, 20);
         }
         S.petAutoSellRarities = latestLocalSnapshot?.petAutoSellRarities || {};
