@@ -183,3 +183,36 @@ test('a stale local pet cannot resurrect a pet removed by another device', async
   assert.deepEqual(getState().pets.map(pet => pet.uid), [cloudPet.uid]);
   assert.deepEqual(getState().equippedPetUids, [cloudPet.uid]);
 });
+
+test('a regressed local roll counter does not discard a pet fused after the baseline', async () => {
+  const basePet = { uid: 'pet-base-regression', id: 'c1', rarity: 'common' };
+  const localFusedPet = { uid: 'pet-local-fused-after-base', id: 'l6', rarity: 'legendary', kg: 42 };
+  const cloudPet = { uid: 'pet-cloud-current', id: 'r1', rarity: 'rare' };
+  const baseSave = {
+    bag: { d1: 1 }, rolls: 100, rollCounts: { d1: 100 },
+    first: { d1: '2026-11-10T00:00:00.000Z' }, best: { den: 100 },
+    pets: [basePet], equippedPetUids: [basePet.uid]
+  };
+  const localSave = {
+    ...baseSave,
+    rolls: 99,
+    rollCounts: { d1: 99 },
+    pets: [basePet, localFusedPet],
+    equippedPetUids: [basePet.uid, localFusedPet.uid],
+    _cloudBaseVersion: '2026-11-13T22:00:00.000Z'
+  };
+  const cloudSave = {
+    ...baseSave,
+    pets: [cloudPet],
+    equippedPetUids: [cloudPet.uid]
+  };
+  const { service, getState } = createService({ localSave, cloudSave, baseSave });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+
+  assert.deepEqual(new Set(getState().pets.map(pet => pet.uid)),
+    new Set([localFusedPet.uid, cloudPet.uid]));
+  assert.deepEqual(new Set(getState().equippedPetUids),
+    new Set([localFusedPet.uid, cloudPet.uid]));
+  assert.equal(getState().rolls, cloudSave.rolls);
+});
