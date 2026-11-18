@@ -101,7 +101,16 @@ export function setupOnboardingUI({ documentRef = document, getCurrentUser, isAd
   });
   el('onboardingClose').addEventListener('click', close);
   el('onboardingSkip').addEventListener('click', close);
-  el('replayTutorialBtn').addEventListener('click', () => { show(); toast('新手教學已開啟'); });
+  const replayTutorialButton = el('replayTutorialBtn');
+  const replayTutorialHandler = () => { show(); toast('新手教學已開啟'); };
+  replayTutorialButton.addEventListener('click', replayTutorialHandler);
+  const onDocumentClick = event => {
+    const target = event.target?.closest?.('#replayTutorialBtn');
+    if (!target || target === replayTutorialButton) return;
+    event.preventDefault();
+    replayTutorialHandler();
+  };
+  documentRef.addEventListener?.('click', onDocumentClick);
   el('adminTutorialTestBtn').addEventListener('click', () => show({ preview: true }));
 
   return { show, close, maybeShowForCurrentUser };
