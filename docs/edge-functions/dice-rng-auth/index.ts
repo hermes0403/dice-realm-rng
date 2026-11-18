@@ -194,15 +194,13 @@ Deno.serve(async (req: Request) => {
       throw insertError;
     }
 
-    const result = await passwordGrant(internalEmail, password);
-    if (!result.ok) {
-      return json({
-        success: true,
-        autoLogin: false,
-        message: "註冊成功，請返回登入畫面並使用玩家名稱登入。"
-      }, 201, origin);
-    }
-    return json({ success: true, session: result.session }, 201, origin);
+    // Registration intentionally does not create a login session.
+    // The player must return to the login panel and sign in with the new username.
+    return json({
+      success: true,
+      autoLogin: false,
+      message: "帳號已建立，請登入帳號。"
+    }, 201, origin);
   } catch (error) {
     console.error("Player auth request failed:", String(error?.message || error));
     return json({ error: "目前無法完成操作，請稍後再試。" }, 503, origin);
