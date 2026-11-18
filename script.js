@@ -39,7 +39,7 @@ import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0106-password-reset';
-import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
+import { setupAccountActions } from './services/account-actions.js?v=20261118-t0111-logout-feedback';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
 import { setupOnboardingUI } from './ui/onboarding.js?v=20261117-t0101-tutorial-milestone';

@@ -124,18 +124,32 @@ export function setupAccountActions(dependencies) {
   };
 
   document.getElementById('profileLogoutBtn')?.addEventListener('click', async () => {
-    if (!getCurrentUser()) { toast('目前沒有登入雲端帳號'); return; }
+    const user = getCurrentUser();
+    if (!user) { toast('目前沒有登入雲端帳號'); return; }
     const button = document.getElementById('profileLogoutBtn');
+    const message = document.getElementById('accountActionMessage');
     if (button) button.disabled = true;
+    if (message) message.textContent = '正在保存最新遊戲進度，完成後會自動登出…';
     try {
-      // Flush the latest local game state before ending the authenticated session.
-      const saved = await flushCloudSave();
-      if (saved === false) throw new Error('雲端同步失敗，請確認網路後重試');
+      // Persist locally first, then wait for the final cloud backup before sign-out.
+      save();
+      const flushPromise = Promise.resolve().then(() => flushCloudSave());
+      let timeoutId;
+      const saved = await Promise.race([
+        flushPromise,
+        new Promise((_, reject) => {
+          timeoutId = globalThis.setTimeout(() => reject(new Error('雲端同步等待超過 20 秒。請確認網路或稍後重試；目前仍保持登入，避免進度遺失。')), 20000);
+        })
+      ]).finally(() => globalThis.clearTimeout(timeoutId));
+      if (getCurrentUser()?.id !== user.id) return;
+      if (saved !== true) throw new Error('雲端同步未確認完成，請稍後重試');
       const { error } = await supabaseClient.auth.signOut();
       if (error) throw error;
+      if (message) message.textContent = '已完成雲端保存並登出。';
       toast('存檔完成，已登出雲端帳號');
     } catch (error) {
-      toast('雲端存檔未完成，為避免進度遺失，暫時未登出：' + (error?.message || '請稍後重試'));
+      if (message) message.textContent = '登出未完成：' + (error?.message || '請稍後重試');
+      toast('登出未完成：' + (error?.message || '請稍後重試'));
     } finally {
       if (button) button.disabled = false;
     }
