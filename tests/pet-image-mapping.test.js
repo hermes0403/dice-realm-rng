@@ -12,11 +12,11 @@ test('all regular and event pets have explicit stable-ID image mappings', () => 
   assert.deepEqual(Object.keys(PET_IMAGE_ASSETS), allIds, 'image mapping order must follow regular pets then event pets');
   for (const pet of PETS) {
     assert.equal(typeof PET_IMAGE_ASSETS[pet.id], 'string', pet.id);
-    assert.match(PET_IMAGE_ASSETS[pet.id], /^data:image\\/jpeg;base64,/);
+    assert.ok(PET_IMAGE_ASSETS[pet.id].startsWith('data:image/jpeg;base64,'), pet.id);
   }
   for (const pet of EVENT_PETS) {
     assert.equal(typeof PET_IMAGE_ASSETS[pet.id], 'string', pet.id);
-    assert.match(PET_IMAGE_ASSETS[pet.id], /\\/assets\\/pets\\/events\\/event-pets-sprite\\.jpg$/);
+    assert.ok(PET_IMAGE_ASSETS[pet.id].endsWith('/assets/pets/events/event-pets-sprite.jpg'), pet.id);
   }
 });
 
@@ -24,7 +24,7 @@ test('retired pet IDs do not retain image mappings', () => {
   for (const id of REMOVED_PET_IDS) assert.equal(Object.hasOwn(PET_IMAGE_ASSETS, id), false, id);
 });
 
-test('all regular pet image assets are distinct; event pets use the dedicated event sprite sheet', () => {
+test('regular pet image assets are distinct and event pets use the dedicated sprite sheet', () => {
   const regularImages = PETS.map(pet => PET_IMAGE_ASSETS[pet.id]);
   assert.equal(new Set(regularImages).size, regularImages.length);
   const eventImages = EVENT_PETS.map(pet => PET_IMAGE_ASSETS[pet.id]);
