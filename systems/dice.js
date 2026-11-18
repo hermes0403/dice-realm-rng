@@ -1,3 +1,18 @@
+export function addWeatherDiceOdds(entries, pool, weatherTypes) {
+  const activeWeatherTypes = new Set(Array.isArray(weatherTypes) ? weatherTypes : [weatherTypes]);
+  const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
+  if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
+  const weatherDice = pool.filter(dice => activeWeatherTypes.has(dice.weather) && Number(dice.den) > 2048);
+  if (!weatherDice.length) return entries;
+  const donors = entries.filter(entry => entry.weight > 10);
+  const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
+  const reserve = weatherDice.length;
+  if (donorTotal <= reserve) return entries;
+  donors.forEach(entry => { entry.weight -= reserve * (entry.weight / donorTotal); });
+  weatherDice.forEach(dice => entries.push({ dice, weight: 1 }));
+  return entries;
+}
+
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
 import { addDiceToBag } from './dice-locks.js';
 import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
@@ -88,19 +103,7 @@ export function createDiceSystem(deps) {
     autoWatchdog = null;
   }
 
-  function addWeatherOdds(entries, pool, weather) {
-    const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
-    if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
-    const weatherDice = pool.filter(dice => dice.weather === weather && Number(dice.den) > 2048);
-    if (!weatherDice.length) return entries;
-    const donors = entries.filter(entry => entry.weight > 10);
-    const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
-    const reserve = weatherDice.length;
-    if (donorTotal <= reserve) return entries;
-    donors.forEach(entry => { entry.weight -= reserve * (entry.weight / donorTotal); });
-    weatherDice.forEach(dice => entries.push({ dice, weight: 1 }));
-    return entries;
-  }
+  const addWeatherOdds = addWeatherDiceOdds;
 
   function isHalloweenDice(dice) {
     return ['d33', 'd34', 'd35', 'd36'].includes(dice?.id);
@@ -134,7 +137,7 @@ export function createDiceSystem(deps) {
         heaven2,
         angel
       );
-      const withWeatherDice = addWeatherOdds(entries, pool, weather);
+      const withWeatherDice = addWeatherOdds(entries, pool, weatherTypes);
       const total = withWeatherDice.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
       for (const entry of withWeatherDice) {

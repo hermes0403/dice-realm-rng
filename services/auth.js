@@ -1,3 +1,11 @@
+export const SESSION_OFFLINE_TIMEOUT_MS = 100000;
+
+export function hasSessionExpiredAfterOffline(offlineStartedAt, now = Date.now()) {
+  const startedAt = Number(offlineStartedAt);
+  return Number.isFinite(startedAt) && startedAt > 0
+    && Number(now) - startedAt >= SESSION_OFFLINE_TIMEOUT_MS;
+}
+
 export function getLoginFailureMessage(error) {
   const message = String(error?.message || error?.msg || error?.error_description || '').toLowerCase();
   if (error?.status === 429 || message.includes('too many requests') || message.includes('rate limit')) {
@@ -132,6 +140,86 @@ export function createAuthService(deps) {
   let cloudLoadUserId = null;
   let recoveryMode = false;
   let signupCooldownInterval = null;
+  let offlineLifecycleListenersAttached = false;
+  let offlineSignOutBusy = false;
+  const SESSION_OFFLINE_KEY = 'diceRealmSessionOfflineAtV1';
+
+  function getSessionStorage() {
+    try { return globalThis.sessionStorage; } catch { return null; }
+  }
+
+  function markSessionOffline() {
+    const storage = getSessionStorage();
+    if (!storage || !getCurrentUser()) return;
+    try {
+      if (!storage.getItem(SESSION_OFFLINE_KEY)) {
+        storage.setItem(SESSION_OFFLINE_KEY, String(Date.now()));
+      }
+    } catch {}
+  }
+
+  function clearSessionOfflineMark() {
+    try { getSessionStorage()?.removeItem(SESSION_OFFLINE_KEY); } catch {}
+  }
+
+  function hasExpiredOfflineMarker() {
+    const storage = getSessionStorage();
+    if (!storage) return false;
+    try { return hasSessionExpiredAfterOffline(storage.getItem(SESSION_OFFLINE_KEY)); }
+    catch { return false; }
+  }
+
+  async function enforceOfflineSessionTimeout() {
+    const storage = getSessionStorage();
+    if (!storage || !getCurrentUser() || offlineSignOutBusy) return false;
+    let offlineStartedAt = 0;
+    try { offlineStartedAt = Number(storage.getItem(SESSION_OFFLINE_KEY)) || 0; } catch {}
+    if (!hasSessionExpiredAfterOffline(offlineStartedAt)) {
+      if (offlineStartedAt) clearSessionOfflineMark();
+      return false;
+    }
+
+    offlineSignOutBusy = true;
+    try {
+      const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+      if (error) throw error;
+      clearSessionOfflineMark();
+      document.body.classList.add('auth-required');
+      document.getElementById('authModal').style.display = 'flex';
+      document.getElementById('authCloseBtn').hidden = true;
+      document.getElementById('authOpenBtn').hidden = false;
+      showAuthMessage('離線已超過 100 秒，為了保護帳號，請重新登入。');
+      return true;
+    } catch (error) {
+      console.warn('Offline session expiry could not be completed', error);
+      showAuthMessage('離線已超過 100 秒，請恢復網路後重新登入。');
+      return false;
+    } finally {
+      offlineSignOutBusy = false;
+    }
+  }
+
+  function attachOfflineLifecycleListeners() {
+    if (offlineLifecycleListenersAttached) return;
+    const documentObject = globalThis.document;
+    const windowObject = globalThis.window;
+    if (!documentObject?.addEventListener) return;
+    offlineLifecycleListenersAttached = true;
+    const onVisibilityChange = () => {
+      if (documentObject.visibilityState === 'hidden') markSessionOffline();
+      else void enforceOfflineSessionTimeout();
+    };
+    const onPageHide = () => markSessionOffline();
+    const onPageShow = () => void enforceOfflineSessionTimeout();
+    const onOffline = () => markSessionOffline();
+    const onOnline = () => void enforceOfflineSessionTimeout();
+    documentObject.addEventListener('visibilitychange', onVisibilityChange);
+    windowObject?.addEventListener('pagehide', onPageHide);
+    windowObject?.addEventListener('pageshow', onPageShow);
+    windowObject?.addEventListener('offline', onOffline);
+    windowObject?.addEventListener('online', onOnline);
+    timerManager?.setTimeout?.(() => void enforceOfflineSessionTimeout(), 0, 'auth-offline-session-check');
+  }
   const SIGNUP_COOLDOWN_MS = 4 * 60 * 1000;
   const SIGNUP_COOLDOWN_KEY = 'diceRealmEmailActionCooldownUntilV1';
 
@@ -746,10 +834,18 @@ export function createAuthService(deps) {
 
   function registerAuthStateListener() {
     if (!supabaseClient) return null;
+    attachOfflineLifecycleListeners();
     if (authStateSubscription) return authStateSubscription;
     authStateSubscription = supabaseClient.auth.onAuthStateChange((event, session) => {
       const previousUser = getCurrentUser();
       const incomingUser = session?.user || null;
+
+      if (incomingUser && hasExpiredOfflineMarker()) {
+        setCurrentUser(incomingUser);
+        void enforceOfflineSessionTimeout();
+        return;
+      }
+      if (incomingUser) clearSessionOfflineMark();
 
       if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')
         && incomingUser && previousUser?.id === incomingUser.id) {
@@ -796,6 +892,7 @@ export function createAuthService(deps) {
       if (incomingUser && !enforceDeviceAccountLimit(incomingUser)) return;
 
       if (!incomingUser) {
+        clearSessionOfflineMark();
         sessionGeneration++;
         sessionInitPromise = null;
         sessionInitUserId = null;

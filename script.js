@@ -3,35 +3,35 @@ import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
 import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261115-t0098-eternal';
 import { DAILY_TASKS } from './data/progression.js';
-import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
+import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261118-shark-weather';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
 import { createNavigationUI } from './ui/navigation.js?v=20261114-t0094-weather-converter-item-slots';
 import { createInventoryUI } from './ui/inventory.js';
-import { createPetIncomeSystem } from './systems/pet-income.js';
+import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
+import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal-realtime-polling';
+import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261118-shark-weather-speed-v1';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
 import { createCloudSaveService } from './services/cloud-save.js?v=20261118-t0114-account-isolation';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261118-t0114-login-identity-help';
+import { createAuthService } from './services/auth.js?v=20261118-offline-timeout-100s';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js?v=20261117-t0097-dice-lock-cleanup';
-import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261117-v154-auto-rewards';
+import { createDiceSystem } from './systems/dice.js?v=20261118-multi-weather-heaven-dice-v1';
+import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
-import { createRealmSocialSystem } from './systems/realm-social.js';
+import { createRealmSocialSystem } from './systems/realm-social.js?v=20261118-shark-weather-announcement';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
-import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
+import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js';
 import { createPresenceService } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
@@ -39,10 +39,10 @@ import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
-import { setupAccountActions } from './services/account-actions.js?v=20261118-t0111-logout-feedback';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
+import { setupAccountActions } from './services/account-actions.js?v=20261118-profile-actions-v2';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261118-fullscreen-feedback-v2';
 import { createTimerManager } from './core/timer-manager.js';
-import { setupOnboardingUI } from './ui/onboarding.js?v=20261117-t0101-tutorial-milestone';
+import { setupOnboardingUI } from './ui/onboarding.js?v=20261118-tutorial-replay-feedback';
 
 // T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
 for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
@@ -166,7 +166,7 @@ function activePotion(category='luck'){const a=category==='speed'?S.potions?.act
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
-function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0))}
+function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0)+getWeatherSpeedBonus(getWeather()))}
 function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
