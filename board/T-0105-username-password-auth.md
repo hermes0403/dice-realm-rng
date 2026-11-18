@@ -51,6 +51,7 @@ done_at:
 - [ ] 登入名稱登入成功後取得正常 Supabase session，切頁／重新整理仍可持續登入。
 - [ ] 管理員清單顯示登入名稱、UID、帳號狀態；一般玩家無法呼叫管理員功能。
 - [ ] 管理員可設定新密碼並留下稽核紀錄；任何介面與 API 都不能讀取或顯示原密碼。
+- [ ] 管理員替玩家重設密碼必須由伺服器端 Edge Function 執行：前端只能呼叫受驗證的函式，不得直接呼叫 Admin Auth API 或持有／傳送 service-role key；函式須在伺服器端驗證管理員身分與權限後，才使用部署環境中的最高權限金鑰執行重設。不得將 service-role key 寫入前端程式、HTML、瀏覽器可讀設定、source map、網路回應或任何用戶端儲存空間。驗收時須檢查正式前端 bundle 與瀏覽器 Network，確認沒有最高權限金鑰，並以非管理員呼叫函式確認會被拒絕。
 - [ ] RLS、Edge Function 權限、速率限制、帳號枚舉防護及 service-role key 隔離通過安全檢查。
 - [ ] 專項測試、相關存檔／登入回歸測試、語法檢查及 diff 檢查通過。
 - [ ] Supabase migration 與 Edge Function 部署成功；GitHub Pages 部署成功；以測試帳號驗證 Gmail 舊登入及新名稱註冊／登入。
