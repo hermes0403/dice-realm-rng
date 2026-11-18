@@ -30,7 +30,7 @@ import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-o
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
-import { createAdminPlayerManagement } from './admin/player-management.js';
+import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0106-password-reset';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
 import { createGameStateService } from './core/game-state.js';
 import { createPresenceService } from './services/presence.js';
@@ -38,7 +38,7 @@ import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
-import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-glitch-weather-phase2';
+import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0106-password-reset';
 import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
 import { createTimerManager } from './core/timer-manager.js';
