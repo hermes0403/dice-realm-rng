@@ -1,10 +1,10 @@
 /** Weekly realm roll challenge. Rolls are batched; rewards are granted server-side and delivered through Realtime. */
 const CAMPAIGN_START = '2026-11-17';
-const MILESTONES = [
+export const MILESTONES = [
   { target: 50000, reward: '1M$' },
   { target: 150000, reward: '幸運藥水 III ×1' },
-  { target: 300000, reward: '速度藥水 I ×5 · 100M$' },
-  { target: 500000, reward: '速度藥水 II ×5 · 幸運藥水 II ×5' },
+  { target: 300000, reward: '速度藥水 II ×5 · 幸運藥水 II ×5' },
+  { target: 500000, reward: '天堂藥水 I ×1' },
   { target: 800000, reward: '天堂藥水 II ×1 · 100M$' }
 ];
 const number = value => new Intl.NumberFormat('en-US').format(Math.max(0, Number(value) || 0));
