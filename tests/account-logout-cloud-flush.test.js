@@ -67,7 +67,7 @@ test('profile logout is blocked when final cloud save fails', async () => {
   await harness.clickLogout();
 
   assert.equal(harness.signOutCalls, 0);
-  assert.ok(harness.toasts.some(message => message.includes('暫時未登出')));
+  assert.ok(harness.toasts.some(message => message.includes('登出未完成')));
 });
 
 test('profile logout signs out only after final cloud save succeeds', async () => {
