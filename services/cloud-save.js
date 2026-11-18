@@ -193,6 +193,7 @@ export function createCloudSaveService(dependencies) {
     // is respected. If local lifetime counters regressed, treat that snapshot
     // as stale: keep cloud-side removals authoritative while still retaining
     // locally-created pet UIDs that are absent from the baseline.
+    // Regression coverage: tests/cloud-save-pet-authority.test.js.
     if (!preserveCloudRemovals) {
       for (const uid of base.keys()) {
         if (!local.has(uid)) merged.delete(uid);
