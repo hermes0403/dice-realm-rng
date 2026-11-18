@@ -3,7 +3,7 @@ export function createCloudSaveService(dependencies) {
     KEY, D, POTIONS, supabaseClient,
     getState, setState, getCurrentUser,
     fresh, normalizeGloves, migrateCurrency, ensurePetData,
-    restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
+    restoreAutoSellPrefs, totalUnique, getPetIncomePerSecond = () => 0, render, refreshLeaderboards,
     toast, openAuth, showAuthMessage, timerManager,
     localStorageRef = globalThis.localStorage,
     documentRef = globalThis.document,
@@ -472,6 +472,7 @@ export function createCloudSaveService(dependencies) {
         username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
         unique_dice: totalUnique(),
         rarest_den: Number(S.best?.den) || 0,
+        pet_income_per_second: Math.max(0, Math.floor(Number(getPetIncomePerSecond()) || 0)),
         ...achievementStats()
       };
       lastCloudSyncAt = Date.now();

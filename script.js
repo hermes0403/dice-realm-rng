@@ -12,13 +12,13 @@ import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-in
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
-import { setupPetSellingUI } from './ui/pet-selling.js';
+import { setupPetSellingUI } from './ui/pet-selling.js?v=20261119-cloud-sale-wiring';
 import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261118-shark-weather-speed-v1';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261119-pet-save-merge-guard';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261119-pet-save-income-profile';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261119-signup-label-v1';
@@ -139,7 +139,7 @@ cloudSaveService=createCloudSaveService({
  getState:()=>S, setState:value=>{S=value}, getCurrentUser:()=>currentUser,
  timerManager,
  fresh, normalizeGloves, migrateCurrency, ensurePetData,
- restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
+ restoreAutoSellPrefs, totalUnique, getPetIncomePerSecond: () => equippedPetIncomePerSecond(), render, refreshLeaderboards,
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
@@ -342,4 +342,4 @@ save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards()
 /* ---- merged from script2.js: achievement popup controls ---- */
 
 setupDisplayControls({ documentRef: document, windowRef: window, navigatorRef: navigator, toast });
-setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier });
+setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier, supabaseClient, getCurrentUser: () => currentUser });
