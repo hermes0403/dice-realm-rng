@@ -208,11 +208,25 @@ export function setupAccountActions(dependencies) {
     }
   }
 
-  // Delegate settings actions from the document so they keep working if the
-  // profile/settings page is rebuilt or its buttons are replaced during render.
-  document.addEventListener('click', event => {
+  // Keep direct listeners for the current controls, with document delegation
+  // as a fallback if a future render replaces one of these buttons.
+  const initiallyBoundButtons = new WeakSet();
+  const bindInitialButton = (id, handler) => {
+    const button = document.getElementById(id);
+    if (!button?.addEventListener) return;
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      if (!button.disabled) void handler();
+    });
+    initiallyBoundButtons.add(button);
+  };
+  bindInitialButton('saveName', handleSaveName);
+  bindInitialButton('resetBtn', handleResetAccount);
+  bindInitialButton('profileLogoutBtn', handleLogout);
+
+  document.addEventListener?.('click', event => {
     const button = event.target?.closest?.('#saveName, #resetBtn, #profileLogoutBtn');
-    if (!button || button.disabled) return;
+    if (!button || button.disabled || initiallyBoundButtons.has(button)) return;
     event.preventDefault();
     if (button.id === 'saveName') void handleSaveName();
     else if (button.id === 'resetBtn') void handleResetAccount();
