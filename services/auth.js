@@ -162,6 +162,13 @@ export function createAuthService(deps) {
     try { getSessionStorage()?.removeItem(SESSION_OFFLINE_KEY); } catch {}
   }
 
+  function hasExpiredOfflineMarker() {
+    const storage = getSessionStorage();
+    if (!storage) return false;
+    try { return hasSessionExpiredAfterOffline(storage.getItem(SESSION_OFFLINE_KEY)); }
+    catch { return false; }
+  }
+
   async function enforceOfflineSessionTimeout() {
     const storage = getSessionStorage();
     if (!storage || !getCurrentUser() || offlineSignOutBusy) return false;
@@ -833,14 +840,19 @@ export function createAuthService(deps) {
       const previousUser = getCurrentUser();
       const incomingUser = session?.user || null;
 
+      if (incomingUser && hasExpiredOfflineMarker()) {
+        setCurrentUser(incomingUser);
+        void enforceOfflineSessionTimeout();
+        return;
+      }
+      if (incomingUser) clearSessionOfflineMark();
+
       if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')
         && incomingUser && previousUser?.id === incomingUser.id) {
         setCurrentUser(incomingUser);
         updateAdminVisibility();
         return;
       }
-
-      if (incomingUser) clearSessionOfflineMark();
 
       if (event === 'PASSWORD_RECOVERY' && incomingUser) {
         if (!incomingUser.email_confirmed_at) {
