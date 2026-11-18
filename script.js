@@ -18,7 +18,7 @@ import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261118-shark-weather-speed-v1';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261118-t0114-account-isolation';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261119-pet-save-merge-guard';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261119-signup-label-v1';
@@ -28,7 +28,7 @@ import { createDiceSystem } from './systems/dice.js?v=20261118-multi-weather-hea
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
-import { createRealmSocialSystem } from './systems/realm-social.js?v=20261118-shark-weather-announcement';
+import { createRealmSocialSystem } from './systems/realm-social.js?v=20261119-pet-audit-metadata';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
@@ -39,7 +39,7 @@ import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
-import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-buttons-v2';
+import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-rpc-fix';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261119-settings-buttons-v2';
 import { createTimerManager } from './core/timer-manager.js';
 import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-buttons-v2';
