@@ -231,6 +231,6 @@ export function setupAccountActions(dependencies) {
     if (button.id === 'saveName') void handleSaveName();
     else if (button.id === 'resetBtn') void handleResetAccount();
     else if (button.id === 'profileLogoutBtn') void handleLogout();
-  });
+  }, true);
 
 }
