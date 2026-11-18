@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.62';
+const CACHE_NAME = 'dice-realm-shell-v1.63';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,7 +24,7 @@ const APP_SHELL = [
   './systems/dice.js?v=20261117-t0097-dice-lock-cleanup',
   './systems/dice-locks.js',
   './core/game-state.js',
-  './systems/weekly-realm-event.js?v=20261117-v154-auto-rewards',
+  './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2',
   './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
