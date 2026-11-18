@@ -405,7 +405,7 @@ export function createAuthService(deps) {
       .then(ready => {
         if (!ready) throw new Error('雲端存檔尚未完成載入，遊戲暫時保持鎖定。');
         if (generation !== sessionGeneration || getCurrentUser()?.id !== user.id) return false;
-        document.getElementById('playerName').textContent = state.name || '玩家';
+        document.getElementById('playerName').textContent = getState()?.name || '玩家';
         document.getElementById('authCloseBtn').hidden = false;
         if (retryButton) retryButton.hidden = true;
         closeAuth();
@@ -463,13 +463,19 @@ export function createAuthService(deps) {
       const signupPassword = document.getElementById('authUsernameSignupPassword').value;
       const confirm = document.getElementById('authUsernameSignupPasswordConfirm').value;
       if (!username) { showAuthMessage('請輸入玩家名稱。'); return; }
-      if (signupPassword.length < 6) { showAuthMessage('新密碼至少需要 6 位。'); return; }
+      if (signupPassword.length < 8) { showAuthMessage('新密碼至少需要 8 位。'); return; }
       if (signupPassword !== confirm) { showAuthMessage('兩次輸入的密碼不一致。'); return; }
     } else if (!email || (mode !== 'login' && !isEmailIdentifier) || (mode === 'login' && !isEmailIdentifier && !/^[\p{L}\p{N}_-]{3,20}$/u.test(email.normalize('NFKC').trim()))) {
       showAuthMessage(mode === 'login' ? '請輸入玩家名稱或有效的 Gmail。' : '請輸入有效的 Email 地址。');
       return;
     }
-    if (['signup', 'login'].includes(mode) && password.length < 6) {
+    // New email registrations require 8 characters; existing accounts may
+    // still sign in with an older 6–7 character password.
+    if (mode === 'signup' && password.length < 8) {
+      showAuthMessage('密碼至少需要 8 位。');
+      return;
+    }
+    if (mode === 'login' && password.length < 6) {
       showAuthMessage('密碼至少需要 6 位。');
       return;
     }
@@ -493,8 +499,25 @@ export function createAuthService(deps) {
         if (error) throw new Error(data?.error || error.message || '玩家名稱登入服務暫時無法使用。');
         if (data?.error) throw new Error(data.error);
         if (data?.session) {
-          const { error: sessionError } = await supabaseClient.auth.setSession(data.session);
+          // Username login returns a session for the UID resolved by the server.
+          // Confirm that exact identity became the active browser session before
+          // loading any player data; never continue with a previous account.
+          const expectedUserId = data.session.user?.id || null;
+          const { data: activated, error: sessionError } = await supabaseClient.auth.setSession(data.session);
           if (sessionError) throw sessionError;
+          const signedUser = activated?.user || activated?.session?.user || null;
+          if (!signedUser?.id || (expectedUserId && signedUser.id !== expectedUserId)) {
+            await supabaseClient.auth.signOut().catch(() => {});
+            setCurrentUser(null);
+            throw new Error('登入帳號確認失敗，請重新登入。');
+          }
+          if (!enforceDeviceAccountLimit(signedUser)) {
+            await supabaseClient.auth.signOut().catch(() => {});
+            setCurrentUser(null);
+            return;
+          }
+          setCurrentUser(signedUser);
+          await startSessionInitialization(signedUser, 'SIGNED_IN', true);
           return;
         }
         if (mode === 'usernameSignup' && data?.success === true) {
@@ -630,8 +653,8 @@ export function createAuthService(deps) {
     if (authBusy || !recoveryMode || !getCurrentUser()) return;
     const password = document.getElementById('authNewPassword').value;
     const confirmation = document.getElementById('authNewPasswordConfirm').value;
-    if (password.length < 6) {
-      showAuthMessage('新密碼至少需要 6 位。');
+    if (password.length < 8) {
+      showAuthMessage('新密碼至少需要 8 位。');
       return;
     }
     if (password !== confirmation) {

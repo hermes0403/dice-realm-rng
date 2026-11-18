@@ -21,7 +21,7 @@ import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js
 import { createCloudSaveService } from './services/cloud-save.js?v=20261118-t0104-pet-uid-merge';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261118-t0112-account-session-isolation';
+import { createAuthService } from './services/auth.js?v=20261118-t0113-username-login-identity';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261117-t0097-dice-lock-cleanup';
