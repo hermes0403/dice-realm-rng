@@ -1,4 +1,4 @@
-import { D, G } from './data/dice.js?v=20261114-t0094-weather-converter-item-slots';
+import { D, G } from './data/dice.js?v=20261117-t0102-void-startrail-gloves';
 import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
 import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261115-t0098-eternal';
@@ -16,18 +16,18 @@ import { setupPetSellingUI } from './ui/pet-selling.js';
 import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal';
+import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal-realtime-polling';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261116-achievement-recheck-leaderboard';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261118-t0104-pet-uid-merge';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261115-t0097-auth-signup-cooldown';
+import { createAuthService } from './services/auth.js?v=20261117-t0103-auth-flow';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261117-t0097-dice-lock-cleanup';
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261117-v154-auto-rewards';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
-import { createGlobalBoostSystem } from './systems/global-boost.js';
+import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js';
@@ -156,7 +156,7 @@ function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
 function closeAuth(){return authService?.closeAuth()}
 function authAction(mode){return authService?.authAction(mode)}
-setupGlobalAnnouncements();refreshServerWeather(false);loadWeatherSummonData(false);
+setupGlobalAnnouncements();weatherSystem.setupServerWeatherSubscription();loadWeatherSummonData(false);
 function byId(id){return D.find(x=>x.id===id)}
 function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
@@ -233,7 +233,7 @@ authService=createAuthService({
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
- applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
+ applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
@@ -318,7 +318,7 @@ function analyzeSuspiciousRolls(){return adminPlayerManagement?.analyzeSuspiciou
 
 document.getElementById('upgradeBagBtn').onclick=()=>{const cap=Number(S.bagCapacity)||35;if(cap>=200){toast('背包已達目前上限 200 顆');return}const cost=bagUpgradeCost(cap);if((Number(S.coins)||0)<cost){toast(`$ 不足，擴充需要 ${format(cost)}$`);return}S.coins-=cost;S.bagCapacity=cap+1;save();render();toast(`背包容量已擴充至 ${S.bagCapacity} 顆`)};
 document.getElementById('rollBtn').onclick=doRoll;
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
+document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authUsernameSignupOpenBtn').onclick=()=>authService?.openUsernameSignup();document.getElementById('authUsernameSignupSubmitBtn').onclick=()=>authAction('usernameSignup');document.getElementById('authUsernameSignupCancelBtn').onclick=()=>authService?.closeUsernameSignup();document.getElementById('authResendBtn').onclick=()=>authAction('resend');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('authPasswordUpdateBtn').onclick=()=>authService?.updateRecoveredPassword();document.getElementById('authPasswordCancelBtn').onclick=()=>authService?.cancelPasswordRecovery();document.getElementById('authRetryCloudBtn').onclick=()=>authService?.retryCloudLoad();document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
 
 function loadAdminOnlineCurve(){return adminMonitoringSystem?.loadAdminOnlineCurve()}
 

@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<!-- PWA shell V1.50 -->
+<!-- PWA shell V1.51 -->
 <meta name="theme-color" content="#090b16"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./assets/pwa-icon-192.png"><title>骰界 RNG</title>
 <link rel="icon" href="./favicon.ico" type="image/x-icon">
 
@@ -51,9 +51,9 @@
 <section class="page" id="page-quests"><div class="section-head"><h2>任務與成就</h2><span class="pill">每日更新：原型版暫用本機日期</span></div><div class="two"><div class="card"><h3>今日任務</h3><p class="muted">完成全部 3 項每日任務，可獲得 20K$。</p><div id="questList"></div></div><div class="card"><h3>成就檔案</h3><p class="muted">里程碑將記錄在你的個人資料。</p><div id="achievementList"></div></div></div></section>
 <section class="page" id="page-updates"><div class="section-head"><h2>遊戲更新日誌</h2><span class="pill">REALM PATCH NOTES</span></div>
   <article class="update-log-card update-log-current">
-    <div class="update-log-top"><span class="update-log-version">v1.50</span><span class="update-log-date">2026/11/17</span><span class="update-log-latest">最新版本</span></div>
-    <h3>時序結晶</h3>
-    <ul><li>新增時序結晶，可使下一次玩家召喚的天氣延長 20%。</li><li>管理員天氣不受影響，待生效效果會保留至下一次玩家召喚。</li></ul>
+    <div class="update-log-top"><span class="update-log-version">v1.50</span></div>
+    <h3>全新手套與道具</h3>
+    <ul><li>2 個新手套</li><li>1 個新道具</li></ul>
   </article>
   <article class="update-log-card">
     <div class="update-log-top"><span class="update-log-version">v1.49</span><span class="update-log-date">2026/11/16</span></div>
@@ -86,13 +86,36 @@
 </main></div></div><div id="realmAnnouncement" aria-live="assertive" style="display:none;position:fixed;z-index:9998;top:13%;left:50%;transform:translateX(-50%);width:min(92vw,760px);text-align:center;pointer-events:none;color:#fff;font-size:clamp(17px,3.5vw,25px);font-weight:800;text-shadow:0 2px 5px #000,0 0 15px #8c9dff;padding:12px 16px;white-space:normal;overflow-wrap:anywhere"></div><div id="realmPollPopup" style="display:none;position:fixed;z-index:9999;top:13%;left:50%;transform:translateX(-50%);width:min(84vw,340px);padding:11px 12px;border:1px solid #6677bd;border-radius:16px;background:linear-gradient(145deg,#11172bfa,#080b16fa);box-shadow:0 18px 60px #000b;color:#fff;text-align:center"><div id="realmPollHeadline" style="font-weight:900;font-size:15px;margin-bottom:9px">【𝓗𝓮𝓻𝓶𝓮𝓼】: 投票問題</div><div id="realmPollButtons" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button type="button" data-poll-choice="hell" style="background:#b52c42;color:white;border:1px solid #ff7788;border-radius:9px;padding:8px 6px;font-size:12px;font-weight:800">選項一</button><button type="button" data-poll-choice="crystal" style="background:#7040bd;color:white;border:1px solid #d7a2ff;border-radius:9px;padding:8px 6px;font-size:12px;font-weight:800">選項二</button></div><div id="realmPollCountdown" style="margin-top:12px;color:#c6ccef;font-size:13px"></div><div id="realmPollVoteStatus" style="margin-top:7px;color:#aebcff;font-size:13px"></div></div><div class="toast" id="toast"></div><div id="rarityOverlay" class="rarity-overlay" aria-live="assertive"><div class="rarity-particles"></div><div class="rarity-reveal-card"><div class="rarity-reveal-title" id="rarityRevealTitle">RARE DISCOVERY</div><div class="rarity-reveal-icon" id="rarityRevealIcon">✦</div><div class="rarity-reveal-name" id="rarityRevealName">稀有骰子</div><div class="rarity-reveal-odds" id="rarityRevealOdds">1/10000</div></div></div>
 <div id="authModal" style="display:none;position:fixed;inset:0;z-index:100;background:#050711dd;backdrop-filter:blur(10px);padding:18px;overflow:auto;align-items:center;justify-content:center">
  <div class="card" style="width:min(100%,440px);padding:22px;border-color:#454d7a;box-shadow:0 25px 90px #0009">
-  <div class="eyebrow">DICE REALM ACCOUNT</div><h2 style="margin:5px 0 4px">登入雲端帳號</h2><p class="muted" style="font-size:13px">使用 Email 與密碼登入。首次註冊需先到信箱確認身分，點擊驗證信後即可返回遊戲。</p>
-  <p class="muted" style="font-size:12px;margin:8px 0 12px">密碼自行設定</p>
-  <label for="authEmail">Gmail／Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="name@gmail.com" class="field" style="width:100%;margin:6px 0 12px">
-  <label for="authPassword">密碼（隨便設定）</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="輸入密碼" class="field" style="width:100%;margin:6px 0 14px">
-  <div class="toolbar"><button class="primary" id="authLoginBtn" style="flex:1">登入</button><button id="authSignupBtn" style="flex:1">註冊</button></div>
-  <button class="quiet" id="authResetBtn" style="width:100%;margin-top:8px">忘記密碼</button><p id="authMessage" class="muted" role="status" style="font-size:13px;margin:12px 0 0"></p><p id="authCooldownMessage" class="mini" role="status" aria-live="polite" hidden style="font-size:12px;margin:8px 0 0;color:#aebcff"></p>
-  <button class="quiet" id="authCloseBtn" style="width:100%;margin-top:12px">稍後再說</button>
+  <div id="authLoginPanel">
+   <div class="eyebrow">DICE REALM ACCOUNT</div><h2 style="margin:5px 0 4px">登入骰界 RNG</h2>
+   <p class="muted" style="font-size:13px">可使用玩家名稱或原本的 Gmail 登入。既有帳號資料與存檔會保留。</p>
+   <label for="authEmail">玩家名稱或 Gmail</label><input id="authEmail" type="text" autocomplete="username" placeholder="輸入玩家名稱或 Gmail" class="field" style="width:100%;margin:6px 0 12px">
+   <label for="authPassword">密碼（至少 6 位）</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="輸入密碼" class="field" style="width:100%;margin:6px 0 14px">
+   <div class="toolbar"><button class="primary" id="authLoginBtn" type="button" style="flex:1">登入</button><button id="authSignupBtn" type="button" style="flex:1">建立新帳號</button></div>
+   <button class="quiet" id="authUsernameSignupOpenBtn" type="button" style="width:100%;margin-top:8px">使用玩家名稱註冊（免 Email）</button>
+   <button class="quiet" id="authResendBtn" type="button" style="width:100%;margin-top:8px">重新寄送驗證信</button>
+   <button class="quiet" id="authResetBtn" type="button" style="width:100%;margin-top:4px">忘記密碼</button>
+   <p class="mini" style="margin:8px 0 0">註冊後請到 Email 收件匣點擊驗證按鈕；若沒有收到，請檢查垃圾郵件。</p>
+  </div>
+  <div id="authUsernameSignupPanel" hidden>
+   <div class="eyebrow">USERNAME ACCOUNT</div><h2 style="margin:5px 0 4px">建立玩家帳號</h2>
+   <p class="muted" style="font-size:13px">不需要 Gmail。玩家名稱需為 3 至 20 個字元，且不可與其他玩家重複。</p>
+   <label for="authUsernameSignupName">玩家名稱</label><input id="authUsernameSignupName" type="text" autocomplete="username" maxlength="20" class="field" style="width:100%;margin:6px 0 12px">
+   <label for="authUsernameSignupPassword">密碼（至少 8 位）</label><input id="authUsernameSignupPassword" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 12px">
+   <label for="authUsernameSignupPasswordConfirm">確認密碼</label><input id="authUsernameSignupPasswordConfirm" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 14px">
+   <div class="toolbar"><button class="primary" id="authUsernameSignupSubmitBtn" type="button" style="flex:1">建立帳號</button><button class="quiet" id="authUsernameSignupCancelBtn" type="button">返回登入</button></div>
+  </div>
+  <div id="authRecoveryPanel" hidden>
+   <div class="eyebrow">ACCOUNT RECOVERY</div><h2 style="margin:5px 0 4px">設定新密碼</h2>
+   <p class="muted" style="font-size:13px">請輸入新的密碼並再次確認，完成後會返回骰界 RNG。</p>
+   <label for="authNewPassword">新密碼（至少 6 位）</label><input id="authNewPassword" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 12px">
+   <label for="authNewPasswordConfirm">再次輸入新密碼</label><input id="authNewPasswordConfirm" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 14px">
+   <div class="toolbar"><button class="primary" id="authPasswordUpdateBtn" type="button" style="flex:1">更新密碼</button><button class="quiet" id="authPasswordCancelBtn" type="button">取消</button></div>
+  </div>
+  <p id="authMessage" class="muted" role="status" aria-live="polite" style="font-size:13px;margin:12px 0 0"></p>
+  <p id="authCooldownMessage" class="mini" role="status" aria-live="polite" hidden style="font-size:12px;margin:8px 0 0;color:#aebcff"></p>
+  <button class="primary" id="authRetryCloudBtn" type="button" hidden style="width:100%;margin-top:12px">重新載入雲端存檔</button>
+  <button class="quiet" id="authCloseBtn" type="button" style="width:100%;margin-top:12px">稍後再說</button>
  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -101,5 +124,5 @@
 <div id="petSellModal" class="pet-sell-modal" hidden role="dialog" aria-modal="true" aria-labelledby="petSellModalTitle"><div class="pet-sell-dialog"><div class="section-head"><h3 id="petSellModalTitle" style="margin:0">選擇要出售的寵物</h3><button type="button" class="quiet" id="petSellCancelBtn">關閉</button></div><p class="mini">選擇要自動出售的寵物稀有度，新合成的符合條件寵物會自動出售。</p><div class="pet-sell-tools"><label class="mini pet-sell-sort-label" for="petSellSortMode">排序<select id="petSellSortMode" class="field"><option value="rarity-asc">稀有度低到高</option><option value="rarity-desc">稀有度高到低</option><option value="income-desc">每秒收益高到低</option><option value="income-asc">每秒收益低到高</option></select></label><button type="button" class="quiet" id="petSellSelectAllBtn">全選</button><button type="button" class="quiet" id="petSellClearBtn">清除選擇</button></div><div id="petSellChoices" class="pet-sell-choices"></div><div id="petSellSummary" class="pet-sell-summary">已選擇 0 隻寵物，合計可獲得 0$。</div><div class="pet-sell-actions"><button type="button" class="quiet" id="petSellCancelBtnBottom">取消</button><button type="button" class="danger" id="petSellConfirmBtn" disabled>確定出售</button></div></div></div>
 <div id="petAutoSellModal" class="pet-sell-modal" hidden role="dialog" aria-modal="true"><div class="pet-sell-dialog"><div class="section-head"><h3 style="margin:0">自動出售設定</h3><button type="button" class="quiet" id="petAutoSellClose">關閉</button></div><p class="mini">勾選後，合成出該稀有度的寵物時會自動出售並獲得對應收益。秘密與永恆寵物不會自動出售。</p><div style="display:grid;gap:10px;margin:14px 0"><label><input type="checkbox" data-auto-pet-rarity="common"> 普通</label><label><input type="checkbox" data-auto-pet-rarity="rare"> 稀有</label><label><input type="checkbox" data-auto-pet-rarity="legendary"> 傳奇</label><label><input type="checkbox" data-auto-pet-rarity="mythic"> 神話</label></div><button type="button" class="primary" id="petAutoSellSave">保存設定</button></div></div>
 <script type="module" src="admin/navigation.js?v=20261105-t0037"></script>
-<script type="module" src="script.js?v=20261117-t0098-time-crystal"></script>
+<script type="module" src="script.js?v=20261118-t0105-username-auth"></script>
 </body></html>

@@ -1,0 +1,37 @@
+name: Realtime polling regression tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'systems/global-boost.js'
+      - 'systems/weather.js'
+      - 'script.js'
+      - 'tests/lifecycle-regression.test.js'
+      - '.github/workflows/realtime-polling-tests.yml'
+
+jobs:
+  realtime-polling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run lifecycle regression tests
+        run: node --test tests/lifecycle-regression.test.js
+      - name: Check JavaScript syntax
+        run: |
+          node --check systems/global-boost.js
+          node --check systems/weather.js
+          node --check script.js
+          node --check tests/lifecycle-regression.test.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD

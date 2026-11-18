@@ -23,6 +23,7 @@ export function createCloudSaveService(dependencies) {
   let lastSyncedPayload = null;
   let lastSyncedUserId = null;
   let cloudLoadReadyUserId = null;
+  let lastCloudLoadError = null;
   const grantCheckAtByUser = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
   const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -176,6 +177,30 @@ export function createCloudSaveService(dependencies) {
     return [...merged];
   }
 
+  function mergePetInstances(baseValue, localValue, cloudValue) {
+    const toMap = value => new Map(
+      (Array.isArray(value) ? value : [])
+        .filter(pet => pet && typeof pet === 'object' && typeof pet.uid === 'string' && pet.uid)
+        .map(pet => [pet.uid, pet])
+    );
+    const base = toMap(baseValue);
+    const local = toMap(localValue);
+    const cloudList = Array.isArray(cloudValue) ? cloudValue : [];
+    const legacyCloudPets = cloudList.filter(pet => !pet || typeof pet.uid !== 'string' || !pet.uid);
+    const merged = toMap(cloudList);
+
+    // Keep legacy cloud pets without UIDs intact. New fusion results always
+    // have UIDs, so only identifiable instances participate in delta merging.
+    // A stale local copy cannot bring back a pet that the cloud has since removed.
+    for (const uid of base.keys()) {
+      if (!local.has(uid)) merged.delete(uid);
+    }
+    for (const [uid, pet] of local) {
+      if (!base.has(uid) && !merged.has(uid)) merged.set(uid, clonePayload(pet));
+    }
+    return [...legacyCloudPets, ...merged.values()];
+  }
+
   function mergeObjectMap(baseValue, localValue, cloudValue, preserveMissing = false) {
     const base = baseValue && typeof baseValue === 'object' ? baseValue : {};
     const local = localValue && typeof localValue === 'object' ? localValue : {};
@@ -279,10 +304,12 @@ export function createCloudSaveService(dependencies) {
       );
     }
 
-    // Pets and equipped pet IDs remain server-authoritative. A stale local
-    // snapshot must never resurrect a pet already sold on the server.
-    if (Array.isArray(cloud.pets)) merged.pets = clonePayload(cloud.pets);
-    if (Array.isArray(cloud.equippedPetUids)) merged.equippedPetUids = clonePayload(cloud.equippedPetUids);
+    // Merge pet inventory by UID delta from the shared baseline. This preserves
+    // a locally-created pet during a concurrent cloud update while respecting
+    // sales/removals made by either device.
+    merged.pets = mergePetInstances(base.pets, local.pets, cloud.pets);
+    merged.equippedPetUids = mergeSetDelta(base.equippedPetUids, local.equippedPetUids, cloud.equippedPetUids)
+      .filter(uid => merged.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3);
     return merged;
   }
 
@@ -595,6 +622,7 @@ export function createCloudSaveService(dependencies) {
     conflictBaseVersion = null,
     conflictLocalSnapshot = null
   } = {}) {
+    lastCloudLoadError = null;
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
     cloudLoadReadyUserId = null;
@@ -677,11 +705,12 @@ export function createCloudSaveService(dependencies) {
         S.petIncomePending = Math.max(0, Number(localSnapshotForMerge?.petIncomePending) || 0);
         if (S.petIncomePending > 0) S.coins = (Number(S.coins) || 0) + S.petIncomePending;
 
-        // Pet instances are server-authoritative; never resurrect sold pets.
-        S.pets = Array.isArray(cloudPayload.pets) ? cloudPayload.pets.slice(0, 20) : [];
+        // Keep the UID-delta pet merge produced above. Cloud-only deletions
+        // stay deleted; local additions/removals made since the baseline survive.
+        S.pets = Array.isArray(S.pets) ? S.pets.slice(0, 20) : [];
         ensurePetData(S.pets);
-        S.equippedPetUids = Array.isArray(cloudPayload.equippedPetUids)
-          ? [...new Set(cloudPayload.equippedPetUids)]
+        S.equippedPetUids = Array.isArray(S.equippedPetUids)
+          ? [...new Set(S.equippedPetUids)]
             .filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
           : [];
         S.petDiscovered = {
@@ -758,17 +787,22 @@ export function createCloudSaveService(dependencies) {
       cloudLoadReadyUserId = user.id;
     } catch (e) {
       cloudLoadReadyUserId = null;
+      lastCloudLoadError = e;
       console.error(e);
       if (/user.?banned|banned|被停權|已停權/i.test(String(e?.message || ''))) {
         await supabaseClient?.auth.signOut().catch(() => {});
         openAuth();
         showAuthMessage('偵測到違反遊戲規則\n已停權此帳號');
         document.getElementById('authMessage').style.whiteSpace = 'pre-line';
-      } else toast('讀取雲端存檔失敗，請重新登入');
+      } else if (Number(e?.status ?? e?.statusCode) === 402
+        || /exceed_egress_quota|project is restricted|egress quota/i.test(String(e?.message || e?.code || ''))) {
+        toast('Supabase 雲端服務目前受到流量額度限制，暫時無法載入雲端存檔。本機資料不會因此清除。');
+      } else toast('讀取雲端存檔失敗，請檢查網路後重試');
     }
   }
 
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
+  function getLastCloudLoadError() { return lastCloudLoadError; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
 }

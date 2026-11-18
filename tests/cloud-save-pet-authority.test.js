@@ -12,11 +12,15 @@ function createStorage(initial = {}) {
   };
 }
 
-function createService({ localSave, cloudSave }) {
+function createService({ localSave, cloudSave, baseSave = null, baseVersion = '2026-11-13T22:00:00.000Z' }) {
   const KEY = 'diceRealmTest';
-  const storage = createStorage({
+  const initialStorage = {
     [KEY + '_user_user-a']: JSON.stringify(localSave)
-  });
+  };
+  if (baseSave) {
+    initialStorage[KEY + '_cloud_base_history_user-a'] = JSON.stringify([{ version: baseVersion, payload: baseSave }]);
+  }
+  const storage = createStorage(initialStorage);
   const writes = [];
   const documentRef = {
     getElementById() { return { textContent: '' }; }
@@ -134,4 +138,48 @@ test('locked dice indexes are included in the cloud save payload', () => {
   getState().lockedDice = ['d1:0', 'd1:2'];
   const payload = service.savePayload();
   assert.deepEqual(payload.lockedDice, ['d1:0', 'd1:2']);
+});
+
+
+test('concurrent cloud updates preserve a locally fused pet added since the baseline', async () => {
+  const basePet = { uid: 'pet-base', id: 'c1', rarity: 'common' };
+  const localPet = { uid: 'pet-local-new', id: 'l1', rarity: 'legendary', createdAt: '2026-11-14T00:01:00.000Z' };
+  const cloudPet = { uid: 'pet-cloud-new', id: 'r1', rarity: 'rare' };
+  const baseSave = { bag: { d1: 1 }, rolls: 10, rollCounts: {}, first: {}, best: {}, pets: [basePet], equippedPetUids: [basePet.uid] };
+  const localSave = { ...baseSave, pets: [basePet, localPet], equippedPetUids: [basePet.uid, localPet.uid], _cloudBaseVersion: '2026-11-13T22:00:00.000Z' };
+  const cloudSave = { ...baseSave, pets: [basePet, cloudPet], equippedPetUids: [basePet.uid, cloudPet.uid] };
+  const { service, getState } = createService({ localSave, cloudSave, baseSave });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+
+  assert.deepEqual(new Set(getState().pets.map(pet => pet.uid)), new Set([basePet.uid, localPet.uid, cloudPet.uid]));
+  assert.deepEqual(new Set(getState().equippedPetUids), new Set([basePet.uid, localPet.uid, cloudPet.uid]));
+});
+
+test('local pet sale/removal since the baseline is applied without dropping other cloud pets', async () => {
+  const soldPet = { uid: 'pet-sold-local', id: 'c1', rarity: 'common' };
+  const cloudPet = { uid: 'pet-cloud-new', id: 'r1', rarity: 'rare' };
+  const baseSave = { bag: { d1: 1 }, rolls: 10, rollCounts: {}, first: {}, best: {}, pets: [soldPet], equippedPetUids: [soldPet.uid] };
+  const localSave = { ...baseSave, pets: [], equippedPetUids: [], _cloudBaseVersion: '2026-11-13T22:00:00.000Z' };
+  const cloudSave = { ...baseSave, pets: [soldPet, cloudPet], equippedPetUids: [soldPet.uid, cloudPet.uid] };
+  const { service, getState } = createService({ localSave, cloudSave, baseSave });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+
+  assert.deepEqual(getState().pets.map(pet => pet.uid), [cloudPet.uid]);
+  assert.deepEqual(getState().equippedPetUids, [cloudPet.uid]);
+});
+
+test('a stale local pet cannot resurrect a pet removed by another device', async () => {
+  const removedPet = { uid: 'pet-removed-cloud', id: 'c1', rarity: 'common' };
+  const cloudPet = { uid: 'pet-cloud-new', id: 'r1', rarity: 'rare' };
+  const baseSave = { bag: { d1: 1 }, rolls: 10, rollCounts: {}, first: {}, best: {}, pets: [removedPet], equippedPetUids: [removedPet.uid] };
+  const localSave = { ...baseSave, _cloudBaseVersion: '2026-11-13T22:00:00.000Z' };
+  const cloudSave = { ...baseSave, pets: [cloudPet], equippedPetUids: [cloudPet.uid] };
+  const { service, getState } = createService({ localSave, cloudSave, baseSave });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+
+  assert.deepEqual(getState().pets.map(pet => pet.uid), [cloudPet.uid]);
+  assert.deepEqual(getState().equippedPetUids, [cloudPet.uid]);
 });

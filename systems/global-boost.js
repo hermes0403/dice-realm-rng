@@ -13,6 +13,8 @@ export function createGlobalBoostSystem({
 }) {
   let refreshBusy = false;
   let globalBoostUISetup = false;
+  let realtimeChannel = null;
+  let boostRevision = 0;
   function timestampToMs(value) {
     if (value == null || value === '') return NaN;
     if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -48,27 +50,56 @@ export function createGlobalBoostSystem({
       String(remaining % 60).padStart(2, '0');
   }
 
+  function applyGlobalBoostRow(data) {
+    const before = JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
+    setBoostState(data || null);
+    const fusionChanged = before !== JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
+    if (fusionChanged) onFusionLuckChanged();
+    if (fusionChanged) {
+      if (typeof render === 'function') render();
+      if (typeof restartAutoInterval === 'function') restartAutoInterval();
+    }
+    if (typeof updateGlobalBoostStatus === 'function') updateGlobalBoostStatus();
+  }
+
   async function refreshGlobalBoost() {
     if (refreshBusy || !supabaseClient) return;
     refreshBusy = true;
+    const revisionAtStart = boostRevision;
     try {
       const { data, error } = await supabaseClient.from('realm_global_boost')
         .select('luck_percent,speed_percent,starts_at,ends_at,updated_at,fusion_luck_percent,fusion_luck_starts_at,fusion_luck_ends_at,fusion_luck_updated_by')
         .eq('singleton', true).maybeSingle();
       if (error) throw error;
-      const before = JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
-      setBoostState(data || null);
-      const fusionChanged = before !== JSON.stringify({ global: activeGlobalBoost(), fusion: activeFusionLuckBoost() });
-      if (fusionChanged) onFusionLuckChanged();
-      if (fusionChanged) {
-        if (typeof render === 'function') render();
-        if (typeof restartAutoInterval === 'function') restartAutoInterval();
-      }
-      if (typeof updateGlobalBoostStatus === 'function') updateGlobalBoostStatus();
+      // A Realtime event received while this request was in flight is newer
+      // than the request snapshot; never let that older response overwrite it.
+      if (revisionAtStart !== boostRevision) return;
+      applyGlobalBoostRow(data || null);
     } catch (error) {
       console.debug('Global timed boost unavailable', error);
     } finally {
       refreshBusy = false;
+    }
+  }
+
+  function setupGlobalBoostSubscription() {
+    if (realtimeChannel || !supabaseClient?.channel) return false;
+    try {
+      realtimeChannel = supabaseClient.channel('global-boost-state')
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'realm_global_boost'
+        }, payload => {
+          boostRevision++;
+          applyGlobalBoostRow(payload?.new || null);
+        })
+        .subscribe(status => {
+          if (status === 'SUBSCRIBED') refreshGlobalBoost();
+        });
+      return true;
+    } catch (error) {
+      realtimeChannel = null;
+      console.debug('Global boost realtime unavailable; polling fallback remains active', error);
+      return false;
     }
   }
 
@@ -157,7 +188,11 @@ export function createGlobalBoostSystem({
     timerManager.clearScope('global-boost-refresh');
     timerManager.clearScope('realm-activity-render');
     timerManager.clearScope('admin-income-monitor');
-    timerManager.setInterval(() => { refreshGlobalBoost(); updateGlobalBoostStatus(); }, 3000, 'global-boost-refresh');
+    setupGlobalBoostSubscription();
+    // Realtime delivers admin changes immediately; 10s polling is the recovery
+    // fallback and also reconciles state if an event was missed.
+    timerManager.setInterval(refreshGlobalBoost, 10000, 'global-boost-refresh');
+    timerManager.setInterval(updateGlobalBoostStatus, 1000, 'global-boost-status');
     timerManager.setInterval(renderRealmActivity, 1000, 'realm-activity-render');
     timerManager.setInterval(() => {
       if (documentRef.getElementById('adminIncomeMonitorFold')?.open) loadAdminIncomeMonitor();

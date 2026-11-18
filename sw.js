@@ -1,12 +1,15 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.58';
+const CACHE_NAME = 'dice-realm-shell-v1.61';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261117-t0098-time-crystal',
-  './ui/equipment.js?v=20261117-t0098-time-crystal',
-  './ui/gloves.js?v=20261117-t0098-time-crystal',
+  './data/dice.js?v=20261117-t0102-void-startrail-gloves',
+  './script.js?v=20261118-t0105-username-auth',
+  './services/auth.js?v=20261117-t0103-auth-flow',
+  './services/cloud-save.js?v=20261117-t0103-auth-cloud-error',
+  './ui/equipment.js?v=20261117-t0102-void-startrail-gloves',
+  './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
   './systems/weather.js?v=20261117-t0098-time-crystal',
   './ui/onboarding.js?v=20261117-t0101-tutorial-milestone',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',

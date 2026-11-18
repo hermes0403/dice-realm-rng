@@ -130,9 +130,19 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(typeof diceDocument.getElementById('autoBtn').onclick, 'function');
 
   const boostDocument = createFakeDocument();
+  let boostState = null;
+  let boostRealtimeHandler = null;
   const boost = createGlobalBoostSystem({
-    getBoostState: () => null,
-    setBoostState() {},
+    supabaseClient: {
+      channel() {
+        return {
+          on(event, filter, handler) { boostRealtimeHandler = handler; return this; },
+          subscribe() { return this; }
+        };
+      }
+    },
+    getBoostState: () => boostState,
+    setBoostState(value) { boostState = value; },
     documentRef: boostDocument,
     timerManager: timers.manager
   });
@@ -140,6 +150,13 @@ test('dice, global boost, realm poll and codex setup are idempotent', () => {
   assert.equal(boost.setupGlobalBoostUI(), false);
   assert.equal(boostDocument.listeners.get('click').length, 1);
   assert.equal(timers.manager.getStats().scopes['global-boost-refresh'].intervals, 1);
+  assert.equal(timers.manager.getStats().scopes['global-boost-status'].intervals, 1);
+  assert.equal([...timers.intervals.values()].find(timer => timer.delay === 10000)?.delay, 10000);
+  assert.equal([...timers.intervals.values()].find(timer => timer.delay === 1000)?.delay, 1000);
+  assert.equal(typeof boostRealtimeHandler, 'function');
+  const realtimeBoost = { luck_percent: 15, speed_percent: 25, ends_at: new Date(Date.now() + 60000).toISOString() };
+  boostRealtimeHandler({ new: realtimeBoost });
+  assert.equal(boostState, realtimeBoost);
 
   const realmDocument = createFakeDocument(['adminBroadcastSendBtn', 'adminPollStartBtn', 'realmPollButtons']);
   const realm = createRealmPolls({
@@ -220,13 +237,14 @@ test('player weather subscription replaces the previous account channel', async 
   let currentUser = { id: 'user-a' };
   const channels = [];
   const removedChannels = [];
+  const realtimeHandlers = new Map();
   const originalDebug = console.debug;
   console.debug = () => {};
   const supabaseClient = {
     channel(name) {
       const channel = {
         name,
-        on() { return this; },
+        on(event, filter, handler) { realtimeHandlers.set(name, handler); return this; },
         subscribe() { channels.push(this); return this; }
       };
       return channel;
@@ -237,19 +255,33 @@ test('player weather subscription replaces the previous account channel', async 
     }
   };
   try {
+    const weatherTimers = createFakeTimerManager();
     const weather = createWeatherSystem({
       WEATHER_TYPES,
       supabaseClient,
       getCurrentUser: () => currentUser,
-      timerManager: createFakeTimerManager().manager,
-      renderCodex() {}
+      timerManager: weatherTimers.manager,
+      renderCodex() {},
+      announceWeatherSummon() {},
+      triggerWeatherSurge() {}
     });
+    weather.setupServerWeatherSubscription();
     weather.setupPlayerWeatherSubscription();
     currentUser = { id: 'user-b' };
     weather.setupPlayerWeatherSubscription();
     await new Promise(resolve => setImmediate(resolve));
-    assert.deepEqual(channels.map(channel => channel.name), ['player-weather-user-a', 'player-weather-user-b']);
-    assert.deepEqual(removedChannels, [channels[0]]);
+    assert.deepEqual(channels.map(channel => channel.name), ['realm-weather-state', 'player-weather-user-a', 'player-weather-user-b']);
+    assert.deepEqual(removedChannels, [channels[1]]);
+    assert.equal([...weatherTimers.intervals.values()].some(timer => timer.delay === 20000), true);
+    const weatherRealtimeHandler = realtimeHandlers.get('realm-weather-state');
+    assert.equal(typeof weatherRealtimeHandler, 'function');
+    weatherRealtimeHandler({ new: {
+      weather_type: 'crystal',
+      ends_at: new Date(Date.now() + 60000).toISOString(),
+      summoned_by: 'test-player',
+      updated_at: new Date().toISOString()
+    } });
+    assert.equal(weather.getWeather().type, 'crystal');
   } finally {
     if (previousStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previousStorage;
