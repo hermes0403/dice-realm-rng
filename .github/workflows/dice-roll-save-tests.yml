@@ -29,6 +29,8 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/pwa-display-controls.test.mjs'
+      - 'tests/pet-income-mutation-multiplier.test.js'
       - 'tests/dice-locks.test.mjs'
       - 'tests/glitch-dice-catalog.test.mjs'
       - 'tests/glitch-weather-dice.test.mjs'
@@ -59,6 +61,8 @@ on:
       - 'script.js'
       - 'tests/cloud-save-pet-authority.test.js'
       - 'tests/dice-roll-save.test.js'
+      - 'tests/pwa-display-controls.test.mjs'
+      - 'tests/pet-income-mutation-multiplier.test.js'
       - 'tests/glitch-dice-catalog.test.mjs'
       - 'tests/glitch-weather-dice.test.mjs'
       - 'tests/glitch-weather-potion-drops.test.mjs'
@@ -88,5 +92,8 @@ jobs:
       - run: node --check services/cloud-save.js
       - run: node --check core/game-state.js
       - run: node --check services/account-actions.js
+      - run: node --check ui/display-controls.js
+      - run: node --check ui/pet-selling.js
+      - run: node --check ui/onboarding.js
       - run: node --check systems/progression.js
-      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/dice-locks.test.mjs tests/local-save-cloud-conflict.test.js tests/glitch-dice-catalog.test.mjs tests/glitch-weather-dice.test.mjs tests/glitch-weather-potion-drops.test.mjs tests/secret-pet-skills.test.mjs tests/weather-summon-odds.test.mjs
+      - run: node --test tests/cloud-save-pet-authority.test.js tests/dice-roll-save.test.js tests/dice-locks.test.mjs tests/local-save-cloud-conflict.test.js tests/glitch-dice-catalog.test.mjs tests/glitch-weather-dice.test.mjs tests/glitch-weather-potion-drops.test.mjs tests/secret-pet-skills.test.mjs tests/weather-summon-odds.test.mjs tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js
