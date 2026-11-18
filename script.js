@@ -28,10 +28,10 @@ import { createDiceSystem } from './systems/dice.js?v=20261118-multi-weather-hea
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
-import { createRealmSocialSystem } from './systems/realm-social.js';
+import { createRealmSocialSystem } from './systems/realm-social.js?v=20261118-shark-weather-announcement';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
-import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
+import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js';
 import { createPresenceService } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
