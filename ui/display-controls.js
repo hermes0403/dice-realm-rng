@@ -14,9 +14,9 @@ export function setupDisplayControls({
   function update() {
     const nativeFullscreen = Boolean(documentRef.fullscreenElement);
     const installedFullscreen = isPwaFullscreen();
-    button.textContent = nativeFullscreen ? '退出全螢幕' : '全螢幕';
+    button.textContent = nativeFullscreen ? '退出全螢幕' : installedFullscreen ? '已全螢幕' : '全螢幕';
     button.setAttribute('aria-pressed', String(nativeFullscreen || installedFullscreen));
-    button.disabled = false;
+    button.disabled = installedFullscreen && !nativeFullscreen;
   }
 
   async function toggleFullscreen() {
