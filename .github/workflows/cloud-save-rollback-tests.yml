@@ -12,6 +12,7 @@ on:
       - 'ui/onboarding.js'
       - 'systems/progression.js'
       - 'systems/weather.js'
+      - 'systems/weekly-realm-event.js'
       - 'admin/ui-bindings.js'
       - 'config.js'
       - 'sw.js'
