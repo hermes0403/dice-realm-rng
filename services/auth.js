@@ -495,12 +495,17 @@ export function createAuthService(deps) {
         if (data?.session) {
           const { error: sessionError } = await supabaseClient.auth.setSession(data.session);
           if (sessionError) throw sessionError;
-          if (mode === 'usernameSignup') {
-            document.getElementById('authUsernameSignupName').value = '';
-            document.getElementById('authUsernameSignupPassword').value = '';
-            document.getElementById('authUsernameSignupPasswordConfirm').value = '';
-            setUsernameSignupMode(false);
-          }
+          return;
+        }
+        if (mode === 'usernameSignup' && data?.success === true) {
+          document.getElementById('authEmail').value = username;
+          document.getElementById('authPassword').value = '';
+          document.getElementById('authUsernameSignupName').value = '';
+          document.getElementById('authUsernameSignupPassword').value = '';
+          document.getElementById('authUsernameSignupPasswordConfirm').value = '';
+          setUsernameSignupMode(false);
+          showAuthMessage('帳號已建立，請登入帳號。');
+          document.getElementById('authEmail').focus();
           return;
         }
         showAuthMessage(data?.message || '操作完成，請返回登入。');
