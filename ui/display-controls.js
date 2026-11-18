@@ -76,7 +76,7 @@ export function setupDisplayControls({
     event.preventDefault();
     void toggleFullscreen();
   };
-  documentRef.addEventListener?.('click', onDocumentClick);
+  documentRef.addEventListener?.('click', onDocumentClick, true);
   documentRef.addEventListener('fullscreenchange', onFullscreenChange);
   documentRef.addEventListener('fullscreenerror', onFullscreenError);
   update();
@@ -85,7 +85,7 @@ export function setupDisplayControls({
     if (!navigatorRef?.serviceWorker?.register || windowRef.isSecureContext !== true) {
       return Promise.resolve(null);
     }
-    const workerUrl = new URL('../sw.js', import.meta.url);
+    const workerUrl = new URL('../sw.js?v=20261119-settings-buttons-v2', import.meta.url);
     const scopeUrl = new URL('../', import.meta.url);
     return navigatorRef.serviceWorker.register(workerUrl.href, { scope: scopeUrl.pathname })
       .catch(() => null);
@@ -96,7 +96,7 @@ export function setupDisplayControls({
     serviceWorkerReady,
     destroy() {
       initialButton.removeEventListener?.('click', toggleFullscreen);
-      documentRef.removeEventListener?.('click', onDocumentClick);
+      documentRef.removeEventListener?.('click', onDocumentClick, true);
       documentRef.removeEventListener?.('fullscreenchange', onFullscreenChange);
       documentRef.removeEventListener?.('fullscreenerror', onFullscreenError);
     }
