@@ -102,23 +102,17 @@ export function setupAccountActions(dependencies) {
         toast('玩家名稱重複');
         return;
       }
-      const now = new Date().toISOString();
-      const { error: profileError } = await supabaseClient.from('player_profiles').upsert({
-        user_id: currentUser.id,
-        username: name,
-        total_rolls: Number(state.rolls) || 0,
-        unique_dice: totalUnique(),
-        rarest_den: Number(state.best?.den) || 0,
-        coins: Number(state.coins) || 0,
-        ...achievementStats(),
-        last_seen: now,
-        updated_at: now
-      }, { onConflict: 'user_id' });
-      if (profileError) throw profileError;
+      // player_profiles writes are intentionally restricted to the version-checked
+      // cloud-save RPC. A direct upsert here is rejected by the current DB grants.
       state.name = name;
       save();
       render();
-      await syncCloudSave();
+      const synced = await syncCloudSave();
+      if (synced !== true) {
+        document.getElementById('accountActionMessage').textContent = '名稱已儲存在本機，雲端尚未確認同步；請稍後重試。';
+        toast('名稱已暫存，雲端同步未確認');
+        return;
+      }
       document.getElementById('accountActionMessage').textContent = '名稱已更新';
       toast('名稱已更新');
     } catch (error) {
