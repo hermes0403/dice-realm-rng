@@ -1,3 +1,8 @@
+export function getWeatherSpeedBonus(weatherState) {
+  const types = Array.isArray(weatherState?.types) ? weatherState.types : [weatherState?.type];
+  return types.includes('shark') ? 100 : 0;
+}
+
 import { WEATHER_SUMMON_ODDS } from './weather-summon-odds.js';
 
 export function createWeatherSystem(dependencies) {
