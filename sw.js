@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.63';
+const CACHE_NAME = 'dice-realm-shell-v1.64';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261118-t0116-shark-weather',
+  './script.js?v=20261118-t0117-pet-weather-fixes',
   './services/auth.js?v=20261118-offline-timeout-100s',
   './services/cloud-save.js?v=20261118-t0114-account-isolation',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
@@ -21,7 +21,8 @@ const APP_SHELL = [
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './data/eternal-update.js?v=20261115-t0098-eternal',
   './systems/pets.js?v=20261115-t0098-eternal-pets',
-  './systems/dice.js?v=20261117-t0097-dice-lock-cleanup',
+  './systems/dice.js?v=20261118-multi-weather-heaven-dice-v1',
+  './systems/pet-income.js?v=20261118-pet-income-mutation-v2',
   './systems/dice-locks.js',
   './core/game-state.js',
   './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2',
