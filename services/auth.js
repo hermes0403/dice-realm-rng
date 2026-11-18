@@ -405,7 +405,7 @@ export function createAuthService(deps) {
       .then(ready => {
         if (!ready) throw new Error('雲端存檔尚未完成載入，遊戲暫時保持鎖定。');
         if (generation !== sessionGeneration || getCurrentUser()?.id !== user.id) return false;
-        document.getElementById('playerName').textContent = state.name || '玩家';
+        document.getElementById('playerName').textContent = getState()?.name || '玩家';
         document.getElementById('authCloseBtn').hidden = false;
         if (retryButton) retryButton.hidden = true;
         closeAuth();
