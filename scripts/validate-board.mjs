@@ -73,6 +73,7 @@ function parseTaskFile(filePath) {
   return {
     filePath,
     fileName: path.basename(filePath),
+    bodyLineOffset: source.slice(0, source.length - body.length).split(/\r?\n/).length - 1,
     fields,
     body,
     delegation,
@@ -184,7 +185,49 @@ function hasNonEmptyRecordField(recordText, label) {
 }
 
 function hasPositiveAcceptanceDecision(recordText) {
-  return /(?<!未)(?<!尚未)(?<!沒)(?<!不)(?<!待)(?<!等待)(?<!不得視為)驗收(?:直接)?(?:通過|成功|完成|結案)/.test(recordText);
+  const beforeNegations = ['不得視為', '尚未', '等待', '不予', '無法', '拒絕', '不是', '未', '沒', '不', '待'];
+  const afterNegations = ['尚未', '退回', '駁回', '拒絕', '暫緩', '失敗', '未', '不', '待'];
+  const positiveDecision = /通過|成功|完成|結案|確認|同意|\bOK\b/i;
+  const negativeDecision = /(?:尚未|未|沒有|沒|不予|無法|拒絕|不|待|等候)[^，,。；;！？!?\n]{0,12}(?:通過|成功|完成|結案|確認|同意|\bOK\b)/i;
+  const decisionText = recordText.split(/\r?\n/)
+    .filter(line => !/^\s*[-*]\s*(?:來源|證據)[：:]/.test(line))
+    .map(line => line.replace(/(?:來源|證據)[：:][\s\S]*?(?=(?:來源|證據)[：:]|$)/g, ''))
+    .join('\n');
+  let offset = decisionText.indexOf('驗收');
+  let foundDecision = false;
+  while (offset >= 0) {
+    const prefix = decisionText.slice(0, offset);
+    const suffix = decisionText.slice(offset + '驗收'.length).replace(/^\s*[:：]?\s*/, '').replace(/^被/, '');
+    const negatedBefore = beforeNegations.some(word => prefix.endsWith(word));
+    const negatedAfter = afterNegations.some(word => suffix.startsWith(word));
+    const decisionClause = suffix.split(/[，,。；;！？!?\n]/, 1)[0].slice(0, 80);
+    if (negatedBefore || negatedAfter || negativeDecision.test(decisionClause)) return false;
+    if (positiveDecision.test(decisionClause)) foundDecision = true;
+    offset = decisionText.indexOf('驗收', offset + '驗收'.length);
+  }
+  return foundDecision;
+}
+
+function acceptanceRecordFailure(record, author, { fromSide, from, doneBy }) {
+  if (author.side === 'UNKNOWN_SIDE' || !author.human) {
+    return `author label=${author.label || '(missing)'} is not a valid human acceptance author (UNKNOWN_SIDE or GPT-only)`;
+  }
+  if (author.impact) return `impact notification label=${author.label}`;
+  if (!hasPositiveAcceptanceDecision(record.text)) {
+    const actualText = record.text.replace(/\s+/g, ' ').trim();
+    return `no positive acceptance decision; actual record=${JSON.stringify(actualText)}`;
+  }
+  if (author.side !== fromSide || SIDES.get(author.human) !== fromSide) {
+    return `acceptance human=${author.human} side=${author.side} does not match from=${from} side=${fromSide || 'UNKNOWN_SIDE'}`;
+  }
+  if (doneBy !== author.human) return `done_by=${doneBy || '(empty)'} does not match acceptance human ${author.human}`;
+  if (!hasNonEmptyRecordField(record.text, '來源')) return '來源=(missing/empty)';
+  if (!hasNonEmptyRecordField(record.text, '證據')) return '證據=(missing/empty)';
+  const date = record.lines[0].text.match(/^-\s+(\d{4}-\d{2}-\d{2})/)?.[1];
+  if (!date || !isValidCalendarDate(date) || date < RECORD_EFFECTIVE_DATE) {
+    return `record date=${date || '(missing/invalid)'} is earlier than ${RECORD_EFFECTIVE_DATE} or invalid`;
+  }
+  return null;
 }
 
 function validateTaskRecords(task, recordChecks, errors, warnings) {
@@ -225,18 +268,28 @@ function validateTaskRecords(task, recordChecks, errors, warnings) {
       warnings.push(`${fields.id}:${record.line} [檢查 2] UNKNOWN_SIDE label=${author.label || '(missing)'} cannot qualify as acceptance`);
     }
   }
-  const validAcceptance = acceptanceAuthors.some(({ record, author }) => {
-    if (author.side === 'UNKNOWN_SIDE' || author.impact || !hasPositiveAcceptanceDecision(record.text)) return false;
-    if (!author.human || author.side !== fromSide || SIDES.get(author.human) !== fromSide) return false;
-    if (doneBy !== author.human) return false;
-    if (!hasNonEmptyRecordField(record.text, '來源') || !hasNonEmptyRecordField(record.text, '證據')) return false;
-    const date = record.lines[0].text.match(/^-\s+(\d{4}-\d{2}-\d{2})/)?.[1];
-    return Boolean(date && isValidCalendarDate(date) && date >= RECORD_EFFECTIVE_DATE);
-  });
+  const evaluated = acceptanceAuthors.map(({ record, author }) => ({
+    record,
+    failure: acceptanceRecordFailure(record, author, { fromSide, from: fields.from, doneBy })
+  }));
+  const validAcceptance = evaluated.some(item => item.failure === null);
 
   if (!validAcceptance) {
     const severity = recordSeverity(recordChecks, 'check2', fromSide);
-    addRecordIssue(`${fileName} [檢查 2] status=done requires a valid human acceptance record matching from=${fields.from} and done_by=${fields.done_by || '(empty)'}, with same-record 來源： and 證據：`, severity, errors, warnings);
+    if (!acceptanceRecords.length) {
+      addRecordIssue(`${fileName} [檢查 2] no acceptance record found in an allowed section`, severity, errors, warnings);
+    } else {
+      const failureOrder = [
+        'author label=', 'impact notification', 'no positive acceptance decision',
+        'acceptance human=', 'done_by=', '來源=', '證據=', 'record date='
+      ];
+      for (const item of evaluated) {
+        item.failureStage = item.failure === null ? 9 : failureOrder.findIndex(prefix => item.failure.startsWith(prefix));
+      }
+      const selected = evaluated.reduce((best, item) => item.failureStage > best.failureStage ? item : best);
+      const line = selected.record.line + task.bodyLineOffset;
+      addRecordIssue(`${fileName} [檢查 2] line ${line}: ${selected.failure}`, severity, errors, warnings);
+    }
   }
 }
 
