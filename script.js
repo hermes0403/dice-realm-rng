@@ -13,7 +13,7 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eterna
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
+import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal-realtime-polling';
@@ -39,10 +39,10 @@ import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
-import { setupAccountActions } from './services/account-actions.js?v=20261118-t0111-logout-feedback';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
+import { setupAccountActions } from './services/account-actions.js?v=20261118-profile-actions-v2';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261118-fullscreen-feedback-v2';
 import { createTimerManager } from './core/timer-manager.js';
-import { setupOnboardingUI } from './ui/onboarding.js?v=20261117-t0101-tutorial-milestone';
+import { setupOnboardingUI } from './ui/onboarding.js?v=20261118-tutorial-replay-feedback';
 
 // T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
 for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
