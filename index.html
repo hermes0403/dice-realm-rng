@@ -91,22 +91,22 @@
    <div class="eyebrow">DICE REALM ACCOUNT</div><h2 style="margin:5px 0 4px">登入骰界 RNG</h2>
    
    <label for="authEmail">玩家名稱</label><input id="authEmail" type="text" autocomplete="username" placeholder="輸入玩家名稱" class="field" style="width:100%;margin:6px 0 12px">
-   <label for="authPassword">密碼（至少 8 位）</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="輸入密碼" class="field" style="width:100%;margin:6px 0 14px">
+   <label for="authPassword">密碼</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="輸入密碼" class="field" style="width:100%;margin:6px 0 14px">
    <div class="toolbar"><button class="primary" id="authLoginBtn" type="button" style="flex:1">登入</button><button id="authSignupBtn" type="button" style="flex:1">建立新帳號</button></div>
   </div>
   <div id="authUsernameSignupPanel" hidden>
    <div class="eyebrow">USERNAME ACCOUNT</div><h2 style="margin:5px 0 4px">建立玩家帳號</h2>
    <p class="muted" style="font-size:13px">不需要 Gmail。玩家名稱需為 3 至 20 個字元，且不可與其他玩家重複。</p><p class="mini" style="font-size:12px;margin:0 0 12px">安全提醒：請避免輸入自己的信箱、其他網站使用中的密碼或重要密碼，以降低個人資料外洩風險。</p>
    <label for="authUsernameSignupName">玩家名稱</label><input id="authUsernameSignupName" type="text" autocomplete="username" maxlength="20" class="field" style="width:100%;margin:6px 0 12px">
-   <label for="authUsernameSignupPassword">密碼（至少 6 位）</label><input id="authUsernameSignupPassword" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 12px">
+   <label for="authUsernameSignupPassword">密碼（至少 8 位）</label><input id="authUsernameSignupPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" class="field" style="width:100%;margin:6px 0 12px">
    <label for="authUsernameSignupPasswordConfirm">確認密碼</label><input id="authUsernameSignupPasswordConfirm" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 14px">
    <div class="toolbar"><button class="primary" id="authUsernameSignupSubmitBtn" type="button" style="flex:1">建立帳號</button><button class="quiet" id="authUsernameSignupCancelBtn" type="button">返回登入</button></div>
   </div>
   <div id="authRecoveryPanel" hidden>
    <div class="eyebrow">ACCOUNT RECOVERY</div><h2 style="margin:5px 0 4px">設定新密碼</h2>
    <p class="muted" style="font-size:13px">請輸入新的密碼並再次確認，完成後會返回骰界 RNG。</p>
-   <label for="authNewPassword">新密碼（至少 6 位）</label><input id="authNewPassword" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 12px">
-   <label for="authNewPasswordConfirm">再次輸入新密碼</label><input id="authNewPasswordConfirm" type="password" autocomplete="new-password" class="field" style="width:100%;margin:6px 0 14px">
+   <label for="authNewPassword">新密碼（至少 8 位）</label><input id="authNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" class="field" style="width:100%;margin:6px 0 12px">
+   <label for="authNewPasswordConfirm">再次輸入新密碼</label><input id="authNewPasswordConfirm" type="password" autocomplete="new-password" minlength="8" maxlength="128" class="field" style="width:100%;margin:6px 0 14px">
    <div class="toolbar"><button class="primary" id="authPasswordUpdateBtn" type="button" style="flex:1">更新密碼</button><button class="quiet" id="authPasswordCancelBtn" type="button">取消</button></div>
   </div>
   <p id="authMessage" class="muted" role="status" aria-live="polite" style="font-size:13px;margin:12px 0 0"></p>
