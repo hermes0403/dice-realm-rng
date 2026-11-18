@@ -21,7 +21,7 @@ import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js
 import { createCloudSaveService } from './services/cloud-save.js?v=20261118-t0114-account-isolation';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261118-offline-timeout-100s';
+import { createAuthService } from './services/auth.js?v=20261119-signup-label-v1';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261118-multi-weather-heaven-dice-v1';
@@ -39,10 +39,10 @@ import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
-import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-delegated-v1';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261119-settings-delegated-v1';
+import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-buttons-v2';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261119-settings-buttons-v2';
 import { createTimerManager } from './core/timer-manager.js';
-import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-delegated-v1';
+import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-buttons-v2';
 
 // T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
 for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
