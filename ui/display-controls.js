@@ -66,13 +66,17 @@ export function setupDisplayControls({
     update();
   }
 
+  const initiallyBoundButtons = new WeakSet();
+  const initialButton = getButton();
+  initialButton.addEventListener('click', toggleFullscreen);
+  initiallyBoundButtons.add(initialButton);
   const onDocumentClick = event => {
     const target = event.target?.closest?.('#fullscreenToggleBtn');
-    if (!target || target.disabled) return;
+    if (!target || target.disabled || initiallyBoundButtons.has(target)) return;
     event.preventDefault();
     void toggleFullscreen();
   };
-  documentRef.addEventListener('click', onDocumentClick);
+  documentRef.addEventListener?.('click', onDocumentClick);
   documentRef.addEventListener('fullscreenchange', onFullscreenChange);
   documentRef.addEventListener('fullscreenerror', onFullscreenError);
   update();
@@ -91,6 +95,7 @@ export function setupDisplayControls({
     update,
     serviceWorkerReady,
     destroy() {
+      initialButton.removeEventListener?.('click', toggleFullscreen);
       documentRef.removeEventListener?.('click', onDocumentClick);
       documentRef.removeEventListener?.('fullscreenchange', onFullscreenChange);
       documentRef.removeEventListener?.('fullscreenerror', onFullscreenError);
