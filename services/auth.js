@@ -524,7 +524,7 @@ export function createAuthService(deps) {
           // Registration creates the account without a session. If another player
           // (for example the admin account) is still signed in on this browser,
           // end that session before asking the player to log in as the new account.
-          let signupNotice = '帳號已建立，請登入帳號。';
+          let signupNotice = '帳號已建立，請使用剛設定的「登入帳號名稱」登入；它與遊戲暱稱不同。';
           const { data: activeSession, error: sessionReadError } = await supabaseClient.auth.getSession();
           if (sessionReadError) {
             signupNotice = '帳號已建立，但無法確認目前登入狀態。請先登出原帳號，再登入新帳號。';

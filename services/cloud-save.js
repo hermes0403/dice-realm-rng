@@ -425,6 +425,10 @@ export function createCloudSaveService(dependencies) {
     }
     const initialUser = getCurrentUser();
     if (!initialUser || !supabaseClient) return false;
+    if (cloudLoadReadyUserId !== initialUser.id) {
+      document.getElementById('saveStatus').textContent = '新帳號雲端存檔載入中，暫停同步以保護資料';
+      return false;
+    }
     if (lastSyncedUserId !== initialUser.id) {
       document.getElementById('saveStatus').textContent = '雲端存檔尚未載入';
       return false;
@@ -516,8 +520,14 @@ export function createCloudSaveService(dependencies) {
   }
 
   function scheduleCloudSync() {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) return;
+    if (cloudLoadReadyUserId !== user.id) {
+      cloudSyncPending = true;
+      return;
+    }
     cloudSyncPending = true;
-    if (!getCurrentUser() || !supabaseClient || cloudSyncBusy || cloudSyncTimer) return;
+    if (cloudSyncBusy || cloudSyncTimer) return;
     const elapsed = Date.now() - lastCloudSyncAt;
     const delay = lastCloudSyncAt ? Math.max(700, CLOUD_SYNC_MIN_INTERVAL - elapsed) : 700;
     const timer = timerManager.setTimeout(() => {
@@ -537,17 +547,24 @@ export function createCloudSaveService(dependencies) {
 
   function save() {
     const S = getState();
-    persistLocalSnapshot(S);
+    const user = getCurrentUser();
+    const accountReady = !!user && cloudLoadReadyUserId === user.id;
+    // During an account switch, never write the previous player's in-memory
+    // state into the new player's UID-scoped local snapshot.
+    persistLocalSnapshot(S, accountReady ? user.id : null);
     try {
-      const savedAtKey = localSavedAtKey();
+      const savedAtKey = accountReady ? localSavedAtKey(user.id) : null;
       if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
     } catch (e) {}
-    document.getElementById('saveStatus').textContent = getCurrentUser() ? '已儲存本機，雲端每 5 分鐘備份' : '本機存檔';
-    if (getCurrentUser()) scheduleSync();
+    document.getElementById('saveStatus').textContent = accountReady
+      ? '已儲存本機，雲端每 5 分鐘備份'
+      : user ? '新帳號存檔載入中' : '本機存檔';
+    if (accountReady) scheduleSync();
   }
 
   async function flushCloudSave() {
-    if (!getCurrentUser() || !supabaseClient) return;
+    const user = getCurrentUser();
+    if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
@@ -625,7 +642,8 @@ export function createCloudSaveService(dependencies) {
     lastCloudLoadError = null;
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
-    cloudLoadReadyUserId = null;
+    const wasReadyForUser = cloudLoadReadyUserId === user.id;
+    cloudLoadReadyUserId = wasReadyForUser ? user.id : null;
     if (lastSyncedUserId !== user.id) {
       cloudSaveVersion = null;
       lastSyncedPayload = null;
@@ -770,6 +788,13 @@ export function createCloudSaveService(dependencies) {
           ...fresh(),
           ...(latestLocalSnapshot?.bag ? latestLocalSnapshot : {})
         }));
+        if (!latestLocalSnapshot?.bag) {
+          // First-time accounts receive a unique game nickname from their
+          // login name, never the previous account's in-memory state.
+          const baseName = String(user.user_metadata?.username || '玩家')
+            .normalize('NFKC').replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
+          S.name = (baseName + '_' + String(user.id).slice(0, 4)).slice(0, 20);
+        }
         S.petAutoSellRarities = latestLocalSnapshot?.petAutoSellRarities || {};
         S._cloudBaseVersion = null;
         setState(S);
@@ -778,6 +803,9 @@ export function createCloudSaveService(dependencies) {
         render();
       }
 
+      // The correct account state is now installed. Only now may any save write
+      // to this UID; all earlier saves were blocked during account switching.
+      cloudLoadReadyUserId = user.id;
       await applyPendingGrants(true);
       if (syncAfterLoad) await syncCloudSave();
       else if (data?.save_data?.bag && stableSerialize(savePayload()) !== stableSerialize(data.save_data)) {
