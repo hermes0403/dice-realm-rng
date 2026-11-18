@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.65';
+const CACHE_NAME = 'dice-realm-shell-v1.66';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,11 +12,11 @@ const APP_SHELL = [
   './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
   './systems/weather.js?v=20261118-shark-weather-speed-v1',
   './systems/progression.js?v=20261118-roll-milestones-v2',
-  './services/account-actions.js?v=20261118-profile-actions-v2',
-  './ui/display-controls.js?v=20261118-fullscreen-feedback-v2',
+  './services/account-actions.js?v=20261119-settings-delegated-v1',
+  './ui/display-controls.js?v=20261119-settings-delegated-v1',
   './admin/ui-bindings.js?v=20261118-t0114-login-name-management',
   './config.js?v=20261118-shark-weather',
-  './ui/onboarding.js?v=20261118-tutorial-replay-feedback',
+  './ui/onboarding.js?v=20261119-settings-delegated-v1',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './data/eternal-update.js?v=20261115-t0098-eternal',
