@@ -110,7 +110,7 @@ export function setupOnboardingUI({ documentRef = document, getCurrentUser, isAd
     event.preventDefault();
     replayTutorialHandler();
   };
-  documentRef.addEventListener?.('click', onDocumentClick);
+  documentRef.addEventListener?.('click', onDocumentClick, true);
   el('adminTutorialTestBtn').addEventListener('click', () => show({ preview: true }));
 
   return { show, close, maybeShowForCurrentUser };
