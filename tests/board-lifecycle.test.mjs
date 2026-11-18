@@ -321,7 +321,11 @@ test('Check 2 rejects empty child-bullet 來源 and 證據 values but accepts bo
 });
 
 test('Check 2 excludes negated acceptance decisions', t => {
-  for (const phrase of ['尚未驗收通過', '未驗收完成', '等待驗收完成', '不得視為驗收通過']) {
+  for (const phrase of [
+    '驗收未通過', '驗收：待棒子確認', '驗收不通過', '驗收失敗', '驗收被退回',
+    '尚未驗收通過', '不是驗收通過', '無法驗收通過', '拒絕驗收通過',
+    '未驗收完成', '等待驗收完成', '不得視為驗收通過'
+  ]) {
     const board = fs.mkdtempSync(path.join(os.tmpdir(), 'dice-board-negated-acceptance-'));
     fs.mkdirSync(path.join(board, 'archive'), { recursive: true });
     try {
@@ -333,6 +337,134 @@ test('Check 2 excludes negated acceptance decisions', t => {
       fs.rmSync(board, { recursive: true, force: true });
     }
   }
+});
+
+test('Check 2 rejects mixed positive and negated decisions, and ignores 來源/證據 text', t => {
+  const cases = [
+    {
+      record: '- 2026-11-17 17:29 [barry] 驗收失敗，待修復後再驗收。來源：人類決定。證據：PR #1。',
+      accepted: false
+    },
+    {
+      record: '- 2026-11-17 17:29 [barry] 驗收未通過。來源：人類決定。證據：PR #1。請重新驗收',
+      accepted: false
+    },
+    {
+      record: '- 2026-11-17 17:29 [barry] 驗收通過。來源：Barry 的待驗收通知。證據：PR #1。',
+      accepted: true
+    },
+    {
+      record: '- 2026-11-17 17:29 [barry] 驗收通過。來源：棒子說「還沒驗收的部分已經好了」。證據：PR #1。',
+      accepted: true
+    },
+    {
+      record: [
+        '- 2026-11-17 17:29 [barry] 驗收通過。',
+        '  - 來源：棒子說「還沒驗收的部分已經好了」。',
+        '  - 證據：PR #1。'
+      ].join('\n'),
+      accepted: true
+    }
+  ];
+  for (const [index, item] of cases.entries()) {
+    const board = makeBoard(t);
+    writeDoneTask(board, { record: item.record });
+    const result = validateTestBoard(board);
+    const hasCheck2Warning = result.warnings.some(warning => warning.includes('[檢查 2]'));
+    assert.equal(!hasCheck2Warning, item.accepted, `case ${index + 1}: ${item.record}`);
+  }
+});
+
+test('Check 2 requires an affirmative outcome near 驗收, not merely a request or pending status', t => {
+  const cases = [
+    { decision: '請 barry 驗收', accepted: false },
+    { decision: '已提交驗收，等候結果', accepted: false },
+    { decision: '驗收中', accepted: false },
+    { decision: '驗收通過', accepted: true },
+    { decision: '驗收：棒子明確確認本任務已完成並同意結案', accepted: true },
+    { decision: '驗收：已完成', accepted: true }
+  ];
+  for (const [index, item] of cases.entries()) {
+    const board = makeBoard(t);
+    writeDoneTask(board, {
+      record: `- 2026-11-17 17:29 [barry] ${item.decision}。來源：人類決定。證據：PR #1。`
+    });
+    const result = validateTestBoard(board);
+    const hasCheck2Warning = result.warnings.some(warning => warning.includes('[檢查 2]'));
+    assert.equal(!hasCheck2Warning, item.accepted, `case ${index + 1}: ${item.decision}`);
+  }
+});
+
+test('Check 2 accepts the real-format proxy record for owner-side from=叉子 and done_by=棒子', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, {
+    from: '叉子', doneBy: '棒子',
+    record: '- 2026-11-17 17:29 [代記:棒子/叉子] 驗收：棒子明確確認本任務已完成並同意結案。來源：棒子於 2026-11-17 對話表示「以上都好了」。證據：PR #145 merge commit 1019d12bceb4ca5ac1ca36018bd61e019aec1ec9。'
+  });
+  const result = validateTestBoard(board);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.warnings, []);
+});
+
+test('Check 2 diagnostics report the first failed condition with actual values and file line', t => {
+  const cases = [
+    {
+      id: 'T-0001', from: 'barry', doneBy: 'barry',
+      record: '- 2026-11-17 17:29 [barry] 驗收未通過。來源：人類決定。證據：PR #1。',
+      expected: 'no positive acceptance decision; actual record="- 2026-11-17 17:29 [barry] 驗收未通過。來源：人類決定。證據：PR #1。"'
+    },
+    {
+      id: 'T-0002', from: '棒子', doneBy: '棒子',
+      record: '- 2026-11-17 17:29 [barry] 驗收：已完成。來源：人類決定。證據：PR #1。',
+      expected: 'acceptance human=barry side=collaborator_side does not match from=棒子 side=owner_side'
+    },
+    {
+      id: 'T-0003', from: '棒子', doneBy: '叉子',
+      record: '- 2026-11-17 17:29 [棒子] 驗收：已完成。來源：人類決定。證據：PR #1。',
+      expected: 'done_by=叉子 does not match acceptance human 棒子'
+    },
+    {
+      id: 'T-0004', from: 'barry', doneBy: 'barry',
+      record: '- 2026-11-17 17:29 [barry] 驗收：已完成。來源： 證據：PR #1。',
+      expected: '來源=(missing/empty)'
+    },
+    {
+      id: 'T-0005', from: 'barry', doneBy: 'barry',
+      record: '- 2026-11-17 17:29 [barry] 驗收：已完成。來源：人類決定。證據：',
+      expected: '證據=(missing/empty)'
+    }
+  ];
+  const board = makeBoard(t);
+  for (const item of cases) writeDoneTask(board, item);
+  const result = validateTestBoard(board);
+  for (const item of cases) {
+    const warning = result.warnings.find(value => value.startsWith(`${item.id}-test.md [檢查 2]`));
+    assert.ok(warning, `missing diagnostic for ${item.id}`);
+    assert.match(warning, /line \d+:/);
+    assert.ok(warning.includes(item.expected), warning);
+  }
+});
+
+test('Check 2 diagnostic line number includes the complete frontmatter offset', t => {
+  const board = makeBoard(t);
+  const record = '- 2026-11-17 17:29 [barry] 驗收未通過。來源：人類決定。證據：PR #1。';
+  writeDoneTask(board, { record });
+  const filePath = path.join(board, 'T-0001-test.md');
+  const physicalLines = fs.readFileSync(filePath, 'utf8').split(/\r?\n/);
+  const expectedLine = physicalLines.findIndex(line => line === record) + 1;
+  const result = validateTestBoard(board);
+  const warning = result.warnings.find(value => value.startsWith('T-0001-test.md [檢查 2]'));
+  assert.ok(warning, 'missing Check 2 diagnostic');
+  assert.ok(warning.includes(`line ${expectedLine}:`), `expected physical line ${expectedLine}, got: ${warning}`);
+});
+
+test('Check 2 reports no allowed-section record, or the GPT-only author label when present', t => {
+  const board = makeBoard(t);
+  writeDoneTask(board, { id: 'T-0001', section: '進度紀錄', record: '- 2026-11-17 17:29 [叉子] 實作完成。' });
+  writeDoneTask(board, { id: 'T-0002', record: '- 2026-11-17 17:29 [叉子] 實作完成。' });
+  const result = validateTestBoard(board);
+  assert.ok(result.warnings.some(value => value.includes('T-0001-test.md [檢查 2] no acceptance record found in an allowed section')));
+  assert.ok(result.warnings.some(value => value.includes('T-0002-test.md [檢查 2]') && value.includes('author label=叉子')));
 });
 
 test('record author labels must immediately follow the date and optional time', () => {
