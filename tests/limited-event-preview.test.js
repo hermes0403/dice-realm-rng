@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url), 'utf8');
 
-test('limited event entry is placed between welcome hero and stats', () => {
-  const welcome = html.indexOf('WELCOME TO THE DICE REALM');
+test('limited event entry is placed inside the home hero before stats', () => {
+  const welcome = html.indexOf('id="realmHero"');
   const entry = html.indexOf('class="limited-event-entry"');
   const stats = html.indexOf('class="stats"', welcome);
   assert.ok(welcome >= 0 && entry > welcome && stats > entry);
