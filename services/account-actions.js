@@ -216,7 +216,7 @@ export function setupAccountActions(dependencies) {
     if (!button?.addEventListener) return;
     button.addEventListener('click', event => {
       event?.preventDefault?.();
-      if (!button.disabled) void handler();
+      if (!button.disabled) return handler();
     });
     initiallyBoundButtons.add(button);
   };
