@@ -175,12 +175,12 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('V1.45 PWA 快取殼同步更新', async () => {
+test('V1.51 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1.44/);
-  assert.match(html, /script\.js\?v=20261115-t0099-eternal-fusion-rates/);
-  assert.match(worker, /dice-realm-shell-v1\.45/);
+  assert.match(html, /V1.51/);
+  assert.match(html, /script\.js\?v=20261118-t0105-username-auth/);
+  assert.match(worker, /dice-realm-shell-v1\.61/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
   assert.match(worker, /data\/eternal-update\.js\?v=20261115-t0098-eternal/);
@@ -206,7 +206,7 @@ test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小�
   assert.doesNotMatch(itemPanel, /ITEM WORKSHOP|打造改變天氣的工具|收集特殊天氣骰子/);
   assert.doesNotMatch(itemPanel, /weatherConvertPanel/);
   assert.match(gloves, /weather-converter-card/);
-  assert.match(gloves, /id="weatherConvertScope"/);
+  assert.match(gloves, /itemWorkshopList/);
   assert.match(gloves, /id="weatherConvertBtn"/);
   assert.match(gloves, /data-craft="g7"/);
 
@@ -254,7 +254,7 @@ test('主頁最新骰子名稱清楚，成就顏色與五種天氣骰子門檻�
 
 test('T-0092 天氣收藏成就以目前進度顯示完成狀態，不顯示歷史完成標籤', async () => {
   const progression = await readFile(new URL('../systems/progression.js', import.meta.url), 'utf8');
-  assert.match(progression, /isAchievementCompleteForDisplay\(id,desc,!!getState\(\)\.achievements\[id\]\)/);
+  assert.match(progression, /isAchievementCompleteForDisplay\(id,desc,getState\(\)\.achievements\[id\]\)/);
   assert.match(progression, /if\(!a\)\{/);
   assert.doesNotMatch(progression, /已完成（歷史紀錄）/);
 });
