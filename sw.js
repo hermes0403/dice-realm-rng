@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.65';
+const CACHE_NAME = 'dice-realm-shell-v1.66';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261118-t0118-shark-announce',
+  './script.js?v=20261119-settings-buttons-v2',
   './services/auth.js?v=20261118-offline-timeout-100s',
   './services/cloud-save.js?v=20261118-t0114-account-isolation',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
