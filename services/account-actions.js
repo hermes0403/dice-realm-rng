@@ -215,7 +215,7 @@ export function setupAccountActions(dependencies) {
     const button = document.getElementById(id);
     if (!button?.addEventListener) return;
     button.addEventListener('click', event => {
-      event.preventDefault();
+      event?.preventDefault?.();
       if (!button.disabled) void handler();
     });
     initiallyBoundButtons.add(button);
