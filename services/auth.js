@@ -463,7 +463,7 @@ export function createAuthService(deps) {
       const signupPassword = document.getElementById('authUsernameSignupPassword').value;
       const confirm = document.getElementById('authUsernameSignupPasswordConfirm').value;
       if (!username) { showAuthMessage('請輸入玩家名稱。'); return; }
-      if (signupPassword.length < 8) { showAuthMessage('新密碼至少需要 8 位。'); return; }
+      if (signupPassword.length < 6) { showAuthMessage('新密碼至少需要 6 位。'); return; }
       if (signupPassword !== confirm) { showAuthMessage('兩次輸入的密碼不一致。'); return; }
     } else if (!email || (mode !== 'login' && !isEmailIdentifier) || (mode === 'login' && !isEmailIdentifier && !/^[\p{L}\p{N}_-]{3,20}$/u.test(email.normalize('NFKC').trim()))) {
       showAuthMessage(mode === 'login' ? '請輸入玩家名稱或有效的 Gmail。' : '請輸入有效的 Email 地址。');
