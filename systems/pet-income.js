@@ -18,7 +18,7 @@ export function createPetIncomeSystem({
   let saveCounter = 0;
 
   function petIncomeMultiplier(pet) {
-    const legacy = petWeightSkillMultiplier(pet?.kg) + (PET_MUTATIONS[pet?.mutation]?.multiplier || 0);
+    const legacy = petWeightSkillMultiplier(pet?.kg) * (PET_MUTATIONS[pet?.mutation]?.multiplier || 1);
     const variant = pet?.variant === 'golden' ? 1.2 : pet?.variant === 'diamond' ? 1.6 : pet?.variant === 'rainbow' ? 2 : 1;
     return legacy * variant;
   }
