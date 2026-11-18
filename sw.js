@@ -1,18 +1,18 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.66';
+const CACHE_NAME = 'dice-realm-shell-v1.67';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261119-settings-buttons-v2',
+  './script.js?v=20261119-pet-save-merge-settings',
   './services/auth.js?v=20261119-signup-label-v1',
-  './services/cloud-save.js?v=20261118-t0114-account-isolation',
+  './services/cloud-save.js?v=20261119-pet-save-merge-guard',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
   './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
   './systems/weather.js?v=20261118-shark-weather-speed-v1',
   './systems/progression.js?v=20261118-roll-milestones-v2',
-  './services/account-actions.js?v=20261119-settings-buttons-v2',
+  './services/account-actions.js?v=20261119-settings-rpc-fix',
   './ui/display-controls.js?v=20261119-settings-buttons-v2',
   './admin/ui-bindings.js?v=20261118-t0114-login-name-management',
   './config.js?v=20261118-shark-weather',
@@ -23,8 +23,8 @@ const APP_SHELL = [
   './systems/pets.js?v=20261115-t0098-eternal-pets',
   './systems/dice.js?v=20261118-multi-weather-heaven-dice-v1',
   './systems/pet-income.js?v=20261118-pet-income-mutation-v2',
-  './systems/realm-social.js?v=20261118-shark-weather-announcement',
-  './systems/global-announcements.js?v=20261118-shark-weather-announcement',
+  './systems/realm-social.js?v=20261119-pet-audit-metadata',
+  './systems/global-announcements.js?v=20261119-pet-audit-metadata',
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './systems/dice-locks.js',
   './core/game-state.js',
