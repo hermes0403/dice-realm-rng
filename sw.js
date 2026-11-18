@@ -1,17 +1,22 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.61';
+const CACHE_NAME = 'dice-realm-shell-v1.62';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261118-t0105-username-auth',
-  './services/auth.js?v=20261117-t0103-auth-flow',
+  './script.js?v=20261118-t0116-shark-weather',
+  './services/auth.js?v=20261118-offline-timeout-100s',
   './services/cloud-save.js?v=20261117-t0103-auth-cloud-error',
   './ui/equipment.js?v=20261117-t0102-void-startrail-gloves',
   './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
-  './systems/weather.js?v=20261117-t0098-time-crystal',
-  './ui/onboarding.js?v=20261117-t0101-tutorial-milestone',
+  './systems/weather.js?v=20261118-shark-weather-speed-v1',
+  './systems/progression.js?v=20261118-roll-milestones-v2',
+  './services/account-actions.js?v=20261118-profile-actions-v2',
+  './ui/display-controls.js?v=20261118-fullscreen-feedback-v2',
+  './admin/ui-bindings.js',
+  './config.js?v=20261118-shark-weather',
+  './ui/onboarding.js?v=20261118-tutorial-replay-feedback',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './data/eternal-update.js?v=20261115-t0098-eternal',
@@ -23,7 +28,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261117-t0101-tutorial-milestone',
+  './style.css?v=20261118-shark-weather',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
