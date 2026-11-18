@@ -55,5 +55,5 @@ test('雜魚的三隻已裝備神話寵物收益依照雪變異正確計算', ()
 
 test('signed-in pet sale UI receives the server transaction dependencies', async () => {
   const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
-  assert.match(script, /setupPetSellingUI\\(\\{[\\s\\S]*?supabaseClient, getCurrentUser: \\(\\) => currentUser/);
+  assert.ok(script.includes("setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier, supabaseClient, getCurrentUser: () => currentUser });"));
 });
