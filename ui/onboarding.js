@@ -101,7 +101,7 @@ export function setupOnboardingUI({ documentRef = document, getCurrentUser, isAd
   });
   el('onboardingClose').addEventListener('click', close);
   el('onboardingSkip').addEventListener('click', close);
-  el('replayTutorialBtn').addEventListener('click', () => show());
+  el('replayTutorialBtn').addEventListener('click', () => { if (show()) toast('新手教學已開啟'); });
   el('adminTutorialTestBtn').addEventListener('click', () => show({ preview: true }));
 
   return { show, close, maybeShowForCurrentUser };
