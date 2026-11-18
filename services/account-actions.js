@@ -75,7 +75,7 @@ export function setupAccountActions(dependencies) {
     });
   }
 
-  document.getElementById('saveName').onclick = async () => {
+  async function handleSaveName() {
     const currentName = String(getState()?.name || '旅人');
     const enteredName = await requestPlayerName(currentName);
     if (enteredName === null || enteredName === undefined) return;
@@ -128,9 +128,8 @@ export function setupAccountActions(dependencies) {
     } finally {
       button.disabled = false;
     }
-  };
-
-  document.getElementById('resetBtn').onclick = async () => {
+  }
+  async function handleResetAccount() {
     const message = document.getElementById('accountActionMessage');
     message.textContent = '刪除帳號會永久移除登入帳號與雲端進度。';
     toast('刪除帳號需要完成兩次確認');
@@ -175,9 +174,8 @@ export function setupAccountActions(dependencies) {
     } finally {
       button.disabled = false;
     }
-  };
-
-  document.getElementById('profileLogoutBtn')?.addEventListener('click', async () => {
+  }
+  async function handleLogout() {
     const user = getCurrentUser();
     if (!user) { toast('目前沒有登入雲端帳號'); return; }
     const button = document.getElementById('profileLogoutBtn');
@@ -208,5 +206,17 @@ export function setupAccountActions(dependencies) {
     } finally {
       if (button) button.disabled = false;
     }
+  }
+
+  // Delegate settings actions from the document so they keep working if the
+  // profile/settings page is rebuilt or its buttons are replaced during render.
+  document.addEventListener('click', event => {
+    const button = event.target?.closest?.('#saveName, #resetBtn, #profileLogoutBtn');
+    if (!button || button.disabled) return;
+    event.preventDefault();
+    if (button.id === 'saveName') void handleSaveName();
+    else if (button.id === 'resetBtn') void handleResetAccount();
+    else if (button.id === 'profileLogoutBtn') void handleLogout();
   });
+
 }
