@@ -498,13 +498,26 @@ export function createAuthService(deps) {
           return;
         }
         if (mode === 'usernameSignup' && data?.success === true) {
+          // Registration creates the account without a session. If another player
+          // (for example the admin account) is still signed in on this browser,
+          // end that session before asking the player to log in as the new account.
+          let signupNotice = '帳號已建立，請登入帳號。';
+          const { data: activeSession, error: sessionReadError } = await supabaseClient.auth.getSession();
+          if (sessionReadError) {
+            signupNotice = '帳號已建立，但無法確認目前登入狀態。請先登出原帳號，再登入新帳號。';
+          } else if (activeSession?.session) {
+            const { error: signOutError } = await supabaseClient.auth.signOut();
+            if (signOutError) {
+              signupNotice = '帳號已建立，但原本帳號登出失敗。請先手動登出，再登入新帳號。';
+            }
+          }
           document.getElementById('authEmail').value = username;
           document.getElementById('authPassword').value = '';
           document.getElementById('authUsernameSignupName').value = '';
           document.getElementById('authUsernameSignupPassword').value = '';
           document.getElementById('authUsernameSignupPasswordConfirm').value = '';
           setUsernameSignupMode(false);
-          showAuthMessage('帳號已建立，請登入帳號。');
+          showAuthMessage(signupNotice);
           document.getElementById('authEmail').focus();
           return;
         }
