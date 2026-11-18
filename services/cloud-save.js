@@ -177,7 +177,7 @@ export function createCloudSaveService(dependencies) {
     return [...merged];
   }
 
-  function mergePetInstances(baseValue, localValue, cloudValue) {
+  function mergePetInstances(baseValue, localValue, cloudValue, preserveCloudRemovals = false) {
     const toMap = value => new Map(
       (Array.isArray(value) ? value : [])
         .filter(pet => pet && typeof pet === 'object' && typeof pet.uid === 'string' && pet.uid)
@@ -189,11 +189,14 @@ export function createCloudSaveService(dependencies) {
     const legacyCloudPets = cloudList.filter(pet => !pet || typeof pet.uid !== 'string' || !pet.uid);
     const merged = toMap(cloudList);
 
-    // Keep legacy cloud pets without UIDs intact. New fusion results always
-    // have UIDs, so only identifiable instances participate in delta merging.
-    // A stale local copy cannot bring back a pet that the cloud has since removed.
-    for (const uid of base.keys()) {
-      if (!local.has(uid)) merged.delete(uid);
+    // In a normal three-way merge, a local removal since the shared baseline
+    // is respected. If local lifetime counters regressed, treat that snapshot
+    // as stale: keep cloud-side removals authoritative while still retaining
+    // locally-created pet UIDs that are absent from the baseline.
+    if (!preserveCloudRemovals) {
+      for (const uid of base.keys()) {
+        if (!local.has(uid)) merged.delete(uid);
+      }
     }
     for (const [uid, pet] of local) {
       if (!base.has(uid) && !merged.has(uid)) merged.set(uid, clonePayload(pet));
@@ -232,16 +235,27 @@ export function createCloudSaveService(dependencies) {
     const merged = clonePayload(cloud) || {};
 
     // A version-tagged local snapshot can still be stale if another tab
-    // overwrote it with older state. Lifetime counters and discovery records
-    // must never be lower than the baseline they claim to descend from.
-    if ((Number(local.rolls) || 0) < (Number(base.rolls) || 0)) return merged;
+    // overwrote it with older state. Do not merge its regressed counters or
+    // removals, but preserve pet UIDs created locally after the shared baseline.
+    let localProgressRegressed = (Number(local.rolls) || 0) < (Number(base.rolls) || 0);
     for (const [diceId, count] of Object.entries(base.rollCounts || {})) {
-      if ((Number(local.rollCounts?.[diceId]) || 0) < (Number(count) || 0)) return merged;
+      if ((Number(local.rollCounts?.[diceId]) || 0) < (Number(count) || 0)) localProgressRegressed = true;
     }
     for (const diceId of Object.keys(base.first || {})) {
-      if (!local.first?.[diceId]) return merged;
+      if (!local.first?.[diceId]) localProgressRegressed = true;
     }
-    if ((Number(base.best?.den) || 0) > (Number(local.best?.den) || 0)) return merged;
+    if ((Number(base.best?.den) || 0) > (Number(local.best?.den) || 0)) localProgressRegressed = true;
+    if (localProgressRegressed) {
+      merged.pets = mergePetInstances(base.pets, local.pets, cloud.pets, true);
+      const baseEquipped = new Set(Array.isArray(base.equippedPetUids) ? base.equippedPetUids : []);
+      const mergedEquipped = new Set(Array.isArray(cloud.equippedPetUids) ? cloud.equippedPetUids : []);
+      for (const uid of Array.isArray(local.equippedPetUids) ? local.equippedPetUids : []) {
+        if (!baseEquipped.has(uid)) mergedEquipped.add(uid);
+      }
+      merged.equippedPetUids = [...mergedEquipped]
+        .filter(uid => merged.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3);
+      return merged;
+    }
     const protectedFields = new Set([
       'rolls', 'rollCounts', 'bag', 'autoSold', 'first', 'best',
       'lockedDice', 'autoDeleteDice', 'autoDepositDice', 'bagCapacity',
