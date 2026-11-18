@@ -194,20 +194,23 @@ export function createAuthService(deps) {
 
   function attachOfflineLifecycleListeners() {
     if (offlineLifecycleListenersAttached) return;
+    const documentObject = globalThis.document;
+    const windowObject = globalThis.window;
+    if (!documentObject?.addEventListener) return;
     offlineLifecycleListenersAttached = true;
     const onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') markSessionOffline();
+      if (documentObject.visibilityState === 'hidden') markSessionOffline();
       else void enforceOfflineSessionTimeout();
     };
     const onPageHide = () => markSessionOffline();
     const onPageShow = () => void enforceOfflineSessionTimeout();
     const onOffline = () => markSessionOffline();
     const onOnline = () => void enforceOfflineSessionTimeout();
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    globalThis.window?.addEventListener('pagehide', onPageHide);
-    globalThis.window?.addEventListener('pageshow', onPageShow);
-    globalThis.window?.addEventListener('offline', onOffline);
-    globalThis.window?.addEventListener('online', onOnline);
+    documentObject.addEventListener('visibilitychange', onVisibilityChange);
+    windowObject?.addEventListener('pagehide', onPageHide);
+    windowObject?.addEventListener('pageshow', onPageShow);
+    windowObject?.addEventListener('offline', onOffline);
+    windowObject?.addEventListener('online', onOnline);
     timerManager?.setTimeout?.(() => void enforceOfflineSessionTimeout(), 0, 'auth-offline-session-check');
   }
   const SIGNUP_COOLDOWN_MS = 4 * 60 * 1000;
