@@ -116,6 +116,17 @@ test('PWA manifest 使用專案相對路徑、fullscreen 優先顯示模式與�
   }
 });
 
+test('缺少可選的驗證信按鈕不會中斷設定頁與寵物出售 UI 初始化', async () => {
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(script, /getElementById\('authResendBtn'\)\?\.addEventListener/);
+  assert.match(script, /getElementById\('authResetBtn'\)\?\.addEventListener/);
+  assert.match(script, /setupAccountActions\(\{/);
+  assert.match(script, /setupDisplayControls\(\{/);
+  assert.match(script, /setupPetSellingUI\(\{/);
+  assert.match(worker, /ui\/pet-selling\.js\?v=20261119-cloud-sale-wiring/);
+});
+
 test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /viewport-fit=cover/);
