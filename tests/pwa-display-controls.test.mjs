@@ -175,10 +175,10 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('V1.45 PWA 快取殼同步更新', async () => {
+test('V1.51 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1.44/);
+  assert.match(html, /V1.51/);
   assert.match(html, /script\.js\?v=20261115-t0099-eternal-fusion-rates/);
   assert.match(worker, /dice-realm-shell-v1\.45/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
@@ -206,7 +206,7 @@ test('T-0093 道具工坊收納天氣轉換器，保留舊持有資料與每小�
   assert.doesNotMatch(itemPanel, /ITEM WORKSHOP|打造改變天氣的工具|收集特殊天氣骰子/);
   assert.doesNotMatch(itemPanel, /weatherConvertPanel/);
   assert.match(gloves, /weather-converter-card/);
-  assert.match(gloves, /id="weatherConvertScope"/);
+  assert.match(gloves, /itemWorkshopList/);
   assert.match(gloves, /id="weatherConvertBtn"/);
   assert.match(gloves, /data-craft="g7"/);
 
