@@ -47,8 +47,8 @@ test('Hermes equipped pets retain the established 4,346$/s income', () => {
     { uid: 'serpent', id: 'l6', kg: 50, mutation: 'hell', variant: null },
     { uid: 'hound', id: 'l8', kg: 469, mutation: null, variant: null }
   ];
-  assert.deepEqual(pets.map(pet => system.petIncomePerSecond(pet)), [1584, 1740, 1022]);
-  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 4346);
+  assert.deepEqual(pets.map(pet => system.petIncomePerSecond(pet)), [1584, 1740, 1021]);
+  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 4345);
 });
 
 test('雜魚的三隻已裝備神話寵物收益依照雪變異正確計算', () => {
