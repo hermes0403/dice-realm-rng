@@ -192,7 +192,7 @@ test('V1.56 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1.56/);
-  assert.match(html, /script\.js\?v=20261119-critical-ui-wiring-v1/);
+  assert.match(html, /script\.js\?v=20261119-weekly-auth-session-fix/);
   assert.match(worker, /dice-realm-shell-v1\.71/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
