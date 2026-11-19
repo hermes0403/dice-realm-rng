@@ -33,7 +33,7 @@ create table if not exists public.realm_weekly_reward_corrections (
 alter table public.realm_weekly_reward_corrections enable row level security;
 revoke all on public.realm_weekly_reward_corrections from public, anon, authenticated;
 
-do $
+do $$
 declare
   v_user record;
   v_data jsonb;
