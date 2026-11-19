@@ -21,6 +21,58 @@ where milestone <= (
 )
 on conflict (campaign_start,milestone) do nothing;
 
+-- Existing accounts already marked as having received the 300,000 milestone
+-- were previously granted the wrong reward pair. Add the intended potions once.
+create table if not exists public.realm_weekly_reward_corrections (
+  campaign_start date not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  milestone bigint not null,
+  corrected_at timestamptz not null default now(),
+  primary key (campaign_start,user_id,milestone)
+);
+alter table public.realm_weekly_reward_corrections enable row level security;
+revoke all on public.realm_weekly_reward_corrections from public, anon, authenticated;
+
+do $
+declare
+  v_user record;
+  v_data jsonb;
+  v_potions jsonb;
+  v_inventory jsonb;
+begin
+  for v_user in
+    select c.user_id
+    from public.realm_weekly_roll_claims c
+    join auth.users u on u.id=c.user_id
+    join public.realm_weekly_milestone_unlocks m
+      on m.campaign_start=c.campaign_start and m.milestone=c.milestone
+    where c.campaign_start=date '2026-11-17'
+      and c.milestone=300000
+      and u.created_at<=m.unlocked_at
+      and exists(select 1 from public.game_saves gs where gs.user_id=c.user_id)
+  loop
+    insert into public.realm_weekly_reward_corrections(campaign_start,user_id,milestone)
+      values(date '2026-11-17',v_user.user_id,300000)
+      on conflict do nothing;
+    if not found then continue; end if;
+
+    select save_data into v_data
+    from public.game_saves where user_id=v_user.user_id for update;
+    v_data:=coalesce(v_data,'{}'::jsonb);
+    v_potions:=coalesce(v_data->'potions','{}'::jsonb);
+    v_inventory:=coalesce(v_potions->'inventory','{}'::jsonb);
+    v_inventory:=jsonb_set(v_inventory,'{speed2}',
+      to_jsonb(coalesce(nullif(v_inventory->>'speed2','')::integer,0)+5),true);
+    v_inventory:=jsonb_set(v_inventory,'{luck2}',
+      to_jsonb(coalesce(nullif(v_inventory->>'luck2','')::integer,0)+5),true);
+    v_potions:=jsonb_set(v_potions,'{inventory}',v_inventory,true);
+    v_data:=jsonb_set(v_data,'{potions}',v_potions,true);
+    update public.game_saves set save_data=v_data,updated_at=now()
+      where user_id=v_user.user_id;
+  end loop;
+end;
+$;
+
 create or replace function public.apply_weekly_realm_rewards(p_uid uuid)
 returns jsonb language plpgsql security definer set search_path = ''
 as $$
