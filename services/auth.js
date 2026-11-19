@@ -6,6 +6,10 @@ export function hasSessionExpiredAfterOffline() {
   return false;
 }
 
+export function shouldReuseReadySessionInitialization({ force = false, attemptedUserId, userId, isCloudSaveReady = () => false }) {
+  return !force && !!userId && attemptedUserId === userId && !!isCloudSaveReady(userId);
+}
+
 export function getLoginFailureMessage(error) {
   const message = String(error?.message || error?.msg || error?.error_description || '').toLowerCase();
   if (error?.status === 429 || message.includes('too many requests') || message.includes('rate limit')) {
@@ -441,8 +445,17 @@ export function createAuthService(deps) {
       return Promise.resolve(false);
     }
     if (sessionInitPromise && sessionInitUserId === user.id) return sessionInitPromise;
+    if (shouldReuseReadySessionInitialization({
+      force, attemptedUserId: sessionInitAttemptedUserId, userId: user.id, isCloudSaveReady
+    })) {
+      // A repeated INITIAL_SESSION/SIGNED_IN event for an already-loaded account
+      // must not leave the login overlay open or trigger another cloud reload.
+      document.getElementById('playerName').textContent = getState()?.name || '玩家';
+      closeAuth();
+      return Promise.resolve(true);
+    }
     if (!force && sessionInitAttemptedUserId === user.id) {
-      return Promise.resolve(!!isCloudSaveReady(user.id));
+      return Promise.resolve(false);
     }
 
     sessionInitAttemptedUserId = user.id;
