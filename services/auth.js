@@ -1,9 +1,9 @@
 export const SESSION_OFFLINE_TIMEOUT_MS = 100000;
 
-export function hasSessionExpiredAfterOffline(offlineStartedAt, now = Date.now()) {
-  const startedAt = Number(offlineStartedAt);
-  return Number.isFinite(startedAt) && startedAt > 0
-    && Number(now) - startedAt >= SESSION_OFFLINE_TIMEOUT_MS;
+// Backgrounding the app or being offline must not revoke a valid login session.
+// Supabase token expiry and normal authentication checks remain authoritative.
+export function hasSessionExpiredAfterOffline() {
+  return false;
 }
 
 export function getLoginFailureMessage(error) {
@@ -834,17 +834,11 @@ export function createAuthService(deps) {
 
   function registerAuthStateListener() {
     if (!supabaseClient) return null;
-    attachOfflineLifecycleListeners();
     if (authStateSubscription) return authStateSubscription;
     authStateSubscription = supabaseClient.auth.onAuthStateChange((event, session) => {
       const previousUser = getCurrentUser();
       const incomingUser = session?.user || null;
 
-      if (incomingUser && hasExpiredOfflineMarker()) {
-        setCurrentUser(incomingUser);
-        void enforceOfflineSessionTimeout();
-        return;
-      }
       if (incomingUser) clearSessionOfflineMark();
 
       if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')
