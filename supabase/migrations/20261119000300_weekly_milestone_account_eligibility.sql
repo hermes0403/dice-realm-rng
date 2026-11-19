@@ -71,7 +71,7 @@ begin
       where user_id=v_user.user_id;
   end loop;
 end;
-$;
+$$;
 
 create or replace function public.apply_weekly_realm_rewards(p_uid uuid)
 returns jsonb language plpgsql security definer set search_path = ''
