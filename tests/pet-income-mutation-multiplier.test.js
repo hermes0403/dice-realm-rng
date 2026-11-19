@@ -40,7 +40,7 @@ test('gold, diamond, and rainbow variants multiply after additive weight and wea
   assert.equal(system.petIncomeMultiplier(pet), (1.2 + 1.2) * 2);
 });
 
-test('Hermes equipped pets retain the established 4,346$/s income', () => {
+test('Hermes equipped pets retain the established 4,345$/s income', () => {
   const system = createSystem();
   const pets = [
     { uid: 'hawk', id: 'l7', kg: 77, mutation: 'thunder', variant: null },
