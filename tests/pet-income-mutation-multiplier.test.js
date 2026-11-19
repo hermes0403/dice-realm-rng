@@ -23,21 +23,32 @@ function createSystem() {
   });
 }
 
-test('weather mutation multiplies weight income bonus instead of adding to it', () => {
+test('weather mutation adds its bonus to the weight multiplier', () => {
   const system = createSystem();
   const pet = { id: 'c1', kg: 200, mutation: 'rain', variant: null };
-  assert.equal(system.petIncomeMultiplier(pet), 1.2 * 1.2);
-  assert.equal(system.petIncomePerSecond(pet), Math.floor(petBaseIncome(pet) * 1.44));
+  assert.equal(system.petIncomeMultiplier(pet), 1.2 + 1.2);
+  assert.equal(system.petIncomePerSecond(pet), Math.floor(petBaseIncome(pet) * 2.4));
 });
 
-test('gold, diamond, and rainbow variants multiply after weight and weather mutation', () => {
+test('gold, diamond, and rainbow variants multiply after additive weight and weather bonuses', () => {
   const system = createSystem();
   const pet = { id: 'c1', kg: 200, mutation: 'rain', variant: 'golden' };
-  assert.equal(system.petIncomeMultiplier(pet), 1.2 * 1.2 * 1.2);
+  assert.equal(system.petIncomeMultiplier(pet), (1.2 + 1.2) * 1.2);
   pet.variant = 'diamond';
-  assert.equal(system.petIncomeMultiplier(pet), 1.2 * 1.2 * 1.6);
+  assert.equal(system.petIncomeMultiplier(pet), (1.2 + 1.2) * 1.6);
   pet.variant = 'rainbow';
-  assert.equal(system.petIncomeMultiplier(pet), 1.2 * 1.2 * 2);
+  assert.equal(system.petIncomeMultiplier(pet), (1.2 + 1.2) * 2);
+});
+
+test('Hermes equipped pets retain the established 4,345$/s income', () => {
+  const system = createSystem();
+  const pets = [
+    { uid: 'hawk', id: 'l7', kg: 77, mutation: 'thunder', variant: null },
+    { uid: 'serpent', id: 'l6', kg: 50, mutation: 'hell', variant: null },
+    { uid: 'hound', id: 'l8', kg: 469, mutation: null, variant: null }
+  ];
+  assert.deepEqual(pets.map(pet => system.petIncomePerSecond(pet)), [1584, 1740, 1021]);
+  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 4345);
 });
 
 test('雜魚的三隻已裝備神話寵物收益依照雪變異正確計算', () => {
@@ -49,8 +60,8 @@ test('雜魚的三隻已裝備神話寵物收益依照雪變異正確計算', ()
   ];
   assert.equal(system.petIncomePerSecond(pets[0]), 3000);
   assert.equal(system.petIncomePerSecond(pets[1]), 2200);
-  assert.equal(system.petIncomePerSecond(pets[2]), 2145);
-  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 7345);
+  assert.equal(system.petIncomePerSecond(pets[2]), 3794);
+  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 8994);
 });
 
 test('signed-in pet sale UI receives the server transaction dependencies', async () => {
