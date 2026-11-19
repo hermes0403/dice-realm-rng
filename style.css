@@ -2196,3 +2196,8 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 
 /* Admin-only Shark weather: clear status cue. */
 .weather-status.weather-shark{border-color:#4ccde8;background:linear-gradient(120deg,#102c3b,#173c55);color:#9beeff;box-shadow:0 0 16px #31c6ef33}body.weather-aura-shark #weatherStatus{border-color:#4ccde8;box-shadow:0 0 20px #31c6ef55;background:linear-gradient(110deg,#0c2636,#123d55)}body.weather-aura-shark .weather-icon,body.weather-aura-shark .weather-name{color:#9beeff;text-shadow:0 0 10px #31c6ef88}
+
+/* v1.55 — completed weekly milestones use a clear success green */
+.weekly-reward-row.is-claimed{border-color:#36b87866;background:linear-gradient(90deg,#176b4633,#123d2b18);color:#d5fbe8}
+.weekly-reward-row.is-claimed .weekly-reward-target,.weekly-reward-row.is-claimed .weekly-reward-description{color:#baf2d2}
+.weekly-reward-status.is-claimed{color:#55e39a;font-weight:900;text-shadow:0 0 9px #35d88933}
