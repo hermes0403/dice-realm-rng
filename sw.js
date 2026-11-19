@@ -1,12 +1,12 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.70';
+const CACHE_NAME = 'dice-realm-shell-v1.71';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261119-critical-ui-wiring-v1',
-  './services/auth.js?v=20261119-remove-offline-timeout',
+  './script.js?v=20261119-weekly-auth-session-fix',
+  './services/auth.js?v=20261119-reuse-loaded-session',
   './services/cloud-save.js?v=20261119-pet-save-income-profile',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
   './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
@@ -29,7 +29,7 @@ const APP_SHELL = [
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './systems/dice-locks.js',
   './core/game-state.js',
-  './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2',
+  './systems/weekly-realm-event.js?v=20261119-weekly-account-eligibility',
   './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',

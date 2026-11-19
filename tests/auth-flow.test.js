@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   getAuthEmailRateLimitMessage,
   getLoginFailureMessage,
-  runCloudSessionInitialization
+  runCloudSessionInitialization,
+  shouldReuseReadySessionInitialization
 } from '../services/auth.js';
 
 test('invalid credentials guide first-time players without revealing account existence', () => {
@@ -114,4 +115,19 @@ test('an egress restriction stops later initialization requests', async () => {
   assert.equal(result, false);
   assert.equal(restricted, true);
   assert.deepEqual(calls, ['pet-skill', 'pet-odds']);
+});
+
+test('already-loaded account reuses its session without reopening login or reloading cloud save', () => {
+  let readinessChecks = 0;
+  const isCloudSaveReady = userId => { readinessChecks++; return userId === 'player-1'; };
+  assert.equal(shouldReuseReadySessionInitialization({
+    attemptedUserId: 'player-1', userId: 'player-1', isCloudSaveReady
+  }), true);
+  assert.equal(shouldReuseReadySessionInitialization({
+    attemptedUserId: 'player-1', userId: 'player-2', isCloudSaveReady
+  }), false);
+  assert.equal(shouldReuseReadySessionInitialization({
+    force: true, attemptedUserId: 'player-1', userId: 'player-1', isCloudSaveReady
+  }), false);
+  assert.equal(readinessChecks, 1);
 });
