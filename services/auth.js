@@ -10,6 +10,38 @@ export function shouldReuseReadySessionInitialization({ force = false, attempted
   return !force && !!userId && attemptedUserId === userId && !!isCloudSaveReady(userId);
 }
 
+export async function getEdgeFunctionFailureMessage(error) {
+  const response = error?.context;
+  const status = Number(response?.status ?? error?.status) || 0;
+
+  // Supabase FunctionsHttpError keeps the original Response in context.
+  // Clone it so parsing the JSON does not consume a body another handler may use.
+  if (response && typeof response.clone === 'function') {
+    try {
+      const payload = await response.clone().json();
+      const serverMessage = payload?.error ?? payload?.message;
+      if (typeof serverMessage === 'string' && serverMessage.trim()) {
+        return serverMessage.trim();
+      }
+    } catch {
+      // Fall through to a safe localized status message when the body is empty
+      // or is not valid JSON.
+    }
+  }
+
+  const fallbackMessages = {
+    400: '輸入資料不符合要求，請檢查玩家名稱與密碼。',
+    401: '帳號或密碼不正確。',
+    403: '目前無法使用玩家名稱登入服務，請重新整理後再試。',
+    409: '此玩家名稱已被使用，請換一個名稱。',
+    429: '註冊或登入操作太頻繁，請稍後再試。',
+    500: '目前無法建立帳號，請稍後再試。',
+    502: '玩家名稱登入服務暫時無法使用，請稍後再試。',
+    503: '目前無法完成操作，請稍後再試。'
+  };
+  return fallbackMessages[status] || '玩家名稱登入服務暫時無法使用，請稍後再試。';
+}
+
 export function getLoginFailureMessage(error) {
   const message = String(error?.message || error?.msg || error?.error_description || '').toLowerCase();
   if (error?.status === 429 || message.includes('too many requests') || message.includes('rate limit')) {
@@ -597,7 +629,12 @@ export function createAuthService(deps) {
         const { data, error } = await supabaseClient.functions.invoke('dice-rng-auth', {
           body: { action, username, password: signupPassword }
         });
-        if (error) throw new Error(data?.error || error.message || '玩家名稱登入服務暫時無法使用。');
+        if (error) {
+          const message = await getEdgeFunctionFailureMessage(error);
+          const requestError = new Error(message);
+          requestError.status = Number(error?.context?.status ?? error?.status) || undefined;
+          throw requestError;
+        }
         if (data?.error) throw new Error(data.error);
         if (data?.session) {
           // Username login returns a session for the UID resolved by the server.
