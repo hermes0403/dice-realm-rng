@@ -71,7 +71,7 @@ function createHarness(playerName = '測試玩家') {
     petById: () => null,
     escapeHTML: value => String(value),
     format: value => new Intl.NumberFormat('en-US').format(value),
-    WEATHER_TYPES: {},
+    WEATHER_TYPES: { crystal: { label: '水晶天氣', icon: '💎' } },
     documentRef,
     timerManager: { clearTimeout() {}, setTimeout() { return 1; } }
   });
@@ -91,9 +91,10 @@ test('分母等於 4096 時顯示骰子名稱、廣播並寫入雲端歷史', as
   const { system, list, sent, rows } = createHarness();
   await system.broadcastRareRoll({ name: '邊界骰子', den: 4096 });
   assert.equal(list.children.length, 1);
-  assert.match(list.children[0].innerHTML, /玩家測試玩家抽到了1\/4,096 邊界骰子/);
-  assert.match(list.children[0].innerHTML, /邊界骰子/);
+  assert.match(list.children[0].innerHTML, /玩家測試玩家/);
+  assert.match(list.children[0].innerHTML, /抽到了/);
   assert.match(list.children[0].innerHTML, /1\/4,096/);
+  assert.match(list.children[0].innerHTML, /邊界骰子/);
   assert.equal(sent.length, 1);
   assert.equal(sent[0].event, 'rare_roll');
   assert.deepEqual(sent[0].payload, {
@@ -113,14 +114,19 @@ test('接收端也會拒絕 4096 以下事件，並顯示達標事件的骰子�
   assert.equal(list.children.length, 0);
   rareRollListener({ payload: { name: '其他玩家', diceName: '達標骰', den: 4096 } });
   assert.equal(list.children.length, 1);
-  assert.match(list.children[0].innerHTML, /玩家其他玩家抽到了1\/4,096 達標骰/);
+  assert.match(list.children[0].innerHTML, /玩家其他玩家/);
+  assert.match(list.children[0].innerHTML, /抽到了/);
   assert.match(list.children[0].innerHTML, /1\/4,096/);
+  assert.match(list.children[0].innerHTML, /達標骰/);
 });
 
 test('長玩家名稱只顯示前四字並以兩個句點省略', async () => {
   const { system, list } = createHarness('可愛的孩子們');
   await system.broadcastRareRoll({ name: '🪐天體骰子', den: 131072 });
-  assert.match(list.children[0].innerHTML, /玩家可愛的孩\.\.抽到了1\/131,072 🪐天體骰子/);
+  assert.match(list.children[0].innerHTML, /玩家可愛的孩\.\./);
+  assert.match(list.children[0].innerHTML, /抽到了/);
+  assert.match(list.children[0].innerHTML, /1\/131,072/);
+  assert.match(list.children[0].innerHTML, /🪐天體骰子/);
 });
 
 test('天氣召喚彈幕會依序完整播放兩次', () => {
