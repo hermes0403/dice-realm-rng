@@ -46,7 +46,7 @@ done_at:
 - 2026-11-20 17:29 [叉子] 開工；已確認 dice-rng-auth 後端已回傳中文 JSON 錯誤，根因是前端在 functions.invoke 出錯時只讀取 error.message，沒有解析 error.context 的 Response body。容量閘門：owner_side 目前 2/5（T-0002、T-0085）；未發現本次開工受 Communicate 優先閘門阻擋。
 
 - 2026-11-20 17:32 [叉子] 程式交付與部署完成，提交 Owner 驗收；PR #232 已合併至 main（merge commit 7a506ccb1875a42d8e8020438020d539417d333e），GitHub Pages deployment run 44711503137 成功。Auth flow、PWA display、Board lifecycle 及其他 PR 回歸工作流程均成功。未建立測試玩家、未修改帳號或任何玩家資料。
- 
+
 ## 完工回報
 
 ### 改了什麼
