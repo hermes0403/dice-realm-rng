@@ -11,6 +11,8 @@ on:
       - 'script.js'
       - 'tests/global-announcements-threshold.test.js'
       - 'tests/weather-crystal-display.test.mjs'
+      - 'board/README.md'
+      - 'board/T-0110-weather-announcement-display.md'
       - '.github/workflows/weather-announcement-display-tests.yml'
   push:
     branches:
