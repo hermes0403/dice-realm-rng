@@ -171,33 +171,94 @@ export function createDiceSystem(deps) {
     return new Promise(resolve => timerManager.setTimeout(resolve, ms, 'dice-reveal-delay'));
   }
 
+  function playRevealSound(tier, glitch = false) {
+    let context;
+    try {
+      const AudioContextClass = documentRef.defaultView?.AudioContext || documentRef.defaultView?.webkitAudioContext;
+      if (!AudioContextClass) return;
+      context = new AudioContextClass();
+      const now = context.currentTime;
+      const master = context.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.12, now + 0.08);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.9);
+      master.connect(context.destination);
+      const patterns = {
+        comet: [523.25, 783.99, 1046.5],
+        rare: [392, 523.25, 659.25],
+        anomaly: [220, 277.18, 440, 554.37],
+        mythic: [196, 392, 587.33, 783.99],
+        cosmic: [130.81, 196, 261.63, 392, 587.33, 880],
+        halloween: [392, 311.13, 466.16],
+        glitch: [110, 880, 165, 660]
+      };
+      const notes = patterns[glitch ? 'glitch' : tier] || patterns.rare;
+      notes.forEach((frequency, index) => {
+        const start = now + index * (tier === 'cosmic' ? 0.22 : 0.2);
+        const oscillator = context.createOscillator();
+        const envelope = context.createGain();
+        oscillator.type = glitch ? 'square' : 'sine';
+        oscillator.frequency.setValueAtTime(frequency, start);
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(65, frequency * 1.22), start + 0.24);
+        envelope.gain.setValueAtTime(0.0001, start);
+        envelope.gain.exponentialRampToValueAtTime(0.42, start + 0.035);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, start + 0.62);
+        oscillator.connect(envelope);
+        envelope.connect(master);
+        oscillator.start(start);
+        oscillator.stop(start + 0.64);
+      });
+      const resumed = context.resume?.();
+      if (resumed && typeof resumed.catch === 'function') resumed.catch(() => {});
+      timerManager.setTimeout(() => {
+        try { context.close(); } catch {}
+      }, 2400, 'rarity-reveal-audio-cleanup');
+    } catch (error) {
+      try { context?.close(); } catch {}
+    }
+  }
+
   async function playRarityReveal(dice) {
     const overlay = documentRef.getElementById('rarityOverlay');
     if (!overlay) return;
     if (documentRef.hidden) {
-      overlay.classList.remove('show', 'blackout', 'common');
+      overlay.className = 'rarity-overlay';
       return;
     }
     const isGlitchDice = !!dice.glitchBonus;
-    const ultra = dice.den >= 100000;
-    const tier = dice.den >= 10000000 ? 'cosmic' : dice.den >= 1000000 ? 'mythic' : 'rare';
-    overlay.className = 'rarity-overlay show tier-' + tier + ' ' + (ultra ? 'blackout' : 'common') + (isGlitchDice ? ' glitch-reveal' : '');
+    const den = Number(dice.den) || 0;
+    const tier = den === 4096 ? 'comet'
+      : den < 100000 ? 'rare'
+      : den < 1000000 ? 'anomaly'
+      : den < 10000000 ? 'mythic'
+      : 'cosmic';
+    const staged = tier !== 'rare';
+    overlay.className = 'rarity-overlay show tier-' + tier + (staged ? ' blackout' : '') + (isGlitchDice ? ' glitch-reveal' : '');
     overlay.style.setProperty('--reveal-color', dice.color);
-    documentRef.getElementById('rarityRevealTitle').textContent = isGlitchDice ? '⚠ SYSTEM BREACH DETECTED ⚠' : ultra ? '✦ ANOMALOUS DISCOVERY ✦' : 'RARE DISCOVERY';
+    const titles = {
+      comet: '✦ COMET AWAKENING ✦',
+      rare: '✧ RARE DISCOVERY ✧',
+      anomaly: '⚠ SPATIAL ANOMALY ⚠',
+      mythic: '✦ MYTHIC MANIFESTATION ✦',
+      cosmic: '✧ COSMIC TRANSCENDENCE ✧'
+    };
+    documentRef.getElementById('rarityRevealTitle').textContent = isGlitchDice ? '⚠ SYSTEM BREACH DETECTED ⚠' : titles[tier];
     const icon = documentRef.getElementById('rarityRevealIcon');
     icon.textContent = dice.icon;
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
-    if (ultra) {
-      await wait(tier === 'cosmic' ? 1050 : 750);
+    playRevealSound(tier, isGlitchDice);
+    if (staged) {
+      await wait(tier === 'cosmic' ? 1050 : tier === 'comet' ? 720 : 750);
       overlay.classList.remove('blackout');
       overlay.classList.add('show');
-      await wait(tier === 'cosmic' ? 4200 : tier === 'mythic' ? 3400 : 2600);
+      await wait(tier === 'cosmic' ? 4200 : tier === 'mythic' ? 3400 : tier === 'anomaly' ? 2600 : 2080);
     } else {
       await wait(1500);
     }
-    overlay.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic', 'glitch-reveal');
+    overlay.className = 'rarity-overlay';
+    icon.classList.remove('halloween-compact');
   }
 
   async function playSmallReveal(dice, label = 'SPECIAL DISCOVERY') {
@@ -217,6 +278,7 @@ export function createDiceSystem(deps) {
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
+    playRevealSound('halloween');
     await wait(720);
     overlay.classList.remove('show', 'blackout', 'common');
     card.classList.remove('small-reveal-card');
@@ -369,7 +431,7 @@ export function createDiceSystem(deps) {
           }
         }
         if (halloweenVariant) await playSmallReveal(dice, 'HALLOWEEN VARIANT');
-        else if (dice.den === 4096) await playSmallReveal(dice, 'RARE DISCOVERY');
+        else if (dice.den === 4096) await playRarityReveal(dice);
         else if (dice.den >= 10000) await playRarityReveal(dice);
         if (currentRollSequence !== rollSequence) return;
 
