@@ -1,7 +1,7 @@
 ---
 id: T-0110
 title: 天氣召喚公告播放兩次、公告名稱縮短與水晶天氣紫色文字
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -46,3 +46,5 @@ done_at:
 ## 紀錄
 
 - 2026-11-20 21:45 [叉子] 依棒子本次指示建立。開工前以 main SHA `82ff4767ce43e887b81c481fed608824061c5d82` 檢查：owner_side 有效 in_progress 任務為 T-0085，共 1/5；未發現指派給 owner_side 的有效 Communicate task。T-0108、T-0109 已由公開 PR 使用，故本任務使用下一個可用 ID T-0110。T-0085 的共用 CSS／首頁／Service Worker 範圍將避開；`work/chazi` 維持已知分歧狀態，不重置、不清空、不作為本任務基準。
+
+- 2026-11-20 21:46 [叉子] 狀態轉換：open → in_progress。以最新 main SHA `82ff4767ce43e887b81c481fed608824061c5d82` 複查 owner_side 容量為 1/5（T-0085）；有效 Communicate 優先閘門未觸發。任務分支由 main 建立，僅修改不與 T-0085 重疊的公告／天氣模組與測試，開始實作。
