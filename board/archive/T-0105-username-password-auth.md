@@ -1,7 +1,7 @@
 ---
 id: T-0105
 title: 新增玩家名稱密碼登入與免 Email 註冊
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-20
 depends_on: []
 branch: task/T-0105-username-password-auth
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-20
 ---
 
 ## 任務
@@ -71,3 +71,8 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+
+## Owner 驗收結案紀錄
+
+- 2026-11-20 [棒子] 驗收：棒子確認本任務完成並正式結案。來源：https://github.com/hermes0403/dice-realm-rng/pull/205（已合併，含玩家名稱登入、免 Email 註冊及伺服器端 dice-rng-auth Edge Function v3）；正式環境前端部署由 https://github.com/hermes0403/dice-realm-rng/actions/runs/44683464270（main Pages deployment success）確認。限制：既有五組登入名稱映射已存在；本任務未重設任何玩家密碼，個別帳號能否以名稱登入仍取決於該帳號原有 Supabase Auth 密碼有效性。
