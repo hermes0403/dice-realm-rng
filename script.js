@@ -23,6 +23,7 @@ import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261120-t0107-edge-error-messages';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
+import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261118-multi-weather-heaven-dice-v1';
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2';
@@ -46,7 +47,8 @@ import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-button
 
 // T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
 for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
-if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ id: 'eternal', name: '永恆', cls: 'pet-rarity-eternal', a: '#9eeaff', b: '#ffaddd' });
+if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ id: 'eternal', name: '永恆', cls: 'pet-rarity-eternal', a: '#0755d9', b: '#ffaddd' });
+applyEternalPetRarityTheme(document);
 for (const pet of ETERNAL_PETS) if (!PETS.some(existing => existing.id === pet.id)) PETS.push(pet);
 Object.assign(PET_BASE_INCOME, ETERNAL_PET_INCOME);
 PET_INDIVIDUAL_ODDS.eternal = ETERNAL_PET_WEIGHTS.slice();
