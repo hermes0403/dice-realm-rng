@@ -153,7 +153,8 @@ function updateWeatherUI(){
  wrap.innerHTML=activeTypes.map(type=>{
   const meta=WEATHER_TYPES[type],until=Number(state.untilByType?.[type]??state[type+'Until']??state.until)||0;
   const left=Math.max(0,Math.ceil((until-now)/1000)),mm=String(Math.floor(left/60)).padStart(2,'0'),ss=String(left%60).padStart(2,'0');
-  return '<span class="weather-item weather-item-'+type+'" data-weather-type="'+type+'"><span class="weather-icon">'+meta.icon+'</span><span class="weather-name">'+meta.label+'</span><span class="weather-countdown">'+mm+':'+ss+'</span></span>';
+  const crystalTextStyle = type === 'crystal' ? ' style="color:#d59aff"' : '';
+  return '<span class="weather-item weather-item-'+type+'" data-weather-type="'+type+'"><span class="weather-icon">'+meta.icon+'</span><span class="weather-name"'+crystalTextStyle+'>'+meta.label+'</span><span class="weather-countdown"'+crystalTextStyle+'>'+mm+':'+ss+'</span></span>';
  }).join('');
 }
 timerManager.setInterval(()=>{updateWeatherUI();if(!document.getElementById('weatherConvertPanel')?.hidden&&getState().equippedItem==='g7')renderGloves()},1000,'weather-ui');updateWeatherUI();
