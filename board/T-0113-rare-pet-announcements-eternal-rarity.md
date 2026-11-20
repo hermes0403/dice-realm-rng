@@ -1,7 +1,7 @@
 ---
 id: T-0113
 title: 神話、秘密、永恆寵物合成全服彈幕與永恆稀有度配色
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -34,11 +34,11 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 神話、秘密、永恆寵物成功合成時，所有新版在線玩家均收到一次彈幕，文案與稀有度正確。
-- [ ] 發送端本地只顯示一次；舊版秘密寵物事件不會讓新版重複顯示。
-- [ ] 普通、稀有、傳奇寵物及失敗合成不發彈幕。
-- [ ] 永恆稀有度文字在背包、圖鑑及使用相同 class 的遊戲 UI 呈普通藍至普通粉漸層；其他稀有度不變。
-- [ ] 新增回歸測試，專用測試、JavaScript 語法檢查與差異空白檢查通過。
+- [x] 神話、秘密、永恆寵物成功合成時，所有新版在線玩家均收到一次彈幕，文案與稀有度正確。
+- [x] 發送端本地只顯示一次；舊版秘密寵物事件不會讓新版重複顯示。
+- [x] 普通、稀有、傳奇寵物及失敗合成不發彈幕。
+- [x] 永恆稀有度文字在背包、圖鑑及使用相同 class 的遊戲 UI 呈普通藍至普通粉漸層；其他稀有度不變。
+- [x] 新增回歸測試，專用測試、JavaScript 語法檢查與差異空白檢查通過。
 - [ ] PR 合併與 GitHub Pages 部署狀態有實際證據；不得把測試通過宣稱為已部署。
 
 ## 開工紀錄
@@ -46,3 +46,5 @@ done_at:
 - 2026-11-20 [叉子] 以 main SHA `4a6f3124cf35fb8308183f6b515d25ff10fae30c` 檢查 Board：owner_side 的 `in_progress` 任務為 T-0085（1/5）；未發現指派給 owner_side 的有效 Communicate task 或 owner_side 原任務鎖定。T-0111／T-0112 已由既有 PR 使用，故本任務使用下一個未使用 ID T-0113。T-0085 涵蓋共用 CSS／首頁／Service Worker，本任務避開這些檔案。
 
 - 2026-11-20 [叉子] 開工前再次核對 origin/main SHA `4a6f3124cf35fb8308183f6b515d25ff10fae30c`；owner_side `in_progress` 任務為 T-0085，容量 1/5；完整讀取所有有效 Board 任務後，無指派給 owner_side 的有效 Communicate task、無 owner_side `returned` 委派單或未解除鎖定。任務由 open 轉 in_progress，開始實作。
+
+- 2026-11-20 [叉子] PR #235 專用測試 6/6 通過；JavaScript 語法檢查、git diff --check 通過。PR 上所有 14 個相關 GitHub Actions 工作均成功（含 Board lifecycle validation）。程式實作完成，轉 review；正式合併與 Pages 部署仍待確認。
