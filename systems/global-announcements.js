@@ -91,6 +91,29 @@ export function createGlobalAnnouncements(dependencies) {
     el.classList.add('show');
   }
 
+  function showPetFusionMarquee(playerName, petName, rarity, at = Date.now()) {
+    const rarityLabels = { mythic: '神話', secret: '秘密', eternal: '永恆' };
+    const rarityLabel = rarityLabels[rarity];
+    if (!rarityLabel) return false;
+    let el = documentRef.getElementById('secretPetMarquee');
+    if (!el) {
+      el = documentRef.createElement('div');
+      el.id = 'secretPetMarquee';
+      el.className = 'secret-pet-marquee';
+      el.innerHTML = '<div class="secret-pet-marquee-inner"></div>';
+      documentRef.body.appendChild(el);
+    }
+    const inner = el.querySelector('.secret-pet-marquee-inner');
+    if (!inner) return false;
+    inner.textContent = `玩家${String(playerName || '玩家')} 召喚到${rarityLabel}寵物 ${String(petName || '未知寵物')}`;
+    el.dataset.rarity = rarity;
+    el.dataset.announcedAt = String(Number(at) || Date.now());
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+    return true;
+  }
+
   async function recordPetFusion(d, p, rarity) {
     const currentUser = getCurrentUser();
     if (!currentUser || !supabaseClient) return;
@@ -117,13 +140,19 @@ export function createGlobalAnnouncements(dependencies) {
     } catch (e) {
       console.warn('Pet fusion log write failed (pet_fusion_logs table/policies may need setup):', e.message || e);
     }
-    if (rarity === 'secret') {
-      const payload = { name: row.username, petName: row.pet_name, at: Date.now() };
-      showSecretPetMarquee(payload.name, payload.petName, payload.at);
+    if (['mythic', 'secret', 'eternal'].includes(rarity)) {
+      const payload = { name: row.username, petName: row.pet_name, rarity, at: Date.now(), announcementVersion: 2 };
+      showPetFusionMarquee(payload.name, payload.petName, payload.rarity, payload.at);
       try {
-        if (announcementChannel) await announcementChannel.send({ type: 'broadcast', event: 'secret_pet', payload });
+        if (announcementChannel) {
+          await announcementChannel.send({ type: 'broadcast', event: 'rare_pet_fusion', payload });
+          // Keep old clients' secret-pet marquee working; v2 clients ignore this compatibility event.
+          if (rarity === 'secret') {
+            await announcementChannel.send({ type: 'broadcast', event: 'secret_pet', payload: { name: payload.name, petName: payload.petName, at: payload.at, announcementVersion: 2 } });
+          }
+        }
       } catch (e) {
-        console.debug('Secret pet announcement broadcast unavailable', e);
+        console.debug('Rare pet announcement broadcast unavailable', e);
       }
     }
   }
@@ -158,8 +187,15 @@ export function createGlobalAnnouncements(dependencies) {
           addGlobalAnnouncement(payload.name || '', den, payload.at || Date.now(), payload.diceName);
         }
       });
+      announcementChannel.on('broadcast', { event: 'rare_pet_fusion' }, ({ payload }) => {
+        if (payload?.name && payload?.petName && ['mythic', 'secret', 'eternal'].includes(payload.rarity)) {
+          showPetFusionMarquee(payload.name, payload.petName, payload.rarity, payload.at || Date.now());
+        }
+      });
       announcementChannel.on('broadcast', { event: 'secret_pet' }, ({ payload }) => {
-        if (payload?.name && payload?.petName) showSecretPetMarquee(payload.name, payload.petName, payload.at || Date.now());
+        if (payload?.name && payload?.petName && payload.announcementVersion !== 2) {
+          showSecretPetMarquee(payload.name, payload.petName, payload.at || Date.now());
+        }
       });
       announcementChannel.on('broadcast', { event: 'weather_changed' }, ({ payload }) => {
         if (payload?.type && Number(payload.until) > Date.now()) {
@@ -205,6 +241,7 @@ export function createGlobalAnnouncements(dependencies) {
     triggerWeatherSurge,
     announceWeatherSummon,
     showSecretPetMarquee,
+    showPetFusionMarquee,
     recordPetFusion,
     loadAdminPetFusionLogs,
     setupGlobalAnnouncements,
