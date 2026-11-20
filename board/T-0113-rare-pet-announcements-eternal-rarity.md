@@ -1,7 +1,7 @@
 ---
 id: T-0113
 title: 神話、秘密、永恆寵物合成全服彈幕與永恆稀有度配色
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -44,3 +44,5 @@ done_at:
 ## 開工紀錄
 
 - 2026-11-20 [叉子] 以 main SHA `4a6f3124cf35fb8308183f6b515d25ff10fae30c` 檢查 Board：owner_side 的 `in_progress` 任務為 T-0085（1/5）；未發現指派給 owner_side 的有效 Communicate task 或 owner_side 原任務鎖定。T-0111／T-0112 已由既有 PR 使用，故本任務使用下一個未使用 ID T-0113。T-0085 涵蓋共用 CSS／首頁／Service Worker，本任務避開這些檔案。
+
+- 2026-11-20 [叉子] 開工前再次核對 origin/main SHA `4a6f3124cf35fb8308183f6b515d25ff10fae30c`；owner_side `in_progress` 任務為 T-0085，容量 1/5；完整讀取所有有效 Board 任務後，無指派給 owner_side 的有效 Communicate task、無 owner_side `returned` 委派單或未解除鎖定。任務由 open 轉 in_progress，開始實作。
