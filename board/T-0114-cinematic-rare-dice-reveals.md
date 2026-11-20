@@ -1,7 +1,7 @@
 ---
 id: T-0114
 title: 全稀有度骰子揭示動畫電影級升級
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P2
 created: 2026-11-20
 updated: 2026-11-20
 depends_on: []
-branch:
+branch: task/T-0114-cinematic-rare-dice-reveals
 done_by:
 done_at:
 ---
@@ -57,3 +57,5 @@ done_at:
 ## 紀錄
 
 - 2026-11-20 [叉子] 依棒子明確要求「接著用那個動畫的」建立本任務；目標依此前明確方向：讓動畫更帥、更好看、更有成就感，完整保留長動畫與高階特效，不做減少或簡化。
+
+- 2026-11-20 23:24 [叉子] 開工閘門複查：owner_side 有效 in_progress + review 任務為 T-0110、T-0113，共 2/5；T-0059、T-0085、T-0098、T-0107 已由棒子驗收並歸檔。檢查目前有效 Board 任務及 Communicate 欄位，未發現指派給 owner_side 且狀態為 open／in_progress 的委派單，也未發現 owner_side from 的 returned 委派單或未解除鎖定。兩道閘門均通過。以 main SHA `a46295cb62bf4a9a7d54395d3e55c1cb8b6980f9` 建立任務分支 `task/T-0114-cinematic-rare-dice-reveals`，開始實作。
