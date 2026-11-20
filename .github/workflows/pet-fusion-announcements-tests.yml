@@ -1,0 +1,46 @@
+name: Rare pet announcement and eternal rarity tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'systems/global-announcements.js'
+      - 'systems/realm-social.js'
+      - 'systems/pet-rarity-theme.js'
+      - 'script.js'
+      - 'tests/pet-fusion-announcements.test.mjs'
+      - '.github/workflows/pet-fusion-announcements-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'systems/global-announcements.js'
+      - 'systems/realm-social.js'
+      - 'systems/pet-rarity-theme.js'
+      - 'script.js'
+      - 'tests/pet-fusion-announcements.test.mjs'
+      - '.github/workflows/pet-fusion-announcements-tests.yml'
+
+jobs:
+  pet-fusion-announcements:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test pet fusion announcements and rarity theme
+        run: node --test tests/pet-fusion-announcements.test.mjs
+      - name: Check JavaScript syntax
+        run: |
+          node --check systems/global-announcements.js
+          node --check systems/realm-social.js
+          node --check systems/pet-rarity-theme.js
+          node --check script.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
