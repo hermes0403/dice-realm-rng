@@ -22,7 +22,7 @@ done_at:
 
 ## 範圍與禁止
 
-- 只動：services/auth.js、tests/auth-flow.test.js、必要的首頁模組版本引用、Service Worker 快取版本，以及本任務 Board 紀錄。
+- 只動：services/auth.js、tests/auth-flow.test.js、tests/pwa-display-controls.test.mjs、必要的首頁模組版本引用、Service Worker 快取版本，以及本任務 Board 紀錄。
 - 保留後端既有中文錯誤訊息；若回應本文缺失，依 HTTP 狀態碼提供安全的繁體中文備援訊息。
 - 不讀取或顯示密碼、token、service-role key、內部堆疊或資料庫細節。
 - 不修改玩家帳號、密碼、玩家存檔、貨幣、道具或其他正式資料。
