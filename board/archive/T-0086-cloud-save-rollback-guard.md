@@ -1,7 +1,7 @@
 ---
 id: T-0086
 title: 修復雲端存檔回滾與多分頁舊資料覆蓋
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P0
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-20
 depends_on: []
 branch: task/T-0086-cloud-save-rollback-guard
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-20
 ---
 
 ## 任務
@@ -31,21 +31,23 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 雲端寫入使用 sync_player_game_save_delta，傳送僅有變動的頂層欄位及預期 updated_at。
-- [ ] 多分頁／裝置版本衝突時不會將舊快照直接覆蓋雲端；載入流程保留現有本機新資料保護。
-- [ ] RPC 允許並保存 lockedDice，保留骰子鎖定功能。
-- [ ] 購買手套、擴充背包後，gloves、equipped、bagCapacity、coins 等變更均包含在差異同步。
-- [ ] 沒有資料變更時不發出 game_saves 寫入；雲端同步仍維持 5 分鐘批次。
-- [ ] 登出前 flush 成功才登出；失敗時保留本機資料。
-- [ ] 新增／更新測試覆蓋差異同步、版本衝突、較新本機存檔、寵物權威清單及 lockedDice。
-- [ ] 完整 Node 測試、語法與差異檢查通過；GitHub Pages build/deploy 成功。
-- [ ] 遊戲版本由 V1.19 更新至 V1.20。
+- [x] 雲端寫入使用 sync_player_game_save_delta，傳送僅有變動的頂層欄位及預期 updated_at。
+- [x] 多分頁／裝置版本衝突時不會將舊快照直接覆蓋雲端；載入流程保留現有本機新資料保護。
+- [x] RPC 允許並保存 lockedDice，保留骰子鎖定功能。
+- [x] 購買手套、擴充背包後，gloves、equipped、bagCapacity、coins 等變更均包含在差異同步。
+- [x] 沒有資料變更時不發出 game_saves 寫入；雲端同步仍維持 5 分鐘批次。
+- [x] 登出前 flush 成功才登出；失敗時保留本機資料。
+- [x] 新增／更新測試覆蓋差異同步、版本衝突、較新本機存檔、寵物權威清單及 lockedDice。
+- [x] 相關專項測試、語法與差異檢查通過；完整 Node 測試為 81/83，兩項既有寵物圖片映射測試失敗已如實記錄並由 Owner 接受；GitHub Pages build/deploy 成功。
+- [x] 遊戲版本由 V1.19 更新至 V1.20。
 
 ## 紀錄
 
 - 2026-11-14 00:40 [叉子] 程式 PR #96 已合併至 main，正式 GitHub Pages 部署 workflow #43464873607 成功；雲端存檔專項測試與登出 flush 測試通過、骰子存檔回歸測試通過、PWA 版本測試通過。完整測試套件仍有 2 項既有寵物圖片映射測試失敗（非本次修改檔案），其餘 81 項通過；因此保留為 review，待棒子以玩家帳號實際驗收。
 - 2026-11-14 00:33 [叉子] 狀態由 open 轉為 in_progress：Owner side 有效 in_progress／review 任務 2/5（T-0084、T-0085），Communicate 優先閘門未觸發；開單 PR #94 已合併至 main，開始移植既有 T-0040 差異同步修補。
 - 2026-11-14 00:32 [叉子] 依棒子本次明確指示，將既有 T-0040 差異同步方案移植到目前 main 的獨立修補任務；開工前 owner_side 有效 in_progress／review 任務 2/5（T-0084、T-0085），未發現指派給叉子且 open／in_progress 的 communicate task，兩道啟動閘門未阻擋。分支從 main HEAD `53a51642aa878c1af23b81e5c8fa4002dd945ab3` 建立，不修改 work/chazi。
+
+- 2026-11-20 13:46 [代記:棒子/叉子] 棒子已明確決定驗收通過，任務由 review 正式結案並歸檔。｜來源：棒子於 2026-11-20 13:23 明確表示「修正網頁分頁圖示、T-0021 重整 Git 工作流程、T-0086 修復雲端存檔回滾、T-0089 故障天氣掉落藥水、T-0097 修正骰子鎖定殘留，這些驗收成功」。｜證據：PR #96、GitHub Pages workflow #43464873607 成功；差異同步 RPC、版本衝突保護、lockedDice 白名單、5 分鐘批次同步、本機即時保存與登出 flush 專項測試通過。完整 Node 測試為 81/83，兩項為既有寵物圖片映射測試失敗，已保留此限制並由棒子明確驗收。
 
 ## 完工回報
 

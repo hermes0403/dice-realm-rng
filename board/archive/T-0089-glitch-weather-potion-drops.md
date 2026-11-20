@@ -1,7 +1,7 @@
 ---
 id: T-0089
 title: 故障天氣期間在線玩家每秒機率獲得藥水
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-20
 depends_on: [T-0084, T-0087]
 branch: task/T-0089-glitch-weather-potion-drops
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-20
 ---
 
 ## 任務
@@ -55,6 +55,8 @@ done_at:
 
 - 2026-11-14 12:11 [叉子] 開工准入複查：依 main SHA f12a755d101090eb0eb81fdba13db14a862f2664，owner_side 有效 in_progress 任務 0/5；Communicate 優先閘門未觸發（Board 搜尋未找到符合 §15.9 的有效委派單）；依賴 T-0084、T-0087 均已由棒子驗收並正式結案。兩道閘門通過，任務由 open 轉為 in_progress，開始進入實作階段。
 
+
+- 2026-11-20 13:46 [代記:棒子/叉子] 棒子已明確決定驗收通過，任務由 review 正式結案並歸檔。｜來源：棒子於 2026-11-20 13:23 明確表示「修正網頁分頁圖示、T-0021 重整 Git 工作流程、T-0086 修復雲端存檔回滾、T-0089 故障天氣掉落藥水、T-0097 修正骰子鎖定殘留，這些驗收成功」。｜證據：PR #116（merge commit 126f457efa5c2980af530e06608c405ec9e7530d）已合併；GitHub Pages workflow #43556365963 成功部署 V1.26；藥水獨立機率、多分頁去重、離線不補發及背包保存測試通過。保留 Web Locks 不支援瀏覽器會暫停掉落、跨裝置未做全域原子去重的限制。
 
 ## 完工回報
 
