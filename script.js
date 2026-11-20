@@ -16,7 +16,7 @@ import { setupPetSellingUI } from './ui/pet-selling.js?v=20261119-cloud-sale-wir
 import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261118-shark-weather-speed-v1';
+import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
 import { createCloudSaveService } from './services/cloud-save.js?v=20261119-pet-save-income-profile';
 import { createCoinBoostService } from './systems/coin-boost.js';
@@ -28,7 +28,7 @@ import { createDiceSystem } from './systems/dice.js?v=20261118-multi-weather-hea
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
-import { createRealmSocialSystem } from './systems/realm-social.js?v=20261119-pet-audit-metadata';
+import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0110-announcement-display';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';

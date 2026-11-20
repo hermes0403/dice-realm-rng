@@ -14,10 +14,13 @@ export function createGlobalAnnouncements(dependencies) {
     list.innerHTML = '';
     const line = documentRef.createElement('div');
     line.className = 'announcement-line';
-    const safeName = String(name || '玩家').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const rawName = String(name || '').trim();
+    const nameCharacters = Array.from(rawName);
+    const displayName = nameCharacters.length > 4 ? nameCharacters.slice(0, 4).join('') + '..' : rawName;
+    const safeName = displayName.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const safeDiceName = String(diceName || '稀有骰子').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const stamp = new Date(Number(at) || Date.now()).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    line.innerHTML = `<span class="announcement-message"><span class="announce-player">${safeName}</span> 抽到 <span class="announce-dice">${safeDiceName}</span>（<span class="announce-odds">1/${format(Number(den) || 0)}</span>）！</span><time class="announcement-time" datetime="${new Date(Number(at) || Date.now()).toISOString()}">${stamp}</time>`;
+    line.innerHTML = `<span class="announcement-message"><span class="announce-player">玩家${safeName}</span>抽到了<span class="announce-odds">1/${format(Number(den) || 0)}</span> <span class="announce-dice">${safeDiceName}</span></span><time class="announcement-time" datetime="${new Date(Number(at) || Date.now()).toISOString()}">${stamp}</time>`;
     list.appendChild(line);
   }
 
@@ -57,6 +60,18 @@ export function createGlobalAnnouncements(dependencies) {
     const safeName = String(by || '玩家').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const message = type === 'shark' ? `${safeName}管理員啟動了鯊鯊天氣　擲骰速度提高 100%` : type === 'hell' ? `${safeName}玩家召喚了地獄天氣　稀有骰子出現率提高` : type === 'glitch' ? `${safeName}玩家召喚了故障天氣　四顆故障骰子權重提高 10 倍` : `${safeName}玩家召喚了水晶天氣`;
     line.textContent = message;
+    let playCount = 1;
+    line.addEventListener('animationend', () => {
+      if (line.parentNode !== list) return;
+      if (playCount >= 2) {
+        line.remove();
+        return;
+      }
+      playCount += 1;
+      line.style.animation = 'none';
+      void line.offsetWidth;
+      line.style.animation = '';
+    });
     list.appendChild(line);
   }
 
@@ -139,8 +154,8 @@ export function createGlobalAnnouncements(dependencies) {
       announcementChannel = supabaseClient.channel('dice-realm-global-announcements');
       announcementChannel.on('broadcast', { event: 'rare_roll' }, ({ payload }) => {
         const den = Number(payload?.den);
-        if (payload?.name && Number.isFinite(den) && den >= RARE_ROLL_ANNOUNCEMENT_MIN_DENOMINATOR) {
-          addGlobalAnnouncement(payload.name, den, payload.at || Date.now(), payload.diceName);
+        if (payload && Number.isFinite(den) && den >= RARE_ROLL_ANNOUNCEMENT_MIN_DENOMINATOR) {
+          addGlobalAnnouncement(payload.name || '', den, payload.at || Date.now(), payload.diceName);
         }
       });
       announcementChannel.on('broadcast', { event: 'secret_pet' }, ({ payload }) => {
@@ -171,7 +186,7 @@ export function createGlobalAnnouncements(dependencies) {
     const currentUser = getCurrentUser();
     const at = Date.now();
     addGlobalAnnouncement(state.name, den, at, d.name);
-    if (announcementChannel) announcementChannel.send({ type: 'broadcast', event: 'rare_roll', payload: { name: state.name || '玩家', den, diceName: d.name, at } }).catch?.(() => {});
+    if (announcementChannel) announcementChannel.send({ type: 'broadcast', event: 'rare_roll', payload: { name: state.name || '', den, diceName: d.name, at } }).catch?.(() => {});
     if (currentUser && supabaseClient) {
       const record = { user_id: currentUser.id, username: (state.name || '玩家').slice(0, 20), dice_name: d.name, den };
       try {
