@@ -2201,3 +2201,66 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .weekly-reward-row.is-claimed{border-color:#36b87866;background:linear-gradient(90deg,#176b4633,#123d2b18);color:#d5fbe8}
 .weekly-reward-row.is-claimed .weekly-reward-target,.weekly-reward-row.is-claimed .weekly-reward-description{color:#baf2d2}
 .weekly-reward-status.is-claimed{color:#55e39a;font-weight:900;text-shadow:0 0 9px #35d88933}
+
+
+/* T-0114：每個稀有度都有獨立的電影式揭示語言；保留原有動畫時間與核心構圖。 */
+.rarity-overlay .rarity-reveal-card{isolation:isolate;overflow:hidden;backdrop-filter:blur(2px)}
+.rarity-overlay .rarity-reveal-card>*{position:relative;z-index:2}
+.rarity-overlay .rarity-reveal-card::before,.rarity-overlay .rarity-reveal-card::after{content:"";position:absolute;inset:9px;border:1px solid color-mix(in srgb,var(--reveal-color,#fff) 55%,transparent);border-radius:18px;pointer-events:none;z-index:1}
+.rarity-overlay .rarity-reveal-card::after{inset:16px;border-style:dashed;opacity:.38;transform:rotate(8deg)}
+.rarity-overlay.tier-comet{background:radial-gradient(ellipse at 50% 52%,#182c55 0%,#090d20 48%,#02040c 100%)}
+.rarity-overlay.tier-comet::before{inset:-20%;opacity:.95;background:repeating-conic-gradient(from -18deg at 50% 50%,transparent 0deg 9deg,#8deaff33 10deg 11deg,transparent 13deg 22deg);mask-image:radial-gradient(circle,black 0%,transparent 72%);animation:cometOrbit 8s linear infinite}
+.rarity-overlay.tier-comet::after{inset:12%;opacity:.8;border:2px solid #8deaff;border-left-color:transparent;border-right-color:#c7a8ff;box-shadow:0 0 34px #5fcfff99,inset 0 0 28px #8deaff33;animation:cometRing 2.8s cubic-bezier(.18,.7,.2,1) infinite}
+.rarity-overlay.tier-comet .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 2px,#9eeaff 3px,transparent 8%),radial-gradient(ellipse at 50% 50%,#65caff44 0%,transparent 58%),repeating-radial-gradient(circle at 50% 50%,transparent 0 28px,#8deaff22 29px 30px,transparent 31px 52px);animation:cometPulse 1.15s ease-in-out infinite alternate}
+.rarity-overlay.tier-comet .rarity-reveal-card{border:2px solid #8deaff;background:linear-gradient(145deg,#132c4df2,#101426f7 58%,#211a3af2);box-shadow:0 0 30px #54cfff99,0 0 95px #6e8dff55,inset 0 0 45px #8deaff20;animation:cometArrival 1.05s cubic-bezier(.12,1.3,.2,1) both}
+.rarity-overlay.tier-comet .rarity-reveal-icon{filter:drop-shadow(0 0 12px #fff) drop-shadow(0 0 30px #68d9ff);animation:cometIcon 2.1s ease-in-out infinite}
+.rarity-overlay.tier-comet .rarity-reveal-title{color:#a7edff;text-shadow:0 0 14px #54cfff;letter-spacing:.34em}
+.rarity-overlay.tier-rare{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--reveal-color,#65e6b2) 16%,#11172b),#050813 76%)}
+.rarity-overlay.tier-rare::before{inset:-24%;opacity:.82;background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 14deg,color-mix(in srgb,var(--reveal-color,#65e6b2) 32%,transparent) 15deg 16deg,transparent 18deg 30deg);mask-image:radial-gradient(circle,black 0%,transparent 70%);animation:rareOrbit 18s linear infinite}
+.rarity-overlay.tier-rare::after{inset:17%;opacity:.65;border:1px solid color-mix(in srgb,var(--reveal-color,#65e6b2) 75%,white);box-shadow:0 0 24px var(--reveal-color);animation:rareHalo 1.8s ease-in-out infinite alternate}
+.rarity-overlay.tier-rare .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 1px,transparent 3px),radial-gradient(ellipse at 50% 50%,color-mix(in srgb,var(--reveal-color,#65e6b2) 24%,transparent),transparent 60%),repeating-radial-gradient(circle at 50% 50%,transparent 0 34px,color-mix(in srgb,var(--reveal-color,#65e6b2) 14%,transparent) 35px 36px,transparent 37px 62px);animation:rarePulse 1.35s ease-in-out infinite alternate}
+.rarity-overlay.tier-rare .rarity-reveal-card{border-width:2px;box-shadow:0 0 30px var(--reveal-color),0 0 70px color-mix(in srgb,var(--reveal-color) 35%,transparent),inset 0 0 28px color-mix(in srgb,var(--reveal-color) 18%,transparent);animation:rareArrival .85s cubic-bezier(.18,1.2,.25,1) both}
+.rarity-overlay.tier-rare .rarity-reveal-icon{animation:rareIcon 2.2s ease-in-out infinite;filter:drop-shadow(0 0 18px var(--reveal-color))}
+.rarity-overlay.tier-anomaly{background:radial-gradient(ellipse at 50% 48%,#24152f 0%,#0a0b19 42%,#010207 100%)}
+.rarity-overlay.tier-anomaly::before{inset:-16%;opacity:.9;background:repeating-linear-gradient(108deg,transparent 0 28px,#e879ff13 29px 31px,transparent 33px 58px),radial-gradient(ellipse at 50% 50%,#f34cff30,transparent 58%);mask-image:radial-gradient(ellipse,black 0%,transparent 74%);animation:anomalyRift 3.2s ease-in-out infinite alternate}
+.rarity-overlay.tier-anomaly::after{inset:7%;border:1px solid #f58aff;opacity:.7;box-shadow:0 0 32px #b64dff,inset 0 0 45px #a22cff55;transform:skewY(-9deg) scale(.7);animation:anomalyGate 2.6s ease-in-out infinite}
+.rarity-overlay.tier-anomaly .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 2px,#f4a6ff 4px,transparent 10px),repeating-linear-gradient(0deg,transparent 0 17px,#e77cff13 18px 19px,transparent 20px 36px);animation:anomalyPulse .8s steps(2,end) infinite}
+.rarity-overlay.tier-anomaly .rarity-reveal-card{border:2px solid #dc85ff;background:linear-gradient(145deg,#2b183af5,#101323f8 62%,#1d102bf5);box-shadow:0 0 28px #d45cff,0 0 95px #8d38ff88,inset 0 0 45px #d85cff20;animation:anomalyArrival 1.1s cubic-bezier(.12,1.35,.2,1) both}
+.rarity-overlay.tier-anomaly .rarity-reveal-icon{filter:drop-shadow(0 0 10px white) drop-shadow(0 0 30px #dc72ff);animation:anomalyIcon .9s ease-in-out infinite alternate}
+.rarity-overlay.tier-anomaly .rarity-reveal-title{color:#f0b4ff;text-shadow:0 0 15px #ce58ff;letter-spacing:.2em}
+.rarity-overlay.tier-mythic{background:radial-gradient(ellipse at 50% 45%,#38221d 0%,#171125 40%,#03040b 78%)}
+.rarity-overlay.tier-mythic::before{background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 7deg,#ffd88b33 8deg 9deg,transparent 11deg 18deg);mask-image:radial-gradient(circle,black 0%,transparent 70%);animation:cosmicRays 8s linear infinite}
+.rarity-overlay.tier-mythic::after{inset:5%;border:2px solid #ffd98b;border-radius:44%;box-shadow:0 0 30px #ffbb5b,inset 0 0 42px #ffb75b55;animation:mythicCrown 2.5s ease-in-out infinite}
+.rarity-overlay.tier-mythic .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 2px,#ffe0a1 4px,transparent 12px),repeating-radial-gradient(circle at 50% 50%,transparent 0 22px,#ffce7728 23px 24px,transparent 25px 42px);animation:cosmicPulse .9s ease-in-out infinite alternate}
+.rarity-overlay.tier-mythic .rarity-reveal-card{border-color:#ffda91;background:linear-gradient(145deg,#3a2a28f5,#151326fa 58%,#26172bf5);box-shadow:0 0 34px #ffcb72,0 0 110px #df8a4e88,inset 0 0 48px #ffcf752b}
+.rarity-overlay.tier-mythic .rarity-reveal-title{color:#ffe0a8;text-shadow:0 0 18px #ffc66b}
+.rarity-overlay.tier-cosmic{background:radial-gradient(ellipse at 50% 48%,#202c63 0%,#100b2a 38%,#02030b 78%)}
+.rarity-overlay.tier-cosmic::before{inset:-30%;opacity:1;background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 4deg,#b7a2ff30 5deg 6deg,transparent 8deg 13deg),radial-gradient(circle at 50% 50%,#fff2,transparent 40%);mask-image:radial-gradient(circle,black 0%,transparent 73%);animation:cosmicRays 12s linear infinite}
+.rarity-overlay.tier-cosmic::after{inset:2%;border:2px solid #b9b4ff;border-radius:50%;box-shadow:0 0 36px #a9a0ff,inset 0 0 65px #7c6aff66;animation:cosmicCrown 3.4s ease-in-out infinite}
+.rarity-overlay.tier-cosmic .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 3px,#b5c6ff 6px,transparent 16px),repeating-radial-gradient(circle at 50% 50%,transparent 0 15px,#a8b6ff35 16px 17px,transparent 18px 31px),radial-gradient(ellipse at 50% 50%,#7e69ff55,transparent 65%);animation:cosmicPulse .7s ease-in-out infinite alternate}
+.rarity-overlay.tier-cosmic .rarity-reveal-card{border:2px solid #c7c1ff;background:linear-gradient(145deg,#20265af7,#100e2afc 58%,#281c4af7);box-shadow:0 0 36px #a9a0ff,0 0 130px #7867ffbb,inset 0 0 55px #9a8bff40;animation:cosmicArrival 1.35s cubic-bezier(.1,1.35,.2,1) both}
+.rarity-overlay.tier-cosmic .rarity-reveal-title{font-size:15px;letter-spacing:.4em;color:#e3deff;text-shadow:0 0 18px #b4aaff,0 0 36px #7e6bff}
+.rarity-overlay.glitch-reveal{background:repeating-linear-gradient(0deg,#070b18 0 3px,#0b1721 4px 5px),radial-gradient(ellipse at center,#173c43 0%,#03060d 72%)}
+.rarity-overlay.glitch-reveal::before{opacity:.95;background:repeating-linear-gradient(0deg,transparent 0 6px,#76ffe52a 7px 8px,transparent 9px 13px),linear-gradient(90deg,transparent 0 12%,#ff4b7a35 13% 15%,transparent 17% 75%,#69eaff35 77% 79%,transparent 81%);animation:glitchScan .8s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal::after{inset:4%;border:2px dashed #8dfff0;border-radius:0;box-shadow:0 0 34px #52f4df99, inset 0 0 32px #54ffe522;animation:glitchGate 1.1s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-card{border:1px solid #8dfff0;background:linear-gradient(145deg,#142b36f5,#111322f8);box-shadow:0 0 28px #52f4df99,0 0 90px #ff4c7a55,inset 0 0 30px #54ffe522;animation:glitchCard .18s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-icon{filter:drop-shadow(2px 0 #ff4b7a) drop-shadow(-2px 0 #58eaff) drop-shadow(0 0 22px #8dfff0);animation:glitchIcon .32s steps(2,end) infinite}
+@keyframes cometOrbit{to{transform:rotate(360deg)}}@keyframes cometRing{0%{transform:scale(.42) rotate(-30deg);opacity:0}35%{opacity:.9}100%{transform:scale(1.3) rotate(120deg);opacity:0}}
+@keyframes cometPulse{from{opacity:.38;transform:scale(.88)}to{opacity:1;transform:scale(1.12)}}
+@keyframes cometArrival{0%{opacity:0;transform:scale(.08) rotate(-24deg);filter:brightness(4) blur(18px)}65%{opacity:1;transform:scale(1.12) rotate(4deg);filter:brightness(1.7) blur(0)}100%{transform:scale(1)}}
+@keyframes cometIcon{0%,100%{transform:translateY(4px) rotate(-10deg) scale(.94)}50%{transform:translateY(-8px) rotate(10deg) scale(1.14)}}
+@keyframes rareOrbit{to{transform:rotate(360deg)}}@keyframes rareHalo{from{transform:scale(.88) rotate(-8deg);opacity:.3}to{transform:scale(1.08) rotate(8deg);opacity:.9}}
+@keyframes rarePulse{from{opacity:.35;transform:scale(.88)}to{opacity:.9;transform:scale(1.08)}}
+@keyframes rareArrival{0%{opacity:0;transform:translateY(36px) scale(.55);filter:blur(12px)}75%{opacity:1;transform:translateY(-5px) scale(1.06);filter:blur(0)}100%{transform:translateY(0) scale(1)}}
+@keyframes rareIcon{0%,100%{transform:rotate(-7deg) scale(.96)}50%{transform:rotate(7deg) scale(1.09)}}
+@keyframes anomalyRift{from{transform:rotate(-7deg) scale(.9);opacity:.45}to{transform:rotate(7deg) scale(1.08);opacity:1}}
+@keyframes anomalyGate{0%,100%{transform:skewY(-9deg) scale(.68) rotate(-4deg);opacity:.2}50%{transform:skewY(8deg) scale(1.08) rotate(4deg);opacity:.9}}
+@keyframes anomalyPulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes anomalyArrival{0%{opacity:0;transform:scale(.04) rotate(18deg);filter:brightness(4) blur(20px)}55%{opacity:1;transform:scale(1.12) rotate(-4deg);filter:brightness(1.7) blur(0)}100%{transform:scale(1)}}
+@keyframes anomalyIcon{from{transform:translateY(-4px) rotate(-12deg) scale(.94)}to{transform:translateY(5px) rotate(12deg) scale(1.12)}}
+@keyframes mythicCrown{0%,100%{transform:scale(.86) rotate(0deg);opacity:.35}50%{transform:scale(1.12) rotate(16deg);opacity:.9}}
+@keyframes cosmicCrown{0%,100%{transform:scale(.78) rotate(0deg);opacity:.3}50%{transform:scale(1.18) rotate(180deg);opacity:1}}
+@keyframes cosmicArrival{0%{opacity:0;transform:scale(.015) rotate(-32deg);filter:brightness(5) blur(24px)}48%{opacity:1;transform:scale(1.15) rotate(5deg);filter:brightness(2) blur(0)}76%{transform:scale(.97) rotate(-1deg)}100%{transform:scale(1)}}
+@keyframes glitchGate{0%,100%{transform:translate(0,0) skewX(0)}25%{transform:translate(5px,-2px) skewX(2deg)}50%{transform:translate(-4px,2px) skewX(-3deg)}75%{transform:translate(2px,0) skewX(1deg)}}
+@media(max-width:520px){.rarity-overlay{padding:12px}.rarity-reveal-card{min-width:min(300px,94vw);padding:24px 16px}.rarity-reveal-icon{font-size:72px}}
+@media(prefers-reduced-motion:reduce){.rarity-overlay::before,.rarity-overlay::after,.rarity-overlay .rarity-particles,.rarity-overlay .rarity-reveal-card,.rarity-overlay .rarity-reveal-icon,.rarity-overlay .rarity-reveal-card::before,.rarity-overlay .rarity-reveal-card::after{animation:none!important;transition:none!important}.rarity-overlay.glitch-reveal .rarity-reveal-card{transform:none!important}}
