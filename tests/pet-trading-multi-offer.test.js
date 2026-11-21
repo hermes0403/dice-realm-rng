@@ -71,6 +71,7 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.doesNotMatch(index, /尋找交易對象|選擇下方玩家即可發送交易邀請/);
   assert.match(index, /玩家列表/);
   assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?max-height:144px[\s\S]*?overflow-y:auto/);
+  assert.match(styles, /\.pet-trade-search-results \.pet-trade-search-result\{margin:0\}/);
   assert.match(styles, /\.pet-trade-search-result\{display:flex;flex:0 0 42px/);
 });
 
