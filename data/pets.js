@@ -40,7 +40,7 @@ export const PET_INCOME_ROLLS={
  secret:[25,22,18,15,12,8]
 };
 export function petBaseIncome(pet){return Math.max(0,Number(PET_BASE_INCOME[pet?.id])||0)}
-export const PET_TIER_CONFIG={1:{min_den:2,max_den:1000},2:{min_den:1001,max_den:3000},3:{min_den:3001,max_den:5000},4:{min_den:5001,max_den:10000},5:{min_den:10001,max_den:40000},6:{min_den:40001,max_den:150000},7:{min_den:150001,max_den:350000},8:{min_den:350001,max_den:550000},9:{min_den:550001,max_den:1100000},10:{min_den:1100001,max_den:10000000},11:{min_den:10000001,max_den:45000000},12:{min_den:45000001,max_den:64999999},13:{min_den:65000000,max_den:null}};
+export const PET_TIER_CONFIG={1:{min_den:2,max_den:1000},2:{min_den:1001,max_den:3000},3:{min_den:3001,max_den:5000},4:{min_den:5001,max_den:10000},5:{min_den:10001,max_den:40000},6:{min_den:40001,max_den:150000},7:{min_den:150001,max_den:350000},8:{min_den:350001,max_den:550000},9:{min_den:550001,max_den:1100000}};
 export const PET_TIER_RATES={
 1:{common:77,rare:20,legendary:2.99,mythic:.01,secret:0},
 2:{common:65,rare:25,legendary:9.8,mythic:.2,secret:0},
@@ -48,13 +48,9 @@ export const PET_TIER_RATES={
 4:{common:0,rare:70,legendary:29,mythic:1,secret:0},
 5:{common:0,rare:50,legendary:48,mythic:2,secret:0},
 6:{common:0,rare:35,legendary:61,mythic:4,secret:0},
-7:{common:0,rare:0,legendary:91.99,mythic:8,secret:.01},
-8:{common:0,rare:0,legendary:84.4,mythic:15,secret:.6},
-9:{common:0,rare:0,legendary:80,mythic:19,secret:1},
-10:{common:0,rare:0,legendary:73,mythic:25,secret:2},
-11:{common:0,rare:0,legendary:60,mythic:23,secret:17},
-12:{common:0,rare:0,legendary:0,mythic:60,secret:40},
-13:{common:0,rare:0,legendary:0,mythic:0,secret:100}
+7:{common:0,rare:0,legendary:90.95,mythic:9,secret:.05,eternal:0},
+8:{common:0,rare:0,legendary:83.39,mythic:16,secret:.6,eternal:.01},
+9:{common:0,rare:0,legendary:79.88,mythic:19,secret:1.1,eternal:.02},
 };
 export const SECRET_PET_SKILLS={s1:{name:'星界之狼',skill:'幸運預兆：每累積 1,000 次擲骰，下一抽獲得 +500% 幸運；與天堂藥水加成採加算，不互相倍乘。'},s2:{name:'無序之龍',skill:'混沌祝福：每日登入領取 10M$，連續登入每日增加 3M$，第 30 天起封頂 100M$。'},s3:{name:'終焉渡鴉',skill:'終焉財藏：擲出分母達 10,000 以上的骰子時固定獲得 1M$，另有 10% 機率額外獲得 1M$；每日上限 100M$。'},s4:{name:'永寂環蛇',skill:'永寂恩賜：每 12 小時可主動使用一次技能，速度 +100% 持續 10 分鐘。'},s5:{name:'虛無君王',skill:'虛無回饋：每次擲骰有 1% 機率額外獲得 500K$；每日上限 100M$。'},s6:{name:'原初奇點',skill:'原初恩賜：每 24 小時可獲得 1 瓶幸運藥水 III。'}};
 export const MYTHIC_PET_SKILLS={m1:{name:'赤白天龍',skill:'天命祝福：裝備後每累積擲骰 1,000 次，下一抽幸運加成 +100%。'}};
