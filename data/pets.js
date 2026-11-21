@@ -30,7 +30,7 @@ export const PET_BASE_INCOME={
  r1:40,r2:45,r3:50,r5:65,r6:72,r7:82,r8:91,r9:100,event_crystal_dragon_sentinel:100,
  l2:300,l3:360,l4:430,l5:500,l6:580,l7:660,l8:730,l9:800,event_dual_core_dragon:750,
  m1:1200,m3:1650,m4:1900,m5:2200,m6:2500,m7:2700,m8:2850,m9:3000,dumpling_mythic:2000,event_moonlight_dragon:2500,
- s1:6000,s2:8000,s3:10000,s4:13000,s5:16000,s6:20000,event_shark_emperor:9000
+ s1:7000,s2:9000,s3:11000,s4:13500,s5:17500,s6:22500,event_shark_emperor:9000
 };
 export const PET_INCOME_ROLLS={
  common:[15,15,15,14,12,11,9,5],
