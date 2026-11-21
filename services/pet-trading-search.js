@@ -1,4 +1,4 @@
-export function createPetTradingSearch({ supabaseClient, getCurrentUser, getState = () => ({ pets: [] }), petById = () => null, petArt = null, onTradeCompleted = () => {}, escapeHTML, documentRef = document, toast = () => {} }) {
+export function createPetTradingSearch({ supabaseClient, getCurrentUser, getState = () => ({ pets: [] }), petById = () => null, petArt = null, onTradeCompleted = () => {}, flushCloudSave = async () => true, escapeHTML, documentRef = document, toast = () => {} }) {
   const doc = documentRef;
   let selectedPlayer = null;
   let searchResults = [];
@@ -352,8 +352,16 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
 
     otherCount.textContent = otherOffer.length + ' / 4 隻';
     saveOffer.addEventListener('click', async () => {
+      if (saveOffer.disabled) return;
       saveOffer.disabled = true;
       try {
+        const synced = await flushCloudSave();
+        if (synced !== true) throw new Error('pet_trade_cloud_save_not_ready');
+        const currentPets = Array.isArray(getState()?.pets) ? getState().pets : [];
+        const currentUids = new Set(currentPets.map(item => String(item?.uid || '')).filter(Boolean));
+        if (draftOffer.some(uid => !currentUids.has(String(uid)))) {
+          throw new Error('pet_trade_local_inventory_changed');
+        }
         const { error } = await supabaseClient.rpc('set_pet_trade_offers', {
           p_session_id: session.id,
           p_pet_uids: draftOffer
@@ -364,12 +372,20 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         await refreshInvitations();
       } catch (error) {
         console.warn('Pet trade offer update failed', error);
-        hint.textContent = error?.message?.includes('pet_not_owned_or_duplicate_uid')
-          ? '其中一隻寵物已不在你的背包，請重新整理後選擇。'
-          : error?.message?.includes('trade_offer_limit_exceeded')
-            ? '每次交易最多只能提供 4 隻寵物。'
-            : '交易內容送出失敗，請重新整理交易房間。';
+        const message = String(error?.message || '');
+        hint.textContent = message.includes('pet_not_owned_or_duplicate_uid')
+          ? '雲端背包尚未確認這隻寵物，已保留目前選擇；請稍後重試。'
+          : message.includes('pet_trade_cloud_save_not_ready')
+            ? '雲端存檔同步尚未完成，這次沒有送出交易內容；請稍後重試。'
+            : message.includes('pet_trade_local_inventory_changed')
+              ? '背包資料剛更新，這次沒有送出交易內容；請重新整理交易房間後選擇。'
+              : message.includes('trade_offer_limit_exceeded')
+                ? '每次交易最多只能提供 4 隻寵物。'
+                : '交易內容送出失敗，已保留選擇；可以重新嘗試。';
+        // Always restore the action after a rejected request. The player must
+        // never be trapped with a permanently disabled "send offer" button.
         saveOffer.disabled = false;
+        saveOffer.textContent = '重試送出交易內容（' + draftOffer.length + ' 隻）';
       }
     });
 
