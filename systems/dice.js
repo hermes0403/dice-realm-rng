@@ -58,6 +58,7 @@ export function createDiceSystem(deps) {
   let autoWatchdog = null;
   let rolling = false;
   let rollingStartedAt = 0;
+  let revealAwaitingDismiss = false;
   let rollSequence = 0;
 
   function withTimeout(promise, timeoutMs, label) {
@@ -89,7 +90,7 @@ export function createDiceSystem(deps) {
   function startAutoWatchdog() {
     if (autoWatchdog) timerManager.clearInterval(autoWatchdog);
     autoWatchdog = timerManager.setInterval(() => {
-      if (!autoTimer || !rolling || !rollingStartedAt) return;
+      if (!autoTimer || !rolling || !rollingStartedAt || revealAwaitingDismiss) return;
       if (Date.now() - rollingStartedAt < 45000) return;
       console.warn('自動擲骰流程逾時，已解除卡住狀態');
       rollSequence++;
@@ -218,6 +219,30 @@ export function createDiceSystem(deps) {
     }
   }
 
+  function waitForRevealDismiss(overlay) {
+    const button = documentRef.getElementById('rarityRevealContinue');
+    if (!button) return Promise.resolve();
+    button.disabled = false;
+    button.textContent = '確認並繼續';
+    revealAwaitingDismiss = true;
+    return new Promise(resolve => {
+      const finish = () => {
+        button.removeEventListener('click', finish);
+        documentRef.removeEventListener('keydown', onKeyDown);
+        revealAwaitingDismiss = false;
+        resolve();
+      };
+      const onKeyDown = event => {
+        if (event.key !== 'Enter' && event.key !== 'Escape') return;
+        event.preventDefault();
+        finish();
+      };
+      button.addEventListener('click', finish, { once: true });
+      documentRef.addEventListener('keydown', onKeyDown);
+      button.focus?.();
+    });
+  }
+
   async function playRarityReveal(dice) {
     const overlay = documentRef.getElementById('rarityOverlay');
     if (!overlay) return;
@@ -233,6 +258,8 @@ export function createDiceSystem(deps) {
       : den < 10000000 ? 'mythic'
       : 'cosmic';
     const staged = tier !== 'rare';
+    const continueButton = documentRef.getElementById('rarityRevealContinue');
+    if (continueButton) { continueButton.disabled = true; continueButton.textContent = '揭示中…'; }
     overlay.className = 'rarity-overlay show tier-' + tier + (staged ? ' blackout' : '') + (isGlitchDice ? ' glitch-reveal' : '');
     overlay.style.setProperty('--reveal-color', dice.color);
     const titles = {
@@ -257,6 +284,7 @@ export function createDiceSystem(deps) {
     } else {
       await wait(1500);
     }
+    await waitForRevealDismiss(overlay);
     overlay.className = 'rarity-overlay';
     icon.classList.remove('halloween-compact');
   }
@@ -269,6 +297,8 @@ export function createDiceSystem(deps) {
       return;
     }
     const card = overlay.querySelector('.rarity-reveal-card');
+    const continueButton = documentRef.getElementById('rarityRevealContinue');
+    if (continueButton) { continueButton.disabled = true; continueButton.textContent = '揭示中…'; }
     overlay.className = 'rarity-overlay show common';
     card.classList.add('small-reveal-card');
     overlay.style.setProperty('--reveal-color', dice.color);
@@ -280,6 +310,7 @@ export function createDiceSystem(deps) {
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
     playRevealSound('halloween');
     await wait(720);
+    await waitForRevealDismiss(overlay);
     overlay.classList.remove('show', 'blackout', 'common');
     card.classList.remove('small-reveal-card');
   }
