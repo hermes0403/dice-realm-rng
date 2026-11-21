@@ -2472,3 +2472,38 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-trade-player-list-head{min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #303b5b}
 .pet-trade-player-list-head label{font-size:13px;letter-spacing:.2px;color:#e7ebff}
 .pet-trade-player-list-head button{width:auto!important;min-width:104px;margin:0!important;white-space:nowrap}
+
+
+/* T-0026 mobile fix: show the complete main navigation without horizontal scrolling. */
+@media (max-width: 760px) and (orientation: portrait) {
+  .mobile-nav {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    margin: 0 0 12px !important;
+    padding: 7px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    overflow: visible !important;
+  }
+  .mobile-nav button {
+    flex: 1 1 calc(20% - 5px) !important;
+    width: auto !important;
+    min-width: 58px !important;
+    min-height: 39px !important;
+    padding: 6px 4px !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+  .layout { margin-left: 0 !important; }
+}

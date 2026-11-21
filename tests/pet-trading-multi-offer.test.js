@@ -52,7 +52,10 @@ test('Realm Exchange is a main navigation entry between fusion and workshop', ()
   assert.match(index, /id="petsFusionView"/);
   assert.match(index, /id="petsTradeView"[^>]*hidden/);
   assert.match(navigation, /id === 'trade' \? 'pets' : id/);
-  assert.match(navigation, /data-pets-view="trade"/);
+  assert.match(navigation, /function setPetView\(view\)/);
+  assert.match(navigation, /if \(id === 'trade'\) setPetView\('trade'\)/);
+  assert.match(index, /id="petsPageTitle"/);
+  assert.doesNotMatch(index, /data-pets-view|pets-page-tabs/);
 });
 
 test('trade lobby uses a scrollable player list instead of manual username or UUID search', () => {
@@ -66,4 +69,21 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.doesNotMatch(index, /尋找交易對象|選擇下方玩家即可發送交易邀請/);
   assert.match(index, /玩家列表/);
   assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
+});
+
+
+test('portrait mobile navigation wraps all entries so trade is visible beside fusion and workshop', () => {
+  assert.match(styles, /@media \(max-width: 760px\) and \(orientation: portrait\) \{[\s\S]*?\.mobile-nav \{[\s\S]*?flex-wrap: wrap !important/);
+  assert.match(styles, /\.mobile-nav button \{[\s\S]*?min-width: 58px !important/);
+});
+
+
+test('trade has exactly one entry point in main navigation and opens only its own view', () => {
+  assert.match(config, /\['pets','融合機','♧'\],\['trade','交易','⇄'\],\['workshop','工坊','⚒'\]/);
+  assert.doesNotMatch(index, /data-pets-view|pets-page-tabs/);
+  assert.match(navigation, /function setPetView\(view\)/);
+  assert.match(navigation, /if \(fusionView\) fusionView\.hidden = trade/);
+  assert.match(navigation, /if \(tradeView\) tradeView\.hidden = !trade/);
+  assert.match(navigation, /if \(id === 'trade'\) setPetView\('trade'\)/);
+  assert.match(navigation, /else if \(id === 'pets'\) \{\s*setPetView\('fusion'\)/);
 });
