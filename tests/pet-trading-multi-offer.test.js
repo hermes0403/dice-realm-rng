@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const service = readFileSync(new URL('../services/pet-trading-search.js', import.meta.url), 'utf8');
+import { getPendingIncomingTradeRequests } from '../services/pet-trading-search.js';
 const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url), 'utf8');
 const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
@@ -123,4 +124,37 @@ test('trade offer submission waits for cloud-save sync and restores the send act
   assert.match(service, /pet_trade_local_inventory_changed/);
   assert.match(service, /saveOffer\.disabled = false/);
   assert.match(service, /重試送出交易內容/);
+});
+
+
+test('交易邀請收件匣只顯示有效且尚未回覆的收到請求', () => {
+  const now = Date.parse('2026-11-21T12:00:00Z');
+  const rows = [
+    { id: 'incoming', sender_id: 'other', recipient_id: 'me', status: 'pending', expires_at: '2026-11-21T12:02:00Z' },
+    { id: 'sent', sender_id: 'me', recipient_id: 'other', status: 'pending', expires_at: '2026-11-21T12:02:00Z' },
+    { id: 'accepted', sender_id: 'other', recipient_id: 'me', status: 'accepted', expires_at: '2026-11-21T12:02:00Z' },
+    { id: 'expired', sender_id: 'other', recipient_id: 'me', status: 'pending', expires_at: '2026-11-21T11:59:59Z' },
+    { id: 'cancelled', sender_id: 'other', recipient_id: 'me', status: 'cancelled', expires_at: '2026-11-21T12:02:00Z' },
+    { id: 'rejected', sender_id: 'other', recipient_id: 'me', status: 'rejected', expires_at: '2026-11-21T12:02:00Z' }
+  ];
+  assert.deepEqual(getPendingIncomingTradeRequests(rows, { id: 'me' }, now).map(row => row.id), ['incoming']);
+});
+
+test('收件匣不再渲染已接受、逾期、取消、拒絕或已送出的歷史紀錄', () => {
+  const start = service.indexOf('const pendingRequests = getPendingIncomingTradeRequests(rows, user)');
+  const end = service.indexOf('for (const session of completedSessionsToSync)', start);
+  const inboxRender = service.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(inboxRender, /交易請求：/);
+  assert.match(inboxRender, /目前沒有待處理的交易請求/);
+  assert.doesNotMatch(inboxRender, /row\.status|sessionLabels|roomStatus|建立於|房間已/);
+  assert.match(inboxRender, /makeActionButton\('接受'/);
+  assert.match(inboxRender, /makeActionButton\('拒絕'/);
+});
+
+test('交易邀請、接受／拒絕、送出內容與確認按鈕在失敗時可重新操作', () => {
+  assert.match(service, /if \(button\) button\.disabled = false/);
+  assert.match(service, /button\.disabled = false;\s*setStatus\('邀請狀態更新失敗/);
+  assert.match(service, /saveOffer\.disabled = false/);
+  assert.match(service, /confirm\.disabled = false/);
 });
