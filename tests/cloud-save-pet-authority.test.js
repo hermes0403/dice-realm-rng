@@ -260,7 +260,8 @@ test('a pet fused while a cloud save RPC is in flight is sent in the next delta'
   releaseFirstRpc();
   await firstSync;
 
-  await service.flushCloudSave();
+  const followUpSync = await service.syncCloudSave();
+  assert.equal(followUpSync, true);
 
   assert.equal(writes.length, 2, 'a second delta must be sent after the in-flight save');
   assert.deepEqual(writes[1].args.p_save_patch.pets, [fusedPet]);
