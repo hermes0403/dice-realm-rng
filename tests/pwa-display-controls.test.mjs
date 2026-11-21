@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261121-t0026-trade-nav-v3/);
+  assert.match(html, /script\.js\?v=20261121-t0026-mobile-nav-v4/);
   assert.match(html, /V1\.\d+/);
 });
 
