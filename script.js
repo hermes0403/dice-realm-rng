@@ -25,9 +25,9 @@ import { createAuthService } from './services/auth.js?v=20261120-t0107-edge-erro
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js?v=20261121-t0114-star-reveal';
+import { createDiceSystem } from './systems/dice.js?v=20261121-t0121-heaven-mode-persistence';
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261118-weekly-rewards-v2';
-import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
+import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
 import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
