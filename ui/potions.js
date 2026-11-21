@@ -151,8 +151,14 @@ export function createPotionUI(deps) {
       return;
     }
     if (id === 'angel1' || id === 'angel2') {
+      const pendingCharges = Math.max(0, Number(state.potions.angelCharges) || 0);
+      const pendingMode = state.potions.angelMode;
+      if (pendingCharges > 0 && pendingMode && pendingMode !== id) {
+        toast('目前仍有另一種天堂藥水待使用，請先完成目前抽數。');
+        return;
+      }
       state.potions.inventory[id] = count - 1;
-      state.potions.angelCharges = (Number(state.potions.angelCharges) || 0) + 1;
+      state.potions.angelCharges = pendingCharges + 1;
       state.potions.angelMode = id;
       if (getCurrentUser()) logPotionAction(id, potion.name, 'use', { mode: 'next_roll', charges: state.potions.angelCharges });
       save();
