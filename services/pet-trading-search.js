@@ -1,4 +1,4 @@
-export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeHTML, documentRef = document, toast = () => {} }) {
+export function createPetTradingSearch({ supabaseClient, getCurrentUser, getState = () => ({ pets: [] }), petById = () => null, onTradeCompleted = () => {}, escapeHTML, documentRef = document, toast = () => {} }) {
   const doc = documentRef;
   let selectedPlayer = null;
   let searchResults = [];
@@ -152,6 +152,103 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
     return button;
   }
 
+  function makeTradeRoom(session, user) {
+    const room = doc.createElement('div');
+    room.className = 'pet-trade-live-room';
+    const ownIsA = user.id === session.participant_a;
+    const ownOffer = ownIsA ? session.offered_pet_uid_a : session.offered_pet_uid_b;
+    const otherOffer = ownIsA ? session.offered_pet_uid_b : session.offered_pet_uid_a;
+    const ownConfirmed = ownIsA ? session.confirmed_a : session.confirmed_b;
+    const otherConfirmed = ownIsA ? session.confirmed_b : session.confirmed_a;
+    const pets = Array.isArray(getState()?.pets) ? getState().pets : [];
+    const heading = doc.createElement('strong');
+    heading.textContent = '交易房間 · 一對一寵物交換';
+    const ownLabel = doc.createElement('label');
+    ownLabel.textContent = '選擇你要交換的寵物';
+    const select = doc.createElement('select');
+    select.className = 'field pet-trade-offer-select';
+    select.setAttribute('aria-label', '選擇要交換的寵物');
+    const placeholder = doc.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '請選擇一隻寵物';
+    select.append(placeholder);
+    for (const item of pets) {
+      const definition = petById(item?.id);
+      if (!item?.uid || !definition) continue;
+      const option = doc.createElement('option');
+      option.value = String(item.uid);
+      option.textContent = definition.name + ' · ' + (definition.rarity || '寵物') + ' · ' + (Number(item.kg) || 0) + ' kg';
+      select.append(option);
+    }
+    select.value = ownOffer || '';
+    const other = doc.createElement('div');
+    other.className = 'pet-trade-offer-summary';
+    if (otherOffer) {
+      const item = pets.find(pet => String(pet.uid) === String(otherOffer));
+      const definition = item ? petById(item.id) : null;
+      other.textContent = '對方已提出寵物：' + (definition?.name || '已選擇寵物') + (item ? ' · ' + (Number(item.kg) || 0) + ' kg' : '');
+    } else {
+      other.textContent = '等待對方選擇寵物';
+    }
+    const state = doc.createElement('small');
+    state.className = 'pet-trade-confirm-state';
+    state.textContent = '你的確認：' + (ownConfirmed ? '已確認' : '尚未確認') + ' · 對方確認：' + (otherConfirmed ? '已確認' : '尚未確認');
+    const confirm = doc.createElement('button');
+    confirm.type = 'button';
+    confirm.className = 'primary pet-trade-confirm-button';
+    confirm.textContent = ownConfirmed ? '已確認，等待對方' : '確認交換內容';
+    confirm.disabled = !ownOffer || !otherOffer || ownConfirmed;
+    const hint = doc.createElement('small');
+    hint.className = 'pet-trade-room-hint';
+    hint.textContent = '任一方更換寵物，雙方確認會自動重置。交易完成前不會轉移寵物。';
+    select.addEventListener('change', async () => {
+      if (!select.value || select.value === ownOffer) return;
+      select.disabled = true;
+      confirm.disabled = true;
+      try {
+        const { error } = await supabaseClient.rpc('set_pet_trade_offer', {
+          p_session_id: session.id,
+          p_pet_uid: select.value
+        });
+        if (error) throw error;
+        toast('交易寵物已更新，雙方需要重新確認');
+        await refreshInvitations();
+      } catch (error) {
+        console.warn('Pet trade offer update failed', error);
+        hint.textContent = error?.message?.includes('pet_inventory_locked_by_trade')
+          ? '寵物目前已鎖定，請先取消其他交易房間。'
+          : '寵物選擇失敗，請重新整理交易房間。';
+        select.disabled = false;
+        select.value = ownOffer || '';
+      }
+    });
+    confirm.addEventListener('click', async () => {
+      confirm.disabled = true;
+      try {
+        const { data, error } = await supabaseClient.rpc('confirm_pet_trade', {
+          p_session_id: session.id
+        });
+        if (error) throw error;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (result?.completed) {
+          toast('寵物交換完成！雙方背包已更新。');
+          await onTradeCompleted();
+        } else {
+          toast('已確認交易內容，等待對方確認');
+        }
+        await refreshInvitations();
+      } catch (error) {
+        console.warn('Pet trade confirmation failed', error);
+        hint.textContent = error?.message?.includes('offered_pet_no_longer_owned')
+          ? '選擇的寵物已不在持有清單，請重新選擇。'
+          : '確認失敗：' + (error?.message || '請重新整理後再試。');
+        confirm.disabled = false;
+      }
+    });
+    room.append(heading, ownLabel, select, other, state, confirm, hint);
+    return room;
+  }
+
   function makeSessionActionButton(sessionId, label) {
     const button = doc.createElement('button');
     button.type = 'button';
@@ -250,7 +347,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
       let sessionsByInvitation = new Map();
       if (acceptedIds.length) {
         const sessions = await supabaseClient.from('pet_trade_sessions')
-          .select('id,invitation_id,status,created_at,expires_at')
+          .select('id,invitation_id,participant_a,participant_b,status,created_at,expires_at,offered_pet_uid_a,offered_pet_uid_b,confirmed_a,confirmed_b,revision')
           .in('invitation_id', acceptedIds);
         if (sessions.error) throw sessions.error;
         sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
@@ -298,6 +395,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, escapeH
             + createdLabel
             + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘有效 · 寵物交換尚未開放' : '');
           item.append(roomStatus);
+          if (session.status === 'active' && !sessionExpired) item.append(makeTradeRoom(session, user));
           if (session.status === 'active') {
             item.append(makeSessionActionButton(session.id, sessionExpired ? '更新逾期狀態' : '取消交易房間'));
           }
