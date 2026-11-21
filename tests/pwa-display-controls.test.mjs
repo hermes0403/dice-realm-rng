@@ -304,7 +304,7 @@ test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', a
   assert.match(dice, /revealAwaitingDismiss/);
   assert.match(css, /\.rarity-reveal-continue/);
   assert.match(worker, /dice-realm-shell-v1\.77/);
-  assert.match(worker, /systems\/dice\.js\?v=20261121-t0117-pet-summary-contrast/);
+  assert.match(worker, /systems\/dice\.js\?v=20261121-t0114-star-reveal/);
 });
 
 
@@ -331,7 +331,7 @@ test('T-0117 寵物出售摘要文字固定為高對比淺色，且首頁與 Ser
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
   assert.match(html, /style\.css\?v=20261121-t0117-pet-summary-contrast/);
-  assert.match(css, /#petSellModal \\.pet-sell-dialog #petSellSummary\\.pet-sell-summary/);
+  assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
