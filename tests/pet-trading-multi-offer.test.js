@@ -43,3 +43,24 @@ test('trade UI has wide desktop layout and stacked mobile offer panels', () => {
   assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.pet-trade-offer-sides\{grid-template-columns:minmax\(0,1fr\)\}/);
   assert.match(styles, /\.pet-trade-pet-option\.is-selected/);
 });
+
+
+test('Realm Exchange is opened from its own tab beside the fusion machine', () => {
+  assert.match(index, /data-pets-view="fusion"/);
+  assert.match(index, /data-pets-view="trade"/);
+  assert.match(index, /id="petsFusionView"/);
+  assert.match(index, /id="petsTradeView"[^>]*hidden/);
+  assert.match(service, /petsFusionView/);
+  assert.match(service, /petsTradeView/);
+});
+
+test('trade lobby uses a scrollable player list instead of manual username or UUID search', () => {
+  assert.doesNotMatch(index, /petTradeTarget|petTradeSearchBtn|輸入玩家名稱或完整 UUID/);
+  assert.match(index, /id="petTradeSearchResults"/);
+  assert.match(index, /id="petTradeRefreshPlayers"/);
+  assert.match(index, /id="petTradeLoadMorePlayers"/);
+  assert.match(service, /select\('user_id,username,last_seen'\)/);
+  assert.match(service, /PLAYER_PAGE_SIZE = 50/);
+  assert.match(service, /目前在線/);
+  assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
+});
