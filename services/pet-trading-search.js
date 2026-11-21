@@ -2,6 +2,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   const doc = documentRef;
   let selectedPlayer = null;
   let searchResults = [];
+  let playerOffset = 0;
+  const PLAYER_PAGE_SIZE = 50;
+  let hasMorePlayers = false;
   let searching = false;
   let refreshing = false;
   let refreshQueued = false;
@@ -20,21 +23,27 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     if (!host) return;
     host.replaceChildren();
     if (!rows.length) {
-      host.textContent = '找不到符合條件的玩家。';
+      host.textContent = getCurrentUser() ? '目前沒有其他玩家。' : '登入雲端帳號後即可查看玩家。';
       return;
     }
+    const onlineCutoff = Date.now() - 3 * 60 * 1000;
     for (const row of rows) {
       const button = doc.createElement('button');
       button.type = 'button';
-      button.className = 'pet-trade-search-result';
+      button.className = 'pet-trade-search-result' + (selectedPlayer?.user_id === row.user_id ? ' is-selected' : '');
       button.setAttribute('aria-pressed', String(selectedPlayer?.user_id === row.user_id));
       const name = doc.createElement('span');
+      name.className = 'pet-trade-player-name';
       const strong = doc.createElement('strong');
       strong.textContent = row.username || '未命名玩家';
       const small = doc.createElement('small');
-      small.textContent = '玩家代碼：' + String(row.user_id).slice(0, 8).toUpperCase();
+      const lastSeen = Date.parse(row.last_seen || '');
+      const online = Number.isFinite(lastSeen) && lastSeen >= onlineCutoff;
+      small.className = online ? 'is-online' : 'is-offline';
+      small.textContent = online ? '● 目前在線' : '○ 最近離線';
       name.append(strong, small);
       const action = doc.createElement('span');
+      action.className = 'pet-trade-player-select-label';
       action.textContent = selectedPlayer?.user_id === row.user_id ? '已選擇' : '選擇';
       button.append(name, action);
       button.addEventListener('click', () => selectPlayer(row));
@@ -48,7 +57,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const invite = doc.getElementById('petTradeInviteBtn');
     if (panel) {
       panel.hidden = false;
-      panel.textContent = '已選擇交易對象：' + (row.username || '未命名玩家') + '（' + row.user_id + '）';
+      panel.textContent = '已選擇交易對象：' + (row.username || '未命名玩家');
     }
     if (invite) {
       invite.disabled = false;
@@ -58,47 +67,52 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     setStatus('玩家已選擇，可以發送交易邀請。邀請有效時間為 2 分鐘。');
   }
 
-  async function search() {
-    const input = doc.getElementById('petTradeTarget');
-    const query = String(input?.value || '').trim();
+  async function refreshPlayers({ append = false } = {}) {
     const host = doc.getElementById('petTradeSearchResults');
+    const moreButton = doc.getElementById('petTradeLoadMorePlayers');
     const user = getCurrentUser();
-    if (!supabaseClient || !user) {
-      setStatus('請先登入雲端帳號，再搜尋玩家。');
-      return;
-    }
-    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(query);
-    const safeNameQuery = query.replace(/[\\%_(),]/g, '').trim();
-    if (!uuid && safeNameQuery.length < 2) {
-      setStatus('請輸入至少 2 個有效字元的玩家名稱，或完整玩家 UUID。');
+    if (!host) return;
+    if (!user || !supabaseClient) {
+      host.textContent = '登入雲端帳號後即可查看玩家。';
+      if (moreButton) moreButton.hidden = true;
+      setStatus('登入雲端帳號後即可載入玩家列表。');
       return;
     }
     if (searching) return;
     searching = true;
-    selectedPlayer = null;
-    searchResults = [];
-    const panel = doc.getElementById('petTradeSelectedTarget');
-    const invite = doc.getElementById('petTradeInviteBtn');
-    if (panel) panel.hidden = true;
-    if (invite) invite.disabled = true;
-    if (host) host.textContent = '正在搜尋玩家…';
-    setStatus('正在搜尋雲端玩家資料…');
+    if (!append) {
+      playerOffset = 0;
+      searchResults = [];
+      host.textContent = '正在載入玩家列表…';
+      selectedPlayer = null;
+      const selected = doc.getElementById('petTradeSelectedTarget');
+      const invite = doc.getElementById('petTradeInviteBtn');
+      if (selected) selected.hidden = true;
+      if (invite) invite.disabled = true;
+    }
+    setStatus('正在讀取最近上線的玩家…');
+    const start = append ? playerOffset : 0;
     try {
-      let request = supabaseClient.from('player_profiles')
-        .select('user_id,username')
+      const { data, error } = await supabaseClient.from('player_profiles')
+        .select('user_id,username,last_seen')
         .neq('user_id', user.id)
-        .limit(10);
-      request = uuid ? request.eq('user_id', query) : request.ilike('username', '%' + safeNameQuery + '%');
-      const { data, error } = await request;
+        .order('last_seen', { ascending: false, nullsFirst: false })
+        .range(start, start + PLAYER_PAGE_SIZE - 1);
       if (error) throw error;
       const rows = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
-      searchResults = rows;
-      renderResults(rows);
-      setStatus(rows.length ? '找到 ' + rows.length + ' 位玩家，選擇一位作為交易對象。' : '沒有找到符合條件的玩家。');
+      searchResults = append ? [...searchResults, ...rows] : rows;
+      playerOffset = start + rows.length;
+      hasMorePlayers = rows.length === PLAYER_PAGE_SIZE;
+      renderResults(searchResults);
+      if (moreButton) moreButton.hidden = !hasMorePlayers;
+      setStatus(searchResults.length
+        ? '已載入 ' + searchResults.length + ' 位玩家，列表依最近上線時間排序。'
+        : '目前還沒有其他玩家資料。');
     } catch (error) {
-      console.warn('Pet trade player search failed', error);
-      if (host) host.textContent = '搜尋失敗，請稍後再試。';
-      setStatus('無法讀取玩家清單，請確認登入狀態後重試。');
+      console.warn('Pet trade player list failed', error);
+      if (!append) host.textContent = '玩家列表載入失敗，請稍後重新整理。';
+      setStatus('無法讀取玩家列表，請確認登入狀態後重試。');
+      if (moreButton) moreButton.hidden = true;
     } finally {
       searching = false;
     }
@@ -584,18 +598,29 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   }
 
   function setup() {
-    const button = doc.getElementById('petTradeSearchBtn');
-    const input = doc.getElementById('petTradeTarget');
     const invite = doc.getElementById('petTradeInviteBtn');
     const refresh = doc.getElementById('petTradeRefreshInvites');
-    if (button) button.addEventListener('click', search);
+    const refreshPlayersButton = doc.getElementById('petTradeRefreshPlayers');
+    const loadMorePlayersButton = doc.getElementById('petTradeLoadMorePlayers');
     if (invite) invite.addEventListener('click', sendInvitation);
     if (refresh) refresh.addEventListener('click', refreshInvitations);
-    if (input) input.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        search();
-      }
+    if (refreshPlayersButton) refreshPlayersButton.addEventListener('click', () => refreshPlayers());
+    if (loadMorePlayersButton) loadMorePlayersButton.addEventListener('click', () => refreshPlayers({ append: true }));
+    doc.querySelectorAll('[data-pets-view]').forEach(button => {
+      button.addEventListener('click', () => {
+        const view = button.dataset.petsView === 'trade' ? 'trade' : 'fusion';
+        doc.getElementById('petsFusionView')?.toggleAttribute('hidden', view !== 'fusion');
+        doc.getElementById('petsTradeView')?.toggleAttribute('hidden', view !== 'trade');
+        doc.querySelectorAll('[data-pets-view]').forEach(tab => {
+          const active = tab.dataset.petsView === view;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-pressed', String(active));
+        });
+        if (view === 'trade') {
+          void refreshPlayers();
+          void refreshInvitations();
+        }
+      });
     });
     if (supabaseClient?.auth?.onAuthStateChange) {
       supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -606,6 +631,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
           searchResults = [];
           offerDrafts.clear();
           renderResults([]);
+          playerOffset = 0;
+          hasMorePlayers = false;
           const selected = doc.getElementById('petTradeSelectedTarget');
           const inviteButton = doc.getElementById('petTradeInviteBtn');
           if (selected) {
@@ -625,11 +652,12 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         }
         queueMicrotask(() => {
           void refreshInvitations();
+          if (doc.getElementById('petsTradeView') && !doc.getElementById('petsTradeView').hidden) void refreshPlayers();
         });
       });
     }
     refreshInvitations();
   }
 
-  return { setup, search, refreshInvitations, getSelectedPlayer: () => selectedPlayer };
+  return { setup, refreshPlayers, refreshInvitations, getSelectedPlayer: () => selectedPlayer };
 }
