@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.78';
+const CACHE_NAME = 'dice-realm-shell-v1.79';
 const APP_SHELL = [
   './',
   './index.html',
@@ -33,7 +33,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261121-t0119-fusion-dice-icon-contrast',
+  './style.css?v=20261121-t0120-fusion-dice-glyph-visibility',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
