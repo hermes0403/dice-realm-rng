@@ -205,7 +205,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       const card = doc.createElement(selectable ? 'button' : 'div');
       if (selectable) {
         card.type = 'button';
-        card.className = 'pet-trade-pet-card pet-trade-pet-option' + (selected ? ' is-selected' : '');
+        card.className = 'pet-trade-pet-card pet-trade-pet-option' + (selected ? ' is-selected is-draft-selected' : '');
         card.setAttribute('aria-pressed', String(selected));
       } else {
         card.className = 'pet-trade-pet-card pet-trade-pet-preview';
@@ -512,13 +512,42 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       const completedSessionsToSync = [...sessionsByInvitation.values()]
         .filter(session => session.status === 'completed')
         .filter(session => !completedSessionsHandled.has(user.id + ':' + session.id));
+      const activeSessions = [...sessionsByInvitation.values()].filter(session => {
+        const expiry = Date.parse(session.expires_at);
+        return session.status === 'active' && Number.isFinite(expiry) && expiry > Date.now();
+      });
+      const tradeView = doc.getElementById('petsTradeView');
+      tradeView?.classList.toggle('is-trading', activeSessions.length > 0);
+      host.replaceChildren();
+
+      // While a trade is active, render only the live room. Keep invitation history
+      // and the player directory out of the way until the session ends.
+      if (activeSessions.length) {
+        for (const session of activeSessions) {
+          const roomOnly = doc.createElement('div');
+          roomOnly.className = 'pet-trade-active-room-only';
+          roomOnly.append(makeTradeRoom(session, user));
+          host.append(roomOnly);
+        }
+        for (const session of completedSessionsToSync) {
+          const syncKey = user.id + ':' + session.id;
+          completedSessionsHandled.add(syncKey);
+          try {
+            await onTradeCompleted();
+          } catch (syncError) {
+            console.warn('Completed pet trade cloud save refresh failed', syncError);
+            setStatus('交易已完成，但背包同步失敗，請重新整理遊戲。');
+          }
+        }
+        return;
+      }
+
       const otherIds = [...new Set(rows.map(row => row.sender_id === user.id ? row.recipient_id : row.sender_id))];
       let names = new Map();
       if (otherIds.length) {
         const profiles = await supabaseClient.from('player_profiles').select('user_id,username').in('user_id', otherIds);
         if (!profiles.error) names = new Map((profiles.data || []).map(row => [row.user_id, row.username || '未命名玩家']));
       }
-      host.replaceChildren();
       if (!rows.length) {
         host.textContent = '目前沒有交易邀請。';
         return;
