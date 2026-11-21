@@ -141,13 +141,15 @@ test('交易邀請收件匣只顯示有效且尚未回覆的收到請求', () =>
 });
 
 test('收件匣不再渲染已接受、逾期、取消、拒絕或已送出的歷史紀錄', () => {
-  assert.match(service, /getPendingIncomingTradeRequests\(rows, user\)/);
-  assert.match(service, /交易請求：/);
-  assert.match(service, /目前沒有待處理的交易請求/);
-  assert.doesNotMatch(service, /已邀請：/);
-  assert.doesNotMatch(service, /交易房間已逾期/);
-  assert.doesNotMatch(service, /交易房間已取消/);
-  assert.doesNotMatch(service, /狀態：' \+ \(\{accepted:/);
+  const start = service.indexOf('const pendingRequests = getPendingIncomingTradeRequests(rows, user)');
+  const end = service.indexOf('for (const session of completedSessionsToSync)', start);
+  const inboxRender = service.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(inboxRender, /交易請求：/);
+  assert.match(inboxRender, /目前沒有待處理的交易請求/);
+  assert.doesNotMatch(inboxRender, /已邀請：|已接受|已逾期|已取消|已拒絕|建立於|房間 /);
+  assert.match(inboxRender, /makeActionButton\('接受'/);
+  assert.match(inboxRender, /makeActionButton\('拒絕'/);
 });
 
 test('交易邀請、接受／拒絕、送出內容與確認按鈕在失敗時可重新操作', () => {
