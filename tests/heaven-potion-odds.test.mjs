@@ -6,7 +6,8 @@ import {
   HEAVEN_MIDDLE_IDS,
   buildHeavenBaseEntries,
   heavenWeatherBonus,
-  applyHeavenWeatherWeights
+  applyHeavenWeatherWeights,
+  consumeHeavenPotionCharge
 } from '../systems/heaven-potion-odds.js';
 import { applyGlitchWeight } from '../systems/glitch-dice.js';
 
@@ -169,4 +170,31 @@ test('地獄與故障天氣仍依原規則提高目標骰子的原始權重', ()
       assert.ok(Math.abs(target.weight - expected) < 1e-10);
     }
   }
+});
+
+
+test('天堂 II 基礎池不含彗星骰子；天堂 I 低運氣固定包含彗星骰子', () => {
+  const heaven1 = buildHeavenBaseEntries(byId, false, false);
+  const heaven2 = buildHeavenBaseEntries(byId, true, false);
+  assert.equal(heaven1.find(entry => entry.dice.id === 'd12')?.weight, 20);
+  assert.equal(heaven2.some(entry => entry.dice.id === 'd12'), false);
+  assert.equal(heaven2.find(entry => entry.dice.id === 'd14')?.weight, 17);
+});
+
+test('天堂藥水多抽數會保留模式，直到最後一抽才清空', () => {
+  const potions = { angelCharges: 2, angelMode: 'angel2' };
+  assert.equal(consumeHeavenPotionCharge(potions), true);
+  assert.deepEqual(potions, { angelCharges: 1, angelMode: 'angel2' });
+  assert.equal(consumeHeavenPotionCharge(potions), true);
+  assert.deepEqual(potions, { angelCharges: 0, angelMode: '' });
+  assert.equal(consumeHeavenPotionCharge(potions), false);
+  assert.deepEqual(potions, { angelCharges: 0, angelMode: '' });
+});
+
+test('待使用天堂藥水模式不會被另一種類型覆蓋', async () => {
+  const source = await (await import('node:fs/promises')).readFile(
+    new URL('../ui/potions.js', import.meta.url), 'utf8'
+  );
+  assert.match(source, /pendingCharges > 0 && pendingMode && pendingMode !== id/);
+  assert.match(source, /請先完成目前抽數/);
 });
