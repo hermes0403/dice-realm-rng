@@ -2472,3 +2472,88 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-trade-player-list-head{min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #303b5b}
 .pet-trade-player-list-head label{font-size:13px;letter-spacing:.2px;color:#e7ebff}
 .pet-trade-player-list-head button{width:auto!important;min-width:104px;margin:0!important;white-space:nowrap}
+
+
+/* T-0026 trade room UX polish: horizontal pet carousel and clear ready action. */
+.pet-trade-live-room{
+  gap:16px;
+  padding:18px;
+  border:1px solid #4a5481;
+  border-radius:16px;
+  background:radial-gradient(ellipse at 12% 0%,#4c43852b,transparent 42%),linear-gradient(145deg,#171d35,#0b1222 72%);
+  box-shadow:0 14px 38px #03071366,inset 0 1px #a6a5ff12;
+}
+.pet-trade-room-heading{padding:0 0 12px;border-bottom:1px solid #333e61}
+.pet-trade-room-heading strong{font-size:16px;letter-spacing:.3px}
+.pet-trade-room-heading small{font-size:11px;line-height:1.6}
+.pet-trade-room-code{border-color:#555d91;background:#171e39;color:#c5c8ff}
+.pet-trade-offer-sides{gap:12px}
+.pet-trade-offer-side{padding:13px;border-radius:14px;box-shadow:inset 0 1px #ffffff08}
+.pet-trade-side-head strong{font-size:13px}
+.pet-trade-side-hint{font-size:11px;line-height:1.6}
+.pet-trade-pet-search{border:1px solid #3b496e;border-radius:9px;background:#090f1d}
+.pet-trade-pet-picker{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:9px;
+  max-width:100%;
+  min-height:142px;
+  max-height:164px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:thin;
+  scrollbar-color:#7770b7 #111a2d;
+  padding:5px 3px 12px;
+}
+.pet-trade-pet-picker::-webkit-scrollbar{height:6px}
+.pet-trade-pet-picker::-webkit-scrollbar-track{border-radius:99px;background:#111a2d}
+.pet-trade-pet-picker::-webkit-scrollbar-thumb{border-radius:99px;background:#7770b7}
+.pet-trade-pet-card{
+  flex:0 0 116px;
+  width:116px;
+  min-width:116px;
+  min-height:132px;
+  padding:9px 7px;
+  border-color:#3c4a70;
+  border-radius:12px;
+  background:linear-gradient(155deg,#17223b,#0c1426);
+  scroll-snap-align:start;
+}
+.pet-trade-pet-option:hover{transform:translateY(-2px);border-color:#8c91d7;background:linear-gradient(155deg,#202b4b,#111a30)}
+.pet-trade-pet-option.is-selected{
+  border-color:#b8a5ff;
+  background:linear-gradient(155deg,#39315f,#171d3a);
+  box-shadow:inset 0 0 0 1px #b8a5ff55,0 0 18px #9274ff30;
+}
+.pet-trade-pet-art{height:66px;background:radial-gradient(ellipse at center,#5864a255,transparent 72%)}
+.pet-trade-pet-card strong{font-size:11px}
+.pet-trade-pet-card small{font-size:10px}
+.pet-trade-empty-offer{flex:0 0 100%;min-width:100%;min-height:120px}
+.pet-trade-save-offer{min-height:40px;border:1px solid #8176c7;border-radius:10px;background:linear-gradient(110deg,#454078,#30345f);font-size:12px;font-weight:850;letter-spacing:.2px}
+.pet-trade-save-offer:not(:disabled):hover{filter:brightness(1.15);transform:translateY(-1px)}
+.pet-trade-confirm-state{gap:10px;padding:11px;border-radius:11px}
+.pet-trade-confirm-state span{padding:7px 9px;border-radius:8px;background:#111a2c;font-size:12px}
+.pet-trade-confirm-state span.is-confirmed{background:#12332e;color:#a8f3d1}
+.pet-trade-room-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+.pet-trade-confirm-button{
+  min-height:46px;
+  border:1px solid #8d83e3;
+  border-radius:11px;
+  background:linear-gradient(110deg,#6254b2,#3d4c91);
+  box-shadow:0 5px 18px #6556c633,inset 0 1px #ffffff20;
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.4px;
+}
+.pet-trade-confirm-button:not(:disabled):hover{filter:brightness(1.14);transform:translateY(-1px)}
+.pet-trade-confirm-button:disabled{opacity:.62}
+.pet-trade-room-hint{font-size:11px;padding:10px 12px;border:1px solid #303b5c}
+@media(max-width:760px){
+  .pet-trade-live-room{padding:13px;gap:13px}
+  .pet-trade-offer-side{padding:10px}
+  .pet-trade-pet-picker{min-height:136px;max-height:152px}
+  .pet-trade-pet-card{flex-basis:108px;width:108px;min-width:108px}
+}
