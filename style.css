@@ -2287,13 +2287,19 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 @media(max-width:480px){.rarity-starburst{width:min(78vw,330px);top:43%}}
 @media(prefers-reduced-motion:reduce){.rarity-starburst,.rarity-starburst::before,.rarity-starburst::after{animation:none!important;transition:none!important}.rarity-overlay.star-reveal.blackout .rarity-starburst{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(.82)}}
 
-/* T-0116: Keep the pet-sale selection summary readable across every theme. */
-#petSellSummary.pet-sell-summary,
-#petSellSummary.pet-sell-summary,
-.pet-sell-dialog #petSellSummary {
-  color: #edf0ff !important;
-  background: linear-gradient(120deg, #111629, #1b2340) !important;
-  border: 1px solid #53608b !important;
-  box-shadow: inset 0 1px 0 #ffffff12, 0 4px 14px #05081466 !important;
+/* T-0117: Force readable sale-summary text across themes and browser text-fill rules. */
+#petSellModal .pet-sell-dialog #petSellSummary.pet-sell-summary,
+#petSellModal .pet-sell-dialog #petSellSummary.pet-sell-summary * {
+  color: #f3f5ff !important;
+  -webkit-text-fill-color: #f3f5ff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
   text-shadow: none !important;
+}
+#petSellModal .pet-sell-dialog #petSellSummary.pet-sell-summary {
+  isolation: isolate !important;
+  background: linear-gradient(120deg, #111629, #1b2340) !important;
+  border: 1px solid #6575a8 !important;
+  box-shadow: inset 0 1px 0 #ffffff18, 0 4px 14px #05081466 !important;
 }
