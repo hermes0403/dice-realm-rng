@@ -65,13 +65,22 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.match(index, /id="petTradeRefreshPlayers"/);
   assert.match(index, /id="petTradeLoadMorePlayers"/);
   assert.match(service, /select\('user_id,username'\)/);
-  assert.match(service, /PLAYER_PAGE_SIZE = 50/);
+  assert.match(service, /PLAYER_PAGE_SIZE = 3/);
   assert.doesNotMatch(service, /目前在線|最近離線|is-online|is-offline/);
   assert.doesNotMatch(index, /尋找交易對象|選擇下方玩家即可發送交易邀請/);
   assert.match(index, /玩家列表/);
   assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
 });
 
+
+test('trade player list waits for persisted auth restoration before showing logged-out state', () => {
+  assert.match(service, /async function resolveCurrentUser\(\)/);
+  assert.match(service, /supabaseClient\.auth\.getSession\(\)/);
+  assert.match(service, /const user = await resolveCurrentUser\(\)/);
+  assert.match(service, /正在確認雲端登入狀態/);
+  assert.match(service, /目前尚未登入雲端帳號/);
+  assert.match(service, /range\(start, start \+ PLAYER_PAGE_SIZE - 1\)/);
+});
 
 test('mobile navigation retains the original horizontal-scroll layout', () => {
   assert.match(styles, /\.mobile-nav/);
