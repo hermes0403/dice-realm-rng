@@ -288,3 +288,21 @@ test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯�
   assert.match(admin, /type==='aura'&&getCurrentUser\(\)\?\.id===targetUserId\)\{await applyPendingGrants\(true\);save\(\);await flushCloudSave\(\);render\(\);\}/);
   assert.match(script, /applyPendingGrants, save, flushCloudSave/);
 });
+
+
+test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const dice = await readFile(new URL('../systems/dice.js', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+
+  assert.match(html, /id="rarityRevealContinue"[^>]*disabled>揭示中…/);
+  assert.match(dice, /function waitForRevealDismiss\(overlay\)/);
+  assert.match(dice, /button\.addEventListener\('click', finish, \{ once: true \}\)/);
+  assert.match(dice, /event\.key !== 'Enter' && event\.key !== 'Escape'/);
+  assert.match(dice, /await waitForRevealDismiss\(overlay\)/);
+  assert.match(dice, /revealAwaitingDismiss/);
+  assert.match(css, /\.rarity-reveal-continue/);
+  assert.match(worker, /dice-realm-shell-v1\.74/);
+  assert.match(worker, /systems\/dice\.js\?v=20261121-t0114-persistent-reveal/);
+});
