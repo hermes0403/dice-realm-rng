@@ -12,7 +12,7 @@ export function timestampToMs(value) {
 }
 
 /** Reads the effective personal/global coin multiplier from the admin API. */
-export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY }) {
+export function createCoinBoostService({ getCurrentUser, getMoneyPotionMultiplier = () => 1, supabaseClient, SUPABASE_URL, SUPABASE_KEY }) {
   let activeCoinBoosts = { global: null, personal: null, lastFetch: 0 };
   let refreshBusy = false;
 
@@ -22,7 +22,8 @@ export function createCoinBoostService({ getCurrentUser, supabaseClient, SUPABAS
     let multiplier = 1;
     if (global && timestampToMs(global.expires_at) > now) multiplier = Math.max(multiplier, Number(global.multiplier) || 1);
     if (personal && timestampToMs(personal.expires_at) > now) multiplier = Math.max(multiplier, Number(personal.multiplier) || 1);
-    return Math.max(1, Math.min(1000, multiplier));
+    const potionMultiplier = Math.max(1, Number(getMoneyPotionMultiplier()) || 1);
+    return Math.max(1, Math.min(5000, multiplier * potionMultiplier));
   }
 
   function activeGlobalCoinBoost() {
