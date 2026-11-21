@@ -63,13 +63,15 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.doesNotMatch(index, /petTradeTarget|petTradeSearchBtn|輸入玩家名稱或完整 UUID/);
   assert.match(index, /id="petTradeSearchResults"/);
   assert.match(index, /id="petTradeRefreshPlayers"/);
-  assert.match(index, /id="petTradeLoadMorePlayers"/);
+  assert.doesNotMatch(index, /petTradeLoadMorePlayers|載入更多玩家/);
   assert.match(service, /select\('user_id,username'\)/);
-  assert.match(service, /PLAYER_PAGE_SIZE = 3/);
+  assert.match(service, /PLAYER_LIMIT = 50/);
+  assert.match(service, /range\(0, PLAYER_LIMIT - 1\)/);
   assert.doesNotMatch(service, /目前在線|最近離線|is-online|is-offline/);
   assert.doesNotMatch(index, /尋找交易對象|選擇下方玩家即可發送交易邀請/);
   assert.match(index, /玩家列表/);
-  assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
+  assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?max-height:144px[\s\S]*?overflow-y:auto/);
+  assert.match(styles, /\.pet-trade-search-result\{display:flex;flex:0 0 42px/);
 });
 
 
@@ -79,7 +81,7 @@ test('trade player list waits for persisted auth restoration before showing logg
   assert.match(service, /const user = await resolveCurrentUser\(\)/);
   assert.match(service, /正在確認雲端登入狀態/);
   assert.match(service, /目前尚未登入雲端帳號/);
-  assert.match(service, /range\(start, start \+ PLAYER_PAGE_SIZE - 1\)/);
+  assert.match(service, /range\(0, PLAYER_LIMIT - 1\)/);
 });
 
 test('mobile navigation retains the original horizontal-scroll layout', () => {
@@ -161,9 +163,32 @@ test('收件匣不再渲染已接受、逾期、取消、拒絕或已送出的�
   assert.match(inboxRender, /makeActionButton\('拒絕'/);
 });
 
+test('trade player directory shows three visible rows and scrolls through up to fifty without a load-more button', () => {
+  assert.match(service, /PLAYER_LIMIT = 50/);
+  assert.match(service, /range\(0, PLAYER_LIMIT - 1\)/);
+  assert.doesNotMatch(service, /petTradeLoadMorePlayers|append = false|append: true/);
+  assert.doesNotMatch(index, /petTradeLoadMorePlayers|載入更多玩家/);
+  assert.match(styles, /max-height:144px/);
+  assert.match(styles, /overflow-y:auto/);
+  assert.match(styles, /flex:0 0 42px/);
+});
+
+test('accept action waits for session, reports progress, and exposes errors instead of silently failing', () => {
+  const start = service.indexOf('function makeActionButton');
+  const end = service.indexOf('function makeTradeRoom', start);
+  const action = service.slice(start, end);
+  assert.match(action, /event\.preventDefault\(\)/);
+  assert.match(action, /await resolveCurrentUser\(\)/);
+  assert.match(action, /respond_pet_trade_invitation/);
+  assert.match(action, /正在接受交易邀請/);
+  assert.match(action, /已接受邀請，正在開啟交易房間/);
+  assert.match(service, /node\.hidden = !message/);
+  assert.match(action, /交易邀請處理失敗/);
+});
+
 test('交易邀請、接受／拒絕、送出內容與確認按鈕在失敗時可重新操作', () => {
   assert.match(service, /if \(button\) button\.disabled = false/);
-  assert.match(service, /button\.disabled = false;\s*setStatus\('邀請狀態更新失敗/);
+  assert.match(service, /button\.disabled = false;\s*button\.textContent = label;[\s\S]*?setStatus\(/);
   assert.match(service, /saveOffer\.disabled = false/);
   assert.match(service, /confirm\.disabled = false/);
 });

@@ -22,7 +22,6 @@ test('主要遊戲按鈕都有實際點擊事件或明確的委派事件', async
     ['寵物自動裝備', pets, /getElementById\('petAutoEquipBestBtn'\)\?\.addEventListener\('click'/],
     ['寵物出售與自動出售設定', selling, /target\.closest\('#petSellBtn'\)[\s\S]*?target\.closest\('#petAutoSellBtn'\)/],
     ['交易邀請與收件匣刷新', trade, /refreshPlayersButton\.addEventListener\('click'/],
-    ['交易載入更多玩家', trade, /loadMorePlayersButton\.addEventListener\('click'/],
     ['交易發送邀請', trade, /invite\.addEventListener\('click', sendInvitation\)/],
     ['交易接受／拒絕', trade, /makeActionButton\('接受'[\s\S]*?makeActionButton\('拒絕'/],
     ['交易送出內容與準備確認', trade, /saveOffer\.addEventListener\('click'[\s\S]*?confirm\.addEventListener\('click'/],
@@ -43,7 +42,7 @@ test('主要遊戲按鈕都有實際點擊事件或明確的委派事件', async
 test('交易按鈕在網路或伺服器失敗後會恢復可操作狀態', async () => {
   const trade = await read('services/pet-trading-search.js');
   assert.match(trade, /if \(button\) button\.disabled = false/);
-  assert.match(trade, /button\.disabled = false;\s*setStatus\('邀請狀態更新失敗/);
+  assert.match(trade, /button\.disabled = false;\s*button\.textContent = label;[\s\S]*?setStatus\(/);
   assert.match(trade, /saveOffer\.disabled = false/);
   assert.match(trade, /confirm\.disabled = false/);
   assert.match(trade, /saveOffer\.textContent = '重試送出交易內容/);
