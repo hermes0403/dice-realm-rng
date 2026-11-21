@@ -1,5 +1,5 @@
 import { D, G } from './data/dice.js?v=20261117-t0102-void-startrail-gloves';
-import { POTIONS } from './data/equipment.js';
+import { POTIONS } from './data/equipment.js?v=20261121-t0123-money-potions';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261121-t0122-pet-fusion-rates';
 import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261121-t0122-pet-fusion-rates';
 import { DAILY_TASKS } from './data/progression.js';
@@ -30,7 +30,7 @@ import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=202611
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
-import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
+import { createEquipmentUI } from './ui/equipment.js?v=20261121-t0123-money-potions';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js';
@@ -102,7 +102,7 @@ const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, res
 S=load();
 const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, localStorageRef: localStorage, timerManager, documentRef: document, toast, isAdmin, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
-const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
+const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, getMoneyPotionMultiplier: () => activePotion('money')?.multiplier || 1, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum });
 const { releaseDeviceLock, isLockHeld, isHeartbeatActive, scheduleUnlock } = createDeviceLockService({ getCurrentUser: () => currentUser, supabaseClient, toast, timerManager });
 const { recordGameVisit, startGameVisitTracking } = createVisitTrackingService({ getCurrentUser: () => currentUser, getState: () => S, supabaseClient, timerManager });
@@ -164,7 +164,7 @@ function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
 function totalDice(){return Object.values(S.bag).reduce((a,b)=>a+Math.max(0,Number(b)||0),0)}
 function currentGlove(){return S.equipped==='g7'?glove('g0'):glove(S.equipped)}
-function activePotion(category='luck'){const a=category==='speed'?S.potions?.activeSpeed:S.potions?.active;if(a&&a.type&&Number(a.expiresAt)>Date.now())return POTIONS.find(p=>p.id===a.type)||null;return null}
+function activePotion(category='luck'){const slot=category==='speed'?'activeSpeed':category==='money'?'activeMoney':'active';const a=S.potions?.[slot];if(a&&a.type&&Number(a.expiresAt)>Date.now())return POTIONS.find(p=>p.id===a.type)||null;return null}
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
 function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
@@ -255,7 +255,7 @@ adminMonitoringSystem = createAdminMonitoringSystem({
 const { doRoll, stopAuto, restartAutoInterval: restartAutoIntervalImpl, isRolling, isAutoRolling, setupAutoRollUI } = createDiceSystem({
  D, POTIONS, KEY, supabaseClient, timerManager, getState:()=>S, getCurrentUser:()=>currentUser,
  getWeather, luck, speed, byId, format, chanceText, totalDice, go, toast,
- isLockHeld, isHeartbeatActive, scheduleUnlock, applyPetRollSkills, potionMaterialTotal,
+ isLockHeld, isHeartbeatActive, scheduleUnlock, applyPetRollSkills, potionMaterialTotal, coinEarningMultiplier,
  checkAchievements, checkDailyReward, save, autoDepositRolledWeatherDice, broadcastRareRoll,
  render, documentRef:document, recordWeeklyRoll: () => weeklyRealmEvent.recordRoll()
 });
@@ -338,7 +338,7 @@ setupAccountActions({
   save, render, flushCloudSave, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
-save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
+save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed','activeMoney']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed')||activePotion('money'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
 
 /* ---- merged from script2.js: achievement popup controls ---- */

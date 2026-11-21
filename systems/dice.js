@@ -43,6 +43,7 @@ export function createDiceSystem(deps) {
     scheduleUnlock,
     applyPetRollSkills,
     potionMaterialTotal,
+    coinEarningMultiplier = () => 1,
     checkAchievements,
     checkDailyReward,
     save,
@@ -362,7 +363,7 @@ export function createDiceSystem(deps) {
 
         // 先以本抽開始前的寵物幸運 charge 計算權重，再於本抽套用技能並扣除 charge。
         const dice = weightedRoll();
-        const petSkillReward = Number(applyPetRollSkills(dice)) || 0;
+        const petSkillReward = Math.floor((Number(applyPetRollSkills(dice)) || 0) * coinEarningMultiplier());
 
         const weather = getWeather();
         if (weather.type === 'dumpling' && Number(dice.den) === 32000 && !currentState.dumplingWeatherRewardClaimed) {
@@ -407,8 +408,11 @@ export function createDiceSystem(deps) {
           sold = false;
         } else if (!autoWeatherDeposit && AUTO_SELL_DICE_IDS.has(dice.id) && !isHalloweenDice(dice)
           && (currentState.autoDeleteDice || []).includes(dice.id)) {
-          currentState.coins = (Number(currentState.coins) || 0) + 1;
-          currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + 1;
+          const saleTotal = Math.max(1, Number(coinEarningMultiplier()) || 1) + (Number(currentState.moneyPotionRemainder) || 0);
+          const saleIncome = Math.floor(saleTotal);
+          currentState.moneyPotionRemainder = saleTotal - saleIncome;
+          currentState.coins = (Number(currentState.coins) || 0) + saleIncome;
+          currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + saleIncome;
           currentState.autoSold = (Number(currentState.autoSold) || 0) + 1;
           sold = true;
         } else {
