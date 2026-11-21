@@ -199,7 +199,7 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
-const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, documentRef: document, toast });
+const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, onTradeCompleted: () => loadCloudSave(), escapeHTML, documentRef: document, toast });
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage
