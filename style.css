@@ -2315,13 +2315,13 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   background: radial-gradient(ellipse at center, #263d68 0%, #121b32 72%) !important;
   color: #78eaff !important;
   -webkit-text-fill-color: #78eaff !important;
-  font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", sans-serif !important;
-  font-size: clamp(48px, 12vw, 68px) !important;
+  font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", sans-serif !important;
+  font-size: clamp(54px, 14vw, 76px) !important;
   font-weight: 900 !important;
   line-height: 1 !important;
   opacity: 1 !important;
-  filter: none !important;
-  text-shadow: 0 0 5px #56dfff, 0 0 15px #258dff, 0 2px 3px #050a18 !important;
+  filter: brightness(1.28) saturate(1.7) contrast(1.22) drop-shadow(0 0 7px #42cfff) !important;
+  text-shadow: 0 0 6px #56dfff, 0 0 18px #258dff, 0 2px 3px #050a18 !important;
   mix-blend-mode: normal !important;
 }
 #page-pets .pet-slots .pet-slot .pet-art img {
@@ -2329,3 +2329,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   height: 100% !important;
   object-fit: contain !important;
 }
+
+/* T-0120: strengthen the dice glyph itself; keep the change scoped to fusion slots A and B. */
+#page-pets .pet-slots .pet-slot:nth-child(1) .pet-art { background: radial-gradient(ellipse at center, #4b3b1d 0%, #171b2d 74%) !important; border-color: #d6a84e !important; filter: brightness(1.32) saturate(1.75) contrast(1.2) drop-shadow(0 0 8px #f2bd55) !important; }
+#page-pets .pet-slots .pet-slot:nth-child(2) .pet-art { background: radial-gradient(ellipse at center, #173e63 0%, #121b32 74%) !important; border-color: #58cfff !important; filter: brightness(1.32) saturate(1.75) contrast(1.2) drop-shadow(0 0 8px #45bfff) !important; }
