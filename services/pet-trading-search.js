@@ -558,58 +558,37 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         return;
       }
 
-      const otherIds = [...new Set(rows.map(row => row.sender_id === user.id ? row.recipient_id : row.sender_id))];
+      // The inbox is intentionally limited to incoming, unanswered requests.
+      // Accepted sessions are rendered only in the active room view above; sent,
+      // expired, rejected, cancelled and completed records are not inbox items.
+      const pendingRequests = rows.filter(row => {
+        if (row.recipient_id !== user.id || row.status !== 'pending') return false;
+        const expiresAt = Date.parse(row.expires_at);
+        return Number.isFinite(expiresAt) && expiresAt > Date.now();
+      });
+      const senderIds = [...new Set(pendingRequests.map(row => row.sender_id).filter(Boolean))];
       let names = new Map();
-      if (otherIds.length) {
-        const profiles = await supabaseClient.from('player_profiles').select('user_id,username').in('user_id', otherIds);
+      if (senderIds.length) {
+        const profiles = await supabaseClient.from('player_profiles').select('user_id,username').in('user_id', senderIds);
         if (!profiles.error) names = new Map((profiles.data || []).map(row => [row.user_id, row.username || '未命名玩家']));
       }
-      if (!rows.length) {
-        host.textContent = '目前沒有交易邀請。';
+      if (!pendingRequests.length) {
+        host.textContent = '目前沒有待處理的交易請求。';
         return;
       }
-      for (const row of rows) {
-        const incoming = row.recipient_id === user.id;
+      for (const row of pendingRequests) {
         const item = doc.createElement('div');
-        item.className = 'pet-trade-invitation' + (row.status === 'accepted' ? ' pet-trade-room-active' : '') + (sessionsByInvitation.get(row.id)?.status === 'completed' ? ' pet-trade-completed' : '');
+        item.className = 'pet-trade-invitation pet-trade-request';
         const summary = doc.createElement('div');
         const title = doc.createElement('strong');
-        title.textContent = (incoming ? '收到邀請：' : '已邀請：') + (names.get(incoming ? row.sender_id : row.recipient_id) || '玩家');
+        title.textContent = '交易請求：' + (names.get(row.sender_id) || '玩家');
         const meta = doc.createElement('small');
-        const expiry = new Date(row.expires_at);
-        const invitationExpired = row.status === 'pending'
-          && !Number.isNaN(expiry.getTime())
-          && expiry.getTime() <= Date.now();
-        meta.textContent = row.status === 'pending'
-          ? (invitationExpired ? '邀請已逾期' : '等待回覆 · ' + (Number.isNaN(expiry.getTime()) ? '有效期限 2 分鐘' : '期限 ' + expiry.toLocaleTimeString()))
-          : '狀態：' + ({accepted:'已接受',rejected:'已拒絕',cancelled:'已取消',expired:'已逾期'}[row.status] || row.status);
+        const expiry = Date.parse(row.expires_at);
+        meta.textContent = '等待你回覆 · 有效期限 ' + new Date(expiry).toLocaleTimeString();
         summary.append(title, meta);
         item.append(summary);
-        const session = sessionsByInvitation.get(row.id);
-        if (session) {
-          const roomStatus = doc.createElement('small');
-          const expiryTime = Date.parse(session.expires_at);
-          const sessionExpired = !Number.isFinite(expiryTime) || expiryTime <= Date.now();
-          const createdTime = Date.parse(session.created_at);
-          const sessionLabels = { active: sessionExpired ? '交易房間已逾期' : '交易房間已建立', cancelled: '交易房間已取消', expired: '交易房間已逾期', completed: '交易已完成' };
-          const roomId = String(session.id || '').slice(0, 8).toUpperCase();
-          const createdLabel = Number.isFinite(createdTime) ? ' · 建立於 ' + new Date(createdTime).toLocaleTimeString() : '';
-          roomStatus.textContent = (sessionLabels[session.status] || '交易房間狀態：' + session.status)
-            + (roomId ? ' · 房間 ' + roomId : '')
-            + createdLabel
-            + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘有效 · 雙方最多各提供 4 隻寵物' : '');
-          item.append(roomStatus);
-          if (session.status === 'active' && !sessionExpired) item.append(makeTradeRoom(session, user));
-          if (session.status === 'active') {
-            item.append(makeSessionActionButton(session.id, sessionExpired ? '更新逾期狀態' : '取消交易房間'));
-          }
-        }
-        if (row.status === 'pending' && !invitationExpired && incoming) {
-          item.append(makeActionButton('接受', row.id, 'accept', '已接受邀請'));
-          item.append(makeActionButton('拒絕', row.id, 'reject', '已拒絕邀請'));
-        } else if (row.status === 'pending' && !invitationExpired && !incoming) {
-          item.append(makeActionButton('取消邀請', row.id, 'cancel', '已取消邀請'));
-        }
+        item.append(makeActionButton('接受', row.id, 'accept', '已接受交易請求'));
+        item.append(makeActionButton('拒絕', row.id, 'reject', '已拒絕交易請求'));
         host.append(item);
       }
       for (const session of completedSessionsToSync) {
