@@ -11,9 +11,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   const doc = documentRef;
   let selectedPlayer = null;
   let searchResults = [];
-  let playerOffset = 0;
-  const PLAYER_PAGE_SIZE = 3;
-  let hasMorePlayers = false;
+  const PLAYER_LIMIT = 50;
   let searching = false;
   let refreshing = false;
   let refreshQueued = false;
@@ -24,7 +22,10 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
 
   function setStatus(message) {
     const node = doc.getElementById('petTradeSearchHint');
-    if (node) node.textContent = message;
+    if (node) {
+      node.textContent = message;
+      node.hidden = !message;
+    }
   }
 
   // Supabase can restore its persisted session slightly after the trade view opens.
@@ -81,51 +82,42 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     setStatus('玩家已選擇，可以發送交易邀請。邀請有效時間為 2 分鐘。');
   }
 
-  async function refreshPlayers({ append = false } = {}) {
+  async function refreshPlayers() {
     const host = doc.getElementById('petTradeSearchResults');
-    const moreButton = doc.getElementById('petTradeLoadMorePlayers');
-    if (!host || !supabaseClient) return;
-    if (searching) return;
+    if (!host || !supabaseClient || searching) return;
     searching = true;
-    if (!append) host.textContent = '正在確認雲端登入狀態…';
+    host.textContent = '正在確認雲端登入狀態…';
     try {
       const user = await resolveCurrentUser();
       if (!user?.id) {
         host.textContent = '目前尚未登入雲端帳號。';
-        if (moreButton) moreButton.hidden = true;
         setStatus('');
         return;
       }
-      if (!append) {
-        playerOffset = 0;
-        searchResults = [];
-        host.textContent = '正在載入玩家列表…';
-        selectedPlayer = null;
-        const selected = doc.getElementById('petTradeSelectedTarget');
-        const invite = doc.getElementById('petTradeInviteBtn');
-        if (selected) selected.hidden = true;
-        if (invite) invite.disabled = true;
+      searchResults = [];
+      selectedPlayer = null;
+      const selected = doc.getElementById('petTradeSelectedTarget');
+      const invite = doc.getElementById('petTradeInviteBtn');
+      if (selected) selected.hidden = true;
+      if (invite) {
+        invite.disabled = true;
+        invite.textContent = '發送交易邀請';
       }
+      host.textContent = '正在載入玩家列表…';
       setStatus('');
-      const start = append ? playerOffset : 0;
       const { data, error } = await supabaseClient.from('player_profiles')
         .select('user_id,username')
         .neq('user_id', user.id)
         .order('username', { ascending: true })
-        .range(start, start + PLAYER_PAGE_SIZE - 1);
+        .range(0, PLAYER_LIMIT - 1);
       if (error) throw error;
-      const rows = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
-      searchResults = append ? [...searchResults, ...rows] : rows;
-      playerOffset = start + rows.length;
-      hasMorePlayers = rows.length === PLAYER_PAGE_SIZE;
+      searchResults = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
       renderResults(searchResults);
-      if (moreButton) moreButton.hidden = !hasMorePlayers;
       setStatus('');
     } catch (error) {
       console.warn('Pet trade player list failed', error);
-      if (!append) host.textContent = '玩家列表載入失敗，請稍後重新整理。';
+      host.textContent = '玩家列表載入失敗，請稍後重新整理。';
       setStatus('無法讀取玩家列表，請稍後重試。');
-      if (moreButton) moreButton.hidden = true;
     } finally {
       searching = false;
     }
@@ -162,20 +154,43 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     button.type = 'button';
     button.className = 'quiet pet-trade-invitation-action';
     button.textContent = label;
-    button.addEventListener('click', async () => {
+    button.addEventListener('click', async event => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (button.disabled) return;
       button.disabled = true;
+      button.textContent = action === 'accept' ? '正在接受…' : '正在拒絕…';
+      setStatus(action === 'accept' ? '正在接受交易邀請…' : '正在更新邀請狀態…');
       try {
-        const { error } = await supabaseClient.rpc('respond_pet_trade_invitation', {
+        const user = await resolveCurrentUser();
+        if (!user?.id) throw new Error('authentication_required');
+        const { data, error } = await supabaseClient.rpc('respond_pet_trade_invitation', {
           p_invitation_id: id,
           p_action: action
         });
         if (error) throw error;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (result?.status && result.status !== (action === 'accept' ? 'accepted' : 'rejected')) {
+          throw new Error(result.status === 'expired' ? 'invitation_expired' : 'invitation_status_' + result.status);
+        }
         toast(status);
+        setStatus(action === 'accept' ? '已接受邀請，正在開啟交易房間…' : status);
         await refreshInvitations();
       } catch (error) {
         console.warn('Pet trade invitation response failed', error);
         button.disabled = false;
-        setStatus('邀請狀態更新失敗，請重新整理邀請清單。');
+        button.textContent = label;
+        const message = String(error?.message || '');
+        setStatus(message.includes('authentication_required')
+          ? '登入狀態已失效，請重新登入後再接受交易。'
+          : message.includes('invitation_expired')
+            ? '這筆交易邀請已逾期，請對方重新發送。'
+            : message.includes('only_recipient_can_respond')
+              ? '目前登入的帳號不是這筆邀請的接收者。'
+              : message.includes('invitation_status_')
+                ? '這筆邀請已經處理過，請重新整理邀請清單。'
+                : '接受／拒絕交易失敗：' + (message || '連線異常，請稍後重試。'));
+        toast('交易邀請處理失敗，請查看提示訊息');
       }
     });
     return button;
@@ -634,11 +649,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const invite = doc.getElementById('petTradeInviteBtn');
     const refresh = doc.getElementById('petTradeRefreshInvites');
     const refreshPlayersButton = doc.getElementById('petTradeRefreshPlayers');
-    const loadMorePlayersButton = doc.getElementById('petTradeLoadMorePlayers');
     if (invite) invite.addEventListener('click', sendInvitation);
     if (refresh) refresh.addEventListener('click', refreshInvitations);
     if (refreshPlayersButton) refreshPlayersButton.addEventListener('click', () => refreshPlayers());
-    if (loadMorePlayersButton) loadMorePlayersButton.addEventListener('click', () => refreshPlayers({ append: true }));
     doc.querySelectorAll('[data-pets-view]').forEach(button => {
       button.addEventListener('click', () => {
         const view = button.dataset.petsView === 'trade' ? 'trade' : 'fusion';
@@ -664,8 +677,6 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
           searchResults = [];
           offerDrafts.clear();
           renderResults([]);
-          playerOffset = 0;
-          hasMorePlayers = false;
           const selected = doc.getElementById('petTradeSelectedTarget');
           const inviteButton = doc.getElementById('petTradeInviteBtn');
           if (selected) {
