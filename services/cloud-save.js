@@ -505,8 +505,15 @@ export function createCloudSaveService(dependencies) {
       if (Number.isFinite(Number(syncResult.total_rolls))) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
       }
-      lastSyncedPayload = clonePayload(savePayload());
+      // The RPC only persisted the immutable snapshot captured before the request.
+      // Never mark live state as synced here: mutations can happen while the RPC is
+      // in flight (e.g. a pet fusion), and doing so would silently drop that delta.
+      lastSyncedPayload = clonePayload(payload);
       writeCloudBase(syncingUserId, lastSyncedPayload, cloudSaveVersion);
+      const latestPayload = savePayload();
+      if (Object.keys(diffPayload(lastSyncedPayload, latestPayload)).length > 0) {
+        cloudSyncPending = true;
+      }
       S.petIncomePending = 0;
       S._cloudBaseVersion = cloudSaveVersion;
       try {
