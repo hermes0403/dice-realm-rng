@@ -23,6 +23,7 @@ import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261120-t0107-edge-error-messages';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
+import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261121-t0026-pet-trade-room';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261121-t0121-heaven-mode-persistence';
@@ -226,6 +227,8 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
+const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, onTradeCompleted: () => loadCloudSave(), escapeHTML, documentRef: document, toast });
+petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
