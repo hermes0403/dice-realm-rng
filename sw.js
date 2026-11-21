@@ -5,7 +5,7 @@ const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261121-t0026-trade-nav-v3',
+  './script.js?v=20261121-t0130-persisted-session-restore-v1',
   './ui/navigation.js?v=20261121-t0026-trade-exclusive-v5',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
