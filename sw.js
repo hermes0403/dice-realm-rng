@@ -5,7 +5,8 @@ const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261121-t0026-trade-nav-v3',
+  './script.js?v=20261121-t0026-trade-nav-v3,
+  './ui/navigation.js?v=20261121-t0026-trade-exclusive-v5'',
   './services/auth.js?v=20261120-t0107-edge-error-messages',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
@@ -33,7 +34,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261121-t0026-trade-nav-v3',
+  './style.css?v=20261121-t0026-mobile-nav-v4',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
