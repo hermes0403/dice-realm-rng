@@ -261,7 +261,9 @@ export function createDiceSystem(deps) {
     const continueButton = documentRef.getElementById('rarityRevealContinue');
     if (continueButton) { continueButton.disabled = true; continueButton.textContent = '揭示中…'; }
     overlay.className = 'rarity-overlay show tier-' + tier + (staged ? ' blackout' : '') + (isGlitchDice ? ' glitch-reveal' : '');
-    overlay.style.setProperty('--reveal-color', dice.color);
+    const revealColor = den >= 10000 && den < 100000 ? '#a98aff' : den >= 1000000 ? '#e9d5ff' : dice.color;
+    overlay.style.setProperty('--reveal-color', revealColor);
+    overlay.classList.toggle('star-reveal', den >= 1000000);
     const titles = {
       comet: '✦ COMET AWAKENING ✦',
       rare: '✧ RARE DISCOVERY ✧',
@@ -277,7 +279,7 @@ export function createDiceSystem(deps) {
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
     playRevealSound(tier, isGlitchDice);
     if (staged) {
-      await wait(tier === 'cosmic' ? 1050 : tier === 'comet' ? 720 : 750);
+      await wait(den >= 10000000 ? 1350 : den >= 1000000 ? 1150 : tier === 'comet' ? 720 : 750);
       overlay.classList.remove('blackout');
       overlay.classList.add('show');
       await wait(tier === 'cosmic' ? 4200 : tier === 'mythic' ? 3400 : tier === 'anomaly' ? 2600 : 2080);
