@@ -459,7 +459,8 @@ export function createCloudSaveService(dependencies) {
       await applyPendingGrants();
       if (getCurrentUser()?.id !== syncingUserId) return false;
       const S = getState();
-      const payload = savePayload();
+      // Freeze the exact request snapshot; nested arrays/objects must not keep live state references.
+      const payload = clonePayload(savePayload());
       const patch = diffPayload(lastSyncedPayload, payload);
 
       // An unchanged snapshot should not produce any game_saves request.
