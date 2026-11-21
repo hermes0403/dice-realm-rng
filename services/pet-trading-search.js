@@ -184,9 +184,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const other = doc.createElement('div');
     other.className = 'pet-trade-offer-summary';
     if (otherOffer) {
-      const item = pets.find(pet => String(pet.uid) === String(otherOffer));
-      const definition = item ? petById(item.id) : null;
-      other.textContent = '對方已提出寵物：' + (definition?.name || '已選擇寵物') + (item ? ' · ' + (Number(item.kg) || 0) + ' kg' : '');
+      const snapshot = ownIsA ? session.offered_pet_snapshot_b : session.offered_pet_snapshot_a;
+      const definition = snapshot ? petById(snapshot.id) : null;
+      other.textContent = '對方提出：' + (definition?.name || '已選擇寵物')
+        + (definition?.rarity ? ' · ' + definition.rarity : '')
+        + (snapshot ? ' · ' + (Number(snapshot.kg) || 0) + ' kg' : '');
     } else {
       other.textContent = '等待對方選擇寵物';
     }
@@ -347,7 +349,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       let sessionsByInvitation = new Map();
       if (acceptedIds.length) {
         const sessions = await supabaseClient.from('pet_trade_sessions')
-          .select('id,invitation_id,participant_a,participant_b,status,created_at,expires_at,offered_pet_uid_a,offered_pet_uid_b,confirmed_a,confirmed_b,revision')
+          .select('id,invitation_id,participant_a,participant_b,status,created_at,expires_at,offered_pet_uid_a,offered_pet_uid_b,offered_pet_snapshot_a,offered_pet_snapshot_b,confirmed_a,confirmed_b,revision')
           .in('invitation_id', acceptedIds);
         if (sessions.error) throw sessions.error;
         sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
@@ -367,7 +369,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       for (const row of rows) {
         const incoming = row.recipient_id === user.id;
         const item = doc.createElement('div');
-        item.className = 'pet-trade-invitation';
+        item.className = 'pet-trade-invitation' + (row.status === 'accepted' ? ' pet-trade-room-active' : '') + (sessionsByInvitation.get(row.id)?.status === 'completed' ? ' pet-trade-completed' : '');
         const summary = doc.createElement('div');
         const title = doc.createElement('strong');
         title.textContent = (incoming ? '收到邀請：' : '已邀請：') + (names.get(incoming ? row.sender_id : row.recipient_id) || '玩家');
