@@ -21,7 +21,7 @@ import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js
 import { createCloudSaveService } from './services/cloud-save.js?v=20261121-t0115-pet-save-race';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261120-t0107-edge-error-messages';
+import { createAuthService } from './services/auth.js?v=20261121-t0130-persisted-session-restore-v1';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
 import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261121-t0026-trade-nav-v3';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
