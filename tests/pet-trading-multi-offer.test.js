@@ -147,7 +147,7 @@ test('收件匣不再渲染已接受、逾期、取消、拒絕或已送出的�
   assert.ok(start >= 0 && end > start);
   assert.match(inboxRender, /交易請求：/);
   assert.match(inboxRender, /目前沒有待處理的交易請求/);
-  assert.doesNotMatch(inboxRender, /已邀請：|已接受|已逾期|已取消|已拒絕|建立於|房間 /);
+  assert.doesNotMatch(inboxRender, /row\.status|sessionLabels|roomStatus|建立於|房間已/);
   assert.match(inboxRender, /makeActionButton\('接受'/);
   assert.match(inboxRender, /makeActionButton\('拒絕'/);
 });
