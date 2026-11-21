@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.80';
+const CACHE_NAME = 'dice-realm-shell-v1.81';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261121-t0115-pet-save-race',
+  './script.js?v=20261121-t0121-heaven-mode-persistence',
   './services/auth.js?v=20261120-t0107-edge-error-messages',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
@@ -22,7 +22,7 @@ const APP_SHELL = [
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './data/eternal-update.js?v=20261121-t0118-eternal-income',
   './systems/pets.js?v=20261115-t0098-eternal-pets',
-  './systems/dice.js?v=20261121-t0114-star-reveal',
+  './systems/dice.js?v=20261121-t0121-heaven-mode-persistence',
   './systems/pet-income.js?v=20261118-pet-income-mutation-v2',
   './systems/realm-social.js?v=20261119-pet-audit-metadata',
   './systems/global-announcements.js?v=20261119-pet-audit-metadata',
@@ -30,7 +30,7 @@ const APP_SHELL = [
   './systems/dice-locks.js',
   './core/game-state.js',
   './systems/weekly-realm-event.js?v=20261119-weekly-account-eligibility',
-  './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
+  './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
   './style.css?v=20261121-t0120-fusion-dice-glyph-visibility',
