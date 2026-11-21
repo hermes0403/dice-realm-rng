@@ -51,10 +51,6 @@ export const PET_TIER_RATES={
 7:{common:0,rare:0,legendary:90.95,mythic:9,secret:.05,eternal:0},
 8:{common:0,rare:0,legendary:83.39,mythic:16,secret:.6,eternal:.01},
 9:{common:0,rare:0,legendary:79.88,mythic:19,secret:1.1,eternal:.02},
-10:{common:0,rare:0,legendary:73,mythic:25,secret:2},
-11:{common:0,rare:0,legendary:60,mythic:23,secret:17},
-12:{common:0,rare:0,legendary:0,mythic:60,secret:40},
-13:{common:0,rare:0,legendary:0,mythic:0,secret:100}
 };
 export const SECRET_PET_SKILLS={s1:{name:'星界之狼',skill:'幸運預兆：每累積 1,000 次擲骰，下一抽獲得 +500% 幸運；與天堂藥水加成採加算，不互相倍乘。'},s2:{name:'無序之龍',skill:'混沌祝福：每日登入領取 10M$，連續登入每日增加 3M$，第 30 天起封頂 100M$。'},s3:{name:'終焉渡鴉',skill:'終焉財藏：擲出分母達 10,000 以上的骰子時固定獲得 1M$，另有 10% 機率額外獲得 1M$；每日上限 100M$。'},s4:{name:'永寂環蛇',skill:'永寂恩賜：每 12 小時可主動使用一次技能，速度 +100% 持續 10 分鐘。'},s5:{name:'虛無君王',skill:'虛無回饋：每次擲骰有 1% 機率額外獲得 500K$；每日上限 100M$。'},s6:{name:'原初奇點',skill:'原初恩賜：每 24 小時可獲得 1 瓶幸運藥水 III。'}};
 export const MYTHIC_PET_SKILLS={m1:{name:'赤白天龍',skill:'天命祝福：裝備後每累積擲骰 1,000 次，下一抽幸運加成 +100%。'}};
