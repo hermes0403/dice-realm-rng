@@ -193,7 +193,7 @@ test('V1.56 PWA 快取殼同步更新', async () => {
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1.56/);
   assert.match(html, /script\.js\?v=20261121-t0115-pet-save-race/);
-  assert.match(worker, /dice-realm-shell-v1\.75/);
+  assert.match(worker, /dice-realm-shell-v1\.76/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
   assert.match(worker, /data\/eternal-update\.js\?v=20261115-t0098-eternal/);
@@ -303,7 +303,7 @@ test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', a
   assert.match(dice, /await waitForRevealDismiss\(overlay\)/);
   assert.match(dice, /revealAwaitingDismiss/);
   assert.match(css, /\.rarity-reveal-continue/);
-  assert.match(worker, /dice-realm-shell-v1\.75/);
+  assert.match(worker, /dice-realm-shell-v1\.76/);
   assert.match(worker, /systems\/dice\.js\?v=20261121-t0114-star-reveal/);
 });
 
@@ -320,6 +320,6 @@ test('T-0114 10,000–99,999 使用紫晶配色，1,000,000 以上先以黑幕�
   assert.match(css, /\.rarity-overlay\.star-reveal\.blackout\{background:#000\}/);
   assert.match(css, /\.rarity-starburst::before/);
   assert.match(css, /@keyframes realmStarAppear/);
-  assert.match(worker, /dice-realm-shell-v1\.75/);
+  assert.match(worker, /dice-realm-shell-v1\.76/);
   assert.match(worker, /20261121-t0114-star-reveal/);
 });
