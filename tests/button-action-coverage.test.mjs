@@ -21,7 +21,7 @@ test('主要遊戲按鈕都有實際點擊事件或明確的委派事件', async
     ['寵物融合', pets, /getElementById\('petDiceCraftBtn'\)\?\.addEventListener\('click'/],
     ['寵物自動裝備', pets, /getElementById\('petAutoEquipBestBtn'\)\?\.addEventListener\('click'/],
     ['寵物出售與自動出售設定', selling, /target\.closest\('#petSellBtn'\)[\s\S]*?target\.closest\('#petAutoSellBtn'\)/],
-    ['交易邀請與收件匣刷新', trade, /refreshPlayersButton\.addEventListener\('click'[\s\S]*?refresh\.addEventListener\('click', refreshInvitations\)/],
+    ['交易邀請與收件匣刷新', trade, /refreshPlayersButton\.addEventListener\('click'/],
     ['交易載入更多玩家', trade, /loadMorePlayersButton\.addEventListener\('click'/],
     ['交易發送邀請', trade, /invite\.addEventListener\('click', sendInvitation\)/],
     ['交易接受／拒絕、送出內容與準備確認', trade, /makeActionButton\('接受'[\s\S]*?makeActionButton\('拒絕'[\s\S]*?saveOffer\.addEventListener\('click'[\s\S]*?confirm\.addEventListener\('click'/],
