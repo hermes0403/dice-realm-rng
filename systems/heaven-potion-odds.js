@@ -73,3 +73,21 @@ export function applyHeavenWeatherWeights(entries, weatherTypes, heaven2, angel)
     };
   });
 }
+
+
+/**
+ * Consume exactly one pending Heaven Potion roll.
+ * Keep its mode while charges remain; clear it only after the final charge.
+ */
+export function consumeHeavenPotionCharge(potions) {
+  if (!potions || typeof potions !== 'object') return false;
+  const charges = Math.max(0, Math.floor(Number(potions.angelCharges) || 0));
+  if (charges < 1) {
+    potions.angelCharges = 0;
+    potions.angelMode = '';
+    return false;
+  }
+  potions.angelCharges = charges - 1;
+  if (potions.angelCharges === 0) potions.angelMode = '';
+  return true;
+}
