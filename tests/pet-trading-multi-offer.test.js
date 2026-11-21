@@ -67,3 +67,9 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.match(index, /玩家列表/);
   assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
 });
+
+
+test('portrait mobile navigation wraps all entries so trade is visible beside fusion and workshop', () => {
+  assert.match(styles, /@media \(max-width: 760px\) and \(orientation: portrait\) \{[\s\S]*?\.mobile-nav \{[\s\S]*?flex-wrap: wrap !important/);
+  assert.match(styles, /\.mobile-nav button \{[\s\S]*?min-width: 58px !important/);
+});
