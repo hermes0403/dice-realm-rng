@@ -15,7 +15,7 @@ export function addWeatherDiceOdds(entries, pool, weatherTypes) {
 
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
 import { addDiceToBag } from './dice-locks.js';
-import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
+import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights, consumeHeavenPotionCharge } from './heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
@@ -379,10 +379,7 @@ export function createDiceSystem(deps) {
         const halloweenVariant = ['d33', 'd34', 'd35', 'd36'].includes(dice.id);
         const now = new Date().toISOString();
         const isNew = !currentState.first[dice.id] && !currentState.bag[dice.id];
-        if (angelUsed) {
-          currentState.potions.angelCharges = Math.max(0, currentState.potions.angelCharges - 1);
-          currentState.potions.angelMode = '';
-        }
+        if (angelUsed) consumeHeavenPotionCharge(currentState.potions);
         if (petSkillReward > 0) {
           currentState.coins = (Number(currentState.coins) || 0) + petSkillReward;
           currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + petSkillReward;
