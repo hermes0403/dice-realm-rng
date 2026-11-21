@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.83';
+const CACHE_NAME = 'dice-realm-shell-v1.84';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261121-t0026-trade-lobby-v2',
+  './script.js?v=20261121-t0026-trade-nav-v3',
   './services/auth.js?v=20261120-t0107-edge-error-messages',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
