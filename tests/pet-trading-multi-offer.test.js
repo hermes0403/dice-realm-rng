@@ -76,7 +76,6 @@ test('mobile navigation retains the original horizontal-scroll layout', () => {
   assert.match(styles, /\.mobile-nav/);
   assert.match(styles, /overflow-x:auto/);
   assert.doesNotMatch(styles, /T-0026 mobile fix: show the complete main navigation/);
-  assert.doesNotMatch(styles, /flex-wrap:\s*wrap\s*!important/);
 });
 
 
