@@ -12,6 +12,8 @@ created: 2026-11-21
 updated: 2026-11-21
 depends_on: [T-0087]
 branch: task/T-0121-heaven-potion-mode-persistence
+done_by:
+done_at:
 ---
 
 ## 問題
