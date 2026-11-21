@@ -115,3 +115,12 @@ test('unsubmitted selected pets have a high-contrast selection border and marker
   assert.match(styles, /\.pet-trade-pet-option\.is-draft-selected\{[\s\S]*?border:2px solid #55e0cb/);
   assert.match(styles, /content:'✓ 已選取'/);
 });
+
+
+test('trade offer submission waits for cloud-save sync and restores the send action after errors', () => {
+  assert.match(service, /const synced = await flushCloudSave\(\)/);
+  assert.match(service, /pet_trade_cloud_save_not_ready/);
+  assert.match(service, /pet_trade_local_inventory_changed/);
+  assert.match(service, /saveOffer\.disabled = false/);
+  assert.match(service, /重試送出交易內容/);
+});
