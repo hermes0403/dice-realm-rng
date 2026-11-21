@@ -7,6 +7,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   let refreshQueued = false;
   let observedAuthUserId = null;
   const realtimeChannels = new Map();
+  const completedSessionsHandled = new Set();
 
   function setStatus(message) {
     const node = doc.getElementById('petTradeSearchHint');
@@ -233,8 +234,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         if (error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
         if (result?.completed) {
-          toast('寵物交換完成！雙方背包已更新。');
-          await onTradeCompleted();
+          toast('寵物交換完成！正在同步雙方背包。');
         } else {
           toast('已確認交易內容，等待對方確認');
         }
@@ -355,6 +355,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
       }
       syncRealtimeChannels(user, [...sessionsByInvitation.values()]);
+      const completedSessionsToSync = [...sessionsByInvitation.values()]
+        .filter(session => session.status === 'completed')
+        .filter(session => !completedSessionsHandled.has(user.id + ':' + session.id));
       const otherIds = [...new Set(rows.map(row => row.sender_id === user.id ? row.recipient_id : row.sender_id))];
       let names = new Map();
       if (otherIds.length) {
@@ -395,7 +398,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
           roomStatus.textContent = (sessionLabels[session.status] || '交易房間狀態：' + session.status)
             + (roomId ? ' · 房間 ' + roomId : '')
             + createdLabel
-            + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘有效 · 寵物交換尚未開放' : '');
+            + (session.status === 'active' && !sessionExpired ? ' · 15 分鐘有效 · 雙方可選擇寵物並確認交換' : '');
           item.append(roomStatus);
           if (session.status === 'active' && !sessionExpired) item.append(makeTradeRoom(session, user));
           if (session.status === 'active') {
@@ -409,6 +412,16 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
           item.append(makeActionButton('取消邀請', row.id, 'cancel', '已取消邀請'));
         }
         host.append(item);
+      }
+      for (const session of completedSessionsToSync) {
+        const syncKey = user.id + ':' + session.id;
+        completedSessionsHandled.add(syncKey);
+        try {
+          await onTradeCompleted();
+        } catch (syncError) {
+          console.warn('Completed pet trade cloud save refresh failed', syncError);
+          setStatus('交易已完成，但背包同步失敗，請重新整理遊戲。');
+        }
       }
     } catch (error) {
       console.warn('Pet trade invitation refresh failed', error);
