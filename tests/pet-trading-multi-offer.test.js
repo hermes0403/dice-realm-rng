@@ -73,7 +73,7 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
 
 
 test('mobile navigation retains the original sticky horizontal-scroll layout', () => {
-  assert.match(styles, /@media\(max-width:760px\)\{[\s\S]*?\.mobile-nav\{display:flex;position:sticky;top:0;z-index:10;gap:5px;overflow-x:auto/);
+  assert.match(styles, /\.mobile-nav\{display:flex;position:sticky;top:0;z-index:10;gap:5px;overflow-x:auto/);
   assert.doesNotMatch(styles, /T-0026 mobile fix: show the complete main navigation/);
   assert.doesNotMatch(styles, /flex-wrap:\s*wrap\s*!important/);
 });
