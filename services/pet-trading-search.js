@@ -292,11 +292,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const confirm = doc.createElement('button');
     confirm.type = 'button';
     confirm.className = 'primary pet-trade-confirm-button';
-    confirm.textContent = ownConfirmed ? '已確認，等待對方' : '確認交易內容';
+    confirm.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
     confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
     const hint = doc.createElement('small');
     hint.className = 'pet-trade-room-hint';
-    hint.textContent = '寵物只有在雙方確認且伺服器完成交換後才會轉移。';
+    hint.textContent = '確認前請再次檢查雙方提供的寵物；按下「準備完成」後，仍可在對方確認前取消房間。';
 
     function updateDraftUI() {
       ownCount.textContent = draftOffer.length + ' / 4 隻';
@@ -306,7 +306,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       if (JSON.stringify(draftOffer) !== JSON.stringify(ownOffer)) {
         hint.textContent = '你有尚未送出的選擇，送出後雙方確認狀態會重置。';
       } else {
-        hint.textContent = '寵物只有在雙方確認且伺服器完成交換後才會轉移。';
+        hint.textContent = '雙方都準備完成後，伺服器才會執行交換。';
       }
     }
 
@@ -385,7 +385,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         if (result?.completed) {
           toast('寵物交換完成！正在同步雙方背包。');
         } else {
-          toast('已確認交易內容，等待對方確認');
+          toast('你已準備完成，等待對方確認');
         }
         await refreshInvitations();
       } catch (error) {
