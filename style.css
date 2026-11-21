@@ -2390,5 +2390,5 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-trade-confirm-button{width:100%;padding:8px;font-size:11px}
 
 .pet-trade-confirm-button:disabled{opacity:.55;cursor:not-allowed}
-.pet-trade-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}.pet-trade-panel{max-width:100%}
-@media(min-width:980px){.pet-trade-layout{grid-template-columns:minmax(0,1fr)}}
+.pet-trade-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px;align-items:start}.pet-trade-main-column{min-width:0}.pet-trade-panel{max-width:100%}
+@media(min-width:1100px){.pet-trade-layout{grid-template-columns:minmax(0,1.4fr) minmax(300px,.8fr)}.pet-trade-panel{position:sticky;top:12px}}
