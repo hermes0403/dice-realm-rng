@@ -40,6 +40,16 @@ export function createNavigationUI({
     document.getElementById('workshop-items-panel')?.toggleAttribute('hidden', category !== 'items');
   }
 
+  function setPetView(view) {
+    const trade = view === 'trade';
+    const fusionView = document.getElementById('petsFusionView');
+    const tradeView = document.getElementById('petsTradeView');
+    const title = document.getElementById('petsPageTitle');
+    if (fusionView) fusionView.hidden = trade;
+    if (tradeView) tradeView.hidden = !trade;
+    if (title) title.textContent = trade ? '交易' : '融合機';
+  }
+
   function go(id) {
     if (id === 'admin' && !isAdmin()) {
       toast('沒有管理員權限');
@@ -52,17 +62,14 @@ export function createNavigationUI({
     document.querySelectorAll('[data-page]').forEach(button => {
       button.classList.toggle('active', button.dataset.page === id);
     });
-    if (id === 'trade') {
-      const tradeTab = document.querySelector('[data-pets-view="trade"]');
-      if (tradeTab) tradeTab.click();
-    } else if (id === 'pets') {
-      const fusionTab = document.querySelector('[data-pets-view="fusion"]');
-      if (fusionTab) fusionTab.click();
+    if (id === 'trade') setPetView('trade');
+    else if (id === 'pets') {
+      setPetView('fusion');
+      renderPetsPage();
     }
     if (id === 'admin') loadAdminDashboard();
     if (id === 'leaderboard') refreshLeaderboards();
     if (id === 'weather-summon') loadWeatherSummonData();
-    if (id === 'pets') renderPetsPage();
     if (id === 'workshop') setWorkshopCategory('gloves');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
