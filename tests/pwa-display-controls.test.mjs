@@ -304,7 +304,7 @@ test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', a
   assert.match(dice, /revealAwaitingDismiss/);
   assert.match(css, /\.rarity-reveal-continue/);
   assert.match(worker, /dice-realm-shell-v1\.82/);
-  assert.match(worker, /systems\/dice\.js\?v=20261121-t0026-multi-pet-trade-v1/);
+  assert.match(worker, /systems\/dice\.js\?v=20261121-t0121-heaven-mode-persistence/);
 });
 
 
