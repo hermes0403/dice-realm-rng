@@ -2557,3 +2557,52 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   .pet-trade-pet-picker{min-height:136px;max-height:152px}
   .pet-trade-pet-card{flex-basis:108px;width:108px;min-width:108px}
 }
+
+
+/* T-0027 trade lobby / active-room visual separation and selection clarity. */
+#petsTradeView .pet-trade-panel{
+  border:1px solid #4b5684;border-radius:20px;
+  background:radial-gradient(ellipse at 8% 0%,#8065d52a,transparent 38%),radial-gradient(ellipse at 100% 22%,#28b8c51a,transparent 34%),linear-gradient(145deg,#151d35 0%,#10172a 55%,#0b1221 100%);
+  box-shadow:0 18px 50px #03071370,inset 0 1px #d7dcff18;
+}
+#petsTradeView .pet-trade-topline{color:#aeb9e9}
+#petsTradeView .pet-trade-status{border:1px solid #315b67;background:#102b35;color:#8de7df}
+#petsTradeView .pet-trade-status i{background:#59e2c5;box-shadow:0 0 10px #59e2c5}
+#petsTradeView .pet-trade-emblem{display:grid;place-items:center;width:54px;height:54px;margin:12px 0 8px;border:1px solid #6e69b6;border-radius:16px;color:#e4d8ff;font-size:27px;background:linear-gradient(145deg,#41366d,#1c3150);box-shadow:0 8px 24px #7961c52e,inset 0 1px #ffffff24}
+#petsTradeView #petTradeTitle{color:#f0edff;letter-spacing:.2px}
+#petsTradeView .pet-trade-columns{gap:16px}
+#petsTradeView .pet-trade-player-picker,#petsTradeView .pet-trade-room{border:1px solid #354667;border-radius:16px;background:linear-gradient(155deg,#111c31,#0b1425);box-shadow:inset 0 1px #ffffff08}
+#petsTradeView .pet-trade-player-list-head,#petsTradeView .pet-trade-room-head{padding:12px 13px;border-bottom:1px solid #2e3c5b;color:#e0e7ff}
+#petsTradeView .pet-trade-search-results{gap:6px;padding:9px}
+#petsTradeView .pet-trade-search-result{min-height:43px;padding:9px 11px;border:1px solid #293b5b;border-radius:10px;background:linear-gradient(110deg,#17243a,#121d31);color:#dce7ff;transition:border-color .15s,background .15s,transform .15s}
+#petsTradeView .pet-trade-search-result:hover{border-color:#5f83b4;background:#1b3048}
+#petsTradeView .pet-trade-search-result.is-selected{border:1px solid #65d9d0;background:linear-gradient(105deg,#153e45,#1b3150);box-shadow:inset 0 0 0 1px #65d9d055,0 0 14px #4acfc326}
+#petsTradeView .pet-trade-player-select-label{border:1px solid #46647c;border-radius:7px;padding:4px 8px;color:#9be9df;background:#112b37;font-size:11px;font-weight:800}
+#petsTradeView .pet-trade-selected-target{margin:10px;padding:10px 12px;border:1px solid #4b9b94;border-radius:10px;background:#123438;color:#b9fff0}
+#petsTradeView #petTradeInviteBtn{margin:0 10px 12px;width:calc(100% - 20px);min-height:44px;border:1px solid #5c9eaa;border-radius:11px;background:linear-gradient(110deg,#267d83,#365f9e);box-shadow:0 7px 20px #1d87902b;font-weight:850}
+#petsTradeView .pet-trade-invitation{padding:12px;border:1px solid #344462;border-radius:12px;background:linear-gradient(150deg,#172239,#10192b)}
+#petsTradeView .pet-trade-invitation strong{color:#e5eaff}
+#petsTradeView .pet-trade-invitation small{color:#9eaccb}
+#petsTradeView .pet-trade-live-room{border:1px solid #6572aa;background:radial-gradient(ellipse at 10% 0%,#8b69df25,transparent 40%),radial-gradient(ellipse at 100% 100%,#2bc2b51b,transparent 38%),linear-gradient(145deg,#171f39,#0c1425 76%);box-shadow:0 16px 42px #03071380,inset 0 1px #ffffff15}
+#petsTradeView .pet-trade-offer-side{border:1px solid #3b5272;background:linear-gradient(155deg,#14233a,#101a2d)}
+#petsTradeView .pet-trade-own-side{border-color:#4a9b9a}
+#petsTradeView .pet-trade-other-side{border-color:#7b6ba9}
+#petsTradeView .pet-trade-pet-option{border:1px solid #465777;background:linear-gradient(155deg,#1b2a43,#111b2e)}
+#petsTradeView .pet-trade-pet-option.is-selected,#petsTradeView .pet-trade-pet-option.is-draft-selected{border:2px solid #55e0cb !important;padding:8px 6px;background:linear-gradient(155deg,#164d4b,#203b57 72%) !important;box-shadow:inset 0 0 0 2px #55e0cb45,0 0 0 2px #55e0cb35,0 0 22px #45d9c34a !important}
+#petsTradeView .pet-trade-pet-option.is-selected::after{content:'✓ 已選取';display:block;margin-top:5px;padding:3px 5px;border-radius:6px;background:#0c3436;color:#9ff9e8;font-size:10px;font-weight:900}
+#petsTradeView .pet-trade-save-offer{border:1px solid #62cfc1;background:linear-gradient(110deg,#176d6a,#315c9c);color:#f1fffd;box-shadow:0 6px 18px #2ac9b52a}
+#petsTradeView .pet-trade-confirm-button{border:1px solid #8e8ae6;background:linear-gradient(110deg,#6355b5,#3e6c9b);color:#fff;box-shadow:0 7px 22px #7663d33b}
+#petsTradeView .pet-trade-room-hint{border-color:#3c5274;background:#101d31;color:#c1cee9}
+
+/* During an accepted trade, turn the page into a focused room-only view. */
+#petsTradeView.is-trading .pet-trade-topline,#petsTradeView.is-trading .pet-trade-emblem,#petsTradeView.is-trading #petTradeTitle,#petsTradeView.is-trading > .pet-trade-layout > .pet-trade-panel > p,#petsTradeView.is-trading .pet-trade-player-picker,#petsTradeView.is-trading .pet-trade-room-head,#petsTradeView.is-trading .pet-trade-lock-note{display:none !important}
+#petsTradeView.is-trading .pet-trade-columns{display:block}
+#petsTradeView.is-trading .pet-trade-room{border:0;background:transparent;box-shadow:none;padding:0}
+#petsTradeView.is-trading .pet-trade-invitations{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+#petsTradeView.is-trading .pet-trade-active-room-only{width:100%}
+#petsTradeView.is-trading .pet-trade-live-room{margin:0 auto;max-width:1100px}
+@media(max-width:760px){
+  #petsTradeView .pet-trade-panel{padding:14px;border-radius:15px}
+  #petsTradeView .pet-trade-search-result{min-height:46px}
+  #petsTradeView.is-trading .pet-trade-live-room{max-width:none}
+}
