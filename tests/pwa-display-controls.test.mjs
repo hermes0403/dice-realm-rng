@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261120-t0114-cinematic-reveal/);
+  assert.match(html, /script\.js\?v=20261121-t0114-persistent-reveal/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -192,8 +192,8 @@ test('V1.56 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1.56/);
-  assert.match(html, /script\.js\?v=20261120-t0114-cinematic-reveal/);
-  assert.match(worker, /dice-realm-shell-v1\.73/);
+  assert.match(html, /script\.js\?v=20261121-t0114-persistent-reveal/);
+  assert.match(worker, /dice-realm-shell-v1\.74/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
   assert.match(worker, /data\/eternal-update\.js\?v=20261115-t0098-eternal/);
@@ -287,4 +287,22 @@ test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯�
   assert.ok(codex.includes("discovered ? `抽到 ${format(rolls)} 次` : '???'"));
   assert.match(admin, /type==='aura'&&getCurrentUser\(\)\?\.id===targetUserId\)\{await applyPendingGrants\(true\);save\(\);await flushCloudSave\(\);render\(\);\}/);
   assert.match(script, /applyPendingGrants, save, flushCloudSave/);
+});
+
+
+test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const dice = await readFile(new URL('../systems/dice.js', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+
+  assert.match(html, /id="rarityRevealContinue"[^>]*disabled>揭示中…/);
+  assert.match(dice, /function waitForRevealDismiss\(overlay\)/);
+  assert.match(dice, /button\.addEventListener\('click', finish, \{ once: true \}\)/);
+  assert.match(dice, /event\.key !== 'Enter' && event\.key !== 'Escape'/);
+  assert.match(dice, /await waitForRevealDismiss\(overlay\)/);
+  assert.match(dice, /revealAwaitingDismiss/);
+  assert.match(css, /\.rarity-reveal-continue/);
+  assert.match(worker, /dice-realm-shell-v1\.74/);
+  assert.match(worker, /systems\/dice\.js\?v=20261121-t0114-persistent-reveal/);
 });

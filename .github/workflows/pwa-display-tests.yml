@@ -10,6 +10,7 @@ on:
     paths:
       - 'index.html'
       - 'style.css'
+      - 'systems/dice.js'
       - 'script.js'
       - 'manifest.webmanifest'
       - 'sw.js'
@@ -34,6 +35,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check script.js
+          node --check systems/dice.js
           node --check ui/display-controls.js
           node --check sw.js
       - name: Check patch whitespace
