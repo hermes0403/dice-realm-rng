@@ -2394,3 +2394,50 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 @media(min-width:1100px){.pet-trade-layout{grid-template-columns:minmax(0,1.4fr) minmax(300px,.8fr)}.pet-trade-panel{position:sticky;top:12px}}
 
 .pet-trade-completed{animation:petTradeCompletePulse 1.1s ease-out}.pet-trade-completed .pet-trade-invitation strong{color:#b9f6d2}@keyframes petTradeCompletePulse{0%{box-shadow:0 0 0 0 #7cf0bb66;border-color:#7cf0bb}100%{box-shadow:0 0 0 14px #7cf0bb00;border-color:#343e62}}
+
+
+/* T-0026 multi-pet trade room: wider lobby, clear offer cards, responsive two-side exchange. */
+.pet-trade-layout{grid-template-columns:minmax(0,1fr);gap:14px}
+.pet-trade-panel{order:-1;position:relative;top:auto;padding:18px}
+.pet-trade-columns{display:grid;grid-template-columns:minmax(250px,.72fr) minmax(0,1.28fr);gap:12px;align-items:start}
+.pet-trade-player-picker,.pet-trade-room{min-width:0;height:100%}
+.pet-trade-room{padding:14px}
+.pet-trade-live-room{gap:12px;padding:14px;border-radius:14px}
+.pet-trade-room-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pet-trade-room-heading strong{display:block;font-size:14px;color:#f0efff}
+.pet-trade-room-heading small{display:block;margin-top:4px;color:#aab4d2;font-size:10px;line-height:1.5}
+.pet-trade-room-code{flex:0 0 auto;padding:6px 8px;border:1px solid #4e5d86;border-radius:8px;background:#101a31;color:#9fafd9;font-size:9px;letter-spacing:.8px}
+.pet-trade-offer-sides{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.pet-trade-offer-side{min-width:0;padding:11px;border:1px solid #39466b;border-radius:12px;background:linear-gradient(145deg,#111a30,#0b1221)}
+.pet-trade-own-side{border-color:#5a5a91;background:linear-gradient(145deg,#1b1d39,#0d1427)}
+.pet-trade-other-side{border-color:#3e6680;background:linear-gradient(145deg,#102338,#0c1425)}
+.pet-trade-side-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pet-trade-side-head strong{font-size:12px;color:#e9edff}
+.pet-trade-offer-count{padding:4px 7px;border-radius:99px;background:#292b50;color:#c7c4ff;font-size:10px;font-weight:850}
+.pet-trade-side-hint{display:block;margin:6px 0 9px;color:#98a5c8;font-size:10px;line-height:1.5}
+.pet-trade-pet-search{width:100%;margin-bottom:8px;padding:8px 10px;font-size:11px}
+.pet-trade-pet-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;max-height:310px;overflow:auto;overscroll-behavior:contain;padding:2px}
+.pet-trade-pet-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-width:0;min-height:116px;padding:7px 5px;border:1px solid #344363;border-radius:9px;background:#0b1221;color:#e5eaff;text-align:center}
+.pet-trade-pet-option{width:100%;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.pet-trade-pet-option:hover{border-color:#7785bd;background:#17223b}
+.pet-trade-pet-option.is-selected{border-color:#b19aff;background:linear-gradient(145deg,#332b59,#171c39);box-shadow:inset 0 0 0 1px #b19aff55,0 0 14px #9274ff22}
+.pet-trade-pet-art{display:grid;place-items:center;width:100%;height:62px;overflow:hidden;border-radius:7px;background:radial-gradient(ellipse at center,#35416a66,transparent 72%)}
+.pet-trade-pet-art img,.pet-trade-pet-art span{max-width:100%;max-height:100%;object-fit:contain}
+.pet-trade-pet-card strong{display:block;width:100%;overflow-wrap:anywhere;color:#edf0ff;font-size:10px;line-height:1.3}
+.pet-trade-pet-card small{display:block;color:#9ca9cb;font-size:9px;line-height:1.25}
+.pet-trade-empty-offer{grid-column:1/-1;display:grid;place-items:center;min-height:104px;padding:12px;border:1px dashed #465171;border-radius:9px;color:#909cbd;font-size:11px;text-align:center}
+.pet-trade-save-offer{width:100%;margin-top:9px;padding:8px 10px;font-size:11px}
+.pet-trade-save-offer:disabled{opacity:.55;cursor:default}
+.pet-trade-confirm-state{display:flex;flex-wrap:wrap;gap:8px;padding:9px 10px;border:1px solid #364365;border-radius:9px;background:#0b1221}
+.pet-trade-confirm-state span{flex:1 1 120px;color:#aab4d2;font-size:11px}
+.pet-trade-confirm-state span.is-confirmed{color:#9df0c5}
+.pet-trade-room-actions{display:flex;gap:8px;align-items:center}
+.pet-trade-confirm-button{flex:1;min-height:38px;font-size:12px}
+.pet-trade-room-hint{display:block;padding:8px 10px;border-radius:8px;background:#0b1221;color:#aab4d2;font-size:10px;line-height:1.5}
+@media(max-width:760px){
+  .pet-trade-columns{grid-template-columns:minmax(0,1fr)}
+  .pet-trade-offer-sides{grid-template-columns:minmax(0,1fr)}
+  .pet-trade-pet-picker{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));max-height:260px}
+  .pet-trade-room-heading{align-items:flex-start;flex-direction:column}
+  .pet-trade-room-code{align-self:flex-start}
+}
