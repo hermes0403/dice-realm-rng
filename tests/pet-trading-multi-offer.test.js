@@ -59,7 +59,7 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.match(index, /id="petTradeSearchResults"/);
   assert.match(index, /id="petTradeRefreshPlayers"/);
   assert.match(index, /id="petTradeLoadMorePlayers"/);
-  assert.match(service, /select\('user_id,username,last_seen'\)/);
+  assert.match(service, /select\('user_id,username'\)/);
   assert.match(service, /PLAYER_PAGE_SIZE = 50/);
   assert.match(service, /目前在線/);
   assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
