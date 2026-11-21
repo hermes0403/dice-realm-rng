@@ -1,7 +1,7 @@
 ---
 id: T-0121
 title: 修正天堂藥水多抽數模式被清空
-status: in_review
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
