@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=20261121-t0026-trade-lobby-v2">
+<link rel="stylesheet" href="style.css?v=20261121-t0026-trade-nav-v3">
 </head>
 <body class="auth-required"><div class="shell">
 <header class="top"><div class="brand">骰界 <span>RNG</span></div><div class="weather-status" id="weatherStatus" aria-live="polite"><span class="weather-icon" id="weatherIcon">☀️</span><span class="weather-name" id="weatherName">晴天</span><span class="weather-countdown" id="weatherCountdown" hidden>05:00</span></div><div class="profile"><span class="pill" id="saveStatus" hidden>本機試玩存檔</span><span class="avatar" id="avatar" hidden>旅</span><span id="playerName" hidden>旅人</span><span id="gloveLabel" hidden>基礎手套</span><button class="primary" id="authOpenBtn">登入／註冊</button></div></header><section class="announcement-panel" aria-label="全服公告"><div class="announcement-heading"><span class="announcement-live"></span><b>全服稀有公告</b><span class="announcement-caption">REALM ANNOUNCEMENTS</span></div><div id="globalAnnouncements" class="announcement-list"><div class="announcement-empty">等待稀有骰子現身……</div></div></section>
@@ -28,7 +28,7 @@
 <section class="page" id="page-inventory"><div class="section-head"><h2>骰子背包</h2><span class="pill" id="bagCount">0 顆</span></div><div class="inventory-toolbar"><button type="button" id="lockDiceModeBtn">鎖定</button><div class="mini" id="inventorySelectedCount"></div><button class="danger" id="sellSelectedDiceBtn" type="button">出售</button></div><div class="bag-upgrade-strip"><div><b>背包容量擴充</b><div class="mini" id="bagUpgradeInfo">目前容量 35，最高 200 顆</div></div><button class="primary" id="upgradeBagBtn" style="padding:6px 10px;font-size:12px;min-height:30px;white-space:nowrap">擴充 +1</button></div><div class="grid" id="inventoryGrid" style="margin-top:12px"></div></section>
 <section class="page" id="page-codex"><div class="codex-category-switch" role="group" aria-label="圖鑑分類"><button type="button" class="codex-category-btn" data-codex-category="pets">寵物</button><button type="button" class="codex-category-btn active" data-codex-category="normal">一般</button><button type="button" class="codex-category-btn" data-codex-category="weather">天氣</button><button type="button" class="codex-category-btn" data-codex-category="halloween">萬聖節</button></div><div class="section-head"><h2>收藏圖鑑</h2><span class="pill" id="codexPct">0%</span></div><div class="hero"><div class="eyebrow">ARCHIVE DATABASE</div><h1>記錄每一次奇蹟。</h1><div class="muted">未發現的骰子將以未知檔案顯示。部分高階骰子擁有專屬視覺。</div><div class="bar"><span id="codexBar" style="width:0%"></span></div></div><div class="codex-list" id="codexGrid"></div></section>
 <section class="page" id="page-pets">
-<div class="section-head pets-page-head"><h2>融合機</h2><div class="pets-page-tabs" role="group" aria-label="寵物功能"><button type="button" class="pets-page-tab active" data-pets-view="fusion" aria-pressed="true">融合機</button><button type="button" class="pets-page-tab" data-pets-view="trade" aria-pressed="false">交易</button></div></div>
+<div class="section-head pets-page-head"><h2>融合機</h2></div>
 <div id="petsFusionView" class="pets-subpage">
 <div class="hero"><div class="eyebrow">PET SYNTHESIS CORE</div><h1>投入兩顆骰子，合成一隻寵物。</h1><p class="muted">可選擇兩種相同或不同的骰子合成；兩種骰子不可超過 1,000 倍，骰子越稀有，能合成出的寵物品質越高。</p></div>
 <div class="card" style="margin-top:12px"><div class="section-head"><h3 style="margin:0">合成材料</h3><span class="pill" id="petOwnedCount">持有 0 隻寵物</span></div><div class="pet-slots"><div class="pet-slot"><div class="eyebrow">DICE SLOT A</div><div class="pet-art" id="petDiceArtA">🎲</div><select class="pet-select" id="petDiceSlotA" aria-label="選擇第一顆骰子"><option value="">選擇第一顆骰子</option></select><div class="mini" id="petDiceInfoA" style="margin-top:7px">尚未選擇</div></div><div class="pet-slot"><div class="eyebrow">DICE SLOT B</div><div class="pet-art" id="petDiceArtB">🎲</div><select class="pet-select" id="petDiceSlotB" aria-label="選擇第二顆骰子"><option value="">選擇第二顆骰子</option></select><div class="mini" id="petDiceInfoB" style="margin-top:7px">尚未選擇</div></div></div><div style="margin-top:16px"><b>寵物品質機率</b><div id="petChanceRows"><div class="empty">選擇兩顆骰子後顯示機率。</div></div></div><button class="primary" id="petDiceCraftBtn" style="width:100%;margin-top:12px" disabled>消耗兩顆骰子，合成寵物</button><p class="mini" id="petDiceCraftInfo" role="status" style="margin-bottom:0">請選擇兩顆骰子。</p></div>
@@ -40,8 +40,8 @@
 <div class="pet-trade-emblem">⇄</div><h3 id="petTradeTitle">寵物交易</h3>
 <p class="muted">從玩家列表選擇交易對象。接受邀請後，雙方可各提供最多 4 隻寵物，檢視完整交換內容並確認；伺服器完成交換前不會轉移寵物。</p>
 <div class="pet-trade-columns"><div class="pet-trade-player-picker">
-<div class="pet-trade-player-list-head"><div><label>尋找交易對象</label><small>選擇下方玩家即可發送交易邀請</small></div><button type="button" class="quiet" id="petTradeRefreshPlayers">重新整理</button></div>
-<div id="petTradeSearchHint" class="mini" role="status">登入雲端帳號後即可載入玩家列表。</div>
+<div class="pet-trade-player-list-head"><label>玩家列表</label><button type="button" class="quiet" id="petTradeRefreshPlayers">↻ 重新整理</button></div>
+<div id="petTradeSearchHint" class="mini" role="status" aria-live="polite" hidden></div>
 <div id="petTradeSearchResults" class="pet-trade-search-results" aria-label="玩家列表"></div>
 <button type="button" class="quiet pet-trade-load-more" id="petTradeLoadMorePlayers" hidden>載入更多玩家</button>
 <div id="petTradeSelectedTarget" class="pet-trade-selected-target" hidden></div>
