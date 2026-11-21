@@ -1,3 +1,12 @@
+export function getPendingIncomingTradeRequests(rows, user, now = Date.now()) {
+  if (!user?.id || !Array.isArray(rows)) return [];
+  return rows.filter(row => {
+    if (row?.recipient_id !== user.id || row.status !== 'pending') return false;
+    const expiresAt = Date.parse(row.expires_at);
+    return Number.isFinite(expiresAt) && expiresAt > now;
+  });
+}
+
 export function createPetTradingSearch({ supabaseClient, getCurrentUser, getState = () => ({ pets: [] }), petById = () => null, petArt = null, onTradeCompleted = () => {}, flushCloudSave = async () => true, escapeHTML, documentRef = document, toast = () => {} }) {
   const doc = documentRef;
   let selectedPlayer = null;
@@ -561,11 +570,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       // The inbox is intentionally limited to incoming, unanswered requests.
       // Accepted sessions are rendered only in the active room view above; sent,
       // expired, rejected, cancelled and completed records are not inbox items.
-      const pendingRequests = rows.filter(row => {
-        if (row.recipient_id !== user.id || row.status !== 'pending') return false;
-        const expiresAt = Date.parse(row.expires_at);
-        return Number.isFinite(expiresAt) && expiresAt > Date.now();
-      });
+      const pendingRequests = getPendingIncomingTradeRequests(rows, user);
       const senderIds = [...new Set(pendingRequests.map(row => row.sender_id).filter(Boolean))];
       let names = new Map();
       if (senderIds.length) {
