@@ -43,6 +43,7 @@ export function createDiceSystem(deps) {
     scheduleUnlock,
     applyPetRollSkills,
     potionMaterialTotal,
+    coinEarningMultiplier = () => 1,
     checkAchievements,
     checkDailyReward,
     save,
@@ -407,8 +408,9 @@ export function createDiceSystem(deps) {
           sold = false;
         } else if (!autoWeatherDeposit && AUTO_SELL_DICE_IDS.has(dice.id) && !isHalloweenDice(dice)
           && (currentState.autoDeleteDice || []).includes(dice.id)) {
-          currentState.coins = (Number(currentState.coins) || 0) + 1;
-          currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + 1;
+          const saleIncome = Math.max(1, Math.floor(coinEarningMultiplier()));
+          currentState.coins = (Number(currentState.coins) || 0) + saleIncome;
+          currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + saleIncome;
           currentState.autoSold = (Number(currentState.autoSold) || 0) + 1;
           sold = true;
         } else {
