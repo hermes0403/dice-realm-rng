@@ -23,7 +23,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     if (!host) return;
     host.replaceChildren();
     if (!rows.length) {
-      host.textContent = '目前沒有其他玩家。';
+      host.textContent = getCurrentUser() ? '目前沒有其他玩家。' : '登入雲端帳號後即可查看玩家。';
       return;
     }
     const onlineCutoff = Date.now() - 3 * 60 * 1000;
@@ -57,7 +57,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const invite = doc.getElementById('petTradeInviteBtn');
     if (panel) {
       panel.hidden = false;
-      panel.textContent = '已選擇交易對象：' + (row.username || '未命名玩家') + '（' + row.user_id + '）';
+      panel.textContent = '已選擇交易對象：' + (row.username || '未命名玩家');
     }
     if (invite) {
       invite.disabled = false;
