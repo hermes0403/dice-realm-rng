@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261121-t0026-mobile-nav-v4/);
+  assert.match(html, /script\.js\?v=20261121-t0026-trade-nav-v3/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -330,11 +330,11 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
-  assert.match(html, /style\.css\?v=20261121-t0026-trade-nav-v3/);
+  assert.match(html, /style\.css\?v=20261121-t0026-mobile-nav-v4/);
   assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /dice-realm-shell-v1\.85/);
-  assert.match(worker, /style\.css\?v=20261121-t0026-trade-nav-v3/);
+  assert.match(worker, /style\.css\?v=20261121-t0026-mobile-nav-v4/);
 });
