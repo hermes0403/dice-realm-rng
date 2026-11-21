@@ -198,7 +198,7 @@ test('交易邀請、接受／拒絕、送出內容與確認按鈕在失敗時�
 
 test('expired active trade sessions are cleaned and cannot block a new invitation acceptance', () => {
   assert.match(expiredSessionMigration, /set status = 'expired'[\s\S]*?where status = 'active'[\s\S]*?expires_at <= clock_timestamp\(\)/i);
-  assert.match(expiredSessionMigration, /s\\.status = 'active'[\s\S]*?s\\.expires_at > clock_timestamp\(\)/i);
+  assert.match(expiredSessionMigration, /s\.status = 'active'[\s\S]*?s\.expires_at > clock_timestamp\(\)/i);
   assert.match(service, /player_already_has_active_trade/);
   assert.match(service, /你或對方已有尚未結束的交易房間/);
 });
