@@ -88,3 +88,15 @@ test('trade has exactly one entry point in main navigation and opens only its ow
   assert.match(navigation, /if \(id === 'trade'\) setPetView\('trade'\)/);
   assert.match(navigation, /else if \(id === 'pets'\) \{\s*setPetView\('fusion'\)/);
 });
+
+
+test('leaving the trade navigation always closes the trade sub-view', () => {
+  assert.match(navigation, /else \{\s*\/\/ Leaving the pets page must always close the trade sub-view\.\s*setPetView\('fusion'\);\s*\}/);
+});
+
+test('trade pet pickers use a horizontal swipe carousel and show an explicit ready action', () => {
+  assert.match(styles, /\.pet-trade-pet-picker\{[\s\S]*?flex-wrap:nowrap[\s\S]*?overflow-x:auto/);
+  assert.match(styles, /\.pet-trade-pet-card\{[\s\S]*?flex:0 0 116px/);
+  assert.match(service, /✓ 準備完成/);
+  assert.match(service, /你已準備完成，等待對方確認/);
+});
