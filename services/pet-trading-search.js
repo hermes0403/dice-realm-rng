@@ -187,7 +187,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             ? '這筆交易邀請已逾期，請對方重新發送。'
             : message.includes('only_recipient_can_respond')
               ? '目前登入的帳號不是這筆邀請的接收者。'
-              : message.includes('invitation_status_')
+              : message.includes('player_already_has_active_trade')
+                ? '你或對方已有尚未結束的交易房間，請先完成或取消原本的交易。'
+                : message.includes('invitation_status_')
                 ? '這筆邀請已經處理過，請重新整理邀請清單。'
                 : '接受／拒絕交易失敗：' + (message || '連線異常，請稍後重試。'));
         toast('交易邀請處理失敗，請查看提示訊息');
