@@ -9,6 +9,7 @@ const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
 const migration = readFileSync(new URL('../docs/database/pet-trading-multi-offer.sql', import.meta.url), 'utf8');
+const expiredSessionMigration = readFileSync(new URL('../supabase/migrations/20261122000100_expire_stale_pet_trade_sessions.sql', import.meta.url), 'utf8');
 
 test('trade room supports up to four pets per participant', () => {
   assert.match(service, /draftOffer\.length >= 4/);
@@ -192,4 +193,12 @@ test('交易邀請、接受／拒絕、送出內容與確認按鈕在失敗時�
   assert.match(service, /button\.disabled = false;\s*button\.textContent = label;[\s\S]*?setStatus\(/);
   assert.match(service, /saveOffer\.disabled = false/);
   assert.match(service, /confirm\.disabled = false/);
+});
+
+
+test('expired active trade sessions are cleaned and cannot block a new invitation acceptance', () => {
+  assert.match(expiredSessionMigration, /set status = 'expired'[\\s\\S]*?where status = 'active'[\\s\\S]*?expires_at <= clock_timestamp\\(\\)/i);
+  assert.match(expiredSessionMigration, /s\\.status = 'active'[\\s\\S]*?s\\.expires_at > clock_timestamp\\(\\)/i);
+  assert.match(service, /player_already_has_active_trade/);
+  assert.match(service, /你或對方已有尚未結束的交易房間/);
 });
