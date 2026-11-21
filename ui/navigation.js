@@ -45,12 +45,20 @@ export function createNavigationUI({
       toast('沒有管理員權限');
       return;
     }
+    const pageId = id === 'trade' ? 'pets' : id;
     document.querySelectorAll('.page').forEach(page => {
-      page.classList.toggle('active', page.id === 'page-' + id);
+      page.classList.toggle('active', page.id === 'page-' + pageId);
     });
     document.querySelectorAll('[data-page]').forEach(button => {
       button.classList.toggle('active', button.dataset.page === id);
     });
+    if (id === 'trade') {
+      const tradeTab = document.querySelector('[data-pets-view="trade"]');
+      if (tradeTab) tradeTab.click();
+    } else if (id === 'pets') {
+      const fusionTab = document.querySelector('[data-pets-view="fusion"]');
+      if (fusionTab) fusionTab.click();
+    }
     if (id === 'admin') loadAdminDashboard();
     if (id === 'leaderboard') refreshLeaderboards();
     if (id === 'weather-summon') loadWeatherSummonData();

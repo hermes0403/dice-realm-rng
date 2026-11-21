@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const service = readFileSync(new URL('../services/pet-trading-search.js', import.meta.url), 'utf8');
+const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url), 'utf8');
+const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
 const migration = readFileSync(new URL('../docs/database/pet-trading-multi-offer.sql', import.meta.url), 'utf8');
@@ -45,13 +47,12 @@ test('trade UI has wide desktop layout and stacked mobile offer panels', () => {
 });
 
 
-test('Realm Exchange is opened from its own tab beside the fusion machine', () => {
-  assert.match(index, /data-pets-view="fusion"/);
-  assert.match(index, /data-pets-view="trade"/);
+test('Realm Exchange is a main navigation entry between fusion and workshop', () => {
+  assert.match(config, /\['pets','融合機','♧'\],\['trade','交易','⇄'\],\['workshop','工坊','⚒'\]/);
   assert.match(index, /id="petsFusionView"/);
   assert.match(index, /id="petsTradeView"[^>]*hidden/);
-  assert.match(service, /petsFusionView/);
-  assert.match(service, /petsTradeView/);
+  assert.match(navigation, /id === 'trade' \? 'pets' : id/);
+  assert.match(navigation, /data-pets-view="trade"/);
 });
 
 test('trade lobby uses a scrollable player list instead of manual username or UUID search', () => {
@@ -59,8 +60,10 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.match(index, /id="petTradeSearchResults"/);
   assert.match(index, /id="petTradeRefreshPlayers"/);
   assert.match(index, /id="petTradeLoadMorePlayers"/);
-  assert.match(service, /select\('user_id,username,last_seen'\)/);
+  assert.match(service, /select\('user_id,username'\)/);
   assert.match(service, /PLAYER_PAGE_SIZE = 50/);
-  assert.match(service, /目前在線/);
+  assert.doesNotMatch(service, /目前在線|最近離線|is-online|is-offline/);
+  assert.doesNotMatch(index, /尋找交易對象|選擇下方玩家即可發送交易邀請/);
+  assert.match(index, /玩家列表/);
   assert.match(styles, /\.pet-trade-search-results\{display:flex;flex-direction:column;[\s\S]*?overflow-y:auto/);
 });

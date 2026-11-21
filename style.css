@@ -2453,17 +2453,22 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #petsTradeView .pet-trade-panel{width:100%;max-width:none}
 .pet-trade-player-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .pet-trade-player-list-head label{display:block;margin:0}
-.pet-trade-player-list-head small{display:block;margin-top:4px;color:#8998bd;font-size:10px}
+.pet-trade-player-list-head small{display:none}
 .pet-trade-player-list-head button{flex:0 0 auto;padding:6px 9px;font-size:10px}
 .pet-trade-search-results{display:flex;flex-direction:column;gap:6px;max-height:390px;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 2px;scrollbar-width:thin;scrollbar-color:#59658d #10172a}
 .pet-trade-search-result{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:9px 11px;border:1px solid #39466d;border-radius:9px;background:#111a30;color:#e5eaff;text-align:left;cursor:pointer}
 .pet-trade-search-result:hover,.pet-trade-search-result.is-selected{border-color:#9d8bff;background:#242344}
-.pet-trade-player-name{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pet-trade-player-name{display:flex;flex-direction:row;align-items:center;gap:8px;min-width:0}
 .pet-trade-player-name strong{font-size:12px;overflow-wrap:anywhere}
-.pet-trade-player-name small{font-size:10px}
+.pet-trade-player-name small{display:none;font-size:10px}
 .pet-trade-player-name small.is-online{color:#78e6b1}
 .pet-trade-player-name small.is-offline{color:#8995b5}
 .pet-trade-player-select-label{flex:0 0 auto;color:#bdb6ff;font-size:10px;font-weight:800}
 .pet-trade-load-more{width:100%;margin-top:8px;padding:8px;font-size:11px}
 #petTradeInviteBtn{width:100%;margin-top:9px}
 @media(max-width:760px){.pets-page-head{align-items:flex-start;flex-direction:column}.pets-page-tabs{width:100%}.pets-page-tab{flex:1}.pet-trade-search-results{max-height:330px}}
+
+/* T-0026 polish: compact horizontal player list heading; trade lives in the main navigation. */
+.pet-trade-player-list-head{min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #303b5b}
+.pet-trade-player-list-head label{font-size:13px;letter-spacing:.2px;color:#e7ebff}
+.pet-trade-player-list-head button{width:auto!important;min-width:104px;margin:0!important;white-space:nowrap}

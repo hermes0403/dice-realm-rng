@@ -23,10 +23,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     if (!host) return;
     host.replaceChildren();
     if (!rows.length) {
-      host.textContent = getCurrentUser() ? '目前沒有其他玩家。' : '登入雲端帳號後即可查看玩家。';
+      host.textContent = getCurrentUser() ? '目前沒有其他玩家。' : '請先登入雲端帳號。';
       return;
     }
-    const onlineCutoff = Date.now() - 3 * 60 * 1000;
     for (const row of rows) {
       const button = doc.createElement('button');
       button.type = 'button';
@@ -36,12 +35,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       name.className = 'pet-trade-player-name';
       const strong = doc.createElement('strong');
       strong.textContent = row.username || '未命名玩家';
-      const small = doc.createElement('small');
-      const lastSeen = Date.parse(row.last_seen || '');
-      const online = Number.isFinite(lastSeen) && lastSeen >= onlineCutoff;
-      small.className = online ? 'is-online' : 'is-offline';
-      small.textContent = online ? '● 目前在線' : '○ 最近離線';
-      name.append(strong, small);
+      name.append(strong);
       const action = doc.createElement('span');
       action.className = 'pet-trade-player-select-label';
       action.textContent = selectedPlayer?.user_id === row.user_id ? '已選擇' : '選擇';
@@ -73,9 +67,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const user = getCurrentUser();
     if (!host) return;
     if (!user || !supabaseClient) {
-      host.textContent = '登入雲端帳號後即可查看玩家。';
+      host.textContent = '請先登入雲端帳號。';
       if (moreButton) moreButton.hidden = true;
-      setStatus('登入雲端帳號後即可載入玩家列表。');
+      setStatus('');
       return;
     }
     if (searching) return;
@@ -90,13 +84,13 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       if (selected) selected.hidden = true;
       if (invite) invite.disabled = true;
     }
-    setStatus('正在讀取最近上線的玩家…');
+    setStatus('');
     const start = append ? playerOffset : 0;
     try {
       const { data, error } = await supabaseClient.from('player_profiles')
-        .select('user_id,username,last_seen')
+        .select('user_id,username')
         .neq('user_id', user.id)
-        .order('last_seen', { ascending: false, nullsFirst: false })
+        .order('username', { ascending: true })
         .range(start, start + PLAYER_PAGE_SIZE - 1);
       if (error) throw error;
       const rows = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
@@ -105,9 +99,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       hasMorePlayers = rows.length === PLAYER_PAGE_SIZE;
       renderResults(searchResults);
       if (moreButton) moreButton.hidden = !hasMorePlayers;
-      setStatus(searchResults.length
-        ? '已載入 ' + searchResults.length + ' 位玩家，列表依最近上線時間排序。'
-        : '目前還沒有其他玩家資料。');
+      setStatus('');
     } catch (error) {
       console.warn('Pet trade player list failed', error);
       if (!append) host.textContent = '玩家列表載入失敗，請稍後重新整理。';
