@@ -72,9 +72,10 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
 });
 
 
-test('portrait mobile navigation wraps all entries so trade is visible beside fusion and workshop', () => {
-  assert.match(styles, /@media \(max-width: 760px\) and \(orientation: portrait\) \{[\s\S]*?\.mobile-nav \{[\s\S]*?flex-wrap: wrap !important/);
-  assert.match(styles, /\.mobile-nav button \{[\s\S]*?min-width: 58px !important/);
+test('mobile navigation retains the original horizontal-scroll layout', () => {
+  assert.match(styles, /\.mobile-nav/);
+  assert.match(styles, /overflow-x:auto/);
+  assert.doesNotMatch(styles, /T-0026 mobile fix: show the complete main navigation/);
 });
 
 

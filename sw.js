@@ -34,7 +34,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261121-t0026-mobile-nav-v4',
+  './style.css?v=20261121-t0026-trade-nav-v3',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
