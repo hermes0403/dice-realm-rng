@@ -40,7 +40,7 @@ export const PET_INCOME_ROLLS={
  secret:[25,22,18,15,12,8]
 };
 export function petBaseIncome(pet){return Math.max(0,Number(PET_BASE_INCOME[pet?.id])||0)}
-export const PET_TIER_CONFIG={1:{min_den:2,max_den:1000},2:{min_den:1001,max_den:3000},3:{min_den:3001,max_den:5000},4:{min_den:5001,max_den:10000},5:{min_den:10001,max_den:40000},6:{min_den:40001,max_den:150000},7:{min_den:150001,max_den:350000},8:{min_den:350001,max_den:550000},9:{min_den:550001,max_den:1100000},10:{min_den:1100001,max_den:10000000},11:{min_den:10000001,max_den:45000000},12:{min_den:45000001,max_den:64999999},13:{min_den:65000000,max_den:null}};
+export const PET_TIER_CONFIG={1:{min_den:2,max_den:1000},2:{min_den:1001,max_den:3000},3:{min_den:3001,max_den:5000},4:{min_den:5001,max_den:10000},5:{min_den:10001,max_den:40000},6:{min_den:40001,max_den:150000},7:{min_den:150001,max_den:350000},8:{min_den:350001,max_den:550000},9:{min_den:550001,max_den:1100000}};
 export const PET_TIER_RATES={
 1:{common:77,rare:20,legendary:2.99,mythic:.01,secret:0},
 2:{common:65,rare:25,legendary:9.8,mythic:.2,secret:0},
@@ -48,7 +48,7 @@ export const PET_TIER_RATES={
 4:{common:0,rare:70,legendary:29,mythic:1,secret:0},
 5:{common:0,rare:50,legendary:48,mythic:2,secret:0},
 6:{common:0,rare:35,legendary:61,mythic:4,secret:0},
-7:{common:0,rare:0,legendary:90.95,mythic:9,secret:.05},
+7:{common:0,rare:0,legendary:90.95,mythic:9,secret:.05,eternal:0},
 8:{common:0,rare:0,legendary:83.39,mythic:16,secret:.6,eternal:.01},
 9:{common:0,rare:0,legendary:79.88,mythic:19,secret:1.1,eternal:.02},
 10:{common:0,rare:0,legendary:73,mythic:25,secret:2},
