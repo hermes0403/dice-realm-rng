@@ -12,7 +12,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   let selectedPlayer = null;
   let searchResults = [];
   let playerOffset = 0;
-  const PLAYER_PAGE_SIZE = 50;
+  const PLAYER_PAGE_SIZE = 3;
   let hasMorePlayers = false;
   let searching = false;
   let refreshing = false;
@@ -27,12 +27,23 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     if (node) node.textContent = message;
   }
 
+  // Supabase can restore its persisted session slightly after the trade view opens.
+  // Resolve that session before showing a logged-out message or querying profiles.
+  async function resolveCurrentUser() {
+    const current = getCurrentUser();
+    if (current?.id) return current;
+    if (!supabaseClient?.auth?.getSession) return null;
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+    return getCurrentUser() || data?.session?.user || null;
+  }
+
   function renderResults(rows) {
     const host = doc.getElementById('petTradeSearchResults');
     if (!host) return;
     host.replaceChildren();
     if (!rows.length) {
-      host.textContent = getCurrentUser() ? '目前沒有其他玩家。' : '請先登入雲端帳號。';
+      host.textContent = '目前沒有其他玩家。';
       return;
     }
     for (const row of rows) {
@@ -73,29 +84,30 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   async function refreshPlayers({ append = false } = {}) {
     const host = doc.getElementById('petTradeSearchResults');
     const moreButton = doc.getElementById('petTradeLoadMorePlayers');
-    const user = getCurrentUser();
-    if (!host) return;
-    if (!user || !supabaseClient) {
-      host.textContent = '請先登入雲端帳號。';
-      if (moreButton) moreButton.hidden = true;
-      setStatus('');
-      return;
-    }
+    if (!host || !supabaseClient) return;
     if (searching) return;
     searching = true;
-    if (!append) {
-      playerOffset = 0;
-      searchResults = [];
-      host.textContent = '正在載入玩家列表…';
-      selectedPlayer = null;
-      const selected = doc.getElementById('petTradeSelectedTarget');
-      const invite = doc.getElementById('petTradeInviteBtn');
-      if (selected) selected.hidden = true;
-      if (invite) invite.disabled = true;
-    }
-    setStatus('');
-    const start = append ? playerOffset : 0;
+    if (!append) host.textContent = '正在確認雲端登入狀態…';
     try {
+      const user = await resolveCurrentUser();
+      if (!user?.id) {
+        host.textContent = '目前尚未登入雲端帳號。';
+        if (moreButton) moreButton.hidden = true;
+        setStatus('');
+        return;
+      }
+      if (!append) {
+        playerOffset = 0;
+        searchResults = [];
+        host.textContent = '正在載入玩家列表…';
+        selectedPlayer = null;
+        const selected = doc.getElementById('petTradeSelectedTarget');
+        const invite = doc.getElementById('petTradeInviteBtn');
+        if (selected) selected.hidden = true;
+        if (invite) invite.disabled = true;
+      }
+      setStatus('');
+      const start = append ? playerOffset : 0;
       const { data, error } = await supabaseClient.from('player_profiles')
         .select('user_id,username')
         .neq('user_id', user.id)
@@ -112,7 +124,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     } catch (error) {
       console.warn('Pet trade player list failed', error);
       if (!append) host.textContent = '玩家列表載入失敗，請稍後重新整理。';
-      setStatus('無法讀取玩家列表，請確認登入狀態後重試。');
+      setStatus('無法讀取玩家列表，請稍後重試。');
       if (moreButton) moreButton.hidden = true;
     } finally {
       searching = false;
@@ -120,7 +132,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   }
 
   async function sendInvitation() {
-    const user = getCurrentUser();
+    const user = await resolveCurrentUser();
     if (!user || !selectedPlayer || selectedPlayer.user_id === user.id) return;
     const button = doc.getElementById('petTradeInviteBtn');
     if (button) button.disabled = true;
@@ -503,7 +515,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
 
   async function refreshInvitations() {
     const host = doc.getElementById('petTradeInvitations');
-    const user = getCurrentUser();
+    const user = await resolveCurrentUser();
     if (!host) return;
     if (!user) {
       removeRealtimeChannels();
