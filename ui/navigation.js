@@ -66,6 +66,9 @@ export function createNavigationUI({
     else if (id === 'pets') {
       setPetView('fusion');
       renderPetsPage();
+    } else {
+      // Leaving the pets page must always close the trade sub-view.
+      setPetView('fusion');
     }
     if (id === 'admin') loadAdminDashboard();
     if (id === 'leaderboard') refreshLeaderboards();
