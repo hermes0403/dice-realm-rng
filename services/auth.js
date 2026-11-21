@@ -882,6 +882,33 @@ export function createAuthService(deps) {
     }
   }
 
+  // Restore a valid persisted Supabase session on every app boot. The auth
+  // listener remains the primary event stream; this explicit check is a safe
+  // fallback for PWA/page restores where INITIAL_SESSION UI timing can race.
+  async function restorePersistedSession() {
+    if (!supabaseClient?.auth?.getSession) return false;
+    try {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      const user = data?.session?.user;
+      if (!user?.id) return false;
+      if (!user.email_confirmed_at) {
+        showAuthMessage('信箱尚未驗證，請先完成 Email 確認。');
+        return false;
+      }
+      if (!enforceDeviceAccountLimit(user)) return false;
+      const activeUser = getCurrentUser();
+      if (activeUser?.id && activeUser.id !== user.id) return false;
+      setCurrentUser(user);
+      updateAdminVisibility();
+      await startSessionInitialization(user, 'INITIAL_SESSION');
+      return true;
+    } catch (error) {
+      console.warn('Persisted auth session restore failed', error);
+      return false;
+    }
+  }
+
   function registerAuthStateListener() {
     if (!supabaseClient) return null;
     if (authStateSubscription) return authStateSubscription;
@@ -979,6 +1006,9 @@ export function createAuthService(deps) {
       }, 0, 'auth-session-init');
     });
     showAuthCallbackError();
+    // onAuthStateChange normally emits INITIAL_SESSION. Explicit getSession()
+    // covers delayed PWA restoration without requiring the player to log in again.
+    void restorePersistedSession();
     return authStateSubscription;
   }
 
