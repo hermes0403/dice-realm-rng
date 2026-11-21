@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.74';
+const CACHE_NAME = 'dice-realm-shell-v1.75';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261121-t0114-persistent-reveal',
+  './script.js?v=20261121-t0114-star-reveal',
   './services/auth.js?v=20261120-t0107-edge-error-messages',
   './services/cloud-save.js?v=20261119-pet-save-income-profile',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
@@ -22,7 +22,7 @@ const APP_SHELL = [
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
   './data/eternal-update.js?v=20261115-t0098-eternal',
   './systems/pets.js?v=20261115-t0098-eternal-pets',
-  './systems/dice.js?v=20261121-t0114-persistent-reveal',
+  './systems/dice.js?v=20261121-t0114-star-reveal',
   './systems/pet-income.js?v=20261118-pet-income-mutation-v2',
   './systems/realm-social.js?v=20261119-pet-audit-metadata',
   './systems/global-announcements.js?v=20261119-pet-audit-metadata',
@@ -33,7 +33,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261121-t0114-persistent-reveal',
+  './style.css?v=20261121-t0114-star-reveal',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
