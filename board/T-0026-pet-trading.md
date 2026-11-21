@@ -104,8 +104,3 @@ done_at:
 - 2026-11-06 [叉子] 追加玩家搜尋輸入與識別資訊保護：搜尋名稱會先移除 PostgREST／ILIKE 特殊字元，並以清理後的有效字元數重新檢查最短長度，避免只輸入萬用字元就擴大成非預期搜尋；結果卡片不再顯示完整 auth UUID，改顯示前 8 碼玩家代碼。GitHub commit：`7ec3371`。未修改玩家資料，未碰 T-0012，未部署；T-0026 維持 blocked。
 
 - 2026-11-06 [叉子] 玩家搜尋查詢再縮減資料欄位：`player_profiles` 搜尋原本一併讀取未使用的 `last_seen`，已移除，只查詢顯示及發送邀請所需的 `user_id, username`。複查目前 `player_profiles` SELECT policy 為公開可讀，因此交易搜尋只取必要欄位，避免不必要讀取上線時間資料。GitHub commit：`0448519`。未修改玩家資料或 profile RLS；未碰 T-0012，未部署。
-
-
-
-
-
