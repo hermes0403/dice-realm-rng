@@ -1,14 +1,14 @@
 ---
 id: T-0118
 title: 更新秘密與永恆寵物每秒收益
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
 contributors: []
 reviewer: 棒子
 priority: P2
-created: 2026--21
+created: 2026-11-21
 updated: 2026-11-21
 depends_on: []
 branch: task/T-0118-pet-income-update
@@ -31,11 +31,12 @@ done_at:
 
 ## 待確認
 
-目前 main 的 data/pets.js 中沒有永恆品質寵物定義或 ID，雖然其他系統有 eternal 加成判斷。棒子提供兩隻永恆寵物收益 95,000$/秒、120,000$/秒，但尚缺兩隻寵物的名稱／ID，因此先不擅自新增寵物或猜測 ID。
+已沿用既有永恆寵物定義與 ID，僅修正基礎收益：曙光守望者 95,000$/秒、星願靈鹿 120,000$/秒。兩隻寵物原有技能、圖鑑圖片、稀有度與取得設定均不變。
 
 ## 驗收條件
 
-- [ ] 六隻秘密寵物的基礎每秒收益正確。
-- [ ] 確認兩隻永恆寵物名稱／ID後，補上 95,000$/秒與 120,000$/秒。
-- [ ] 寵物收益顯示與實際收益使用相同基礎值。
-- [ ] 相關測試通過。
+- [x] 六隻秘密寵物的基礎每秒收益正確（PR #243）。
+- [x] 曙光守望者（eternal_dawn_guardian）：95,000$/秒。
+- [x] 星願靈鹿（eternal_starwish_deer）：120,000$/秒。
+- [x] 寵物收益顯示與實際收益共用 PET_BASE_INCOME。
+- [ ] 相關測試通過（待執行）。

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.79';
+const CACHE_NAME = 'dice-realm-shell-v1.80';
 const APP_SHELL = [
   './',
   './index.html',
@@ -20,7 +20,7 @@ const APP_SHELL = [
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
-  './data/eternal-update.js?v=20261115-t0098-eternal',
+  './data/eternal-update.js?v=20261121-t0118-eternal-income',
   './systems/pets.js?v=20261115-t0098-eternal-pets',
   './systems/dice.js?v=20261121-t0114-star-reveal',
   './systems/pet-income.js?v=20261118-pet-income-mutation-v2',

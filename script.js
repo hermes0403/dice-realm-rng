@@ -1,7 +1,7 @@
 import { D, G } from './data/dice.js?v=20261117-t0102-void-startrail-gloves';
 import { POTIONS } from './data/equipment.js';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
-import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261115-t0098-eternal';
+import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261121-t0118-eternal-income';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261118-shark-weather';
 import { supabaseClient } from './services/supabase.js';
