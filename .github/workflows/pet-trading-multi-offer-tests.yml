@@ -11,6 +11,7 @@ on:
       - 'style.css'
       - 'docs/database/pet-trading-multi-offer.sql'
       - 'tests/pet-trading-multi-offer.test.js'
+      - 'tests/button-action-coverage.test.mjs'
       - '.github/workflows/pet-trading-multi-offer-tests.yml'
 
 jobs:
@@ -28,7 +29,7 @@ jobs:
       - name: Check trade service syntax
         run: node --check services/pet-trading-search.js
       - name: Run multi-offer regression tests
-        run: node --test tests/pet-trading-multi-offer.test.js
+        run: node --test tests/pet-trading-multi-offer.test.js tests/button-action-coverage.test.mjs
       - name: Check patch whitespace
         run: |
           git fetch origin main
