@@ -100,3 +100,18 @@ test('trade pet pickers use a horizontal swipe carousel and show an explicit rea
   assert.match(service, /✓ 準備完成/);
   assert.match(service, /你已準備完成，等待對方確認/);
 });
+
+
+test('active trade shows only the room and hides invitation lobby history', () => {
+  assert.match(service, /activeSessions = \[\.\.\.sessionsByInvitation\.values\(\)\]/);
+  assert.match(service, /classList\.toggle\('is-trading', activeSessions\.length > 0\)/);
+  assert.match(service, /if \(activeSessions\.length\) \{[\s\S]*?roomOnly\.append\(makeTradeRoom\(session, user\)\)[\s\S]*?return;/);
+  assert.match(styles, /#petsTradeView\.is-trading \.pet-trade-player-picker[\s\S]*?display:none !important/);
+  assert.match(styles, /#petsTradeView\.is-trading \.pet-trade-room-head[\s\S]*?display:none !important/);
+});
+
+test('unsubmitted selected pets have a high-contrast selection border and marker', () => {
+  assert.match(service, /is-selected is-draft-selected/);
+  assert.match(styles, /\.pet-trade-pet-option\.is-draft-selected\{[\s\S]*?border:2px solid #55e0cb/);
+  assert.match(styles, /content:'✓ 已選取'/);
+});
