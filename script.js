@@ -12,7 +12,7 @@ import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-in
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
-import { setupPetSellingUI } from './ui/pet-selling.js?v=20261119-cloud-sale-wiring';
+import { setupPetSellingUI } from './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard';
 import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
@@ -23,7 +23,7 @@ import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261121-t0130-persisted-session-restore-v1';
 import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
-import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261121-t0026-trade-polish-v1';
+import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261121-pet-inventory-sync-guard';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261121-t0121-heaven-mode-persistence';
@@ -227,7 +227,7 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
-const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt, onTradeCompleted: () => loadCloudSave(), escapeHTML, documentRef: document, toast });
+const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt, onTradeCompleted: () => loadCloudSave(), flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast });
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
@@ -347,4 +347,4 @@ save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards()
 /* ---- merged from script2.js: achievement popup controls ---- */
 
 setupDisplayControls({ documentRef: document, windowRef: window, navigatorRef: navigator, toast });
-setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier, supabaseClient, getCurrentUser: () => currentUser });
+setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, flushCloudSave, toast, render, renderPetsPage, coinEarningMultiplier, supabaseClient, getCurrentUser: () => currentUser });
