@@ -244,7 +244,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     headingText.append(title, subtitle);
     const roomCode = doc.createElement('span');
     roomCode.className = 'pet-trade-room-code';
-    roomCode.textContent = 'ROOM ' + String(session.id || '').slice(0, 8).toUpperCase();
+    roomCode.textContent = '房間 ' + String(session.id || '').slice(0, 8).toUpperCase();
     heading.append(headingText, roomCode);
 
     function makePetCard(item, selectable = false, selected = false) {
@@ -266,7 +266,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       const rarityNames = { common: '普通', rare: '稀有', legendary: '傳奇', mythic: '神話', secret: '秘密' };
       rarity.textContent = rarityNames[String(definition?.rarity || '').toLowerCase()] || definition?.rarity || '寵物';
       const weight = doc.createElement('small');
-      weight.textContent = (Number(item?.kg) || 0).toFixed(2) + ' kg';
+      weight.textContent = (Number(item?.kg) || 0).toFixed(2) + ' 公斤';
       card.append(art, name, rarity, weight);
       return card;
     }
@@ -300,7 +300,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     ownSearch.setAttribute('aria-label', '搜尋自己的寵物');
     const pickerGrid = doc.createElement('div');
     pickerGrid.className = 'pet-trade-pet-picker';
-    pickerPanel.append(ownSearch, pickerGrid);
+    const closePickerButton = doc.createElement('button');
+    closePickerButton.type = 'button';
+    closePickerButton.className = 'quiet pet-trade-close-picker';
+    closePickerButton.textContent = '取消選擇';
+    pickerPanel.append(ownSearch, pickerGrid, closePickerButton);
     const slotActions = doc.createElement('div');
     slotActions.className = 'pet-trade-slot-actions';
     slotActions.hidden = true;
@@ -397,22 +401,12 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       editingSlotIndex = null;
       slotActions.hidden = true;
     }
+    closePickerButton.addEventListener('click', closePicker);
 
     function renderOfferSlots() {
       ownGrid.replaceChildren();
-      for (let index = 0; index < 4; index += 1) {
+      for (let index = 0; index < draftOffer.length; index += 1) {
         const uid = draftOffer[index];
-        if (!uid) {
-          const add = doc.createElement('button');
-          add.type = 'button';
-          add.className = 'pet-trade-add-slot';
-          add.textContent = '+';
-          add.setAttribute('aria-label', '新增交易寵物');
-          add.disabled = draftOffer.length >= 4;
-          add.addEventListener('click', () => openPicker('add'));
-          ownGrid.append(add);
-          continue;
-        }
         const item = pets.find(pet => String(pet.uid) === String(uid));
         if (!item) continue;
         const preview = makePetCard(item);
@@ -428,6 +422,15 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
           renderOfferSlots();
         });
         ownGrid.append(slot);
+      }
+      if (draftOffer.length < 4) {
+        const add = doc.createElement('button');
+        add.type = 'button';
+        add.className = 'pet-trade-add-slot';
+        add.textContent = '+';
+        add.setAttribute('aria-label', '新增交易寵物');
+        add.addEventListener('click', () => openPicker('add'));
+        ownGrid.append(add);
       }
       ownCount.textContent = draftOffer.length + ' / 4 隻';
       updateDraftUI();
@@ -698,7 +701,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             }
             if (confirmButton) {
               confirmButton.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
-              confirmButton.disabled = !session.offered_pet_uids_a?.length || !session.offered_pet_uids_b?.length || Boolean(ownConfirmed);
+              const offeredA = Array.isArray(session.offered_pet_uids_a) ? session.offered_pet_uids_a : (session.offered_pet_uid_a ? [session.offered_pet_uid_a] : []);
+              const offeredB = Array.isArray(session.offered_pet_uids_b) ? session.offered_pet_uids_b : (session.offered_pet_uid_b ? [session.offered_pet_uid_b] : []);
+              confirmButton.disabled = !offeredA.length || !offeredB.length || Boolean(ownConfirmed);
             }
             retainedRooms.add(existing);
             continue;
