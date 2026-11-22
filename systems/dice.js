@@ -469,7 +469,7 @@ export function createDiceSystem(deps) {
         if (petSkillReward > 0) toast('寵物技能觸發：額外獲得 +' + format(petSkillReward) + '$');
 
         // 全服稀有公告獨立執行，避免遠端公告寫入延遲卡住自動擲骰。
-        Promise.resolve().then(() => broadcastRareRoll(dice)).catch(error => {
+        Promise.resolve().then(() => broadcastRareRoll(dice, weather.type)).catch(error => {
           console.warn('稀有擲骰公告送出失敗', error);
         });
         checkAchievements();
