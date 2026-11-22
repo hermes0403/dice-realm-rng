@@ -12,23 +12,19 @@ test('navigation and page now expose pet information instead of patch notes', as
   assert.doesNotMatch(html, /遊戲更新日誌|REALM PATCH NOTES|update-log-card/);
 });
 
-test('pet information page lists all twelve weight multiplier tiers', async () => {
+test('pet information page lists six estimated weight acquisition odds to five decimal places', async () => {
   const html = await read('index.html');
   const rows = [
-    '1–99 kg', '×1.0',
-    '100–200 kg', '×1.2',
-    '201–500 kg', '×1.5',
-    '501–1,000 kg', '×1.8',
-    '1,001–2,000 kg', '×2.0',
-    '2,001–5,000 kg', '×2.5',
-    '5,001–10,000 kg', '×2.8',
-    '10,001–40,000 kg', '×3.0',
-    '40,001–100,000 kg', '×3.5',
-    '100,001–500,000 kg', '×3.8',
-    '500,001–3,000,000 kg', '×4.0',
-    '3,000,001 kg 以上', '×4.5'
+    '1K+ kg', '0.24990%',
+    '50K+ kg', '0.02323%',
+    '1M+ kg', '0.00930%',
+    '25M+ kg', '0.00386%',
+    '200M+ kg', '0.00333%',
+    '1B+ kg', '0.00090%'
   ];
-  for (const value of rows) assert.ok(html.includes(value), `missing weight tier value: ${value}`);
+  for (const value of rows) assert.ok(html.includes(value), `missing weight odds value: ${value}`);
+  assert.match(html, /概略估算/);
+  assert.doesNotMatch(html, /1–99 kg|3,000,001 kg 以上/);
 });
 
 test('each appearance and weather mutation has its own information panel', async () => {
@@ -67,4 +63,10 @@ test('mutation panels use distinct theme colors and rainbow uses a full gradient
   }
   assert.match(css, /pet-info-rainbow-strip[\s\S]*?linear-gradient\(90deg/);
   assert.match(css, /pet-info-panel--crystal\{border-color:#a78bfa/);
+});
+
+test('appearance and weather mutation panels are stacked as full-width horizontal rows', async () => {
+  const css = await read('style.css');
+  assert.match(css, /\.pet-info-grid\{display:flex;flex-direction:column/);
+  assert.match(css, /\.pet-info-panel\{position:relative;display:grid;grid-template-columns/);
 });
