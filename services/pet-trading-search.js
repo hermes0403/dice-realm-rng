@@ -454,7 +454,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       }
     });
 
-    actions.append(confirm);
+    const cancel = makeSessionActionButton(session.id, '取消交易房間');
+    cancel.classList.add('pet-trade-cancel-button');
+    actions.append(confirm, cancel);
     room.append(heading, sides, state, actions, hint);
     return room;
   }
@@ -585,9 +587,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         }
         for (const session of completedSessionsToSync) {
           const syncKey = user.id + ':' + session.id;
-          completedSessionsHandled.add(syncKey);
           try {
             await onTradeCompleted();
+            completedSessionsHandled.add(syncKey);
           } catch (syncError) {
             console.warn('Completed pet trade cloud save refresh failed', syncError);
             setStatus('交易已完成，但背包同步失敗，請重新整理遊戲。');
@@ -627,9 +629,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       }
       for (const session of completedSessionsToSync) {
         const syncKey = user.id + ':' + session.id;
-        completedSessionsHandled.add(syncKey);
         try {
           await onTradeCompleted();
+          completedSessionsHandled.add(syncKey);
         } catch (syncError) {
           console.warn('Completed pet trade cloud save refresh failed', syncError);
           setStatus('交易已完成，但背包同步失敗，請重新整理遊戲。');
