@@ -6,10 +6,10 @@ export const HEAVEN_MIDDLE_IDS = [
 
 export function buildHeavenBaseEntries(byId, heaven2, highLuck) {
   const fixed = heaven2
-    ? (highLuck ? { id: 'd15', percent: 17 } : { id: 'd14', percent: 17 })
+    ? (highLuck ? { id: 'd15', percent: 17 } : { id: 'd14', percent: 15 })
     : (highLuck ? { id: 'd13', percent: 19 } : { id: 'd12', percent: 20 });
   const errorPercent = heaven2 ? 0.07 : 0.005;
-  const middle = HEAVEN_MIDDLE_IDS.filter(id => id !== fixed.id);
+  const middle = HEAVEN_MIDDLE_IDS.filter(id => id !== fixed.id && (!heaven2 || Number(byId(id)?.den) >= 16384));
   const remaining = 100 - fixed.percent - errorPercent;
   const targetId = heaven2 ? 'd23' : 'd21';
   const targetIndex = middle.indexOf(targetId);

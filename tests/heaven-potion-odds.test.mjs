@@ -10,6 +10,7 @@ import {
   consumeHeavenPotionCharge
 } from '../systems/heaven-potion-odds.js';
 import { applyGlitchWeight } from '../systems/glitch-dice.js';
+import { addWeatherDiceOdds } from '../systems/dice.js';
 
 const ALL_DICE = [...D, ...NEW_DICE];
 const byId = id => ALL_DICE.find(dice => dice.id === id);
@@ -18,8 +19,8 @@ test('天堂 I／II 四組基礎表固定骰子、數量及總和正確', () => 
   const cases = [
     { heaven2: false, high: false, fixed: 'd12', percent: 20, error: 0.005, count: 31 },
     { heaven2: false, high: true, fixed: 'd13', percent: 19, error: 0.005, count: 30 },
-    { heaven2: true, high: false, fixed: 'd14', percent: 17, error: 0.07, count: 30 },
-    { heaven2: true, high: true, fixed: 'd15', percent: 17, error: 0.07, count: 30 }
+    { heaven2: true, high: false, fixed: 'd14', percent: 15, error: 0.07, count: 29 },
+    { heaven2: true, high: true, fixed: 'd15', percent: 17, error: 0.07, count: 29 }
   ];
   for (const item of cases) {
     const entries = buildHeavenBaseEntries(byId, item.heaven2, item.high);
@@ -47,7 +48,7 @@ test('四組中間骰子依分母遞增、權重嚴格遞減且包含奇點骰�
     const fixedId = heaven2 ? (high ? 'd15' : 'd14') : (high ? 'd13' : 'd12');
     const entries = buildHeavenBaseEntries(byId, heaven2, high)
       .filter(entry => HEAVEN_MIDDLE_IDS.includes(entry.dice.id) && entry.dice.id !== fixedId);
-    assert.equal(entries.length, HEAVEN_MIDDLE_IDS.length - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0));
+    assert.equal(entries.length, HEAVEN_MIDDLE_IDS.length - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0) - (heaven2 ? 1 : 0));
     for (let i = 1; i < entries.length; i++) {
       assert.ok(entries[i].dice.den > entries[i - 1].dice.den);
       assert.ok(entries[i].weight < entries[i - 1].weight);
@@ -178,7 +179,9 @@ test('天堂 II 基礎池不含彗星骰子；天堂 I 低運氣固定包含彗�
   const heaven2 = buildHeavenBaseEntries(byId, true, false);
   assert.equal(heaven1.find(entry => entry.dice.id === 'd12')?.weight, 20);
   assert.equal(heaven2.some(entry => entry.dice.id === 'd12'), false);
-  assert.equal(heaven2.find(entry => entry.dice.id === 'd14')?.weight, 17);
+  assert.equal(heaven2.find(entry => entry.dice.id === 'd14')?.weight, 15);
+  assert.equal(heaven2.some(entry => entry.dice.id === 'd13'), false);
+  assert.ok(heaven2.every(entry => entry.dice.den >= 16384));
 });
 
 test('天堂藥水多抽數會保留模式，直到最後一抽才清空', () => {
@@ -197,4 +200,18 @@ test('待使用天堂藥水模式不會被另一種類型覆蓋', async () => {
   );
   assert.match(source, /pendingCharges > 0 && pendingMode && pendingMode !== id/);
   assert.match(source, /請先完成目前抽數/);
+});
+
+
+test('天堂 II 天氣限定骰子也遵守最低分母 1/16384', () => {
+  const entries = [{ dice: { id: 'base', den: 16384 }, weight: 100 }];
+  const pool = [
+    { id: 'rain-common', den: 9800, weather: 'rain' },
+    { id: 'rain-minimum', den: 16384, weather: 'rain' },
+    { id: 'rain-rare', den: 85500, weather: 'rain' }
+  ];
+  const heaven2 = addWeatherDiceOdds(entries.map(entry => ({ ...entry })), pool, ['rain'], 16384);
+  assert.deepEqual(heaven2.map(entry => entry.dice.id), ['base', 'rain-minimum', 'rain-rare']);
+  const heaven1 = addWeatherDiceOdds(entries.map(entry => ({ ...entry })), pool, ['rain'], 2049);
+  assert.ok(heaven1.some(entry => entry.dice.id === 'rain-common'));
 });
