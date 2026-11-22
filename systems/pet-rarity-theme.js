@@ -1,5 +1,5 @@
 export const ETERNAL_PET_RARITY_CSS = `.pet-rarity-eternal {
-  background: linear-gradient(90deg, #9eeaff 0%, #d6c4ff 52%, #ffaddd 100%);
+  background: linear-gradient(90deg, #9eeaff 0%, #ffaddd 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
