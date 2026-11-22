@@ -1,9 +1,9 @@
 export const ETERNAL_PET_RARITY_CSS = `.pet-rarity-eternal {
-  background: linear-gradient(90deg, #0755d9 0%, #ffaddd 100%);
+  background: linear-gradient(90deg, #9eeaff 0%, #d6c4ff 52%, #ffaddd 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
-  text-shadow: 0 0 7px #0755d966, 0 0 10px #ffaddd55;
+  text-shadow: 0 0 12px #a9dfff88, 0 0 18px #ffaddd55;
   font-weight: 950;
 }`;
 
