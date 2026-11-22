@@ -2817,3 +2817,5 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   .mobile-nav .nav-more-item{min-height:64px;font-size:12px}
   .toast{bottom:calc(82px + env(safe-area-inset-bottom))}
 }
+
+.nav-more-menu button[hidden]{display:none!important}
