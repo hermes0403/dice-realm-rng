@@ -2888,3 +2888,36 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   #mobileNav .nav-more-item{min-height:54px!important;padding:6px 4px!important}
   .content{padding-bottom:calc(132px / var(--landscape-scale, 1) + env(safe-area-inset-bottom, 0px))!important}
 }
+
+
+/* T-0127: remove accumulated mobile top whitespace across every page. */
+@media (max-width: 760px) {
+  .shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4px) !important;
+  }
+  .top {
+    min-height: 0 !important;
+    padding: 0 0 4px !important;
+    gap: 5px !important;
+  }
+  .announcement-panel {
+    margin: 0 0 5px !important;
+  }
+  .layout,
+  .content,
+  .page.active {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .page.active > :first-child {
+    margin-top: 0 !important;
+  }
+  .page.active > .codex-category-switch {
+    margin: 0 0 6px !important;
+    padding-top: 0 !important;
+    padding-bottom: 4px !important;
+  }
+  .page.active > .section-head {
+    margin: 0 0 8px !important;
+  }
+}
