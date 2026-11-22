@@ -10,6 +10,10 @@ on:
     paths:
       - 'index.html'
       - 'style.css'
+      - 'config.js'
+      - 'systems/pet-skills.js'
+      - 'tests/pet-income-mutation-multiplier.test.js'
+      - 'tests/pet-info-page.test.js'
       - 'systems/dice.js'
       - 'script.js'
       - 'manifest.webmanifest'
@@ -31,10 +35,12 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/pwa-display-controls.test.mjs
+        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js
       - name: Check JavaScript syntax
         run: |
           node --check script.js
+          node --check config.js
+          node --check systems/pet-skills.js
           node --check systems/dice.js
           node --check ui/display-controls.js
           node --check sw.js
