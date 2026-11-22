@@ -2646,3 +2646,18 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #petsTradeView .pet-trade-other-side { border-left: 2px solid #5791ad; }
 #petsTradeView .pet-trade-pet-option.is-selected { box-shadow: inset 0 0 0 1px #b19aff55; }
 #petsTradeView .pet-trade-player-picker, #petsTradeView .pet-trade-room { box-shadow: inset 0 1px 0 #ffffff08; }
+
+
+/* T-0122: slot-based pet offer picker. */
+#petsTradeView .pet-trade-offer-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-height:112px}
+#petsTradeView .pet-trade-add-slot{min-height:112px;border:1px dashed #7182a8;border-radius:5px;background:#111c30;color:#b9c8e8;font-size:32px;font-weight:400;cursor:pointer}
+#petsTradeView .pet-trade-add-slot:disabled{opacity:.3;cursor:not-allowed}
+#petsTradeView .pet-trade-offer-slot{width:100%;cursor:pointer}
+#petsTradeView .pet-trade-offer-slot.is-active{outline:2px solid #a58cff;outline-offset:2px}
+#petsTradeView .pet-trade-slot-actions{display:flex;gap:8px;margin:8px 0}
+#petsTradeView .pet-trade-picker-panel{margin-top:8px;padding:9px;border:1px solid #3e5273;background:#0c1628}
+#petsTradeView .pet-trade-picker-panel[hidden],#petsTradeView .pet-trade-slot-actions[hidden]{display:none!important}
+#petsTradeView .pet-trade-picker-panel .pet-trade-pet-search{width:100%;margin-bottom:8px}
+#petsTradeView .pet-trade-picker-panel .pet-trade-pet-picker{max-height:250px}
+#petsTradeView .pet-trade-picker-panel .pet-trade-pet-option{cursor:pointer}
+@media(max-width:760px){#petsTradeView .pet-trade-offer-slots{grid-template-columns:repeat(2,minmax(0,1fr))}#petsTradeView .pet-trade-add-slot{min-height:104px}}
