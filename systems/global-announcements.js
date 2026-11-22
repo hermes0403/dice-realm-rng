@@ -76,41 +76,32 @@ export function createGlobalAnnouncements(dependencies) {
   }
 
   function showSecretPetMarquee(playerName, petName, at = Date.now()) {
-    let el = documentRef.getElementById('secretPetMarquee');
-    if (!el) {
-      el = documentRef.createElement('div');
-      el.id = 'secretPetMarquee';
-      el.className = 'secret-pet-marquee';
-      el.innerHTML = '<div class="secret-pet-marquee-inner"></div>';
-      documentRef.body.appendChild(el);
-    }
-    const safe = v => String(v || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    el.querySelector('.secret-pet-marquee-inner').innerHTML = `✦ 秘密階級降臨 ✦ ${safe(playerName)} 合成出 ${safe(petName)}！ ✦`;
-    el.classList.remove('show');
-    void el.offsetWidth;
-    el.classList.add('show');
+    return showPetFusionMarquee(playerName, petName, 'secret', at);
   }
 
   function showPetFusionMarquee(playerName, petName, rarity, at = Date.now()) {
     const rarityLabels = { mythic: '神話', secret: '秘密', eternal: '永恆' };
     const rarityLabel = rarityLabels[rarity];
     if (!rarityLabel) return false;
-    let el = documentRef.getElementById('secretPetMarquee');
-    if (!el) {
-      el = documentRef.createElement('div');
-      el.id = 'secretPetMarquee';
-      el.className = 'secret-pet-marquee';
-      el.innerHTML = '<div class="secret-pet-marquee-inner"></div>';
-      documentRef.body.appendChild(el);
-    }
-    const inner = el.querySelector('.secret-pet-marquee-inner');
-    if (!inner) return false;
-    inner.textContent = `玩家${String(playerName || '玩家')} 召喚到${rarityLabel}寵物 ${String(petName || '未知寵物')}`;
-    el.dataset.rarity = rarity;
-    el.dataset.announcedAt = String(Number(at) || Date.now());
-    el.classList.remove('show');
-    void el.offsetWidth;
-    el.classList.add('show');
+    const list = documentRef.getElementById('globalAnnouncements');
+    if (!list) return false;
+    list.innerHTML = '';
+    const line = documentRef.createElement('div');
+    line.className = 'announcement-line weather-summon-announcement pet-fusion-announcement ' + rarity;
+    line.textContent = `玩家${String(playerName || '玩家')} 合成出${rarityLabel}寵物　${String(petName || '未知寵物')}`;
+    let playCount = 1;
+    line.addEventListener('animationend', () => {
+      if (line.parentNode !== list) return;
+      if (playCount >= 2) {
+        line.remove();
+        return;
+      }
+      playCount += 1;
+      line.style.animation = 'none';
+      void line.offsetWidth;
+      line.style.animation = '';
+    });
+    list.appendChild(line);
     return true;
   }
 
