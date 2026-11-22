@@ -52,7 +52,7 @@ export function createNavigationUI({
     return primaryItems.map(([id, name, icon]) =>
       buttonHTML([id, name, icon], `${id === 'roll' ? 'active' : ''} nav-primary-item`)
     ).join('') +
-    '<button type="button" class="nav-more-toggle" data-more-toggle aria-expanded="false" aria-controls="${menuId}"><span class="nav-item-icon" aria-hidden="true">▦</span><span class="nav-item-label">更多</span></button>' +
+    `<button type="button" class="nav-more-toggle" data-more-toggle aria-expanded="false" aria-controls="${menuId}"><span class="nav-item-icon" aria-hidden="true">▦</span><span class="nav-item-label">更多</span></button>` +
     `<div class="nav-more-menu" id="${menuId}" hidden>${moreItems.map(item => buttonHTML(item, 'nav-more-item')).join('')}</div>`;
   }
 
