@@ -2886,5 +2886,5 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   }
   #mobileNav>.nav-more-menu[hidden]{display:none!important}
   #mobileNav .nav-more-item{min-height:54px!important;padding:6px 4px!important}
-  .content{padding-bottom:74px!important}
+  .content{padding-bottom:calc(104px + env(safe-area-inset-bottom, 0px))!important}
 }
