@@ -2981,7 +2981,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
     position: relative !important;
     display: block !important;
     /* The legacy mobile shell reserves an oversized blank band before the content. */
-    margin: -240px 0 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
   }
