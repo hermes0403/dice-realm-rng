@@ -23,30 +23,30 @@ test('混沌祝福同一天不重複領取，漏一天後連續天數重置', ()
 
 test('終焉財藏：合資格擲骰固定1M，額外10%再得1M', () => {
   const result = resolveSecretRollRewards({
-    den: 10_000, hasS3: true, daily: { date: '2026-11-14', s3: 0, s5: 0 }, random: () => 0.05
+    den: 10_000, hasS4: true, daily: { date: '2026-11-14', s4: 0, s5: 0 }, random: () => 0.05
   });
   assert.equal(result.reward, 2_000_000);
-  assert.equal(result.daily.s3, 2_000_000);
+  assert.equal(result.daily.s4, 2_000_000);
 });
 
 test('終焉財藏：分母門檻及每日100M上限', () => {
-  const below = resolveSecretRollRewards({ den: 9_999, hasS3: true, daily: { s3: 0, s5: 0 } });
+  const below = resolveSecretRollRewards({ den: 9_999, hasS4: true, daily: { s4: 0, s5: 0 } });
   assert.equal(below.reward, 0);
   const capped = resolveSecretRollRewards({
-    den: 10_000, hasS3: true, daily: { s3: 99_500_000, s5: 0 }, random: () => 0
+    den: 10_000, hasS4: true, daily: { s4: 99_500_000, s5: 0 }, random: () => 0
   });
   assert.equal(capped.reward, 500_000);
-  assert.equal(capped.daily.s3, 100_000_000);
+  assert.equal(capped.daily.s4, 100_000_000);
 });
 
 test('虛無回饋：1%獲得500K，且每日100M上限不超額', () => {
   const hit = resolveSecretRollRewards({
-    den: 2, hasS5: true, daily: { s3: 0, s5: 99_750_000 }, random: () => 0
+    den: 2, hasS5: true, daily: { s4: 0, s5: 99_750_000 }, random: () => 0
   });
   assert.equal(hit.reward, 250_000);
   assert.equal(hit.daily.s5, 100_000_000);
   const miss = resolveSecretRollRewards({
-    den: 2, hasS5: true, daily: { s3: 0, s5: 0 }, random: () => 0.02
+    den: 2, hasS5: true, daily: { s4: 0, s5: 0 }, random: () => 0.02
   });
   assert.equal(miss.reward, 0);
 });

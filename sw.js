@@ -1,11 +1,12 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.94';
+const CACHE_NAME = 'dice-realm-shell-v1.95';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261122-t0125-pet-info',
+  './data/pets.js?v=20261122-pet-skill-swap-v1',
+  './script.js?v=20261122-t0126-pet-skills-weekly-v1',
   './ui/navigation.js?v=20261121-t0026-trade-exclusive-v5',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
@@ -21,9 +22,9 @@ const APP_SHELL = [
   './config.js?v=20261122-t0125-pet-info',
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
-  './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
-  './data/eternal-update.js?v=20261121-t0118-eternal-income',
-  './systems/pets.js?v=20261115-t0098-eternal-pets',
+  './systems/secret-pet-skills.js?v=20261122-secret-skill-swap-v1',
+  './data/eternal-update.js?v=20261122-eternal-income-v1',
+  './systems/pets.js?v=20261122-secret-skill-swap-v1',
   './systems/dice.js?v=20261121-t0121-heaven-mode-persistence',
   './systems/pet-income.js?v=20261118-pet-income-mutation-v2',
   './systems/realm-social.js?v=20261119-pet-audit-metadata',
@@ -31,7 +32,7 @@ const APP_SHELL = [
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './systems/dice-locks.js',
   './core/game-state.js',
-  './systems/weekly-realm-event.js?v=20261122-weekly-700k-v1',
+  './systems/weekly-realm-event.js?v=20261122-weekly-claim-only-v1',
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',

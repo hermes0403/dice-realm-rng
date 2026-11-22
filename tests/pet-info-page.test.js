@@ -61,7 +61,7 @@ test('mutation panels use distinct theme colors and rainbow uses a full gradient
   for (const kind of ['none', 'golden', 'diamond', 'rainbow', 'rain', 'snow', 'thunder', 'crystal', 'hell']) {
     assert.ok(css.includes(`.pet-info-panel--${kind}`), `missing panel theme: ${kind}`);
   }
-  assert.match(css, /pet-info-rainbow-strip[\s\S]*?linear-gradient\(90deg/);
+  assert.match(css, /pet-info-rainbow-strip[\s\S]*?linear-gradient\(180deg/);
   assert.match(css, /pet-info-panel--crystal\{border-color:#a78bfa/);
 });
 

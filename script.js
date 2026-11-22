@@ -1,7 +1,7 @@
 import { D, G } from './data/dice.js?v=20261117-t0102-void-startrail-gloves';
 import { POTIONS } from './data/equipment.js?v=20261121-t0123-money-potions';
-import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261121-t0122-pet-fusion-rates';
-import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261121-t0122-pet-fusion-rates';
+import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261122-pet-skill-swap-v1';
+import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261122-eternal-income-v1';
 import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261122-t0125-pet-info';
 import { supabaseClient } from './services/supabase.js';
@@ -22,12 +22,12 @@ import { createCloudSaveService } from './services/cloud-save.js?v=20261121-t011
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261121-t0130-persisted-session-restore-v1';
-import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
+import { createPetSystem } from './systems/pets.js?v=20261122-secret-skill-swap-v1';
 import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261122-trade-slot-picker-v2';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261122-auto-roll-rare-continue-v1';
-import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261122-weekly-700k-v1';
+import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261122-weekly-claim-only-v1';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
@@ -101,7 +101,7 @@ let S;
 const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetData, getCurrentUser: () => currentUser, getState: () => S, localStorageRef: localStorage });
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
-const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, localStorageRef: localStorage, timerManager, documentRef: document, toast, isAdmin, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
+const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, documentRef: document, toast, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
 const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, getMoneyPotionMultiplier: () => activePotion('money')?.multiplier || 1, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum });
@@ -168,7 +168,7 @@ function currentGlove(){return S.equipped==='g7'?glove('g0'):glove(S.equipped)}
 function activePotion(category='luck'){const slot=category==='speed'?'activeSpeed':category==='money'?'activeMoney':'active';const a=S.potions?.[slot];if(a&&a.type&&Number(a.expiresAt)>Date.now())return POTIONS.find(p=>p.id===a.type)||null;return null}
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
-function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
+function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?(Number(S.petSkillLuckBonus)||100):0))}
 function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0)+getWeatherSpeedBonus(getWeather()))}
 function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}

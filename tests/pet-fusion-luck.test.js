@@ -41,7 +41,7 @@ test('永恆階級九個分母區間連續且各組品質機率總和為 100%', 
     const range = ETERNAL_TIER_CONFIG[tiers[i]];
     const rates = ETERNAL_TIER_RATES[tiers[i]];
     assert.equal(Object.values(rates).reduce((sum,value)=>sum+value,0), 100);
-    assert.equal(rates.eternal, [0,0,0,1,6,18,65,95,100][i]);
+    assert.equal(rates.eternal, [0.05,0.1,1,5,7,12,49,95,100][i]);
     if (i < tiers.length - 1) {
       assert.equal(range.max_den + 1, ETERNAL_TIER_CONFIG[tiers[i+1]].min_den);
     } else {
@@ -54,7 +54,7 @@ test('永恆階級九個分母區間連續且各組品質機率總和為 100%', 
 test('永恆寵物兩隻的融合比率、技能與每秒收益符合設定', () => {
   assert.equal(ETERNAL_PETS.length, 2);
   assert.deepEqual(ETERNAL_PET_WEIGHTS, [60, 40]);
-  assert.deepEqual(ETERNAL_PET_INCOME, { eternal_dawn_guardian: 18000, eternal_starwish_deer: 22000 });
+  assert.deepEqual(ETERNAL_PET_INCOME, { eternal_dawn_guardian: 50000, eternal_starwish_deer: 62500 });
   assert.match(ETERNAL_PETS[0].skill, /運氣 \+35%.*速度 \+35%/);
   assert.match(ETERNAL_PETS[1].skill, /24 小時.*天堂藥水 I（40%）.*幸運藥水 III（60%）/);
 });
@@ -67,13 +67,13 @@ test('五顆新骰子分母與 ID 不重複', () => {
 
 test('永恆融合九段分母與四種高階品質機率完全符合指定表', () => {
   const expected = [
-    [1100001, 5000001, 73, 25, 2, 0],
-    [5000002, 10000000, 70, 27, 3, 0],
-    [10000001, 25000000, 67, 28, 5, 0],
-    [25000001, 40000000, 60, 23, 16, 1],
-    [40000001, 60000000, 0, 49, 45, 6],
-    [60000001, 80000000, 0, 7, 75, 18],
-    [80000001, 100000000, 0, 0, 35, 65],
+    [1100001, 5000001, 70, 27.95, 2, 0.05],
+    [5000002, 10000000, 63, 30.9, 6, 0.1],
+    [10000001, 25000000, 52, 32, 15, 1],
+    [25000001, 40000000, 20, 38, 37, 5],
+    [40000001, 60000000, 0, 40, 53, 7],
+    [60000001, 80000000, 0, 8, 80, 12],
+    [80000001, 100000000, 0, 1, 50, 49],
     [100000001, 119999999, 0, 0, 5, 95],
     [120000000, null, 0, 0, 0, 100]
   ];
