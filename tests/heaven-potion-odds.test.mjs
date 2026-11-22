@@ -10,6 +10,7 @@ import {
   consumeHeavenPotionCharge
 } from '../systems/heaven-potion-odds.js';
 import { applyGlitchWeight } from '../systems/glitch-dice.js';
+import { addWeatherDiceOdds } from '../systems/dice.js';
 
 const ALL_DICE = [...D, ...NEW_DICE];
 const byId = id => ALL_DICE.find(dice => dice.id === id);
@@ -199,4 +200,18 @@ test('待使用天堂藥水模式不會被另一種類型覆蓋', async () => {
   );
   assert.match(source, /pendingCharges > 0 && pendingMode && pendingMode !== id/);
   assert.match(source, /請先完成目前抽數/);
+});
+
+
+test('天堂 II 天氣限定骰子也遵守最低分母 1/16384', () => {
+  const entries = [{ dice: { id: 'base', den: 16384 }, weight: 100 }];
+  const pool = [
+    { id: 'rain-common', den: 9800, weather: 'rain' },
+    { id: 'rain-minimum', den: 16384, weather: 'rain' },
+    { id: 'rain-rare', den: 85500, weather: 'rain' }
+  ];
+  const heaven2 = addWeatherDiceOdds(entries.map(entry => ({ ...entry })), pool, ['rain'], 16384);
+  assert.deepEqual(heaven2.map(entry => entry.dice.id), ['base', 'rain-minimum', 'rain-rare']);
+  const heaven1 = addWeatherDiceOdds(entries.map(entry => ({ ...entry })), pool, ['rain'], 2049);
+  assert.ok(heaven1.some(entry => entry.dice.id === 'rain-common'));
 });
