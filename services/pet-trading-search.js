@@ -644,7 +644,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       return;
     }
     refreshing = true;
-    host.textContent = '正在讀取邀請…';
+    const hasVisibleTradeRoom = [...host.children].some(node => node.classList.contains('pet-trade-active-room-only'));
+    if (!hasVisibleTradeRoom) host.textContent = '正在讀取邀請…';
     try {
       const { data, error } = await supabaseClient.from('pet_trade_invitations')
         .select('id,sender_id,recipient_id,status,created_at,expires_at')
