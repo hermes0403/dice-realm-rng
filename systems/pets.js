@@ -1,5 +1,5 @@
 /** Pet gameplay, inventory, fusion preview, and pet-related skill calculations. */
-import { resolveSecretLoginReward, resolveSecretRollRewards, resolveSecretSpeedSkill, taipeiDateKey } from './secret-pet-skills.js?v=20261114-t0090-secret-pet-skills';
+import { resolveSecretLoginReward, resolveSecretRollRewards, resolveSecretSpeedSkill, taipeiDateKey } from './secret-pet-skills.js?v=20261122-secret-skill-swap-v1';
 
 /** Build codex entries while excluding retired pets for every player, including previous owners. */
 import { EVENT_PETS, PET_BASE_INCOME } from '../data/pets.js';
@@ -782,7 +782,8 @@ export function createPetSystem({
     applyPetSkillDailyReset,
     applyPetRollSkills,
     applyPetLoginSkill,
-    usePetSkillS4,
+    usePetSkillS3,
+    useSecretDailySkill,
     useEternalDailySkill,
     petBonusTotals,
     populateAdminPetSelects,
