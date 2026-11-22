@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.99';
+const CACHE_NAME = 'dice-realm-shell-v2.00';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const APP_SHELL = [
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
   './script.js?v=20261122-t0126-pet-skills-weekly-v1',
-  './ui/navigation.js?v=20261122-five-entry-nav-v4',
+  './ui/navigation.js?v=20261122-five-entry-nav-v5',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
@@ -36,7 +36,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261122-five-entry-nav-v4',
+  './style.css?v=20261122-five-entry-nav-v5',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
