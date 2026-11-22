@@ -26,7 +26,7 @@ import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets
 import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261122-trade-auto-load-v1';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js?v=20261121-t0121-heaven-mode-persistence';
+import { createDiceSystem } from './systems/dice.js?v=20261122-auto-roll-rare-continue-v1';
 import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261122-weekly-700k-v1';
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';

@@ -60,6 +60,7 @@ export function createDiceSystem(deps) {
   let rolling = false;
   let rollingStartedAt = 0;
   let revealAwaitingDismiss = false;
+  let autoRevealSequence = 0;
   let rollSequence = 0;
 
   function withTimeout(promise, timeoutMs, label) {
@@ -279,6 +280,17 @@ export function createDiceSystem(deps) {
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
     playRevealSound(tier, isGlitchDice);
+    // 自動擲骰時，稀有揭示只播放短暫展示，不等待玩家按鈕，也不阻塞下一抽。
+    if (autoTimer) {
+      overlay.className = 'rarity-overlay show tier-' + tier + (isGlitchDice ? ' glitch-reveal' : '');
+      const revealSequence = ++autoRevealSequence;
+      timerManager.setTimeout(() => {
+        if (revealSequence !== autoRevealSequence) return;
+        overlay.className = 'rarity-overlay';
+        icon.classList.remove('halloween-compact');
+      }, 1500, 'auto-rarity-reveal-cleanup');
+      return;
+    }
     if (staged) {
       await wait(den >= 10000000 ? 1350 : den >= 1000000 ? 1150 : tier === 'comet' ? 720 : 750);
       overlay.classList.remove('blackout');
@@ -312,6 +324,16 @@ export function createDiceSystem(deps) {
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
     playRevealSound('halloween');
+    if (autoTimer) {
+      const revealSequence = ++autoRevealSequence;
+      timerManager.setTimeout(() => {
+        if (revealSequence !== autoRevealSequence) return;
+        overlay.classList.remove('show', 'blackout', 'common');
+        card.classList.remove('small-reveal-card');
+        icon.classList.remove('halloween-compact');
+      }, 900, 'auto-small-reveal-cleanup');
+      return;
+    }
     await wait(720);
     await waitForRevealDismiss(overlay);
     overlay.classList.remove('show', 'blackout', 'common');
