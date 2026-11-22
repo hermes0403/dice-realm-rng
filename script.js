@@ -227,7 +227,15 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
-const petTradingSearch = createPetTradingSearch({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt, onTradeCompleted: () => loadCloudSave(), flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast });
+const petTradingSearch = createPetTradingSearch({
+  supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt,
+  onTradeCompleted: async () => {
+    await loadCloudSave({ renderAfterLoad: false });
+    renderPetsPage();
+    renderPetCodex();
+  },
+  flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast
+});
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
