@@ -2823,6 +2823,8 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 
 /* Mobile navigation correction: show only the compact five-button bottom row. */
 @media(max-width:760px){
+  /* Hide the legacy desktop sidebar and its GAME MENU heading on phones. */
+  #sideNav{display:none!important}
   .shell{padding-bottom:10px!important}
   .mobile-nav{
     display:flex!important;
