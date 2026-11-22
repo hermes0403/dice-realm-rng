@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.92';
+const CACHE_NAME = 'dice-realm-shell-v1.93';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261122-weekly-700k-trade-audit-v1',
+  './script.js?v=20261122-t0125-pet-info',
   './ui/navigation.js?v=20261121-t0026-trade-exclusive-v5',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
@@ -18,7 +18,7 @@ const APP_SHELL = [
   './services/pet-trading-search.js?v=20261122-trade-expired-session-v1',
   './ui/display-controls.js?v=20261119-settings-buttons-v2',
   './admin/ui-bindings.js?v=20261118-t0114-login-name-management',
-  './config.js?v=20261118-shark-weather',
+  './config.js?v=20261122-t0125-pet-info',
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261114-t0090-secret-pet-skills',
@@ -35,7 +35,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261122-trade-scroll-accept-v2',
+  './style.css?v=20261122-t0125-pet-info',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
