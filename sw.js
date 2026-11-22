@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v1.91';
+const CACHE_NAME = 'dice-realm-shell-v1.92';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
-  './script.js?v=20261122-trade-expired-session-v1',
+  './script.js?v=20261122-weekly-700k-trade-audit-v1',
   './ui/navigation.js?v=20261121-t0026-trade-exclusive-v5',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
   './services/cloud-save.js?v=20261121-t0115-pet-save-race',
@@ -31,7 +31,7 @@ const APP_SHELL = [
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './systems/dice-locks.js',
   './core/game-state.js',
-  './systems/weekly-realm-event.js?v=20261119-weekly-account-eligibility',
+  './systems/weekly-realm-event.js?v=20261122-weekly-700k-v1',
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
