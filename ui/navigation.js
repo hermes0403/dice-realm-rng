@@ -48,12 +48,12 @@ export function createNavigationUI({
     return `<button type="button" data-page="${id}" class="${extraClass}" ${id === 'admin' ? 'hidden' : ''}><span class="nav-item-icon" aria-hidden="true">${icon}</span><span class="nav-item-label">${name}</span></button>`;
   }
 
-  function navHTML() {
+  function navHTML(menuId = 'realmMoreMenu') {
     return primaryItems.map(([id, name, icon]) =>
       buttonHTML([id, name, icon], `${id === 'roll' ? 'active' : ''} nav-primary-item`)
     ).join('') +
-    '<button type="button" class="nav-more-toggle" data-more-toggle aria-expanded="false" aria-controls="realmMoreMenu"><span class="nav-item-icon" aria-hidden="true">▦</span><span class="nav-item-label">更多</span></button>' +
-    `<div class="nav-more-menu" id="realmMoreMenu" hidden>${moreItems.map(item => buttonHTML(item, 'nav-more-item')).join('')}</div>`;
+    '<button type="button" class="nav-more-toggle" data-more-toggle aria-expanded="false" aria-controls="${menuId}"><span class="nav-item-icon" aria-hidden="true">▦</span><span class="nav-item-label">更多</span></button>' +
+    `<div class="nav-more-menu" id="${menuId}" hidden>${moreItems.map(item => buttonHTML(item, 'nav-more-item')).join('')}</div>`;
   }
 
   function setMoreMenu(open) {
@@ -122,8 +122,8 @@ export function createNavigationUI({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  document.getElementById('sideNav').innerHTML = '<small>GAME MENU</small>' + navHTML();
-  document.getElementById('mobileNav').innerHTML = navHTML();
+  document.getElementById('sideNav').innerHTML = '<small>GAME MENU</small>' + navHTML('desktopMoreMenu');
+  document.getElementById('mobileNav').innerHTML = navHTML('mobileMoreMenu');
   document.addEventListener('click', event => {
     const eggButton = event.target.closest('[data-event-egg]');
     if (eggButton) {
