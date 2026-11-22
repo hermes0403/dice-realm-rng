@@ -18,8 +18,8 @@ test('天堂 I／II 四組基礎表固定骰子、數量及總和正確', () => 
   const cases = [
     { heaven2: false, high: false, fixed: 'd12', percent: 20, error: 0.005, count: 31 },
     { heaven2: false, high: true, fixed: 'd13', percent: 19, error: 0.005, count: 30 },
-    { heaven2: true, high: false, fixed: 'd14', percent: 17, error: 0.07, count: 30 },
-    { heaven2: true, high: true, fixed: 'd15', percent: 17, error: 0.07, count: 30 }
+    { heaven2: true, high: false, fixed: 'd14', percent: 15, error: 0.07, count: 29 },
+    { heaven2: true, high: true, fixed: 'd15', percent: 17, error: 0.07, count: 29 }
   ];
   for (const item of cases) {
     const entries = buildHeavenBaseEntries(byId, item.heaven2, item.high);
@@ -178,7 +178,9 @@ test('天堂 II 基礎池不含彗星骰子；天堂 I 低運氣固定包含彗�
   const heaven2 = buildHeavenBaseEntries(byId, true, false);
   assert.equal(heaven1.find(entry => entry.dice.id === 'd12')?.weight, 20);
   assert.equal(heaven2.some(entry => entry.dice.id === 'd12'), false);
-  assert.equal(heaven2.find(entry => entry.dice.id === 'd14')?.weight, 17);
+  assert.equal(heaven2.find(entry => entry.dice.id === 'd14')?.weight, 15);
+  assert.equal(heaven2.some(entry => entry.dice.id === 'd13'), false);
+  assert.ok(heaven2.every(entry => entry.dice.den >= 16384));
 });
 
 test('天堂藥水多抽數會保留模式，直到最後一抽才清空', () => {
