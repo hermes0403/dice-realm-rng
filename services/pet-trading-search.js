@@ -674,7 +674,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       refreshing = false;
       if (refreshQueued) {
         refreshQueued = false;
-        void refreshInvitations();
+        scheduleRefreshInvitations();
       }
     }
   }
