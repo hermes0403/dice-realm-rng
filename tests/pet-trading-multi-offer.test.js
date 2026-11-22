@@ -240,3 +240,9 @@ test('confirmation status updates in the existing room without replacing the roo
   assert.match(service, /existing\.querySelector\('\[data-trade-other-state\]'\)/);
   assert.match(service, /confirmButton\.dataset\.draftMatchesOffer/);
 });
+
+
+test('refreshing trade invitations never replaces an already visible active room with a loading message', () => {
+  assert.match(service, /const hasVisibleTradeRoom = \[\.\.\.host\.children\]\.some\(node => node\.classList\.contains\('pet-trade-active-room-only'\)\)/);
+  assert.match(service, /if \(!hasVisibleTradeRoom\) host\.textContent = '正在讀取邀請…'/);
+});
