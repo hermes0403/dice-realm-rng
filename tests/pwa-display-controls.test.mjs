@@ -330,11 +330,11 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
-  assert.match(html, /style\.css\?v=20261122-t0126-pet-skills-weekly-v1/);
+  assert.match(html, /style\.css\?v=20261122-t0125-pet-info-v2/);
   assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /dice-realm-shell-v1\.93/);
-  assert.match(worker, /style\.css\?v=20261122-t0126-pet-skills-weekly-v1/);
+  assert.match(worker, /style\.css\?v=20261122-t0125-pet-info-v2/);
 });
