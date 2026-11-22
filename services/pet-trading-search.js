@@ -260,11 +260,15 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       const art = doc.createElement('div');
       art.className = 'pet-trade-pet-art';
       art.innerHTML = petArt && definition ? petArt(definition, true) : (definition?.icon || '◈');
+      const rarityKey = String(definition?.rarity || '').toLowerCase();
+      const rarityClass = ['common', 'rare', 'legendary', 'mythic', 'secret', 'eternal'].includes(rarityKey) ? 'pet-rarity-' + rarityKey : '';
       const name = doc.createElement('strong');
       name.textContent = definition?.name || '未知寵物';
+      if (rarityClass) name.classList.add(rarityClass);
       const rarity = doc.createElement('small');
-      const rarityNames = { common: '普通', rare: '稀有', legendary: '傳奇', mythic: '神話', secret: '秘密' };
-      rarity.textContent = rarityNames[String(definition?.rarity || '').toLowerCase()] || definition?.rarity || '寵物';
+      const rarityNames = { common: '普通', rare: '稀有', legendary: '傳奇', mythic: '神話', secret: '秘密', eternal: '永恆' };
+      rarity.textContent = rarityNames[rarityKey] || definition?.rarity || '寵物';
+      if (rarityClass) rarity.classList.add(rarityClass);
       const weight = doc.createElement('small');
       weight.textContent = (Number(item?.kg) || 0).toFixed(2) + ' 公斤';
       card.append(art, name, rarity, weight);
