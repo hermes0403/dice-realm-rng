@@ -193,4 +193,37 @@
 <div id="petAutoSellModal" class="pet-sell-modal" hidden role="dialog" aria-modal="true"><div class="pet-sell-dialog"><div class="section-head"><h3 style="margin:0">自動出售設定</h3><button type="button" class="quiet" id="petAutoSellClose">關閉</button></div><p class="mini">勾選後，合成出該稀有度的寵物時會自動出售並獲得對應收益。秘密與永恆寵物不會自動出售。</p><div style="display:grid;gap:10px;margin:14px 0"><label><input type="checkbox" data-auto-pet-rarity="common"> 普通</label><label><input type="checkbox" data-auto-pet-rarity="rare"> 稀有</label><label><input type="checkbox" data-auto-pet-rarity="legendary"> 傳奇</label><label><input type="checkbox" data-auto-pet-rarity="mythic"> 神話</label></div><button type="button" class="primary" id="petAutoSellSave">保存設定</button></div></div>
 <script type="module" src="admin/navigation.js?v=20261105-t0037"></script>
 <script type="module" src="script.js?v=20261122-t0126-pet-skills-weekly-v1"></script>
+<script>
+/* Mobile page spacing: measure the real gap per active page and remove only excess space. */
+(()=>{
+ const shell=document.querySelector('.shell');
+ const announcement=document.querySelector('.announcement-panel');
+ const pages=[...document.querySelectorAll('.page')];
+ if(!shell||!announcement||!pages.length)return;
+ let queued=false;
+ const measure=()=>{
+  queued=false;
+  const mobile=window.matchMedia('(max-width: 760px)').matches;
+  for(const page of pages){
+   page.style.removeProperty('margin-top');
+   if(!mobile||!page.classList.contains('active'))continue;
+   const first=page.firstElementChild;
+   if(!first||first.hidden||getComputedStyle(first).display==='none')continue;
+   const gap=first.getBoundingClientRect().top-announcement.getBoundingClientRect().bottom;
+   const excess=Math.min(240,Math.max(0,gap-12));
+   if(excess>1)page.style.marginTop='-'+excess+'px';
+  }
+ };
+ const schedule=()=>{
+  if(queued)return;
+  queued=true;
+  requestAnimationFrame(()=>requestAnimationFrame(measure));
+ };
+ new MutationObserver(schedule).observe(document.querySelector('.content'),{subtree:true,attributes:true,attributeFilter:['class','hidden']});
+ new ResizeObserver(schedule).observe(announcement);
+ window.addEventListener('resize',schedule,{passive:true});
+ window.addEventListener('pageshow',schedule);
+ schedule();
+})();
+</script>
 </body></html>
