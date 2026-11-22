@@ -244,7 +244,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     headingText.append(title, subtitle);
     const roomCode = doc.createElement('span');
     roomCode.className = 'pet-trade-room-code';
-    roomCode.textContent = 'ROOM ' + String(session.id || '').slice(0, 8).toUpperCase();
+    roomCode.textContent = '房間 ' + String(session.id || '').slice(0, 8).toUpperCase();
     heading.append(headingText, roomCode);
 
     function makePetCard(item, selectable = false, selected = false) {
@@ -263,9 +263,10 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       const name = doc.createElement('strong');
       name.textContent = definition?.name || '未知寵物';
       const rarity = doc.createElement('small');
-      rarity.textContent = definition?.rarity || '寵物';
+      const rarityNames = { common: '普通', rare: '稀有', legendary: '傳奇', mythic: '神話', secret: '秘密' };
+      rarity.textContent = rarityNames[String(definition?.rarity || '').toLowerCase()] || definition?.rarity || '寵物';
       const weight = doc.createElement('small');
-      weight.textContent = (Number(item?.kg) || 0).toFixed(2) + ' kg';
+      weight.textContent = (Number(item?.kg) || 0).toFixed(2) + ' 公斤';
       card.append(art, name, rarity, weight);
       return card;
     }
@@ -286,20 +287,42 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     ownHead.append(ownTitle, ownCount);
     const ownHint = doc.createElement('small');
     ownHint.className = 'pet-trade-side-hint';
-    ownHint.textContent = '點選下方寵物加入或移除，最多 4 隻。';
+    ownHint.textContent = '點擊「＋」選擇寵物；點擊已選寵物可替換，最多 4 隻。';
+    const ownGrid = doc.createElement('div');
+    ownGrid.className = 'pet-trade-offer-slots';
+    const pickerPanel = doc.createElement('div');
+    pickerPanel.className = 'pet-trade-picker-panel';
+    pickerPanel.hidden = true;
     const ownSearch = doc.createElement('input');
     ownSearch.type = 'search';
     ownSearch.className = 'field pet-trade-pet-search';
     ownSearch.placeholder = '搜尋自己的寵物名稱…';
     ownSearch.setAttribute('aria-label', '搜尋自己的寵物');
-    const ownGrid = doc.createElement('div');
-    ownGrid.className = 'pet-trade-pet-picker';
+    const pickerGrid = doc.createElement('div');
+    pickerGrid.className = 'pet-trade-pet-picker';
+    const closePickerButton = doc.createElement('button');
+    closePickerButton.type = 'button';
+    closePickerButton.className = 'quiet pet-trade-close-picker';
+    closePickerButton.textContent = '取消選擇';
+    pickerPanel.append(ownSearch, pickerGrid, closePickerButton);
+    const slotActions = doc.createElement('div');
+    slotActions.className = 'pet-trade-slot-actions';
+    slotActions.hidden = true;
+    const replacePet = doc.createElement('button');
+    replacePet.type = 'button';
+    replacePet.className = 'quiet pet-trade-replace-pet';
+    replacePet.textContent = '替換';
+    const cancelReplace = doc.createElement('button');
+    cancelReplace.type = 'button';
+    cancelReplace.className = 'quiet pet-trade-cancel-replace';
+    cancelReplace.textContent = '取消';
+    slotActions.append(replacePet, cancelReplace);
     const saveOffer = doc.createElement('button');
     saveOffer.type = 'button';
     saveOffer.className = 'primary pet-trade-save-offer';
     saveOffer.textContent = '送出交易內容';
     saveOffer.disabled = true;
-    ownSide.append(ownHead, ownHint, ownSearch, ownGrid, saveOffer);
+    ownSide.append(ownHead, ownHint, ownGrid, slotActions, pickerPanel, saveOffer);
 
     const otherHead = doc.createElement('div');
     otherHead.className = 'pet-trade-side-head';
@@ -327,9 +350,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const state = doc.createElement('div');
     state.className = 'pet-trade-confirm-state';
     const ownState = doc.createElement('span');
+    ownState.dataset.tradeOwnState = 'true';
     ownState.className = ownConfirmed ? 'is-confirmed' : '';
     ownState.textContent = '你：' + (ownConfirmed ? '已確認' : '尚未確認');
     const otherState = doc.createElement('span');
+    otherState.dataset.tradeOtherState = 'true';
     otherState.className = otherConfirmed ? 'is-confirmed' : '';
     otherState.textContent = '對方：' + (otherConfirmed ? '已確認' : '尚未確認');
     state.append(ownState, otherState);
@@ -339,6 +364,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const confirm = doc.createElement('button');
     confirm.type = 'button';
     confirm.className = 'primary pet-trade-confirm-button';
+    confirm.dataset.tradeConfirmButton = 'true';
     confirm.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
     confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
     const hint = doc.createElement('small');
@@ -349,7 +375,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       ownCount.textContent = draftOffer.length + ' / 4 隻';
       saveOffer.disabled = JSON.stringify(draftOffer) === JSON.stringify(ownOffer);
       saveOffer.textContent = saveOffer.disabled ? '交易內容已送出' : '送出交易內容（' + draftOffer.length + ' 隻）';
-      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
+      confirm.dataset.draftMatchesOffer = String(JSON.stringify(draftOffer) === JSON.stringify(ownOffer));
+      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || confirm.dataset.draftMatchesOffer !== 'true';
       if (JSON.stringify(draftOffer) !== JSON.stringify(ownOffer)) {
         hint.textContent = '你有尚未送出的選擇，送出後雙方確認狀態會重置。';
       } else {
@@ -357,28 +384,81 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       }
     }
 
-    function renderOwnPets(filter = '') {
+    let editingSlotIndex = null;
+    let pickerMode = 'add';
+
+    function openPicker(mode, slotIndex = null) {
+      pickerMode = mode;
+      editingSlotIndex = slotIndex;
+      slotActions.hidden = true;
+      pickerPanel.hidden = false;
+      ownSearch.value = '';
+      renderPicker();
+      ownSearch.focus();
+    }
+
+    function closePicker() {
+      pickerPanel.hidden = true;
+      editingSlotIndex = null;
+      slotActions.hidden = true;
+    }
+    closePickerButton.addEventListener('click', closePicker);
+
+    function renderOfferSlots() {
       ownGrid.replaceChildren();
+      for (let index = 0; index < draftOffer.length; index += 1) {
+        const uid = draftOffer[index];
+        const item = pets.find(pet => String(pet.uid) === String(uid));
+        if (!item) continue;
+        const preview = makePetCard(item);
+        const slot = doc.createElement('button');
+        slot.type = 'button';
+        slot.className = 'pet-trade-pet-card pet-trade-offer-slot' + (editingSlotIndex === index ? ' is-active' : '');
+        slot.setAttribute('aria-label', '選擇替換' + (petById(item.id)?.name || '寵物'));
+        while (preview.firstChild) slot.append(preview.firstChild);
+        slot.addEventListener('click', () => {
+          editingSlotIndex = index;
+          slotActions.hidden = false;
+          pickerPanel.hidden = true;
+          renderOfferSlots();
+        });
+        ownGrid.append(slot);
+      }
+      if (draftOffer.length < 4) {
+        const add = doc.createElement('button');
+        add.type = 'button';
+        add.className = 'pet-trade-add-slot';
+        add.textContent = '+';
+        add.setAttribute('aria-label', '新增交易寵物');
+        add.addEventListener('click', () => openPicker('add'));
+        ownGrid.append(add);
+      }
+      ownCount.textContent = draftOffer.length + ' / 4 隻';
+      updateDraftUI();
+    }
+
+    function renderPicker(filter = ownSearch.value) {
+      pickerGrid.replaceChildren();
       const needle = String(filter || '').trim().toLocaleLowerCase();
+      const selectedUids = new Set(draftOffer.map(String));
       const visible = pets.filter(item => {
+        if (selectedUids.has(String(item.uid))) return false;
         const definition = petById(item.id);
         return !needle || String(definition?.name || '').toLocaleLowerCase().includes(needle);
       });
       if (!visible.length) {
         const empty = doc.createElement('div');
         empty.className = 'pet-trade-empty-offer';
-        empty.textContent = pets.length ? '沒有符合名稱的寵物。' : '目前沒有可交易的寵物。';
-        ownGrid.append(empty);
-        updateDraftUI();
+        empty.textContent = pets.length ? '沒有其他符合條件的寵物。' : '目前沒有可交易的寵物。';
+        pickerGrid.append(empty);
         return;
       }
       for (const item of visible) {
-        const selected = draftOffer.includes(String(item.uid));
-        const card = makePetCard(item, true, selected);
+        const card = makePetCard(item, true, false);
         card.addEventListener('click', () => {
           const uid = String(item.uid);
-          if (draftOffer.includes(uid)) {
-            draftOffer = draftOffer.filter(value => value !== uid);
+          if (pickerMode === 'replace' && Number.isInteger(editingSlotIndex)) {
+            draftOffer = draftOffer.map((value, index) => index === editingSlotIndex ? uid : value);
           } else {
             if (draftOffer.length >= 4) {
               toast('每次交易最多只能提供 4 隻寵物');
@@ -387,15 +467,24 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             draftOffer = [...draftOffer, uid];
           }
           offerDrafts.set(session.id, { revision, uids: [...draftOffer] });
-          renderOwnPets(ownSearch.value);
+          closePicker();
+          renderOfferSlots();
         });
-        ownGrid.append(card);
+        pickerGrid.append(card);
       }
-      updateDraftUI();
     }
 
-    ownSearch.addEventListener('input', () => renderOwnPets(ownSearch.value));
-    renderOwnPets();
+    replacePet.addEventListener('click', () => {
+      if (!Number.isInteger(editingSlotIndex)) return;
+      openPicker('replace', editingSlotIndex);
+    });
+    cancelReplace.addEventListener('click', () => {
+      editingSlotIndex = null;
+      slotActions.hidden = true;
+      renderOfferSlots();
+    });
+    ownSearch.addEventListener('input', () => renderPicker(ownSearch.value));
+    renderOfferSlots();
 
     otherCount.textContent = otherOffer.length + ' / 4 隻';
     saveOffer.addEventListener('click', async () => {
@@ -593,11 +682,30 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             session.offered_pet_uids_a, session.offered_pet_uids_b,
             session.offered_pet_snapshots_a, session.offered_pet_snapshots_b,
             session.offered_pet_uid_a, session.offered_pet_uid_b,
-            session.offered_pet_snapshot_a, session.offered_pet_snapshot_b,
-            session.confirmed_a, session.confirmed_b
+            session.offered_pet_snapshot_a, session.offered_pet_snapshot_b
           ]);
           const existing = [...host.children].find(node => node.dataset.sessionId === String(session.id));
           if (existing && existing.dataset.sessionSignature === signature) {
+            const ownIsA = user.id === session.participant_a;
+            const ownConfirmed = ownIsA ? session.confirmed_a : session.confirmed_b;
+            const otherConfirmed = ownIsA ? session.confirmed_b : session.confirmed_a;
+            const ownState = existing.querySelector('[data-trade-own-state]');
+            const otherState = existing.querySelector('[data-trade-other-state]');
+            const confirmButton = existing.querySelector('[data-trade-confirm-button]');
+            if (ownState) {
+              ownState.classList.toggle('is-confirmed', Boolean(ownConfirmed));
+              ownState.textContent = '你：' + (ownConfirmed ? '已確認' : '尚未確認');
+            }
+            if (otherState) {
+              otherState.classList.toggle('is-confirmed', Boolean(otherConfirmed));
+              otherState.textContent = '對方：' + (otherConfirmed ? '已確認' : '尚未確認');
+            }
+            if (confirmButton) {
+              confirmButton.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
+              const offeredA = Array.isArray(session.offered_pet_uids_a) ? session.offered_pet_uids_a : (session.offered_pet_uid_a ? [session.offered_pet_uid_a] : []);
+              const offeredB = Array.isArray(session.offered_pet_uids_b) ? session.offered_pet_uids_b : (session.offered_pet_uid_b ? [session.offered_pet_uid_b] : []);
+              confirmButton.disabled = !offeredA.length || !offeredB.length || Boolean(ownConfirmed) || confirmButton.dataset.draftMatchesOffer !== 'true';
+            }
             retainedRooms.add(existing);
             continue;
           }

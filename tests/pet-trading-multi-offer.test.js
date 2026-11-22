@@ -214,3 +214,29 @@ test('completed trade sync is marked handled only after cloud refresh succeeds',
   assert.match(service, /await onTradeCompleted\(\);\s*completedSessionsHandled\.add\(syncKey\)/);
   assert.doesNotMatch(service, /completedSessionsHandled\.add\(syncKey\);\s*try\s*\{\s*await onTradeCompleted/);
 });
+
+
+test('trade pet offer uses one sequential plus slot, excludes already selected pets, and supports replacement', () => {
+  assert.match(service, /pet-trade-add-slot/);
+  assert.match(service, /for \(let index = 0; index < draftOffer\.length; index \+= 1\)/);
+  assert.match(service, /if \(draftOffer\.length < 4\)/);
+  assert.match(service, /selectedUids\.has\(String\(item\.uid\)\)/);
+  assert.match(service, /replacePet\.addEventListener/);
+  assert.match(service, /取消選擇/);
+  assert.match(service, /pet-trade-replace-pet/);
+});
+
+test('trade room translates rarity labels and weight units into Chinese', () => {
+  assert.match(service, /legendary: '傳奇'/);
+  assert.match(service, /mythic: '神話'/);
+  assert.match(service, /\+ ' 公斤'/);
+  assert.doesNotMatch(service, /weight\.textContent = .*\+ ' kg'/);
+});
+
+test('confirmation status updates in the existing room without replacing the room DOM', () => {
+  assert.match(service, /session\.offered_pet_snapshot_a, session\.offered_pet_snapshot_b\s*\]\)/);
+  assert.doesNotMatch(service, /session\.offered_pet_snapshot_a, session\.offered_pet_snapshot_b,\s*session\.confirmed_a/);
+  assert.match(service, /existing\.querySelector\('\[data-trade-own-state\]'\)/);
+  assert.match(service, /existing\.querySelector\('\[data-trade-other-state\]'\)/);
+  assert.match(service, /confirmButton\.dataset\.draftMatchesOffer/);
+});
