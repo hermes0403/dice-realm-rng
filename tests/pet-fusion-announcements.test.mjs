@@ -113,7 +113,9 @@ test('永恆稀有度套用較深普通藍至普通粉漸層，且只注入一�
   assert.equal(applyEternalPetRarityTheme(documentRef), true);
   assert.equal(applyEternalPetRarityTheme(documentRef), false);
   assert.match(elements.get('eternal-pet-rarity-theme').textContent, /#9eeaff/);
-  assert.match(elements.get('eternal-pet-rarity-theme').textContent, /#d6c4ff/);
+  assert.doesNotMatch(elements.get('eternal-pet-rarity-theme').textContent, /#d6c4ff/);
   assert.match(elements.get('eternal-pet-rarity-theme').textContent, /#ffaddd/);
   assert.equal(ETERNAL_PET_RARITY_CSS.includes('.pet-rarity-eternal'), true);
+  assert.match(ETERNAL_PET_RARITY_CSS, /#9eeaff 0%, #ffaddd 100%/);
+  assert.equal(ETERNAL_PET_RARITY_CSS.includes('#d6c4ff'), false);
 });
