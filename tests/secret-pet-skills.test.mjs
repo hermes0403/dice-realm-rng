@@ -41,7 +41,7 @@ test('終焉財藏：分母門檻及每日100M上限', () => {
 
 test('虛無回饋：1%獲得500K，且每日100M上限不超額', () => {
   const hit = resolveSecretRollRewards({
-    den: 2, hasS5: true, daily: { s3: 0, s5: 99_750_000 }, random: () => 0
+    den: 2, hasS5: true, daily: { s4: 0, s5: 99_750_000 }, random: () => 0
   });
   assert.equal(hit.reward, 250_000);
   assert.equal(hit.daily.s5, 100_000_000);
