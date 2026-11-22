@@ -26,14 +26,14 @@ export function resolveSecretLoginReward(previous = {}, today = taipeiDateKey())
   return { claimed: true, reward, state: { lastDate: today, streak, reward } };
 }
 
-export function resolveSecretRollRewards({ den, daily = {}, hasS3 = false, hasS5 = false, random = Math.random } = {}) {
+export function resolveSecretRollRewards({ den, daily = {}, hasS4 = false, hasS5 = false, random = Math.random } = {}) {
   const next = {
     date: daily.date || '',
     s3: Math.min(DAILY_CAP, Math.max(0, Number(daily.s3) || 0)),
     s5: Math.min(DAILY_CAP, Math.max(0, Number(daily.s5) || 0))
   };
   let reward = 0;
-  if (hasS3 && Number(den) >= 10_000 && next.s3 < DAILY_CAP) {
+  if (hasS4 && Number(den) >= 10_000 && next.s3 < DAILY_CAP) {
     const base = Math.min(1_000_000, DAILY_CAP - next.s3);
     next.s3 += base;
     reward += base;
