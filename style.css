@@ -2613,3 +2613,36 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #petsTradeView .pet-trade-search-results{max-height:141px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;}
 
 @media(max-width:760px){#petsTradeView .pet-trade-search-result{min-height:43px;height:43px;}}
+
+
+/* T-0121: sharper, calmer trade UI; avoid excessive pill/circle styling. */
+#petsTradeView .pet-trade-status,
+#petsTradeView .pet-trade-emblem,
+#petsTradeView .pet-trade-player-picker,
+#petsTradeView .pet-trade-search,
+#petsTradeView .pet-trade-search-result,
+#petsTradeView .pet-trade-selected-target,
+#petsTradeView .pet-trade-room,
+#petsTradeView .pet-trade-invitation,
+#petsTradeView .pet-trade-live-room,
+#petsTradeView .pet-trade-offer-side,
+#petsTradeView .pet-trade-offer-select,
+#petsTradeView .pet-trade-offer-summary,
+#petsTradeView .pet-trade-pet-card,
+#petsTradeView .pet-trade-empty-offer,
+#petsTradeView .pet-trade-confirm-state,
+#petsTradeView .pet-trade-room-hint,
+#petsTradeView .pet-trade-room-code {
+  border-radius: 5px;
+}
+#petsTradeView .pet-trade-emblem { border-radius: 7px; box-shadow: inset 0 1px 0 #ffffff12, 0 8px 20px #05071355; }
+#petsTradeView .pet-trade-status { border-radius: 4px; letter-spacing: .6px; }
+#petsTradeView .pet-trade-offer-count { border-radius: 4px; padding: 4px 8px; background: #202b45; border: 1px solid #435274; }
+#petsTradeView .pet-trade-pet-art { border-radius: 3px; }
+#petsTradeView .pet-trade-confirm-state { border-radius: 5px; border-left: 2px solid #6f78ad; }
+#petsTradeView .pet-trade-live-room { border-color: #465477; background: linear-gradient(145deg, #151d31, #0d1423); box-shadow: inset 0 1px 0 #ffffff0a; }
+#petsTradeView .pet-trade-own-side, #petsTradeView .pet-trade-other-side { border-radius: 5px; background: #101a2b; }
+#petsTradeView .pet-trade-own-side { border-left: 2px solid #8a7ad0; }
+#petsTradeView .pet-trade-other-side { border-left: 2px solid #5791ad; }
+#petsTradeView .pet-trade-pet-option.is-selected { box-shadow: inset 0 0 0 1px #b19aff55; }
+#petsTradeView .pet-trade-player-picker, #petsTradeView .pet-trade-room { box-shadow: inset 0 1px 0 #ffffff08; }
