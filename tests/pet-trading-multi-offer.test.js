@@ -66,7 +66,7 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
   assert.match(index, /id="petTradeRefreshPlayers"/);
   assert.doesNotMatch(index, /petTradeLoadMorePlayers|載入更多玩家/);
   assert.match(service, /select\('user_id,username'\)/);
-  assert.match(service, /PLAYER_LIMIT = 50/);
+  assert.match(service, /PLAYER_LIMIT = 40/);
   assert.match(service, /range\(0, PLAYER_LIMIT - 1\)/);
   assert.doesNotMatch(service, /目前在線|最近離線|is-online|is-offline/);
   assert.doesNotMatch(index, /尋找交易對象|選擇下方玩家即可發送交易邀請/);
@@ -165,8 +165,8 @@ test('收件匣不再渲染已接受、逾期、取消、拒絕或已送出的�
   assert.match(inboxRender, /makeActionButton\('拒絕'/);
 });
 
-test('trade player directory shows three visible rows and scrolls through up to fifty without a load-more button', () => {
-  assert.match(service, /PLAYER_LIMIT = 50/);
+test('trade player directory shows three visible rows and scrolls through up to forty without a load-more button', () => {
+  assert.match(service, /PLAYER_LIMIT = 40/);
   assert.match(service, /range\(0, PLAYER_LIMIT - 1\)/);
   assert.doesNotMatch(service, /petTradeLoadMorePlayers|append = false|append: true/);
   assert.doesNotMatch(index, /petTradeLoadMorePlayers|載入更多玩家/);
