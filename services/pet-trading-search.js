@@ -654,21 +654,23 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     if (invite) invite.addEventListener('click', sendInvitation);
     if (refresh) refresh.addEventListener('click', refreshInvitations);
     if (refreshPlayersButton) refreshPlayersButton.addEventListener('click', () => refreshPlayers());
-    doc.querySelectorAll('[data-pets-view]').forEach(button => {
-      button.addEventListener('click', () => {
-        const view = button.dataset.petsView === 'trade' ? 'trade' : 'fusion';
-        doc.getElementById('petsFusionView')?.toggleAttribute('hidden', view !== 'fusion');
-        doc.getElementById('petsTradeView')?.toggleAttribute('hidden', view !== 'trade');
-        doc.querySelectorAll('[data-pets-view]').forEach(tab => {
-          const active = tab.dataset.petsView === view;
-          tab.classList.toggle('active', active);
-          tab.setAttribute('aria-pressed', String(active));
-        });
-        if (view === 'trade') {
-          void refreshPlayers();
-          void refreshInvitations();
-        }
+    // Delegate the pets-view switch so it also works when navigation tabs are
+    // rendered after this module's setup() has already run.
+    doc.addEventListener('click', event => {
+      const button = event.target?.closest?.('[data-pets-view]');
+      if (!button) return;
+      const view = button.dataset.petsView === 'trade' ? 'trade' : 'fusion';
+      doc.getElementById('petsFusionView')?.toggleAttribute('hidden', view !== 'fusion');
+      doc.getElementById('petsTradeView')?.toggleAttribute('hidden', view !== 'trade');
+      doc.querySelectorAll('[data-pets-view]').forEach(tab => {
+        const active = tab.dataset.petsView === view;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-pressed', String(active));
       });
+      if (view === 'trade') {
+        void refreshPlayers();
+        void refreshInvitations();
+      }
     });
     if (supabaseClient?.auth?.onAuthStateChange) {
       supabaseClient.auth.onAuthStateChange((_event, session) => {
