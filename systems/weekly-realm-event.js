@@ -5,7 +5,7 @@ export const MILESTONES = [
   { target: 150000, reward: '幸運藥水 III ×1' },
   { target: 300000, reward: '速度藥水 II ×5 · 幸運藥水 II ×5' },
   { target: 500000, reward: '天堂藥水 I ×1' },
-  { target: 700000, reward: '天堂藥水 II ×1 · 100M }
+  { target: 700000, reward: '天堂藥水 II ×1 · 100M$' }
 ];
 const number = value => new Intl.NumberFormat('en-US').format(Math.max(0, Number(value) || 0));
 const safeText = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
