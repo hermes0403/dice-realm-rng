@@ -2715,3 +2715,80 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-info-panel--hell{border-color:#ff5364;box-shadow:inset 0 1px #ff536422,0 0 13px #ff536418}
 .pet-info-panel--hell strong{color:#ff6674}
 @media(max-width:520px){.pet-info-grid{display:flex;flex-direction:column;gap:7px}.pet-info-panel{grid-template-columns:minmax(74px,94px) minmax(48px,auto) minmax(0,1fr);gap:8px;padding:11px 10px 11px 13px}.pet-info-panel h4{font-size:13px}.pet-info-panel strong{font-size:19px}.pet-info-panel p{font-size:10px;line-height:1.45}.pet-info-kicker{font-size:8px}.pet-info-weight-table th,.pet-info-weight-table td{padding:8px 9px;font-size:12px}}
+
+
+/* T-0126: full-width mutation color bars, not border-only accents. */
+.pet-info-panel--none{
+  border-color:#7c879e;
+  background:linear-gradient(100deg,#465166 0%,#293449 78%);
+  box-shadow:inset 0 1px #ffffff20;
+}
+.pet-info-panel--none .pet-info-kicker,
+.pet-info-panel--none h4,
+.pet-info-panel--none strong{color:#f0f3fa}
+
+.pet-info-panel--golden{
+  border-color:#f4d77b;
+  background:linear-gradient(100deg,#8b641b 0%,#59431c 78%);
+  box-shadow:inset 0 1px #fff1bd35,0 0 14px #d5a83a20;
+}
+.pet-info-panel--golden .pet-info-kicker{color:#ffe9a6}
+.pet-info-panel--golden h4,.pet-info-panel--golden strong{color:#fff4c8}
+
+.pet-info-panel--diamond{
+  border-color:#8ed8ff;
+  background:linear-gradient(100deg,#236b91 0%,#17445f 78%);
+  box-shadow:inset 0 1px #d5f5ff35,0 0 14px #56caff22;
+}
+.pet-info-panel--diamond .pet-info-kicker{color:#c8f0ff}
+.pet-info-panel--diamond h4,.pet-info-panel--diamond strong{color:#e8f9ff}
+
+.pet-info-panel--rainbow{
+  border:1px solid transparent;
+  background:linear-gradient(100deg,#713c52 0%,#55416e 22%,#315b68 46%,#52643d 68%,#78542c 100%) padding-box,
+             linear-gradient(110deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1) border-box;
+  box-shadow:inset 0 1px #ffffff28,0 0 16px #c69bff20;
+}
+.pet-info-panel--rainbow .pet-info-kicker,
+.pet-info-panel--rainbow h4,
+.pet-info-panel--rainbow strong{color:#fff!important;text-shadow:0 1px 5px #171027aa}
+
+.pet-info-panel--rain{
+  border-color:#4ea5ff;
+  background:linear-gradient(100deg,#155a9b 0%,#123c68 78%);
+  box-shadow:inset 0 1px #9fd2ff35,0 0 13px #4ea5ff22;
+}
+.pet-info-panel--rain .pet-info-kicker{color:#b9dcff}
+.pet-info-panel--rain h4,.pet-info-panel--rain strong{color:#e5f3ff}
+
+.pet-info-panel--snow{
+  border-color:#fff4e8;
+  background:linear-gradient(100deg,#a8bacb 0%,#657b91 78%);
+  box-shadow:inset 0 1px #ffffff65,0 0 13px #fff4e822;
+}
+.pet-info-panel--snow .pet-info-kicker{color:#fff}
+.pet-info-panel--snow h4,.pet-info-panel--snow strong{color:#fff}
+
+.pet-info-panel--thunder{
+  border-color:#fff12d;
+  background:linear-gradient(100deg,#8b7900 0%,#554b08 78%);
+  box-shadow:inset 0 1px #fff12d44,0 0 13px #fff12d22;
+}
+.pet-info-panel--thunder .pet-info-kicker{color:#fff79a}
+.pet-info-panel--thunder h4,.pet-info-panel--thunder strong{color:#fffbd0}
+
+.pet-info-panel--crystal{
+  border-color:#a78bfa;
+  background:linear-gradient(100deg,#6742a0 0%,#3e2c70 78%);
+  box-shadow:inset 0 1px #c4b5fd35,0 0 13px #a78bfa28;
+}
+.pet-info-panel--crystal .pet-info-kicker{color:#e3d7ff}
+.pet-info-panel--crystal h4,.pet-info-panel--crystal strong{color:#f5efff}
+
+.pet-info-panel--hell{
+  border-color:#ff5364;
+  background:linear-gradient(100deg,#8d2636 0%,#531b2b 78%);
+  box-shadow:inset 0 1px #ff536444,0 0 13px #ff536422;
+}
+.pet-info-panel--hell .pet-info-kicker{color:#ffc1c8}
+.pet-info-panel--hell h4,.pet-info-panel--hell strong{color:#fff0f1}
