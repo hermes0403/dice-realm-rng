@@ -2960,3 +2960,48 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
     margin-top: 0 !important;
   }
 }
+
+
+/* T-0129: mobile vertical spacing and bottom navigation content clearance. */
+@media (max-width: 760px) {
+  /* The mobile bar is fixed UI; keep it completely outside normal document flow. */
+  #mobileNav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    height: 58px !important;
+    z-index: 10000 !important;
+  }
+
+  /* Collapse the persistent mobile spacer between the announcement and active page. */
+  .layout {
+    position: relative !important;
+    display: block !important;
+    /* The legacy mobile shell reserves an oversized blank band before the content. */
+    margin: clamp(-150px, -35vw, -110px) 0 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  .content {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 0 0 !important;
+    min-height: 0 !important;
+  }
+  .page.active {
+    display: block !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 0 calc(180px + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .page.active > .section-head:first-child {
+    margin-top: 0 !important;
+  }
+}
