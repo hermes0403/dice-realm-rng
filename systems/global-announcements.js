@@ -215,9 +215,13 @@ export function createGlobalAnnouncements(dependencies) {
     }
   }
 
-  async function broadcastRareRoll(d) {
-    const den = Number(d?.den);
-    if (!d || !Number.isFinite(den) || den < RARE_ROLL_ANNOUNCEMENT_MIN_DENOMINATOR) return;
+  async function broadcastRareRoll(d, weatherType = 'sunny') {
+    const baseDen = Number(d?.den);
+    if (!d || !Number.isFinite(baseDen) || baseDen < RARE_ROLL_ANNOUNCEMENT_MIN_DENOMINATOR) return;
+    // 故障骰在地獄天氣下，百萬至一億分母的實際權重提升 4%；公告與歷史紀錄顯示有效分母。
+    const den = weatherType === 'hell' && d.glitchBonus && baseDen >= 1000000 && baseDen <= 100000000
+      ? Math.floor(baseDen / 1.04)
+      : baseDen;
     const state = getState();
     const currentUser = getCurrentUser();
     const at = Date.now();
