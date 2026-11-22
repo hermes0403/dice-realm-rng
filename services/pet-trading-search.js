@@ -375,7 +375,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       ownCount.textContent = draftOffer.length + ' / 4 隻';
       saveOffer.disabled = JSON.stringify(draftOffer) === JSON.stringify(ownOffer);
       saveOffer.textContent = saveOffer.disabled ? '交易內容已送出' : '送出交易內容（' + draftOffer.length + ' 隻）';
-      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
+      confirm.dataset.draftMatchesOffer = String(JSON.stringify(draftOffer) === JSON.stringify(ownOffer));
+      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || confirm.dataset.draftMatchesOffer !== 'true';
       if (JSON.stringify(draftOffer) !== JSON.stringify(ownOffer)) {
         hint.textContent = '你有尚未送出的選擇，送出後雙方確認狀態會重置。';
       } else {
@@ -703,7 +704,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
               confirmButton.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
               const offeredA = Array.isArray(session.offered_pet_uids_a) ? session.offered_pet_uids_a : (session.offered_pet_uid_a ? [session.offered_pet_uid_a] : []);
               const offeredB = Array.isArray(session.offered_pet_uids_b) ? session.offered_pet_uids_b : (session.offered_pet_uid_b ? [session.offered_pet_uid_b] : []);
-              confirmButton.disabled = !offeredA.length || !offeredB.length || Boolean(ownConfirmed);
+              confirmButton.disabled = !offeredA.length || !offeredB.length || Boolean(ownConfirmed) || confirmButton.dataset.draftMatchesOffer !== 'true';
             }
             retainedRooms.add(existing);
             continue;
