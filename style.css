@@ -2611,3 +2611,5 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 
 /* Trade player list: keep exactly three rows visible; scroll within the list, capped at 40 players. */
 #petsTradeView .pet-trade-search-results{max-height:141px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;}
+
+@media(max-width:760px){#petsTradeView .pet-trade-search-result{min-height:43px;height:43px;}}
