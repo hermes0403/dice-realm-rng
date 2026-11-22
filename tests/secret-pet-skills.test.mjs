@@ -36,7 +36,7 @@ test('終焉財藏：分母門檻及每日100M上限', () => {
     den: 10_000, hasS4: true, daily: { s4: 99_500_000, s5: 0 }, random: () => 0
   });
   assert.equal(capped.reward, 500_000);
-  assert.equal(capped.daily.s3, 100_000_000);
+  assert.equal(capped.daily.s4, 100_000_000);
 });
 
 test('虛無回饋：1%獲得500K，且每日100M上限不超額', () => {
