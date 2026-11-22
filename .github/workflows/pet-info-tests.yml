@@ -1,0 +1,38 @@
+name: Pet information and income multiplier tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'config.js'
+      - 'index.html'
+      - 'style.css'
+      - 'script.js'
+      - 'sw.js'
+      - 'systems/pet-skills.js'
+      - 'tests/pet-income-mutation-multiplier.test.js'
+      - 'tests/pet-info-page.test.js'
+      - '.github/workflows/pet-info-tests.yml'
+
+jobs:
+  pet-info:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run pet income and information tests
+        run: node --test tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js
+      - name: Check JavaScript syntax
+        run: |
+          node --check script.js
+          node --check systems/pet-skills.js
+          node --check sw.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
