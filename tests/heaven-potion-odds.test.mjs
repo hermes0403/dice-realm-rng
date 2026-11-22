@@ -48,7 +48,7 @@ test('四組中間骰子依分母遞增、權重嚴格遞減且包含奇點骰�
     const fixedId = heaven2 ? (high ? 'd15' : 'd14') : (high ? 'd13' : 'd12');
     const entries = buildHeavenBaseEntries(byId, heaven2, high)
       .filter(entry => HEAVEN_MIDDLE_IDS.includes(entry.dice.id) && entry.dice.id !== fixedId);
-    assert.equal(entries.length, HEAVEN_MIDDLE_IDS.length - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0));
+    assert.equal(entries.length, HEAVEN_MIDDLE_IDS.length - (HEAVEN_MIDDLE_IDS.includes(fixedId) ? 1 : 0) - (heaven2 ? 1 : 0));
     for (let i = 1; i < entries.length; i++) {
       assert.ok(entries[i].dice.den > entries[i - 1].dice.den);
       assert.ok(entries[i].weight < entries[i - 1].weight);
