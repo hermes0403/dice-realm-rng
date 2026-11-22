@@ -202,3 +202,15 @@ test('expired active trade sessions are cleaned and cannot block a new invitatio
   assert.match(service, /player_already_has_active_trade/);
   assert.match(service, /你或對方已有尚未結束的交易房間/);
 });
+
+test('active trade room exposes a working cancel action before both players confirm', () => {
+  assert.match(service, /const cancel = makeSessionActionButton\(session\.id, '取消交易房間'\)/);
+  assert.match(service, /actions\.append\(confirm, cancel\)/);
+  assert.match(service, /cancel_pet_trade_session/);
+  assert.match(service, /交易房間已取消/);
+});
+
+test('completed trade sync is marked handled only after cloud refresh succeeds', () => {
+  assert.match(service, /await onTradeCompleted\(\);\s*completedSessionsHandled\.add\(syncKey\)/);
+  assert.doesNotMatch(service, /completedSessionsHandled\.add\(syncKey\);\s*try\s*\{\s*await onTradeCompleted/);
+});
