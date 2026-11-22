@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const service = readFileSync(new URL('../services/pet-trading-search.js', import.meta.url), 'utf8');
+const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
+const cloudSave = readFileSync(new URL('../services/cloud-save.js', import.meta.url), 'utf8');
 import { getPendingIncomingTradeRequests } from '../services/pet-trading-search.js';
 const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url), 'utf8');
 const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
@@ -245,4 +247,18 @@ test('confirmation status updates in the existing room without replacing the roo
 test('refreshing trade invitations never replaces an already visible active room with a loading message', () => {
   assert.match(service, /const hasVisibleTradeRoom = \[\.\.\.host\.children\]\.some\(node => node\.classList\.contains\('pet-trade-active-room-only'\)\)/);
   assert.match(service, /if \(!hasVisibleTradeRoom\) host\.textContent = '正在讀取邀請…'/);
+});
+
+
+test('trade pet names and rarity labels receive the same rarity class', () => {
+  assert.match(service, /const rarityClass = .*'pet-rarity-' \+ rarityKey/);
+  assert.match(service, /if \(rarityClass\) name\.classList\.add\(rarityClass\)/);
+  assert.match(service, /if \(rarityClass\) rarity\.classList\.add\(rarityClass\)/);
+  assert.match(service, /legendary: '傳奇'/);
+});
+
+test('trade completion refreshes cloud state and redraws pet pages without a full game render', () => {
+  assert.match(script, /onTradeCompleted: async \(\) => \{\s*await loadCloudSave\(\{ renderAfterLoad: false \}\);\s*renderPetsPage\(\);\s*renderPetCodex\(\);/);
+  assert.match(cloudSave, /renderAfterLoad = true/);
+  assert.match(cloudSave, /if \(renderAfterLoad\) render\(\)/);
 });

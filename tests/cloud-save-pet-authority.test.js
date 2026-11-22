@@ -266,3 +266,15 @@ test('a pet fused while a cloud save RPC is in flight is sent in the next delta'
   assert.equal(writes.length, 2, 'a second delta must be sent after the in-flight save');
   assert.deepEqual(writes[1].args.p_save_patch.pets, [fusedPet]);
 });
+
+
+test('trade completion can refresh authoritative cloud pets without redrawing the whole game', async () => {
+  const localPet = { uid: 'trade-out', id: 'c1', rarity: 'common' };
+  const receivedPet = { uid: 'trade-in', id: 'r1', rarity: 'rare' };
+  const { service, getState } = createService({
+    localSave: { bag: { d1: 1 }, pets: [localPet], equippedPetUids: [], coins: 100 },
+    cloudSave: { bag: { d1: 1 }, pets: [receivedPet], equippedPetUids: [], coins: 100 }
+  });
+  await service.loadCloudSave({ renderAfterLoad: false });
+  assert.deepEqual(getState().pets.map(pet => pet.uid), [receivedPet.uid]);
+});

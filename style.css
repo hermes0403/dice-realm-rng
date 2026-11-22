@@ -2661,3 +2661,15 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #petsTradeView .pet-trade-picker-panel .pet-trade-pet-picker{max-height:250px}
 #petsTradeView .pet-trade-picker-panel .pet-trade-pet-option{cursor:pointer}
 @media(max-width:760px){#petsTradeView .pet-trade-offer-slots{grid-template-columns:repeat(2,minmax(0,1fr))}#petsTradeView .pet-trade-add-slot{min-height:104px}}
+
+
+/* T-0123: legendary trade pet names and rarity labels use the same gold tone. */
+#petsTradeView .pet-trade-pet-card strong.pet-rarity-legendary,
+#petsTradeView .pet-trade-pet-card small.pet-rarity-legendary{
+  color:#ffe58a!important;
+  background:none!important;
+  -webkit-background-clip:initial!important;
+  background-clip:initial!important;
+  -webkit-text-fill-color:#ffe58a!important;
+  text-shadow:0 0 7px #d99a0044;
+}
