@@ -31,7 +31,7 @@ const APP_SHELL = [
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './systems/dice-locks.js',
   './core/game-state.js',
-  './systems/weekly-realm-event.js?v=20261119-weekly-account-eligibility',
+  './systems/weekly-realm-event.js?v=20261122-weekly-700k-v1',
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
