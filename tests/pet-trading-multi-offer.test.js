@@ -246,3 +246,17 @@ test('refreshing trade invitations never replaces an already visible active room
   assert.match(service, /const hasVisibleTradeRoom = \[\.\.\.host\.children\]\.some\(node => node\.classList\.contains\('pet-trade-active-room-only'\)\)/);
   assert.match(service, /if \(!hasVisibleTradeRoom\) host\.textContent = '正在讀取邀請…'/);
 });
+
+
+test('trade pet names and rarity labels receive the same rarity class', () => {
+  assert.match(service, /const rarityClass = .*'pet-rarity-' \+ rarityKey/);
+  assert.match(service, /if \(rarityClass\) name\.classList\.add\(rarityClass\)/);
+  assert.match(service, /if \(rarityClass\) rarity\.classList\.add\(rarityClass\)/);
+  assert.match(service, /legendary: '傳奇'/);
+});
+
+test('trade completion refreshes cloud state and redraws pet pages without a full game render', () => {
+  assert.match(script, /onTradeCompleted: async \(\) => \{\s*await loadCloudSave\(\{ renderAfterLoad: false \}\);\s*renderPetsPage\(\);\s*renderPetCodex\(\);/);
+  assert.match(cloudSave, /renderAfterLoad = true/);
+  assert.match(cloudSave, /if \(renderAfterLoad\) render\(\)/);
+});
