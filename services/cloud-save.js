@@ -659,6 +659,7 @@ export function createCloudSaveService(dependencies) {
 
   async function loadCloudSave({
     syncAfterLoad = true,
+    renderAfterLoad = true,
     conflictBasePayload = null,
     conflictBaseVersion = null,
     conflictLocalSnapshot = null
@@ -803,7 +804,7 @@ export function createCloudSaveService(dependencies) {
         restoreAutoSellPrefs();
         persistLocalSnapshot(S, user.id);
         writeCloudBase(user.id, cloudPayload, data.updated_at);
-        render();
+        if (renderAfterLoad) render();
         document.getElementById('saveStatus').textContent = usedLegacyFallback
           ? '雲端存檔已載入；舊版本機資料另存為復原備份'
           : '雲端存檔已載入';
@@ -824,7 +825,7 @@ export function createCloudSaveService(dependencies) {
         setState(S);
         restoreAutoSellPrefs();
         persistLocalSnapshot(S, user.id);
-        render();
+        if (renderAfterLoad) render();
       }
 
       // The correct account state is now installed. Only now may any save write
