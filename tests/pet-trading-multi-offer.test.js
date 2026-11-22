@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const service = readFileSync(new URL('../services/pet-trading-search.js', import.meta.url), 'utf8');
+const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
+const cloudSave = readFileSync(new URL('../services/cloud-save.js', import.meta.url), 'utf8');
 import { getPendingIncomingTradeRequests } from '../services/pet-trading-search.js';
 const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url), 'utf8');
 const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
