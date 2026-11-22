@@ -184,7 +184,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         }
         toast(status);
         setStatus(action === 'accept' ? '已接受邀請，正在開啟交易房間…' : status);
-        await refreshInvitations();
+        scheduleRefreshInvitations();
       } catch (error) {
         console.warn('Pet trade invitation response failed', error);
         button.disabled = false;
@@ -416,7 +416,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         if (error) throw error;
         offerDrafts.delete(session.id);
         toast('交易內容已送出，雙方需要重新確認');
-        await refreshInvitations();
+        scheduleRefreshInvitations();
       } catch (error) {
         console.warn('Pet trade offer update failed', error);
         const message = String(error?.message || '');
@@ -450,7 +450,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         } else {
           toast('你已準備完成，等待對方確認');
         }
-        await refreshInvitations();
+        scheduleRefreshInvitations();
       } catch (error) {
         console.warn('Pet trade confirmation failed', error);
         hint.textContent = error?.message?.includes('trade_offer_changed_reload')
@@ -459,7 +459,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             ? '有寵物已不在持有清單，請重新選擇。'
             : '確認失敗：' + (error?.message || '請重新整理後再試。');
         confirm.disabled = false;
-        if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();;
+        if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();;;
       }
     });
 
@@ -483,7 +483,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         });
         if (error) throw error;
         toast(label === '取消交易房間' ? '交易房間已取消' : '逾期房間狀態已更新');
-        await refreshInvitations();
+        scheduleRefreshInvitations();
       } catch (error) {
         console.warn('Pet trade session cancellation failed', error);
         button.disabled = false;
