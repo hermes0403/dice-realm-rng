@@ -11,7 +11,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   const doc = documentRef;
   let selectedPlayer = null;
   let searchResults = [];
-  const PLAYER_LIMIT = 50;
+  const PLAYER_LIMIT = 40;
   let searching = false;
   let refreshing = false;
   let refreshQueued = false;
