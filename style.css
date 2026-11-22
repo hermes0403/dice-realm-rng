@@ -2980,7 +2980,8 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   .layout {
     position: relative !important;
     display: block !important;
-    margin: 0 !important;
+    /* The legacy mobile shell reserves an oversized blank band before the content. */
+    margin: clamp(-150px, -35vw, -110px) 0 0 !important;
     padding: 0 !important;
     transform: none !important;
   }
