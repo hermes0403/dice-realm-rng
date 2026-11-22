@@ -338,5 +338,5 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /dice-realm-shell-v2\.02/);
   assert.match(worker, /style\.css\?v=20261122-mobile-spacing-v7/);
-  assert.match(worker, /ui\/navigation\.js\?v=20261122-mobile-spacing-v7/);
+  assert.match(worker, /ui\/navigation\.js\?v=20261122-five-entry-nav-v5/);
 });
