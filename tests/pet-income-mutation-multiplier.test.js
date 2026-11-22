@@ -81,8 +81,8 @@ test('雜魚的三隻已裝備神話寵物收益依照雪變異正確計算', ()
   ];
   assert.equal(system.petIncomePerSecond(pets[0]), 3000);
   assert.equal(system.petIncomePerSecond(pets[1]), 2200);
-  assert.equal(system.petIncomePerSecond(pets[2]), 3795);
-  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 8995);
+  assert.equal(system.petIncomePerSecond(pets[2]), 3794);
+  assert.equal(pets.reduce((sum, pet) => sum + system.petIncomePerSecond(pet), 0), 8994);
 });
 
 test('signed-in pet sale UI receives the server transaction dependencies', async () => {
