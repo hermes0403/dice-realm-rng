@@ -1,8 +1,8 @@
-export function addWeatherDiceOdds(entries, pool, weatherTypes) {
+export function addWeatherDiceOdds(entries, pool, weatherTypes, minimumDenominator = 2049) {
   const activeWeatherTypes = new Set(Array.isArray(weatherTypes) ? weatherTypes : [weatherTypes]);
   const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
   if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
-  const weatherDice = pool.filter(dice => activeWeatherTypes.has(dice.weather) && Number(dice.den) > 2048);
+  const weatherDice = pool.filter(dice => activeWeatherTypes.has(dice.weather) && Number(dice.den) >= minimumDenominator);
   if (!weatherDice.length) return entries;
   const donors = entries.filter(entry => entry.weight > 10);
   const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
@@ -15,7 +15,7 @@ export function addWeatherDiceOdds(entries, pool, weatherTypes) {
 
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
 import { addDiceToBag } from './dice-locks.js';
-import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights, consumeHeavenPotionCharge } from './heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
+import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights, consumeHeavenPotionCharge } from './heaven-potion-odds.js?v=20261122-heaven2-min-denominator';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
@@ -140,7 +140,7 @@ export function createDiceSystem(deps) {
         heaven2,
         angel
       );
-      const withWeatherDice = addWeatherOdds(entries, pool, weatherTypes);
+      const withWeatherDice = addWeatherOdds(entries, pool, weatherTypes, heaven2 ? 16384 : 2049);
       const total = withWeatherDice.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
       for (const entry of withWeatherDice) {
