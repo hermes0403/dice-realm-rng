@@ -135,8 +135,8 @@ export function createPetSystem({
   function applyPetSkillDailyReset() {
     const S = getState();
     const today = taipeiDateKey();
-    S.petSkillDaily = S.petSkillDaily || { date: today, s3: 0, s5: 0 };
-    if (S.petSkillDaily.date !== today) S.petSkillDaily = { date: today, s3: 0, s5: 0 };
+    S.petSkillDaily = S.petSkillDaily || { date: today, s4: 0, s5: 0 };
+    if (S.petSkillDaily.date !== today) S.petSkillDaily = { date: today, s4: 0, s5: 0 };
   }
 
   function petBonusTotals() {
@@ -170,17 +170,23 @@ export function createPetSystem({
   function applyPetRollSkills(dice) {
     const S = getState();
     const petLuckWasUsed = (Number(S.petSkillLuckCharges) || 0) > 0;
-    if (petLuckWasUsed) S.petSkillLuckCharges = Math.max(0, (Number(S.petSkillLuckCharges) || 0) - 1);
+    if (petLuckWasUsed) {
+      S.petSkillLuckCharges = Math.max(0, (Number(S.petSkillLuckCharges) || 0) - 1);
+      if (!S.petSkillLuckCharges) S.petSkillLuckBonus = 0;
+    }
     applyPetSkillDailyReset();
     const rollRewards = resolveSecretRollRewards({
       den: dice.den,
       daily: S.petSkillDaily,
-      hasS3: equippedPetHas('s3'),
+      hasS4: equippedPetHas('s4'),
       hasS5: equippedPetHas('s5')
     });
     S.petSkillDaily = rollRewards.daily;
     const petSkillReward = rollRewards.reward;
-    if (equippedPetHas('m1') && Number(S.rolls) % 1000 === 0) S.petSkillLuckCharges = 1;
+    if (Number(S.rolls) % 1000 === 0) {
+      if (equippedPetHas('s6')) { S.petSkillLuckCharges = 1; S.petSkillLuckBonus = 500; }
+      else if (equippedPetHas('m1')) { S.petSkillLuckCharges = 1; S.petSkillLuckBonus = 100; }
+    }
     return petSkillReward;
   }
 
@@ -210,6 +216,36 @@ export function createPetSystem({
       save();
       toast('混沌祝福：連續登入第 ' + result.state.streak + ' 天，獲得 ' + format(result.reward) + '$');
       return result.reward;
+    });
+  }
+
+  async function useSecretDailySkill(uid) {
+    const userId = getCurrentUser()?.id;
+    if (!userId) { openAuth(); toast('請先登入帳號才能領取寵物技能獎勵'); return false; }
+    const lockName = 'diceRealmSecretPetS1DailySkill:' + userId;
+    const locks = globalThis.navigator?.locks;
+    if (!locks?.request) { toast('此瀏覽器不支援技能防重複鎖定，請使用單一分頁操作'); return false; }
+    return locks.request(lockName, { ifAvailable: true }, async lock => {
+      if (!lock) { toast('星界之狼技能正在其他分頁處理'); return false; }
+      const current = getState();
+      const pet = (current.pets || []).find(item => item.uid === uid && item.id === 's1');
+      if (!pet || !equippedPetHas('s1')) { toast('請先裝備星界之狼'); return false; }
+      const now = Date.now();
+      const last = Math.max(0, Number(current.petSkillSecretDailyLastClaimAt) || 0);
+      const cooldown = 24 * 60 * 60 * 1000;
+      if (now - last < cooldown) {
+        toast('星界之狼技能冷卻中，約 ' + Math.ceil((cooldown - (now - last)) / 3600000) + ' 小時後可再次領取');
+        return false;
+      }
+      current.potions = current.potions || {};
+      current.potions.inventory = current.potions.inventory || {};
+      current.potions.inventory.luck3 = Math.max(0, Number(current.potions.inventory.luck3) || 0) + 1;
+      current.petSkillSecretDailyLastClaimAt = now;
+      save();
+      render();
+      renderPetsPage();
+      toast('星界之狼帶來祝福：獲得幸運藥水 III ×1');
+      return true;
     });
   }
 
@@ -249,13 +285,13 @@ export function createPetSystem({
     });
   }
 
-  async function usePetSkillS4(uid) {
+  async function usePetSkillS3(uid) {
     const S = getState();
-    const pet = (S.pets || []).find(item => item.uid === uid && item.id === 's4');
-    if (!pet || !equippedPetHas('s4')) return false;
+    const pet = (S.pets || []).find(item => item.uid === uid && item.id === 's3');
+    if (!pet || !equippedPetHas('s3')) return false;
     const now = Date.now();
     const userId = getCurrentUser()?.id || 'guest';
-    const markerKey = 'diceRealmSecretPetS4:' + userId;
+    const markerKey = 'diceRealmSecretPetS3:' + userId;
     const locks = globalThis.navigator?.locks;
     if (!locks?.request) {
       toast('此瀏覽器不支援多分頁技能防重複，永寂恩賜暫停使用');
@@ -267,8 +303,8 @@ export function createPetSystem({
         return false;
       }
       const current = getState();
-      const currentPet = (current.pets || []).find(item => item.uid === uid && item.id === 's4');
-      if (!currentPet || !equippedPetHas('s4')) return false;
+      const currentPet = (current.pets || []).find(item => item.uid === uid && item.id === 's3');
+      if (!currentPet || !equippedPetHas('s3')) return false;
       let localLastUse = 0;
       try { localLastUse = Number(localStorageRef?.getItem(markerKey)) || 0; } catch {}
       const result = resolveSecretSpeedSkill(current.petSkillSpeed || {}, now, localLastUse);
@@ -465,9 +501,15 @@ export function createPetSystem({
           const eternalReady = Date.now() - eternalLast >= 24 * 60 * 60 * 1000;
           const eternalRemain = Math.max(0, 24 * 60 * 60 * 1000 - (Date.now() - eternalLast));
           const eternalWait = Math.ceil(eternalRemain / 3600000);
-          const skillButton = definition.id === 's4'
+          const secretDailyLast = Number(S.petSkillSecretDailyLastClaimAt) || 0;
+          const secretDailyReady = Date.now() - secretDailyLast >= 24 * 60 * 60 * 1000;
+          const secretDailyRemain = Math.max(0, 24 * 60 * 60 * 1000 - (Date.now() - secretDailyLast));
+          const secretDailyWait = Math.ceil(secretDailyRemain / 3600000);
+          const skillButton = definition.id === 's3'
             ? `<button type="button" class="${equipped && !skillActive && !skillCooling ? 'primary' : 'quiet'}" data-pet-skill-use="${escapeHTML(pet.uid)}" ${!equipped || skillActive || skillCooling ? 'disabled' : ''}>${!equipped ? '裝備後可使用' : skillActive ? '技能生效中' : skillCooling ? '技能冷卻中' : '啟動速度 +100% 技能'}</button>`
-            : definition.id === 'eternal_starwish_deer'
+            : definition.id === 's1'
+              ? `<button type="button" class="${equipped && secretDailyReady ? 'primary' : 'quiet'}" data-pet-secret-daily-claim="${escapeHTML(pet.uid)}" ${!equipped || !secretDailyReady ? 'disabled' : ''}>${!equipped ? '裝備後可領取' : secretDailyReady ? '領取每日幸運藥水 III' : '技能冷卻中（約 ' + secretDailyWait + ' 小時）'}</button>`
+              : definition.id === 'eternal_starwish_deer'
               ? `<button type="button" class="${equipped && eternalReady ? 'primary' : 'quiet'}" data-pet-daily-claim="${escapeHTML(pet.uid)}" ${!equipped || !eternalReady ? 'disabled' : ''}>${!equipped ? '裝備後可領取' : eternalReady ? '領取每日隨機藥水' : '技能冷卻中（約 ' + eternalWait + ' 小時）'}</button>`
               : '';
           const mutationColors = {
@@ -698,11 +740,13 @@ export function createPetSystem({
       toast(best.length ? `已自動裝備收益最高的 ${best.length} 隻寵物` : '目前沒有可裝備的寵物');
     });
     documentRef.getElementById('petInventoryGrid')?.addEventListener('click', event => {
+      const secretDailyButton = event.target.closest('[data-pet-secret-daily-claim]');
+      if (secretDailyButton) { useSecretDailySkill(secretDailyButton.dataset.petSecretDailyClaim); return; }
       const dailyClaimButton = event.target.closest('[data-pet-daily-claim]');
       if (dailyClaimButton) { useEternalDailySkill(dailyClaimButton.dataset.petDailyClaim); return; }
       const skillButton = event.target.closest('[data-pet-skill-use]');
       if (skillButton) {
-        usePetSkillS4(skillButton.dataset.petSkillUse);
+        usePetSkillS3(skillButton.dataset.petSkillUse);
         return;
       }
       const button = event.target.closest('[data-pet-equip]');
