@@ -332,7 +332,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
 
   assert.match(html, /style\.css\?v=20261122-five-entry-nav-v5/);
   assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
-  assert.match(css, /padding-bottom:calc\\(132px \/ var\\(--landscape-scale, 1\\) \\+ env\\(safe-area-inset-bottom, 0px\\)\\)!important/);
+  assert.match(css, /padding-bottom:calc\(132px \/ var\(--landscape-scale, 1\) \+ env\(safe-area-inset-bottom, 0px\)\)!important/);
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
