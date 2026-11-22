@@ -7,7 +7,7 @@ export const NEW_DICE = [
 ];
 
 export const ETERNAL_PET_WEIGHTS = [60, 40];
-export const ETERNAL_PET_INCOME = { eternal_dawn_guardian: 95000, eternal_starwish_deer: 120000 };
+export const ETERNAL_PET_INCOME = { eternal_dawn_guardian: 50000, eternal_starwish_deer: 62500 };
 
 export const ETERNAL_PETS = [
   { id: 'eternal_dawn_guardian', name: '曙光守望者', icon: '🪽', rarity: 'eternal', skill: '裝備後運氣 +35%、擲骰速度 +35%。' },
