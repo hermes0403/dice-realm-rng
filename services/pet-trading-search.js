@@ -15,10 +15,19 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   let searching = false;
   let refreshing = false;
   let refreshQueued = false;
+  let refreshScheduleTimer = null;
   let observedAuthUserId = null;
   const realtimeChannels = new Map();
   const completedSessionsHandled = new Set();
   const offerDrafts = new Map();
+
+  function scheduleRefreshInvitations() {
+    if (refreshScheduleTimer) clearTimeout(refreshScheduleTimer);
+    refreshScheduleTimer = setTimeout(() => {
+      refreshScheduleTimer = null;
+      void refreshInvitations();
+    }, 140);
+  }
 
   function setStatus(message) {
     const node = doc.getElementById('petTradeSearchHint');
@@ -136,7 +145,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       setStatus('交易邀請已送出，等待對方接受（2 分鐘內有效）。');
       if (button) button.textContent = '邀請已送出';
       toast('交易邀請已送出');
-      await refreshInvitations();
+      scheduleRefreshInvitations();
       return data;
     } catch (error) {
       console.warn('Pet trade invitation failed', error);
@@ -450,7 +459,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             ? '有寵物已不在持有清單，請重新選擇。'
             : '確認失敗：' + (error?.message || '請重新整理後再試。');
         confirm.disabled = false;
-        if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();
+        if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();;
       }
     });
 
@@ -502,7 +511,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         filter
       }, () => {
         if (refreshing) refreshQueued = true;
-        else void refreshInvitations();
+        else scheduleRefreshInvitations();
       })
       .subscribe();
     realtimeChannels.set(key, channel);
@@ -574,16 +583,35 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       });
       const tradeView = doc.getElementById('petsTradeView');
       tradeView?.classList.toggle('is-trading', activeSessions.length > 0);
-      host.replaceChildren();
-
-      // While a trade is active, render only the live room. Keep invitation history
-      // and the player directory out of the way until the session ends.
+      // Keep the live-room DOM stable across duplicate Realtime events. Only
+      // replace a room when fields that affect its visible state have actually changed.
       if (activeSessions.length) {
+        const retainedRooms = new Set();
         for (const session of activeSessions) {
+          const signature = JSON.stringify([
+            session.status, session.expires_at, session.revision,
+            session.offered_pet_uids_a, session.offered_pet_uids_b,
+            session.offered_pet_snapshots_a, session.offered_pet_snapshots_b,
+            session.offered_pet_uid_a, session.offered_pet_uid_b,
+            session.offered_pet_snapshot_a, session.offered_pet_snapshot_b,
+            session.confirmed_a, session.confirmed_b
+          ]);
+          const existing = [...host.children].find(node => node.dataset.sessionId === String(session.id));
+          if (existing && existing.dataset.sessionSignature === signature) {
+            retainedRooms.add(existing);
+            continue;
+          }
           const roomOnly = doc.createElement('div');
           roomOnly.className = 'pet-trade-active-room-only';
+          roomOnly.dataset.sessionId = String(session.id);
+          roomOnly.dataset.sessionSignature = signature;
           roomOnly.append(makeTradeRoom(session, user));
-          host.append(roomOnly);
+          if (existing) existing.replaceWith(roomOnly);
+          else host.append(roomOnly);
+          retainedRooms.add(roomOnly);
+        }
+        for (const child of [...host.children]) {
+          if (child.classList.contains('pet-trade-active-room-only') && !retainedRooms.has(child)) child.remove();
         }
         for (const session of completedSessionsToSync) {
           const syncKey = user.id + ':' + session.id;
@@ -597,6 +625,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         }
         return;
       }
+
+      host.replaceChildren();
 
       // The inbox is intentionally limited to incoming, unanswered requests.
       // Accepted sessions are rendered only in the active room view above; sent,
