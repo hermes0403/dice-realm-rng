@@ -20,7 +20,7 @@ test('roll counter is saved immediately through the shared save service', () => 
 test('completed roll result is saved before async announcement and reveal work', () => {
   const result = diceSource.indexOf("documentRef.getElementById('resultSub').textContent =");
   const resultSave = diceSource.indexOf('save();', result);
-  const announcement = diceSource.indexOf('broadcastRareRoll(dice)', result);
+  const announcement = diceSource.indexOf('broadcastRareRoll(dice,', result);
   assert.notEqual(result, -1, 'result UI update exists');
   assert.ok(resultSave > result && resultSave < announcement,
     'completed inventory/counter state is saved before async announcement');
