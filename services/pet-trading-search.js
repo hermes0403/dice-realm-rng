@@ -459,7 +459,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             ? '有寵物已不在持有清單，請重新選擇。'
             : '確認失敗：' + (error?.message || '請重新整理後再試。');
         confirm.disabled = false;
-        if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();;;
+        if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();
       }
     });
 
