@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261122-trade-expired-session-v1/);
+  assert.match(html, /script\.js\?v=20261122-weekly-700k-trade-audit-v1/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -192,7 +192,7 @@ test('V1.56 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1.56/);
-  assert.match(html, /script\.js\?v=20261122-trade-expired-session-v1/);
+  assert.match(html, /script\.js\?v=20261122-weekly-700k-trade-audit-v1/);
   assert.match(worker, /dice-realm-shell-v1\.91/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
