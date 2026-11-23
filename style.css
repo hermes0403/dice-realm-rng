@@ -3046,3 +3046,21 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .daily-shop-empty h3{margin:0;font-size:17px}
 .daily-shop-empty p{margin:0 0 7px;color:#98a3c1;font-size:12px}
 @media(max-width:600px){.daily-shop-hero{padding:20px 17px}.daily-shop-orbit{right:18px;top:12px;font-size:43px}.daily-shop-card{flex-basis:min(76vw,250px);min-height:0}.daily-shop-toolbar{align-items:flex-end}.daily-shop-foot{flex-direction:column;gap:3px}.daily-shop-buy-row button{min-width:88px}}
+
+
+/* T-0126: compact, persistent Time Crystal material deposit UI. */
+.time-crystal-card .time-crystal-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px}
+.time-crystal-description{margin:0 0 8px;color:var(--muted)}
+.time-crystal-material-list{display:grid;gap:6px;margin:0 0 10px}
+.time-crystal-material-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;min-width:0;padding:7px 9px;border:1px solid rgba(119,143,201,.22);border-radius:10px;background:rgba(12,19,39,.55)}
+.time-crystal-material-name{min-width:0;overflow-wrap:anywhere;font-size:13px}
+.time-crystal-material-progress{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap}
+.time-crystal-material-done{font-size:11px;font-weight:800;color:#65e6b2;white-space:nowrap}
+.time-crystal-add{min-height:28px;padding:4px 11px;font-size:12px;white-space:nowrap}
+.time-crystal-caption{margin:6px 0 0}
+.time-crystal-picker{z-index:10001}
+.time-crystal-die-options{display:grid;gap:8px;margin:12px 0}
+.time-crystal-die-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0;padding:10px 12px;border:1px solid #303955;border-radius:10px;background:#151d33;color:inherit;text-align:left;cursor:pointer}
+.time-crystal-die-option.selected{border-color:#a78bfa;background:rgba(91,75,155,.28);box-shadow:0 0 0 1px rgba(167,139,250,.24)}
+.time-crystal-die-option span:first-child{min-width:0;overflow-wrap:anywhere}
+@media(max-width:420px){.time-crystal-material-row{gap:5px;padding:7px}.time-crystal-material-name{font-size:12px}.time-crystal-add{padding:4px 8px}}
