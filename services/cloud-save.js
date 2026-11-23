@@ -599,6 +599,7 @@ export function createCloudSaveService(dependencies) {
     writeCloudBase(user.id, nextPayload, updatedAt);
     const state = getState();
     state.bag = clonePayload(bag);
+    state._cloudBaseVersion = updatedAt;
     persistLocalSnapshot(state, user.id);
     try {
       const savedAtKey = localSavedAtKey(user.id);
