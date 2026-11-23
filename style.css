@@ -3064,3 +3064,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .time-crystal-die-option.selected{border-color:#a78bfa;background:rgba(91,75,155,.28);box-shadow:0 0 0 1px rgba(167,139,250,.24)}
 .time-crystal-die-option span:first-child{min-width:0;overflow-wrap:anywhere}
 @media(max-width:420px){.time-crystal-material-row{gap:5px;padding:7px}.time-crystal-material-name{font-size:12px}.time-crystal-add{padding:4px 8px}}
+
+.time-crystal-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.time-crystal-toggle-title{flex:1;min-width:0;font-size:15px;font-weight:800}
+.time-crystal-toggle-chevron{flex:0 0 auto;color:var(--muted);font-size:18px;line-height:1}
