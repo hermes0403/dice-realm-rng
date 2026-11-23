@@ -13,6 +13,16 @@ const PRODUCTS = [
   { id: 'd13', type: 'dice', itemId: 'd13', name: '☼ 日冕骰子', chance: 0.5, price: 40000000, tier: 'legendary', desc: '1/8,192 · 微型日冕向外迸發。' }
 ];
 
+const STOCK_RANGES = {
+  luck1: [1, 3], luck2: [1, 3], luck3: [1, 1], speed1: [1, 3], speed2: [1, 2],
+  money1: [1, 2], money2: [1, 1], angel1: [1, 1], d10: [1, 2], d12: [1, 2], d13: [1, 2]
+};
+
+function rollItemStock(productId, random = Math.random) {
+  const [min, max] = STOCK_RANGES[productId] || [1, 1];
+  return min + Math.floor(random() * (max - min + 1));
+}
+
 export function taipeiDateKey(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
@@ -48,8 +58,30 @@ export function createDailyShopSystem(deps) {
     if (!user || !isCloudSaveReady(user.id)) return false;
     const state = getState();
     const today = taipeiDateKey();
-    if (state.dailyShop?.date === today && Array.isArray(state.dailyShop.items)) return false;
-    state.dailyShop = { date: today, items: rollDailyStock(), purchased: [] };
+    if (state.dailyShop?.date === today && Array.isArray(state.dailyShop.items)) {
+      const shop = state.dailyShop;
+      let changed = false;
+      if (!shop.stock || typeof shop.stock !== 'object') {
+        shop.stock = Object.fromEntries(shop.items.map(id => [id, rollItemStock(id)]));
+        changed = true;
+      }
+      if (Array.isArray(shop.purchased)) {
+        shop.purchased = Object.fromEntries(shop.purchased.map(id => [id, 1]));
+        changed = true;
+      } else if (!shop.purchased || typeof shop.purchased !== 'object') {
+        shop.purchased = {};
+        changed = true;
+      }
+      if (changed) save();
+      return false;
+    }
+    const items = rollDailyStock();
+    state.dailyShop = {
+      date: today,
+      items,
+      stock: Object.fromEntries(items.map(id => [id, rollItemStock(id)])),
+      purchased: {}
+    };
     save();
     return true;
   }
@@ -69,26 +101,29 @@ export function createDailyShopSystem(deps) {
     ensureDailyStock();
     const state = getState();
     const shop = state.dailyShop;
-    const purchased = new Set(Array.isArray(shop.purchased) ? shop.purchased : []);
+    const purchased = shop.purchased && typeof shop.purchased === 'object' ? shop.purchased : {};
     const products = shop.items.map(id => PRODUCTS.find(product => product.id === id)).filter(Boolean);
     const balance = Math.max(0, Number(state.coins) || 0);
     root.innerHTML = `
       <div class="daily-shop-toolbar"><div><span class="daily-shop-kicker">DAILY ROTATION · TAIPEI TIME</span><strong>今日商品 <b>${products.length}</b> / 6</strong></div><div class="daily-shop-balance"><small>目前持有</small><b>${format(balance)}$</b></div></div>
       <div class="daily-shop-track" aria-label="每日商店商品，可左右滑動">
         ${products.map((product, index) => {
-          const done = purchased.has(product.id);
+          const totalStock = Math.max(1, Number(shop.stock?.[product.id]) || 1);
+          const bought = Math.max(0, Number(purchased[product.id]) || 0);
+          const remaining = Math.max(0, totalStock - bought);
+          const soldOut = remaining === 0;
           const icon = product.type === 'potion' ? ({luck1:'🧪',luck2:'⚗️',luck3:'✦',speed1:'💨',speed2:'🌪️',money1:'💰',money2:'🪙',angel1:'🪽'}[product.itemId] || '✧') : ({d10:'✺',d12:'☄',d13:'☼'}[product.itemId] || '🎲');
           return `<article class="daily-shop-card daily-shop-${product.tier}">
             <div class="daily-shop-card-top"><span class="daily-shop-index">0${index + 1} / DAILY STOCK</span></div>
             <div class="daily-shop-art" aria-hidden="true">${icon}</div>
-            <h3>${product.name}</h3><p class="daily-shop-desc">${product.desc}</p>
+            <h3>${product.name}</h3><p class="daily-shop-desc">${product.desc}</p><p class="daily-shop-stock">庫存 ${remaining} / ${totalStock}</p>
             <div class="daily-shop-buy-row"><strong>${format(product.price)}<small>$</small></strong>
-              <button type="button" class="primary" data-buy-daily-item="${product.id}" ${done || balance < product.price ? 'disabled' : ''}>${done ? '今日已購買' : balance < product.price ? '金錢不足' : '立即購買'}</button>
+              <button type="button" class="primary" data-buy-daily-item="${product.id}" ${soldOut || balance < product.price ? 'disabled' : ''}>${soldOut ? '已售罄' : balance < product.price ? '金錢不足' : '立即購買'}</button>
             </div>
           </article>`;
         }).join('')}
       </div>
-      <div class="daily-shop-foot"><span>← 左右滑動瀏覽商品 →</span><span>每日 00:00 刷新 · 每項商品每日限購 1 次</span></div>`;
+      <div class="daily-shop-foot"><span>每日 00:00 刷新 · 商品售完為止</span></div>`;
   }
 
   function purchase(productId) {
@@ -105,9 +140,12 @@ export function createDailyShopSystem(deps) {
       toast('這項商品不在今日商店中');
       return;
     }
-    shop.purchased = Array.isArray(shop.purchased) ? shop.purchased : [];
-    if (shop.purchased.includes(productId)) {
-      toast('這項商品今天已經購買過了');
+    shop.purchased = shop.purchased && typeof shop.purchased === 'object' ? shop.purchased : {};
+    shop.stock = shop.stock && typeof shop.stock === 'object' ? shop.stock : {};
+    const totalStock = Math.max(1, Number(shop.stock[productId]) || 1);
+    const bought = Math.max(0, Number(shop.purchased[productId]) || 0);
+    if (bought >= totalStock) {
+      toast('這項商品今日庫存已售完');
       return;
     }
     if (product.type === 'dice') {
@@ -133,7 +171,7 @@ export function createDailyShopSystem(deps) {
       state.first = state.first || {};
       if (!state.first[product.itemId]) state.first[product.itemId] = new Date().toISOString();
     }
-    shop.purchased.push(productId);
+    shop.purchased[productId] = bought + 1;
     save();
     render();
     renderDailyShop();
