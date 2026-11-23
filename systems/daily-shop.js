@@ -137,6 +137,25 @@ export function createDailyShopSystem(deps) {
     toast('購買成功：' + product.name);
   }
 
+  function millisecondsUntilTaipeiMidnight() {
+    const now = Date.now();
+    const taipei = new Date(now + 8 * 60 * 60 * 1000);
+    const nextMidnightUtc = Date.UTC(
+      taipei.getUTCFullYear(), taipei.getUTCMonth(), taipei.getUTCDate() + 1
+    ) - 8 * 60 * 60 * 1000;
+    return Math.max(1000, nextMidnightUtc - now + 250);
+  }
+
+  function scheduleMidnightRefresh() {
+    timerManager.setTimeout(() => {
+      if (getCurrentUser() && isCloudSaveReady(getCurrentUser().id)) {
+        const changed = ensureDailyStock();
+        if (changed && documentRef.getElementById('page-daily-shop')?.classList.contains('active')) renderDailyShop();
+      }
+      scheduleMidnightRefresh();
+    }, millisecondsUntilTaipeiMidnight(), 'daily-shop-midnight-refresh');
+  }
+
   function setup() {
     documentRef.addEventListener('click', event => {
       const login = event.target.closest('[data-daily-shop-login]');
@@ -147,12 +166,7 @@ export function createDailyShopSystem(deps) {
       const buy = event.target.closest('[data-buy-daily-item]');
       if (buy) purchase(buy.dataset.buyDailyItem);
     });
-    timerManager.setInterval(() => {
-      if (getCurrentUser() && isCloudSaveReady(getCurrentUser().id)) {
-        const changed = ensureDailyStock();
-        if (changed && documentRef.getElementById('page-daily-shop')?.classList.contains('active')) renderDailyShop();
-      }
-    }, 30000, 'daily-shop-midnight-refresh');
+    scheduleMidnightRefresh();
   }
 
   return { setup, ensureDailyStock, renderDailyShop, purchase };
