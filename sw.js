@@ -1,15 +1,15 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.07';
+const CACHE_NAME = 'dice-realm-shell-v2.08';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
-  './script.js?v=20261123-daily-shop-v1',
-  './ui/navigation.js?v=20261123-daily-shop-v1',
+  './script.js?v=20261123-daily-shop-v2',
+  './ui/navigation.js?v=20261123-daily-shop-v2',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
-  './services/cloud-save.js?v=20261123-daily-shop-v1',
+  './services/cloud-save.js?v=20261123-daily-shop-v2',
   './ui/equipment.js?v=20261117-t0098-time-crystal',
   './ui/gloves.js?v=20261117-t0102-void-startrail-gloves',
   './systems/weather.js?v=20261118-shark-weather-speed-v1',
@@ -19,7 +19,7 @@ const APP_SHELL = [
   './services/pet-trading-search.js?v=20261122-trade-expired-session-v1',
   './ui/display-controls.js?v=20261119-settings-buttons-v2',
   './admin/ui-bindings.js?v=20261118-t0114-login-name-management',
-  './config.js?v=20261123-daily-shop-v1',
+  './config.js?v=20261123-daily-shop-v2',
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './systems/secret-pet-skills.js?v=20261122-secret-skill-swap-v1',
@@ -31,13 +31,13 @@ const APP_SHELL = [
   './systems/global-announcements.js?v=20261119-pet-audit-metadata',
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './systems/dice-locks.js',
-  './core/game-state.js?v=20261123-daily-shop-v1',
+  './core/game-state.js?v=20261123-daily-shop-v2',
   './systems/weekly-realm-event.js?v=20261122-weekly-claim-only-v1',
-  './systems/daily-shop.js?v=20261123-daily-shop-v1',
+  './systems/daily-shop.js?v=20261123-daily-shop-v2',
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261123-daily-shop-v1',
+  './style.css?v=20261123-daily-shop-v2',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
