@@ -43,5 +43,5 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-23 [叉子] 從正式 Supabase 讀取 `sync_player_game_save_delta` 函式定義，逐欄比對前端 `savePayload()`。確認唯一缺漏欄位為 `dailyShop`；正式環境 24 小時內觀察到 346 次存檔 RPC HTTP 400（SQLSTATE 22023），另有 1,169 次總呼叫。未讀取或修改任何玩家存檔內容。
-- 2026-11-23 [叉子] 已在正式 Supabase 套用向後相容的函式更新，僅將 `dailyShop` 加入允許清單；保留原本函式其餘邏輯。純 SQL 驗證結果：`daily_shop_allowed=true`、`unexpected_field_allowed=false`、正式函式定義含 `dailyShop`。尚待 Node／Actions 與玩家實機回歸。
+- 2026-11-23 19:40 [叉子] 從正式 Supabase 讀取 `sync_player_game_save_delta` 函式定義，逐欄比對前端 `savePayload()`。確認唯一缺漏欄位為 `dailyShop`；正式環境 24 小時內觀察到 346 次存檔 RPC HTTP 400（SQLSTATE 22023），另有 1,169 次總呼叫。未讀取或修改任何玩家存檔內容。
+- 2026-11-23 19:45 [叉子] 已在正式 Supabase 套用向後相容的函式更新，僅將 `dailyShop` 加入允許清單；保留原本函式其餘邏輯。純 SQL 驗證結果：`daily_shop_allowed=true`、`unexpected_field_allowed=false`、正式函式定義含 `dailyShop`。尚待 Node／Actions 與玩家實機回歸。
