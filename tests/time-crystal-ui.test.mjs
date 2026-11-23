@@ -109,19 +109,21 @@ test('Time Crystal recipe is compact and collapsed until opened', async () => {
   assert.match(html, /0\/1/);
 });
 
-test('deposit consumes one selected die through the server and adopts its bag baseline', async () => {
+test('confirm button deposits one selected die and material survives a fresh status read', async () => {
+  let serverMaterials = {};
   const h = makeHarness(async (name, args) => {
     if (name === 'get_time_crystal_status') {
-      return { data: { owned: false, materials: {}, pending: false, cooldown_until: null }, error: null };
+      return { data: { owned: false, materials: { ...serverMaterials }, pending: false, cooldown_until: null }, error: null };
     }
     if (name === 'deposit_time_crystal_material') {
       assert.deepEqual(args, { p_die_id: 'd15', p_expected_user_id: 'test-user' });
+      serverMaterials = { time: 'd15' };
       return {
         data: {
           ok: true,
           already_deposited: false,
           bag: { d14: 1, d64: 1 },
-          materials: { time: 'd15' },
+          materials: { ...serverMaterials },
           updated_at: '2026-11-23T10:00:00Z'
         },
         error: null
@@ -134,12 +136,13 @@ test('deposit consumes one selected die through the server and adopts its bag ba
   h.click('[data-time-crystal-toggle]');
   h.click('[data-time-crystal-add]', { timeCrystalAdd: 'time' });
   h.click('[data-time-crystal-select]', { timeCrystalSelect: 'd15' });
-  await h.ui.depositTimeCrystalMaterial();
+  await h.click('[data-time-crystal-confirm]');
 
   assert.ok(h.calls.some(call => call.name === 'deposit_time_crystal_material'));
   assert.deepEqual(h.state.bag, { d14: 1, d64: 1 });
   assert.equal(h.saveCalls, 0, 'server inventory transactions must not replay a local bag delta');
   assert.ok(h.messages.includes('材料已投入工坊'));
+  await h.ui.loadTimeCrystalStatus(true);
   h.ui.renderGloves();
   assert.match(h.elements.get('itemWorkshopList').innerHTML, /已投入/);
 });
