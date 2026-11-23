@@ -167,7 +167,7 @@ begin
   if v_materials->>'void' is distinct from 'd14' then
     raise exception '尚未投入虛空骰子';
   end if;
-  if v_materials->>'glitch' not in ('d64', 'd65', 'd66', 'd67') then
+  if v_materials->>'glitch' is null or v_materials->>'glitch' not in ('d64', 'd65', 'd66', 'd67') then
     raise exception '尚未投入故障骰子';
   end if;
 
