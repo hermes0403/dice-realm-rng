@@ -6,7 +6,8 @@ export function createNavigationUI({
   loadAdminDashboard,
   refreshLeaderboards,
   loadWeatherSummonData,
-  renderPetsPage
+  renderPetsPage,
+  renderDailyShop
 }) {
   const primaryItems = [
     ['roll', '大廳', '✦'],
@@ -15,6 +16,7 @@ export function createNavigationUI({
     ['workshop', '工坊', '⚒']
   ];
   const moreItems = [
+    ['daily-shop', '每日商店', '✧'],
     ['pets', '融合機', '♧'],
     ['trade', '交易', '⇄'],
     ['weather-summon', '天氣召喚', '✧'],
@@ -118,6 +120,7 @@ export function createNavigationUI({
     if (id === 'admin') loadAdminDashboard();
     if (id === 'leaderboard') refreshLeaderboards();
     if (id === 'weather-summon') loadWeatherSummonData();
+    if (id === 'daily-shop') renderDailyShop?.();
     if (id === 'workshop') setWorkshopCategory('gloves');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
