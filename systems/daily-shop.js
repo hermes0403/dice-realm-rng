@@ -117,7 +117,7 @@ export function createDailyShopSystem(deps) {
     const products = shop.items.map(id => PRODUCTS.find(product => product.id === id)).filter(Boolean);
     const balance = Math.max(0, Number(state.coins) || 0);
     root.innerHTML = `
-      <div class="daily-shop-toolbar"><div><span class="daily-shop-kicker">DAILY ROTATION · TAIPEI TIME</span><strong>今日商品 <b>${products.length}</b> / 6</strong></div><div class="daily-shop-balance"><small>目前持有</small><b>${format(balance)}$</b></div></div>
+      <div class="daily-shop-toolbar"><div><span class="daily-shop-kicker">DAILY ROTATION · TAIPEI TIME</span></div><div class="daily-shop-balance"><small>目前持有</small><b>${format(balance)}$</b></div></div>
       <div class="daily-shop-track" aria-label="每日商店商品，可左右滑動">
         ${products.map((product, index) => {
           const totalStock = Math.max(1, Number(shop.stock?.[product.id]) || 1);
