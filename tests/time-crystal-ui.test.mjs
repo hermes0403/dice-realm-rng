@@ -77,6 +77,7 @@ function makeHarness(rpcHandler) {
   function click(selector, dataset = {}) {
     assert.equal(typeof clickHandler, 'function', 'click handler must be installed');
     const target = {
+      nodeType: 1,
       closest(candidate) {
         return candidate === selector ? { dataset } : null;
       }
