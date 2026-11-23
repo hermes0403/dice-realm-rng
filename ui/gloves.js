@@ -506,8 +506,12 @@ export function createGloveUI(deps) {
   function setupGloveUI() {
     if (gloveUISetup) return false;
     gloveUISetup = true;
+    // Capture-phase delegation ensures modal actions are handled even if an inner
+    // component stops bubbling before the document's normal click phase.
     documentRef.addEventListener('click', event => {
-      const target = event.target;
+      const rawTarget = event.target;
+      const target = rawTarget?.nodeType === 1 ? rawTarget : rawTarget?.parentElement;
+      if (!target?.closest) return;
       const purchaseButton = target.closest('[data-glove-action]');
       const craftGloveButton = target.closest('[data-craft]');
       const craftTimeCrystalButton = target.closest('[data-craft-time-crystal]');
@@ -549,7 +553,7 @@ export function createGloveUI(deps) {
         render();
         toast('已裝備' + glove(state.equipped).name);
       }
-    });
+    }, true);
     if (timerManager?.setInterval && !timeCrystalTicker) {
       timeCrystalTicker = timerManager.setInterval(() => {
         if (getCurrentUser()?.id && timeCrystalStatusUserId === getCurrentUser()?.id && timeCrystalStatus?.owned) {
