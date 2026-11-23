@@ -32,6 +32,7 @@ import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-o
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
 import { createEquipmentUI } from './ui/equipment.js?v=20261121-t0123-money-potions';
+import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-daily-shop-v1';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js';
@@ -69,6 +70,8 @@ let globalBoostState=null;
 let globalBoostSystem=null;
 let realmSocialSystem=null;
 let equipmentUI=null;
+let dailyShopSystem=null;
+function renderDailyShop(){return dailyShopSystem?.renderDailyShop()}
 let adminPetOddsUI=null;
 let adminPlayerManagement=null;
 let adminMonitoringSystem=null;
@@ -146,6 +149,8 @@ cloudSaveService=createCloudSaveService({
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
+dailyShopSystem=createDailyShopSystem({getState:()=>S,getCurrentUser:()=>currentUser,isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId),save,render,toast,format,documentRef:document,timerManager});
+dailyShopSystem.setup();
 presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, scheduleSync });
 function save(){return cloudSaveService.save()}
 function userSaveKey(userId){return cloudSaveService.userSaveKey(userId)}
@@ -238,7 +243,7 @@ const petTradingSearch = createPetTradingSearch({
 });
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
