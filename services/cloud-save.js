@@ -620,9 +620,20 @@ export function createCloudSaveService(dependencies) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
     }
-    while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    // A background sync already in progress must finish before starting this
+    // explicit flush. Calling syncCloudSave() while busy only queues another
+    // pass and returns false; treating that as a failed flush aborts inventory
+    // transactions even when the in-flight sync succeeds.
+    while (cloudSyncBusy) {
+      await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+      if (getCurrentUser()?.id !== user.id) return false;
+    }
+    if (getCurrentUser()?.id !== user.id || cloudLoadReadyUserId !== user.id) return false;
     const saved = await syncCloudSave();
-    while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    while (cloudSyncBusy) {
+      await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+      if (getCurrentUser()?.id !== user.id) return false;
+    }
     return saved === true;
   }
 
