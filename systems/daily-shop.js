@@ -114,6 +114,13 @@ export function createDailyShopSystem(deps) {
       toast('這項商品今天已經購買過了');
       return;
     }
+    if (product.type === 'dice') {
+      const used = Object.values(state.bag || {}).reduce((sum, count) => sum + Math.max(0, Number(count) || 0), 0);
+      if (used >= (Number(state.bagCapacity) || 35)) {
+        toast('背包已滿，請先擴充容量或整理骰子');
+        return;
+      }
+    }
     const balance = Math.max(0, Number(state.coins) || 0);
     if (balance < product.price) {
       toast('金錢不足，無法購買');
