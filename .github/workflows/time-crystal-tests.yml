@@ -13,6 +13,8 @@ on:
       - 'ui/equipment.js'
       - 'tests/time-crystal-ui.test.mjs'
       - 'docs/migrations/20261117101418_t0098_time_crystal_weather_extension.sql'
+      - 'docs/migrations/20261123120000_t0126_time_crystal_material_deposit.sql'
+      - 'services/cloud-save.js'
       - 'index.html'
       - 'script.js'
       - 'sw.js'
@@ -37,6 +39,7 @@ jobs:
           node --check ui/gloves.js
           node --check systems/weather.js
           node --check ui/equipment.js
+          node --check services/cloud-save.js
           node --check script.js
           node --check sw.js
       - name: Check patch whitespace
