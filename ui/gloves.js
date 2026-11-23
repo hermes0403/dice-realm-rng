@@ -14,6 +14,7 @@ export function createGloveUI(deps) {
   let timeCrystalStatusLoading = false;
   let timeCrystalPickerSlot = null;
   let timeCrystalSelectedDieId = null;
+  let timeCrystalExpanded = false;
   let timeCrystalTicker = null;
 
   async function loadTimeCrystalStatus(force = false) {
@@ -22,7 +23,16 @@ export function createGloveUI(deps) {
     if (!userId || !supabaseClient) {
       timeCrystalStatus = null;
       timeCrystalStatusUserId = null;
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      timeCrystalExpanded = false;
       return null;
+    }
+    if (timeCrystalStatusUserId && timeCrystalStatusUserId !== userId) {
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      timeCrystalExpanded = false;
+      timeCrystalStatus = null;
     }
     if (!force && (timeCrystalStatusUserId === userId || timeCrystalStatusLoading)) return timeCrystalStatus;
     timeCrystalStatusUserId = userId;
@@ -128,18 +138,30 @@ export function createGloveUI(deps) {
         '>確認投入</button></div></div></div>';
     }
 
+    const progress = slots.filter(item => {
+      const id = materials[item.slot];
+      return typeof id === 'string' && item.ids.includes(id);
+    }).length;
+    const expanded = owned || timeCrystalExpanded;
+    const heading = owned
+      ? '<div class="section-head time-crystal-heading"><h3 style="margin:0">⌛ 時序結晶</h3><span class="pill">已合成</span></div>'
+      : '<button type="button" class="time-crystal-toggle" data-time-crystal-toggle aria-expanded="' + expanded + '">' +
+        '<span class="time-crystal-toggle-title">⌛ 時序結晶</span>' +
+        '<span class="pill">' + (statusReady ? progress + '/3' : '讀取中') + '</span>' +
+        '<span class="time-crystal-toggle-chevron">' + (expanded ? '⌃' : '⌄') + '</span></button>';
+
     itemWorkshopList.innerHTML +=
       '<div class="recipe weather-converter-card time-crystal-card" style="display:block;padding:12px;margin-top:10px">' +
-      '<div class="section-head time-crystal-heading"><h3 style="margin:0">⌛ 時序結晶</h3>' +
-      (owned ? '<span class="pill">已合成</span>' : '<span class="pill">' +
-        (statusReady ? slots.filter(item => materials[item.slot]).length + '/3' : '讀取中') + '</span>') + '</div>' +
-      '<p class="time-crystal-description">可使下個天氣延長20%時間</p>' +
-      (owned ? '' : '<div class="time-crystal-material-list">' + rows + '</div>') +
-      button +
+      heading +
       (owned
-        ? '<p class="mini time-crystal-caption">可重複使用，每次使用後冷卻 1 小時。</p>'
-        : '<p class="mini time-crystal-caption">' + status + '</p>') +
-      picker + '</div>';
+        ? '<p class="time-crystal-description">可使下個天氣延長20%時間</p>' + button +
+          '<p class="mini time-crystal-caption">可重複使用，每次使用後冷卻 1 小時。</p>'
+        : expanded
+          ? '<p class="time-crystal-description">可使下個天氣延長20%時間</p>' +
+            '<div class="time-crystal-material-list">' + rows + '</div>' + button +
+            '<p class="mini time-crystal-caption">' + status + '</p>' + picker
+          : '') +
+      '</div>';
   }
 
   function openTimeCrystalMaterialPicker(slot) {
@@ -154,6 +176,7 @@ export function createGloveUI(deps) {
     if (materials[slot]) return;
     timeCrystalPickerSlot = slot;
     timeCrystalSelectedDieId = null;
+    timeCrystalExpanded = true;
     renderGloves();
   }
 
@@ -487,6 +510,7 @@ export function createGloveUI(deps) {
       const craftTimeCrystalButton = target.closest('[data-craft-time-crystal]');
       const useTimeCrystalButton = target.closest('[data-use-time-crystal]');
       const refreshTimeCrystalButton = target.closest('[data-refresh-time-crystal]');
+      const toggleTimeCrystalButton = target.closest('[data-time-crystal-toggle]');
       const addTimeCrystalButton = target.closest('[data-time-crystal-add]');
       const selectTimeCrystalDieButton = target.closest('[data-time-crystal-select]');
       const confirmTimeCrystalButton = target.closest('[data-time-crystal-confirm]');
@@ -496,6 +520,10 @@ export function createGloveUI(deps) {
       if (craftTimeCrystalButton) craftTimeCrystal();
       if (useTimeCrystalButton) activateTimeCrystal();
       if (refreshTimeCrystalButton) loadTimeCrystalStatus(true).then(renderGloves);
+      if (toggleTimeCrystalButton) {
+        timeCrystalExpanded = !timeCrystalExpanded;
+        renderGloves();
+      }
       if (addTimeCrystalButton) openTimeCrystalMaterialPicker(addTimeCrystalButton.dataset.timeCrystalAdd);
       if (selectTimeCrystalDieButton) {
         timeCrystalSelectedDieId = selectTimeCrystalDieButton.dataset.timeCrystalSelect;
