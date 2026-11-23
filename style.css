@@ -3024,19 +3024,19 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .daily-shop-balance small{font-size:10px;color:#8f9abd}
 .daily-shop-balance b{font-size:15px;color:#ffe0a1;font-variant-numeric:tabular-nums}
 .daily-shop-track{display:flex;gap:13px;overflow-x:auto;overflow-y:hidden;padding:3px 2px 15px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#6975bd #111629;-webkit-overflow-scrolling:touch}
-.daily-shop-card{position:relative;display:flex;flex:0 0 258px;flex-direction:column;min-height:325px;padding:15px;border:1px solid #3d496e;border-radius:17px;background:radial-gradient(ellipse at 50% 0%,#39416b55,transparent 44%),linear-gradient(155deg,#151d34,#101524 70%);box-shadow:0 9px 24px #0004;scroll-snap-align:start;overflow:hidden}
+.daily-shop-card{position:relative;display:flex;flex:0 0 244px;flex-direction:column;min-height:0;padding:12px;border:1px solid #3d496e;border-radius:17px;background:radial-gradient(ellipse at 50% 0%,#39416b55,transparent 44%),linear-gradient(155deg,#151d34,#101524 70%);box-shadow:0 9px 24px #0004;scroll-snap-align:start;overflow:hidden}
 .daily-shop-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#7e91ff,#a98aff,#5ed8e8);opacity:.9}
 .daily-shop-rare{border-color:#56618d;background:radial-gradient(ellipse at 50% 0%,#4e427455,transparent 48%),linear-gradient(155deg,#171b35,#101524 70%)}
 .daily-shop-epic{border-color:#7959a7;background:radial-gradient(ellipse at 50% 0%,#7846a955,transparent 48%),linear-gradient(155deg,#211a3b,#101524 70%)}
 .daily-shop-legendary{border-color:#9b794d;background:radial-gradient(ellipse at 50% 0%,#a57a3f55,transparent 48%),linear-gradient(155deg,#292139,#111524 70%)}
 .daily-shop-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;color:#8793b8;font-size:9px;font-weight:900;letter-spacing:.08em}
 .daily-shop-chance{padding:3px 7px;border:1px solid #49547a;border-radius:99px;color:#c5b8ff;font-size:10px;letter-spacing:0;white-space:nowrap}
-.daily-shop-art{display:grid;place-items:center;height:88px;margin:10px 0 2px;font-size:51px;color:#d8dcff;text-shadow:0 0 24px #9a8aff88}
+.daily-shop-art{display:grid;place-items:center;height:72px;margin:6px 0 1px;font-size:45px;color:#d8dcff;text-shadow:0 0 24px #9a8aff88}
 .daily-shop-card h3{margin:5px 0 3px;font-size:17px;letter-spacing:.02em}
-.daily-shop-desc{min-height:38px;margin:0;color:#9da8c7;font-size:11px;line-height:1.55}
+.daily-shop-desc{min-height:0;margin:0;color:#9da8c7;font-size:11px;line-height:1.55}
 .daily-shop-owned{margin-top:10px;padding-top:9px;border-top:1px solid #ffffff12;color:#8f9aba;font-size:11px}
 .daily-shop-owned b{color:#dbe3ff}
-.daily-shop-buy-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:12px}
+.daily-shop-buy-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;padding-top:9px}
 .daily-shop-buy-row>strong{color:#ffe0a1;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .daily-shop-buy-row>strong small{margin-left:3px;font-size:11px}
 .daily-shop-buy-row button{min-width:94px;padding:8px 10px;font-size:11px;white-space:nowrap}
@@ -3045,4 +3045,4 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .daily-shop-empty>span{font-size:35px;color:#a99aff;text-shadow:0 0 20px #9d8cff}
 .daily-shop-empty h3{margin:0;font-size:17px}
 .daily-shop-empty p{margin:0 0 7px;color:#98a3c1;font-size:12px}
-@media(max-width:600px){.daily-shop-hero{padding:20px 17px}.daily-shop-orbit{right:18px;top:12px;font-size:43px}.daily-shop-card{flex-basis:min(78vw,270px);min-height:318px}.daily-shop-toolbar{align-items:flex-end}.daily-shop-foot{flex-direction:column;gap:3px}.daily-shop-buy-row button{min-width:88px}}
+@media(max-width:600px){.daily-shop-hero{padding:20px 17px}.daily-shop-orbit{right:18px;top:12px;font-size:43px}.daily-shop-card{flex-basis:min(76vw,250px);min-height:0}.daily-shop-toolbar{align-items:flex-end}.daily-shop-foot{flex-direction:column;gap:3px}.daily-shop-buy-row button{min-width:88px}}
