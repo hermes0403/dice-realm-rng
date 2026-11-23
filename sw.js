@@ -9,7 +9,7 @@ const APP_SHELL = [
   './script.js?v=20261123-t0126-click-capture-fix',
   './ui/navigation.js?v=20261123-daily-shop-prices-d14-v1',
   './services/auth.js?v=20261121-t0130-persisted-session-restore-v1',
-  './services/cloud-save.js?v=20261123-t0126-click-capture-fix',
+  './services/cloud-save.js?v=20261123-t0126-time-crystal-material-deposit',
   './ui/equipment.js?v=20261123-t0126-click-capture-fix',
   './ui/gloves.js?v=20261123-t0126-click-capture-fix',
   './systems/weather.js?v=20261118-shark-weather-speed-v1',
@@ -37,7 +37,7 @@ const APP_SHELL = [
   './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261123-t0126-click-capture-fix',
+  './style.css?v=20261123-t0126-time-crystal-material-deposit',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
