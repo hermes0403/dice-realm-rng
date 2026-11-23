@@ -31,7 +31,7 @@ import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=202611
 import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
-import { createEquipmentUI } from './ui/equipment.js?v=20261121-t0123-money-potions';
+import { createEquipmentUI } from './ui/equipment.js?v=20261123-t0126-time-crystal-material-deposit';
 import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-daily-shop-prices-d14-v1';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
@@ -283,7 +283,7 @@ equipmentUI = createEquipmentUI({
   render, toast, achievementStats, rewardText, grantAchievementReward,
   showAchievementPopup, checkAchievements, logCraft, logPotionAction,
   KEY, userSaveKey, documentRef: document, confirmAction: message => confirm(message),
-  openAuth, totalUnique, restartAutoInterval, chanceText, localStorageRef: localStorage
+  openAuth, totalUnique, restartAutoInterval, chanceText, timerManager, escapeHTML, localStorageRef: localStorage
 });
 equipmentUI.setupEquipmentUI();
 mainRenderUI = createMainRenderUI({
