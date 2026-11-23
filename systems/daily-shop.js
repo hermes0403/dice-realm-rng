@@ -1,26 +1,35 @@
 /** Per-player daily shop. Stock is generated once per Taipei calendar day and saved with the player's game state. */
 const PRODUCTS = [
-  { id: 'luck1', type: 'potion', itemId: 'luck1', name: '幸運藥水 I', chance: 50, price: 1000000, tier: 'common', desc: '運氣提升，持續 5 分鐘。' },
-  { id: 'luck2', type: 'potion', itemId: 'luck2', name: '幸運藥水 II', chance: 15, price: 3000000, tier: 'rare', desc: '更高幅度的運氣提升，持續 5 分鐘。' },
-  { id: 'luck3', type: 'potion', itemId: 'luck3', name: '幸運藥水 III', chance: 5, price: 8000000, tier: 'epic', desc: '高階運氣提升，持續 5 分鐘。' },
-  { id: 'speed1', type: 'potion', itemId: 'speed1', name: '速度藥水 I', chance: 25, price: 1000000, tier: 'common', desc: '擲骰速度提升，持續 5 分鐘。' },
-  { id: 'speed2', type: 'potion', itemId: 'speed2', name: '速度藥水 II', chance: 12.5, price: 3000000, tier: 'rare', desc: '更高幅度的速度提升，持續 5 分鐘。' },
-  { id: 'money1', type: 'potion', itemId: 'money1', name: '錢錢藥水 I', chance: 25, price: 1500000, tier: 'common', desc: '金錢收益 ×2.5，持續 5 分鐘。' },
-  { id: 'money2', type: 'potion', itemId: 'money2', name: '錢錢藥水 II', chance: 12.5, price: 4000000, tier: 'rare', desc: '金錢收益 ×5，持續 5 分鐘。' },
-  { id: 'angel1', type: 'potion', itemId: 'angel1', name: '天堂藥水 I', chance: 1, price: 25000000, tier: 'legendary', desc: '提升下一抽的特殊機率。' },
-  { id: 'd10', type: 'dice', itemId: 'd10', name: '✺ 極光骰子', chance: 3, price: 8000000, tier: 'rare', desc: '1/1,024 · 極光在骰面周圍流轉。' },
-  { id: 'd12', type: 'dice', itemId: 'd12', name: '☄ 彗星骰子', chance: 1.2, price: 20000000, tier: 'epic', desc: '1/4,096 · 拖著彗尾穿越暗色星空。' },
-  { id: 'd13', type: 'dice', itemId: 'd13', name: '☼ 日冕骰子', chance: 0.5, price: 40000000, tier: 'legendary', desc: '1/8,192 · 微型日冕向外迸發。' }
+  { id: 'luck1', type: 'potion', itemId: 'luck1', name: '幸運藥水 I', chance: 40, price: 100000, tier: 'common', desc: '運氣提升，持續 5 分鐘。' },
+  { id: 'speed1', type: 'potion', itemId: 'speed1', name: '速度藥水 I', chance: 30, price: 100000, tier: 'common', desc: '擲骰速度提升，持續 5 分鐘。' },
+  { id: 'money1', type: 'potion', itemId: 'money1', name: '錢錢藥水 I', chance: 25, price: 500000, tier: 'common', desc: '金錢收益 ×2.5，持續 5 分鐘。' },
+  { id: 'luck2', type: 'potion', itemId: 'luck2', name: '幸運藥水 II', chance: 20, price: 1000000, tier: 'rare', desc: '更高幅度的運氣提升，持續 5 分鐘。' },
+  { id: 'speed2', type: 'potion', itemId: 'speed2', name: '速度藥水 II', chance: 20, price: 2000000, tier: 'rare', desc: '更高幅度的速度提升，持續 5 分鐘。' },
+  { id: 'money2', type: 'potion', itemId: 'money2', name: '錢錢藥水 II', chance: 15, price: 2500000, tier: 'rare', desc: '金錢收益 ×5，持續 5 分鐘。' },
+  { id: 'luck3', type: 'potion', itemId: 'luck3', name: '幸運藥水 III', chance: 15, price: 6000000, tier: 'epic', desc: '高階運氣提升，持續 5 分鐘。' },
+  { id: 'd10', type: 'dice', itemId: 'd10', name: '✺ 極光骰子', chance: 15, price: 5000000, tier: 'rare', desc: '1/1,024 · 極光在骰面周圍流轉。' },
+  { id: 'd12', type: 'dice', itemId: 'd12', name: '☄ 彗星骰子', chance: 15, price: 18000000, tier: 'epic', desc: '1/4,096 · 拖著彗尾穿越暗色星空。' },
+  { id: 'd13', type: 'dice', itemId: 'd13', name: '☼ 日冕骰子', chance: 10, price: 35000000, tier: 'legendary', desc: '1/8,192 · 微型日冕向外迸發。' },
+  { id: 'angel1', type: 'potion', itemId: 'angel1', name: '天堂藥水 I', chance: 1, price: 50000000, tier: 'legendary', desc: '提升下一抽的特殊機率。' },
+  { id: 'd14', type: 'dice', itemId: 'd14', name: '◉ 虛空骰子', chance: 5, price: 50000000, tier: 'legendary', desc: '1/16,384 · 黑暗中心吞沒周圍的光。' }
 ];
 
 const STOCK_RANGES = {
-  luck1: [1, 3], luck2: [1, 3], luck3: [1, 1], speed1: [1, 3], speed2: [1, 2],
-  money1: [1, 2], money2: [1, 1], angel1: [1, 1], d10: [1, 2], d12: [1, 2], d13: [1, 2]
+  luck1: [1, 3], speed1: [1, 3], money1: [1, 2], luck2: [1, 3], speed2: [1, 2],
+  money2: [1, 1], luck3: [1, 1], d10: [1, 2], d12: [1, 2], d13: [1, 2],
+  angel1: [1, 1], d14: [1, 1]
 };
 
 function rollItemStock(productId, random = Math.random) {
   const [min, max] = STOCK_RANGES[productId] || [1, 1];
   return min + Math.floor(random() * (max - min + 1));
+}
+
+function formatShopPrice(value) {
+  const amount = Number(value) || 0;
+  if (amount >= 1000000) return (amount / 1000000).toFixed(amount % 1000000 ? 1 : 0).replace(/\.0$/, '') + 'M';
+  if (amount >= 1000) return (amount / 1000).toFixed(amount % 1000 ? 1 : 0).replace(/\.0$/, '') + 'K';
+  return String(amount);
 }
 
 export function taipeiDateKey(now = new Date()) {
@@ -38,8 +47,7 @@ export function rollDailyStock(random = Math.random) {
     if (selected.length === 6) break;
   }
   if (selected.length < 2) {
-    const fallback = [...PRODUCTS].sort((a, b) => b.chance - a.chance || PRODUCTS.indexOf(a) - PRODUCTS.indexOf(b));
-    for (const product of fallback) {
+    for (const product of PRODUCTS) {
       if (!selected.includes(product.id)) selected.push(product.id);
       if (selected.length === 2) break;
     }
@@ -52,6 +60,7 @@ export function createDailyShopSystem(deps) {
     getState, getCurrentUser, isCloudSaveReady, save, render, toast,
     format, documentRef, timerManager
   } = deps;
+  let pendingScrollLeft = null;
 
   function ensureDailyStock() {
     const user = getCurrentUser();
@@ -89,6 +98,9 @@ export function createDailyShopSystem(deps) {
   function renderDailyShop() {
     const root = documentRef.getElementById('dailyShopContent');
     if (!root) return;
+    const oldTrack = root.querySelector('.daily-shop-track');
+    const oldScrollLeft = pendingScrollLeft ?? oldTrack?.scrollLeft ?? 0;
+    pendingScrollLeft = null;
     const user = getCurrentUser();
     if (!user) {
       root.innerHTML = '<div class="daily-shop-empty"><span>◈</span><h3>登入後開啟專屬商店</h3><p>每位玩家每天會獲得不同的商品組合。</p><button type="button" class="primary" data-daily-shop-login>登入帳號</button></div>';
@@ -112,18 +124,23 @@ export function createDailyShopSystem(deps) {
           const bought = Math.max(0, Number(purchased[product.id]) || 0);
           const remaining = Math.max(0, totalStock - bought);
           const soldOut = remaining === 0;
-          const icon = product.type === 'potion' ? ({luck1:'🧪',luck2:'⚗️',luck3:'✦',speed1:'💨',speed2:'🌪️',money1:'💰',money2:'🪙',angel1:'🪽'}[product.itemId] || '✧') : ({d10:'✺',d12:'☄',d13:'☼'}[product.itemId] || '🎲');
+          const icon = product.type === 'potion' ? ({luck1:'🧪',luck2:'⚗️',luck3:'✦',speed1:'💨',speed2:'🌪️',money1:'💰',money2:'🪙',angel1:'🪽'}[product.itemId] || '✧') : ({d10:'✺',d12:'☄',d13:'☼',d14:'◉'}[product.itemId] || '🎲');
           return `<article class="daily-shop-card daily-shop-${product.tier}">
             <div class="daily-shop-card-top"><span class="daily-shop-index">0${index + 1} / DAILY STOCK</span></div>
             <div class="daily-shop-art" aria-hidden="true">${icon}</div>
             <h3>${product.name}</h3><p class="daily-shop-desc">${product.desc}</p><p class="daily-shop-stock">庫存 ${remaining} / ${totalStock}</p>
-            <div class="daily-shop-buy-row"><strong>${format(product.price)}<small>$</small></strong>
+            <div class="daily-shop-buy-row"><strong>${formatShopPrice(product.price)}<small>$</small></strong>
               <button type="button" class="primary" data-buy-daily-item="${product.id}" ${soldOut || balance < product.price ? 'disabled' : ''}>${soldOut ? '已售罄' : balance < product.price ? '金錢不足' : '立即購買'}</button>
             </div>
           </article>`;
         }).join('')}
       </div>
       <div class="daily-shop-foot"><span>每日 00:00 刷新 · 商品售完為止</span></div>`;
+    const newTrack = root.querySelector('.daily-shop-track');
+    if (newTrack) {
+      newTrack.scrollLeft = oldScrollLeft;
+      requestAnimationFrame(() => { newTrack.scrollLeft = oldScrollLeft; });
+    }
   }
 
   function purchase(productId) {
@@ -132,6 +149,8 @@ export function createDailyShopSystem(deps) {
       toast('請先登入並完成雲端同步');
       return;
     }
+    const root = documentRef.getElementById('dailyShopContent');
+    pendingScrollLeft = root?.querySelector('.daily-shop-track')?.scrollLeft ?? 0;
     ensureDailyStock();
     const state = getState();
     const shop = state.dailyShop;
