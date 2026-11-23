@@ -283,6 +283,7 @@ equipmentUI = createEquipmentUI({
   render, toast, achievementStats, rewardText, grantAchievementReward,
   showAchievementPopup, checkAchievements, logCraft, logPotionAction,
   KEY, userSaveKey, documentRef: document, confirmAction: message => confirm(message),
+  adoptServerBag: (bag, updatedAt) => cloudSaveService?.adoptServerBag(bag, updatedAt) || false,
   openAuth, totalUnique, restartAutoInterval, chanceText, timerManager, escapeHTML, localStorageRef: localStorage
 });
 equipmentUI.setupEquipmentUI();
