@@ -245,6 +245,9 @@ export function createGloveUI(deps) {
     } else if (timeCrystalStatusUserId) {
       timeCrystalStatus = null;
       timeCrystalStatusUserId = null;
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      timeCrystalExpanded = false;
     }
     const state = getState();
     const equippedGlove = currentGlove();
