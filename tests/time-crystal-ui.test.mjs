@@ -93,13 +93,13 @@ test('Time Crystal recipe is compact and collapsed until opened', async () => {
   h.ui.setupGloveUI();
   h.ui.renderGloves();
   let html = h.elements.get('itemWorkshopList').innerHTML;
-  assert.match(html, /可使下個天氣延長20%時間/);
   assert.match(html, /data-time-crystal-toggle/);
   assert.doesNotMatch(html, /data-time-crystal-add/);
 
   h.click('[data-time-crystal-toggle]');
   h.ui.renderGloves();
   html = h.elements.get('itemWorkshopList').innerHTML;
+  assert.match(html, /可使下個天氣延長20%時間/);
   assert.match(html, /時序骰子/);
   assert.match(html, /虛空骰子/);
   assert.match(html, /故障骰子/);
@@ -145,11 +145,13 @@ test('deposit consumes one selected die through the server and adopts its bag ba
 });
 
 test('Time Crystal crafting requires all deposited slots and uses server RPC', async () => {
+  let crafted = false;
   const h = makeHarness(async name => {
     if (name === 'get_time_crystal_status') {
-      return { data: { owned: false, materials: { time: 'd15', void: 'd14', glitch: 'd64' }, pending: false, cooldown_until: null }, error: null };
+      return { data: { owned: crafted, materials: { time: 'd15', void: 'd14', glitch: 'd64' }, pending: false, cooldown_until: null }, error: null };
     }
     if (name === 'craft_time_crystal') {
+      crafted = true;
       return { data: { ok: true, owned: true, materials: { time: 'd15', void: 'd14', glitch: 'd64' } }, error: null };
     }
     throw new Error('Unexpected RPC: ' + name);
