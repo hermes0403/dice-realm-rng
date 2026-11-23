@@ -3,10 +3,10 @@ import { POTIONS } from './data/equipment.js?v=20261121-t0123-money-potions';
 import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261122-pet-skill-swap-v1';
 import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261122-eternal-income-v1';
 import { DAILY_TASKS } from './data/progression.js';
-import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261122-t0125-pet-info';
+import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261123-daily-shop-v1';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
-import { createNavigationUI } from './ui/navigation.js?v=20261122-five-entry-nav-v1';
+import { createNavigationUI } from './ui/navigation.js?v=20261123-daily-shop-v1';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
@@ -18,7 +18,7 @@ import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261121-t0115-pet-save-race';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261123-daily-shop-v1';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261121-t0130-persisted-session-restore-v1';
@@ -32,9 +32,10 @@ import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-o
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
 import { createEquipmentUI } from './ui/equipment.js?v=20261121-t0123-money-potions';
+import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-daily-shop-v1';
 import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
-import { createGameStateService } from './core/game-state.js';
+import { createGameStateService } from './core/game-state.js?v=20261123-daily-shop-v1';
 import { createPresenceService } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
@@ -69,6 +70,8 @@ let globalBoostState=null;
 let globalBoostSystem=null;
 let realmSocialSystem=null;
 let equipmentUI=null;
+let dailyShopSystem=null;
+function renderDailyShop(){return dailyShopSystem?.renderDailyShop()}
 let adminPetOddsUI=null;
 let adminPlayerManagement=null;
 let adminMonitoringSystem=null;
@@ -146,6 +149,8 @@ cloudSaveService=createCloudSaveService({
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
+dailyShopSystem=createDailyShopSystem({getState:()=>S,getCurrentUser:()=>currentUser,isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId),save,render,toast,format,documentRef:document,timerManager});
+dailyShopSystem.setup();
 presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, scheduleSync });
 function save(){return cloudSaveService.save()}
 function userSaveKey(userId){return cloudSaveService.userSaveKey(userId)}
@@ -238,14 +243,14 @@ const petTradingSearch = createPetTradingSearch({
 });
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
+ toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
  applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
 });
 authService.registerAuthStateListener();

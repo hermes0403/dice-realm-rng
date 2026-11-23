@@ -354,7 +354,7 @@ export function createCloudSaveService(dependencies) {
       lockedDice: Array.isArray(S.lockedDice) ? S.lockedDice.filter(key => typeof key === 'string') : [],
       bagCapacity: S.bagCapacity, first: S.first, rollCounts: S.rollCounts || {},
       gloves: S.gloves, equipped: S.equipped, items: S.items || {}, equippedItem: S.equippedItem || '', best: S.best, coins: S.coins,
-      currencyVersion: 2, adminGrantApplied: S.adminGrantApplied || {},
+      currencyVersion: 2, adminGrantApplied: S.adminGrantApplied || {}, dailyShop: S.dailyShop || null,
       autoSellThreshold: S.autoSellThreshold, autoDeleteDice: S.autoDeleteDice || [],
       autoSold: S.autoSold, autoDepositWeatherEnabled: !!S.autoDepositWeatherEnabled,
       autoDepositThreshold: Number(S.autoDepositThreshold) || 700,
