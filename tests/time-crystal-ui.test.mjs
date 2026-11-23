@@ -14,13 +14,17 @@ function makeHarness(rpcHandler) {
   };
   const elements = new Map();
   let clickHandler = null;
+  let clickCapture = false;
   const documentRef = {
     getElementById(id) {
       if (!elements.has(id)) elements.set(id, { textContent: '', innerHTML: '', style: {} });
       return elements.get(id);
     },
-    addEventListener(type, handler) {
-      if (type === 'click') clickHandler = handler;
+    addEventListener(type, handler, options) {
+      if (type === 'click') {
+        clickHandler = handler;
+        clickCapture = options === true;
+      }
     }
   };
   const calls = [];
@@ -79,7 +83,7 @@ function makeHarness(rpcHandler) {
     };
     return clickHandler({ target });
   }
-  return { ui, state, calls, messages, elements, click, get saveCalls() { return saveCalls; } };
+  return { ui, state, calls, messages, elements, click, get clickCapture() { return clickCapture; }, get saveCalls() { return saveCalls; } };
 }
 
 test('Time Crystal recipe is compact and collapsed until opened', async () => {
@@ -91,6 +95,7 @@ test('Time Crystal recipe is compact and collapsed until opened', async () => {
   });
   await h.ui.loadTimeCrystalStatus(true);
   h.ui.setupGloveUI();
+  assert.equal(h.clickCapture, true, 'modal action listener must run in capture phase');
   h.ui.renderGloves();
   let html = h.elements.get('itemWorkshopList').innerHTML;
   assert.match(html, /data-time-crystal-toggle/);
