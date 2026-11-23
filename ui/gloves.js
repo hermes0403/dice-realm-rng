@@ -2,7 +2,7 @@
 export function createGloveUI(deps) {
   const {
     getState, D, G, supabaseClient, getCurrentUser, byId, glove, currentGlove,
-    format, formatWalletScientific, save, flushCloudSave, render, toast, timerManager, escapeHTML = value => String(value),
+    format, formatWalletScientific, save, flushCloudSave, adoptServerBag, render, toast, timerManager, escapeHTML = value => String(value),
     rewardText, grantAchievementReward, showAchievementPopup,
     checkAchievements, logCraft, KEY, userSaveKey, documentRef, confirmAction,
     openAuth, localStorageRef = globalThis.localStorage
@@ -178,21 +178,22 @@ export function createGloveUI(deps) {
     timeCrystalBusy = true;
     renderGloves();
     try {
-      await flushCloudSave();
+      const flushed = await flushCloudSave();
+      if (flushed === false) throw new Error('雲端存檔尚未同步完成，材料尚未投入，請稍後重試');
       if (getCurrentUser()?.id !== user.id) throw new Error('登入帳號已切換，請重新操作');
       const { data, error } = await supabaseClient.rpc('deposit_time_crystal_material', {
         p_die_id: dieId,
         p_expected_user_id: user.id
       });
       if (error) throw error;
-      if (!data?.ok || !data?.bag || !data?.materials) throw new Error('伺服器未確認材料投入結果');
+      if (!data?.ok || !data?.bag || !data?.materials || !data?.updated_at) throw new Error('伺服器未確認材料投入結果');
       if (getCurrentUser()?.id !== user.id) throw new Error('登入帳號已切換，請重新載入存檔');
-      getState().bag = data.bag;
+      if (typeof adoptServerBag !== 'function' || !adoptServerBag(data.bag, data.updated_at)) {
+        throw new Error('材料已由伺服器處理，但本機存檔同步基準未能更新，請重新載入遊戲');
+      }
       timeCrystalStatus = { ...(timeCrystalStatus || {}), materials: data.materials };
       timeCrystalPickerSlot = null;
       timeCrystalSelectedDieId = null;
-      save();
-      await loadTimeCrystalStatus(true);
       render();
       toast('材料已投入工坊');
     } catch (error) {
