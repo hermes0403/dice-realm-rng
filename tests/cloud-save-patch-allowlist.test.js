@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const cloudSave = readFileSync(new URL('../services/cloud-save.js', import.meta.url), 'utf8');
-const migration = readFileSync(new URL('../supabase/migrations/20261123120000_t0127_allow_daily_shop_save_field.sql', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20261123114521_t0127_allow_daily_shop_save_field.sql', import.meta.url), 'utf8');
 
 function extractSavePayloadKeys(source) {
   const start = source.indexOf('function savePayload()');
