@@ -13,7 +13,7 @@ const PRODUCTS = [
   { id: 'd13', type: 'dice', itemId: 'd13', name: '☼ 日冕骰子', chance: 0.5, price: 40000000, tier: 'legendary', desc: '1/8,192 · 微型日冕向外迸發。' }
 ];
 
-function taipeiDateKey(now = new Date()) {
+export function taipeiDateKey(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
   }).formatToParts(now);
@@ -21,7 +21,7 @@ function taipeiDateKey(now = new Date()) {
   return values.year + '-' + values.month + '-' + values.day;
 }
 
-function rollDailyStock(random = Math.random) {
+export function rollDailyStock(random = Math.random) {
   const selected = [];
   for (const product of PRODUCTS) {
     if (random() * 100 < product.chance) selected.push(product.id);
