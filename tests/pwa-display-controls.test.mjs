@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261123-t0126-time-crystal-material-deposit/);
+  assert.match(html, /script\.js\?v=20261123-t0126-click-capture-fix/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -192,7 +192,7 @@ test('V1.56 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1.56/);
-  assert.match(html, /script\.js\?v=20261123-t0126-time-crystal-material-deposit/);
+  assert.match(html, /script\.js\?v=20261123-t0126-click-capture-fix/);
   assert.match(worker, /dice-realm-shell-v2\.11/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261122-secret-skill-swap-v1/);
@@ -330,13 +330,13 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
-  assert.match(html, /style\.css\?v=20261123-t0126-time-crystal-material-deposit/);
+  assert.match(html, /style\.css\?v=20261123-t0126-click-capture-fix/);
   assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
   assert.match(css, /padding-bottom:calc\(132px \/ var\(--landscape-scale, 1\) \+ env\(safe-area-inset-bottom, 0px\)\)!important/);
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /dice-realm-shell-v2\.11/);
-  assert.match(worker, /style\.css\?v=20261123-t0126-time-crystal-material-deposit/);
+  assert.match(worker, /style\.css\?v=20261123-t0126-click-capture-fix/);
   assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
 });
