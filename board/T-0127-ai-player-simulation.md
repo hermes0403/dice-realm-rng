@@ -55,6 +55,9 @@ done_at:
 - 2026-11-24 05:47 [叉子] 依棒子本次「開始用吧」及「繼續用吧」建立任務。需求確認為五名 AI 玩家、各自獨立身份與骰子紀錄、差異化活動排程、管理員介面專屬 AI 標記；公會系統延期。依 AGENTS.md 與 Board §15，容量／Communicate 閘門未通過前，本任務保持 open，不開始程式或資料庫實作。
 - 2026-11-24 05:48 [叉子] 開單 PR #316 已合併至 main，merge commit `ba1310b8a292d1049be54ffe31f28e069c9d77ea`；回讀 main 確認任務檔存在且 status 仍為 open。容量規則在 AGENTS.md（in_progress + review）與 Board §15.3（僅 in_progress）之間存在定義差異；按較嚴格規則盤點已確認 owner_side 至少 8 張 in_progress／review 任務，超過 5 張上限，因此不啟動實作。Communicate 閘門尚未完成全 Board 掃描，維持未確認。
 
+
+- 2026-11-24 05:50 [叉子] 唯讀架構盤點：目前 systems/dice.js 的 weightedRoll() 由前端執行；T-0006「將擲骰核心與結果副作用移至伺服器」仍為老查方 open 任務，叉子不得接手或修改。AI 伺服器端擲骰需先確認可共用的權威抽骰入口，不能在 AI 服務中複製另一套機率。admin/player-management.js 的管理員名單來自 adminApi dashboard，故 AI 標記應由管理專用回應提供；不得把 AI 欄位加入公開可讀的 player_profiles 造成一般玩家可查。另 services/presence.js 目前 main 原始碼常數為 60000 ms，與 T-0039 done 紀錄所述 5 分鐘不一致，列為既有基線差異，本任務不得擅自修改真人心跳。
+
 ## 完工回報
 
 ### 改了什麼
