@@ -31,7 +31,7 @@ done_at:
 
 - [x] 正式資料庫函式已更新並確認包含 `dailyShop`。
 - [x] 純 SQL 檢查確認 `dailyShop` 可通過允許清單、未知欄位仍不被允許。
-- [ ] Node 回歸測試與 GitHub Actions 通過。
+- [x] Node 回歸測試與 cloud-save GitHub Actions 通過。
 - [ ] 以正式遊戲玩家實際驗證時序結晶投入及寵物出售，確認交易 RPC 成功、資料正確保存。
 - [ ] GitHub Pages 部署成功並確認線上版本。
 
@@ -44,4 +44,6 @@ done_at:
 ## 紀錄
 
 - 2026-11-23 19:40 [叉子] 從正式 Supabase 讀取 `sync_player_game_save_delta` 函式定義，逐欄比對前端 `savePayload()`。確認唯一缺漏欄位為 `dailyShop`；正式環境 24 小時內觀察到 346 次存檔 RPC HTTP 400（SQLSTATE 22023），另有 1,169 次總呼叫。未讀取或修改任何玩家存檔內容。
-- 2026-11-23 19:45 [叉子] 已在正式 Supabase 套用向後相容的函式更新，僅將 `dailyShop` 加入允許清單；保留原本函式其餘邏輯。純 SQL 驗證結果：`daily_shop_allowed=true`、`unexpected_field_allowed=false`、正式函式定義含 `dailyShop`。尚待 Node／Actions 與玩家實機回歸。
+- 2026-11-23 19:45 [叉子] 已在正式 Supabase 套用向後相容的函式更新，僅將 `dailyShop` 加入允許清單；保留原本函式其餘邏輯。純 SQL 驗證結果：`daily_shop_allowed=true`、`unexpected_field_allowed=false`、正式函式定義含 `dailyShop`。
+- 2026-11-23 19:48 [叉子] 修復後觀察正式 edge logs：從 11:46 UTC 起有 2 次 `sync_player_game_save_delta` HTTP 200、0 次 HTTP 400；表示存檔同步已能成功通過此欄位檢查。尚未觀察到玩家觸發 `sell_owned_pets` 或 `deposit_time_crystal_material`，因此仍待棒子實機驗收兩筆交易。
+- 2026-11-23 19:49 [叉子] GitHub Actions 的 `cloud-save-regression` 通過，新增測試已執行成功；`weather-announcement-display`、`coin-boost` 亦通過。`board-lifecycle` 仍因 main 原有 T-0119 任務檔 frontmatter 缺欄位及舊紀錄格式錯誤而失敗；最新輸出未再列出 T-0127 的索引缺漏或時間格式警告。未修改 T-0119。
