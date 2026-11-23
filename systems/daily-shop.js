@@ -77,15 +77,11 @@ export function createDailyShopSystem(deps) {
       <div class="daily-shop-track" aria-label="每日商店商品，可左右滑動">
         ${products.map((product, index) => {
           const done = purchased.has(product.id);
-          const owned = product.type === 'potion'
-            ? Number(state.potions?.inventory?.[product.itemId]) || 0
-            : Number(state.bag?.[product.itemId]) || 0;
           const icon = product.type === 'potion' ? ({luck1:'🧪',luck2:'⚗️',luck3:'✦',speed1:'💨',speed2:'🌪️',money1:'💰',money2:'🪙',angel1:'🪽'}[product.itemId] || '✧') : ({d10:'✺',d12:'☄',d13:'☼'}[product.itemId] || '🎲');
           return `<article class="daily-shop-card daily-shop-${product.tier}">
-            <div class="daily-shop-card-top"><span class="daily-shop-index">0${index + 1} / DAILY STOCK</span><span class="daily-shop-chance">出現率 ${product.chance}%</span></div>
+            <div class="daily-shop-card-top"><span class="daily-shop-index">0${index + 1} / DAILY STOCK</span></div>
             <div class="daily-shop-art" aria-hidden="true">${icon}</div>
             <h3>${product.name}</h3><p class="daily-shop-desc">${product.desc}</p>
-            <div class="daily-shop-owned">目前持有 <b>×${format(owned)}</b></div>
             <div class="daily-shop-buy-row"><strong>${format(product.price)}<small>$</small></strong>
               <button type="button" class="primary" data-buy-daily-item="${product.id}" ${done || balance < product.price ? 'disabled' : ''}>${done ? '今日已購買' : balance < product.price ? '金錢不足' : '立即購買'}</button>
             </div>
