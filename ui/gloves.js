@@ -458,7 +458,6 @@ export function createGloveUI(deps) {
     timeCrystalBusy = true;
     renderGloves();
     try {
-      await flushCloudSave();
       if (getCurrentUser()?.id !== user.id) throw new Error('登入帳號已切換，請重新操作');
       const { data, error } = await supabaseClient.rpc('craft_time_crystal');
       if (error) throw error;
