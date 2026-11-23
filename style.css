@@ -3005,3 +3005,44 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
     margin-top: 0 !important;
   }
 }
+
+/* Daily shop: premium horizontal market cards, with touch-friendly snap scrolling. */
+.daily-shop-hero{position:relative;overflow:hidden;padding:25px 24px;border:1px solid #55518d;border-radius:22px;background:radial-gradient(ellipse at 82% 15%,#5d4a9b55,transparent 40%),linear-gradient(125deg,#121a35,#211a3d 58%,#11172b);box-shadow:inset 0 1px #ffffff12,0 14px 40px #0003}
+.daily-shop-hero:after{content:"";position:absolute;width:220px;height:220px;right:-55px;bottom:-135px;border:1px solid #9d8cff44;border-radius:50%;box-shadow:0 0 0 22px #8d7dff0a,0 0 0 48px #8d7dff08}
+.daily-shop-orbit{position:absolute;right:34px;top:18px;font-size:54px;color:#c4b7ff;text-shadow:0 0 22px #a78bfa;animation:dailyShopGlow 3s ease-in-out infinite alternate}
+@keyframes dailyShopGlow{to{filter:drop-shadow(0 0 14px #a78bfa);transform:rotate(18deg) scale(1.08)}}
+.daily-shop-hero h1{margin:5px 0;font-size:clamp(25px,4vw,34px);letter-spacing:.04em}
+.daily-shop-hero p{max-width:560px;margin:7px 0 13px;color:#b7c0df;font-size:13px}
+.daily-shop-refresh{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid #515b8a;border-radius:99px;background:#0b1125a8;color:#d9ddff;font-size:11px;font-weight:850;letter-spacing:.08em}
+.daily-shop-live-dot{width:7px;height:7px;border-radius:50%;background:#6ee7c0;box-shadow:0 0 10px #6ee7c0}
+.daily-shop-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 12px}
+.daily-shop-toolbar>div:first-child{display:grid;gap:3px}
+.daily-shop-kicker{color:#8e9dce;font-size:10px;font-weight:900;letter-spacing:.13em}
+.daily-shop-toolbar strong{font-size:17px}
+.daily-shop-toolbar strong b{color:#c5a8ff}
+.daily-shop-balance{display:grid;gap:1px;text-align:right;padding:7px 12px;border:1px solid #3b456b;border-radius:12px;background:linear-gradient(135deg,#111a2d,#191b36)}
+.daily-shop-balance small{font-size:10px;color:#8f9abd}
+.daily-shop-balance b{font-size:15px;color:#ffe0a1;font-variant-numeric:tabular-nums}
+.daily-shop-track{display:flex;gap:13px;overflow-x:auto;overflow-y:hidden;padding:3px 2px 15px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#6975bd #111629;-webkit-overflow-scrolling:touch}
+.daily-shop-card{position:relative;display:flex;flex:0 0 258px;flex-direction:column;min-height:325px;padding:15px;border:1px solid #3d496e;border-radius:17px;background:radial-gradient(ellipse at 50% 0%,#39416b55,transparent 44%),linear-gradient(155deg,#151d34,#101524 70%);box-shadow:0 9px 24px #0004;scroll-snap-align:start;overflow:hidden}
+.daily-shop-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#7e91ff,#a98aff,#5ed8e8);opacity:.9}
+.daily-shop-rare{border-color:#56618d;background:radial-gradient(ellipse at 50% 0%,#4e427455,transparent 48%),linear-gradient(155deg,#171b35,#101524 70%)}
+.daily-shop-epic{border-color:#7959a7;background:radial-gradient(ellipse at 50% 0%,#7846a955,transparent 48%),linear-gradient(155deg,#211a3b,#101524 70%)}
+.daily-shop-legendary{border-color:#9b794d;background:radial-gradient(ellipse at 50% 0%,#a57a3f55,transparent 48%),linear-gradient(155deg,#292139,#111524 70%)}
+.daily-shop-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;color:#8793b8;font-size:9px;font-weight:900;letter-spacing:.08em}
+.daily-shop-chance{padding:3px 7px;border:1px solid #49547a;border-radius:99px;color:#c5b8ff;font-size:10px;letter-spacing:0;white-space:nowrap}
+.daily-shop-art{display:grid;place-items:center;height:88px;margin:10px 0 2px;font-size:51px;color:#d8dcff;text-shadow:0 0 24px #9a8aff88}
+.daily-shop-card h3{margin:5px 0 3px;font-size:17px;letter-spacing:.02em}
+.daily-shop-desc{min-height:38px;margin:0;color:#9da8c7;font-size:11px;line-height:1.55}
+.daily-shop-owned{margin-top:10px;padding-top:9px;border-top:1px solid #ffffff12;color:#8f9aba;font-size:11px}
+.daily-shop-owned b{color:#dbe3ff}
+.daily-shop-buy-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:12px}
+.daily-shop-buy-row>strong{color:#ffe0a1;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.daily-shop-buy-row>strong small{margin-left:3px;font-size:11px}
+.daily-shop-buy-row button{min-width:94px;padding:8px 10px;font-size:11px;white-space:nowrap}
+.daily-shop-foot{display:flex;justify-content:space-between;gap:10px;margin:0 2px;color:#7783a8;font-size:10px}
+.daily-shop-empty{display:grid;justify-items:center;gap:7px;margin-top:18px;padding:34px 18px;border:1px dashed #46527c;border-radius:18px;background:linear-gradient(145deg,#11182b,#101424);text-align:center}
+.daily-shop-empty>span{font-size:35px;color:#a99aff;text-shadow:0 0 20px #9d8cff}
+.daily-shop-empty h3{margin:0;font-size:17px}
+.daily-shop-empty p{margin:0 0 7px;color:#98a3c1;font-size:12px}
+@media(max-width:600px){.daily-shop-hero{padding:20px 17px}.daily-shop-orbit{right:18px;top:12px;font-size:43px}.daily-shop-card{flex-basis:min(78vw,270px);min-height:318px}.daily-shop-toolbar{align-items:flex-end}.daily-shop-foot{flex-direction:column;gap:3px}.daily-shop-buy-row button{min-width:88px}}
