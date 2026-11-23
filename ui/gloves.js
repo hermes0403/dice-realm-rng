@@ -135,7 +135,7 @@ export function createGloveUI(deps) {
         '<div class="pet-sell-actions"><button type="button" class="quiet" data-time-crystal-cancel>取消</button>' +
         '<button type="button" class="primary" data-time-crystal-confirm ' +
         (!available.some(dice => dice.id === timeCrystalSelectedDieId) || timeCrystalBusy ? 'disabled' : '') +
-        '>確認投入</button></div></div></div>';
+        '>' + (timeCrystalBusy ? '正在投入…' : '確認投入') + '</button></div></div></div>';
     }
 
     const progress = slots.filter(item => {
@@ -199,6 +199,7 @@ export function createGloveUI(deps) {
       return;
     }
     timeCrystalBusy = true;
+    toast('正在確認投入材料…');
     renderGloves();
     try {
       const flushed = await flushCloudSave();
@@ -531,7 +532,10 @@ export function createGloveUI(deps) {
         timeCrystalSelectedDieId = selectTimeCrystalDieButton.dataset.timeCrystalSelect;
         renderGloves();
       }
-      if (confirmTimeCrystalButton) depositTimeCrystalMaterial();
+      if (confirmTimeCrystalButton) {
+        event.preventDefault?.();
+        return depositTimeCrystalMaterial();
+      }
       if (cancelTimeCrystalButton) {
         timeCrystalPickerSlot = null;
         timeCrystalSelectedDieId = null;
