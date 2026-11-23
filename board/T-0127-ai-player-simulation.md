@@ -53,6 +53,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-24 05:47 [叉子] 依棒子本次「開始用吧」及「繼續用吧」建立任務。需求確認為五名 AI 玩家、各自獨立身份與骰子紀錄、差異化活動排程、管理員介面專屬 AI 標記；公會系統延期。依 AGENTS.md 與 Board §15，容量／Communicate 閘門未通過前，本任務保持 open，不開始程式或資料庫實作。
+- 2026-11-24 05:48 [叉子] 開單 PR #316 已合併至 main，merge commit `ba1310b8a292d1049be54ffe31f28e069c9d77ea`；回讀 main 確認任務檔存在且 status 仍為 open。容量規則在 AGENTS.md（in_progress + review）與 Board §15.3（僅 in_progress）之間存在定義差異；按較嚴格規則盤點已確認 owner_side 至少 8 張 in_progress／review 任務，超過 5 張上限，因此不啟動實作。Communicate 閘門尚未完成全 Board 掃描，維持未確認。
 
 ## 完工回報
 
