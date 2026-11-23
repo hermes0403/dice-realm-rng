@@ -77,7 +77,7 @@ function makeHarness(rpcHandler) {
         return candidate === selector ? { dataset } : null;
       }
     };
-    clickHandler({ target });
+    return clickHandler({ target });
   }
   return { ui, state, calls, messages, elements, click, get saveCalls() { return saveCalls; } };
 }
