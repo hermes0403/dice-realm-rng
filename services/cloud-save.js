@@ -586,6 +586,33 @@ export function createCloudSaveService(dependencies) {
     if (accountReady) scheduleSync();
   }
 
+  // Adopt a server-side inventory transaction into the local/cloud merge baseline.
+  // This prevents the same dice removal from being replayed as a second local delta.
+  function adoptServerBag(bag, updatedAt) {
+    const user = getCurrentUser();
+    if (!user || cloudLoadReadyUserId !== user.id || lastSyncedUserId !== user.id
+      || !lastSyncedPayload || !bag || typeof bag !== 'object' || !updatedAt) return false;
+    const nextPayload = clonePayload(lastSyncedPayload);
+    nextPayload.bag = clonePayload(bag);
+    lastSyncedPayload = nextPayload;
+    cloudSaveVersion = updatedAt;
+    writeCloudBase(user.id, nextPayload, updatedAt);
+    const state = getState();
+    state.bag = clonePayload(bag);
+    state._cloudBaseVersion = updatedAt;
+    persistLocalSnapshot(state, user.id);
+    try {
+      const savedAtKey = localSavedAtKey(user.id);
+      if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
+    } catch {}
+    document.getElementById('saveStatus').textContent = '材料已同步至雲端';
+    if (!valuesEqual(savePayload(), lastSyncedPayload)) {
+      cloudSyncPending = true;
+      scheduleCloudSync();
+    }
+    return true;
+  }
+
   async function flushCloudSave() {
     const user = getCurrentUser();
     if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
@@ -857,5 +884,5 @@ export function createCloudSaveService(dependencies) {
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
   function getLastCloudLoadError() { return lastCloudLoadError; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
 }
