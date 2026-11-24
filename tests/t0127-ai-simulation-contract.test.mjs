@@ -9,6 +9,8 @@ const migration = readFileSync(resolve(root, 'docs/database/20261124_t0127_ai_pl
 const fix = readFileSync(resolve(root, 'docs/database/20261124_t0127_ai_simulation_fix.sql'), 'utf8');
 const adminFunction = readFileSync(resolve(root, 'backend/edge-functions/dice-rng-ai-admin/index.ts'), 'utf8');
 const adminUi = readFileSync(resolve(root, 'admin/player-management.js'), 'utf8');
+const publicUi = readFileSync(resolve(root, 'index.html'), 'utf8');
+const publicScript = readFileSync(resolve(root, 'script.js'), 'utf8');
 
 test('AI dice pool contains 72 unique entries from the current game catalog', () => {
   const ids = [...migration.matchAll(/^\('?(d\d+)'?,/gm)].map(match => match[1]);
@@ -42,4 +44,14 @@ test('AI roster appears only in the admin player management module', () => {
   assert.match(adminUi, /supabaseClient\.functions\.invoke\('dice-rng-ai-admin'/);
   assert.match(adminUi, /AI 模擬玩家/);
   assert.match(adminUi, /不計入真人在線人數與排行榜/);
+});
+
+
+test('public lobby shows only online simulated visitors with clear disclosure', () => {
+  assert.match(migration, /create or replace function public\\.list_public_ai_activity\\(\\)/i);
+  assert.match(migration, /grant execute on function public\\.list_public_ai_activity\\(\\) to anon, authenticated/i);
+  assert.match(publicUi, /伺服器旅人/);
+  assert.match(publicUi, /部分角色由系統模擬/);
+  assert.match(publicScript, /rpc\\('list_public_ai_activity'\\)/);
+  assert.match(publicScript, /escapeHTML\\(p\\.display_name/);
 });
