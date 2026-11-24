@@ -1,0 +1,1 @@
+-- T-0127: AI activity is no longer public; the admin list is served by the admin-only Edge Function.\nrevoke all on function public.list_public_ai_activity() from public, anon, authenticated;\n
