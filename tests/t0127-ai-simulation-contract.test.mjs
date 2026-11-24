@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const migration = readFileSync(resolve(root, 'docs/database/20261124_t0127_ai_player_simulation.sql'), 'utf8');
+const publicMigration = readFileSync(resolve(root, 'docs/database/20261124_t0127_public_ai_activity.sql'), 'utf8');
 const fix = readFileSync(resolve(root, 'docs/database/20261124_t0127_ai_simulation_fix.sql'), 'utf8');
 const adminFunction = readFileSync(resolve(root, 'backend/edge-functions/dice-rng-ai-admin/index.ts'), 'utf8');
 const adminUi = readFileSync(resolve(root, 'admin/player-management.js'), 'utf8');
