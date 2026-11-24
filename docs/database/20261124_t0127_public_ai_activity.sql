@@ -14,5 +14,5 @@ as $$
   order by p.ai_id;
 $$;
 
-revoke all on function public.list_public_ai_activity() from public;
+revoke all on function public.list_public_ai_activity() from public, anon;
 grant execute on function public.list_public_ai_activity() to authenticated;
