@@ -131,7 +131,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (button.dataset.guildApply) {
       run(async () => {
         await rpc('guild_apply', { p_guild_id: button.dataset.guildApply, p_message: '' });
-        toast('已送出加入申請');
+        toast('加入公會操作已完成');
         await load();
       });
       return;
