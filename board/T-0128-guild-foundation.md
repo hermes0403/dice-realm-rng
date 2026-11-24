@@ -1,7 +1,7 @@
 ---
 id: T-0128
 title: 建立公會基礎系統
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P1
 created: 2026-11-25
 updated: 2026-11-25
 depends_on: []
-branch:
+branch: task/T-0128-guild-foundation
 done_by:
 done_at:
 ---
@@ -63,6 +63,7 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 叉子：PR #321 已合併，六項棒子已驗收任務完成歸檔。重新依 main 最新 Board 檢查 §15.3：owner_side 有效 in_progress 任務為 0 張；collaborator_side 的 T-0002、T-0038 不屬本方容量。搜尋 Board 任務與紀錄未發現有效 Communicate 優先鎖。兩道閘門均未阻擋，將 T-0128 轉為 in_progress，建立任務分支 task/T-0128-guild-foundation。
 - 2026-11-25 叉子：依棒子「公會基礎系統開始吧」建立第一階段任務。開工前盤點發現 owner_side 目前仍有 6 張有效 in_progress 任務（T-0026、T-0114、T-0117、T-0119、T-0126、T-0127），達到 Board §15.3 的五單上限；本任務先保持 open，不建立任務分支、不修改程式或 Supabase。須待既有任務狀態依正式驗收紀錄更新後，重新檢查容量與 Communicate 優先閘門，再轉為 in_progress。
 
 ## 完工回報
