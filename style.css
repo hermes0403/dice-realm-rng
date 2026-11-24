@@ -3071,13 +3071,3 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 
 
 /* T-0127: compact, disclosed system-simulated visitors in the roll lobby. */
-.ai-lobby-card{margin:10px 0 12px;padding:12px 14px;border:1px solid rgba(126,145,255,.28);background:linear-gradient(145deg,rgba(20,29,55,.94),rgba(13,19,36,.94))}
-.ai-lobby-heading{align-items:center;margin:0 0 5px}
-.ai-lobby-heading h2{margin:0 0 3px;font-size:16px}
-.ai-lobby-heading .eyebrow{font-size:9px;letter-spacing:.12em}
-.ai-lobby-disclosure{margin:5px 0 10px;color:var(--muted);line-height:1.55}
-.ai-lobby-players{display:flex;flex-wrap:wrap;gap:7px}
-.ai-lobby-player{display:inline-flex;align-items:center;gap:7px;min-width:0;padding:6px 9px;border:1px solid rgba(126,145,255,.2);border-radius:11px;background:rgba(8,14,29,.62);font-size:12px}
-.ai-lobby-avatar{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:8px;background:linear-gradient(135deg,#394d83,#694f9d);color:#eef1ff;font-weight:900}
-.ai-lobby-name{min-width:0;overflow-wrap:anywhere;color:#e1e7ff;font-weight:750}
-.ai-lobby-online{color:#72e0b1;font-size:10px;font-weight:800;white-space:nowrap}
