@@ -1,7 +1,7 @@
 ---
 id: T-0127
 title: 建立五名 AI 玩家與低流量自動活動系統
-status: in_progress
+status: blocked
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -10,7 +10,7 @@ reviewer: 棒子
 priority: P2
 created: 2026-11-24
 updated: 2026-11-24
-depends_on: []
+depends_on: [T-0006]
 branch: task/T-0127-ai-player-simulation
 done_by:
 done_at:
@@ -51,6 +51,8 @@ done_at:
 - [ ] GitHub Actions、GitHub Pages 及任何必要的服務端部署均有各自成功證據；正式資料庫操作有 migration／權限／功能驗證紀錄。
 
 ## 紀錄
+
+- 2026-11-24 [叉子] 架構盤點後將任務標記 `blocked`，依賴 `T-0006`。目前 `systems/dice.js` 的 `weightedRoll()`／`doRoll()` 仍在瀏覽器端產生結果並更新骰子資產；正式資料庫沒有 `roll_dice` 或其他可供系統 AI 呼叫的權威擲骰 RPC。T-0006（`from: 老查`）仍為 `open`，其範圍正是將擲骰核心及結果副作用移至伺服器；叉子不得接手、修改或假設已完成。若現在複製前端權重邏輯到 AI 服務，將產生第二套可能漂移的機率來源，違反本任務「沿用可信抽骰規則」及真人／AI 結果一致性要求，因此不採用。另目前 Supabase 未安裝 `pg_cron`／`pg_net`（僅可用版本，未啟用），`cron`／`net` schema 及排程工作均不存在；目前僅有 `dice-rng-admin`、`dice-rng-auth` 兩個 Edge Functions。管理員名單由 `dice-rng-admin` 的 `dashboard` action 讀取 `player_profiles`，前端另有直接讀取該表的 fallback。以上均已唯讀確認。解除條件：T-0006 完成並部署可供受信任伺服器流程呼叫的權威擲骰入口，且確認 AI 系統身份可安全呼叫而不建立真人登入 session；之後再設計一次批次排程與 AI 專用資料表。阻塞期間不建立 AI 帳號、不寫入真人資料表、不修改機率、不啟用排程、不部署。
 
 - 2026-11-24 [叉子] 棒子已明確同意本任務一次性容量閘門例外。Board §15.3 的權威計算法為 owner_side `from` + `in_progress`，盤點為 4/5；AGENTS.md 另將 `review` 納入，依較嚴格口徑會超過 5。為處理兩份規範衝突，僅對 T-0127 啟用一次性例外；範圍只限本任務開工，不延伸至其他任務，於本任務轉 `review`、`blocked` 或 `cancelled` 時失效。Communicate 閘門已完成 Board 全量掃描，沒有符合 §15.9 的有效觸發項目，結果 `NOT_REQUIRED`，未使用 Communicate 覆寫。分支已快轉同步至最新 main SHA `b5116695bcc99bb98cc1227bd6ffe67a276f73d7`。
 
