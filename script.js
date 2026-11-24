@@ -356,9 +356,13 @@ setupAccountActions({
   fresh, refreshLeaderboards
 });
 async function loadAiLobbyActivity(){
+ const card=document.getElementById('aiLobbyActivity');
  const count=document.getElementById('aiLobbyCount');
  const list=document.getElementById('aiLobbyPlayers');
- if(!count||!list)return;
+ if(!card||!count||!list)return;
+ // T-0127: AI activity is management-only; never render it for ordinary players.
+ if(!isAdmin()){card.hidden=true;return;}
+ card.hidden=false;
  if(!supabaseClient){count.textContent='暫不可用';list.textContent='目前無法取得系統旅人狀態。';return;}
  try{
   const {data,error}=await supabaseClient.rpc('list_public_ai_activity');
