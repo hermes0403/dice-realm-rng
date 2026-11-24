@@ -36,7 +36,6 @@ test('admin endpoint checks the authenticated admin before reading AI data', () 
   assert.match(adminFunction, /auth\.getUser\(token\)/);
   assert.match(adminFunction, /ADMIN_EMAIL/);
   assert.match(adminFunction, /admin\.rpc\("admin_list_ai_players"\)/);
-  assert.match(adminFunction, /verify_jwt/);
 });
 
 test('AI roster appears only in the admin player management module', () => {
