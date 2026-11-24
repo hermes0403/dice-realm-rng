@@ -63,6 +63,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 06:57 [叉子] 已完成公會前端第一階段串接：script.js 匯入並建立 createGuildSystem，導航切換時才載入公會資料；搜尋結果依 join_mode 顯示直接加入／申請加入，操作提示依 RPC 回傳區分；會長退出按鈕停用並提示需先轉讓或解散。Supabase 正式環境 guild_foundation migration（版本 20261124221835）已存在，三張公會表均啟用 RLS；查核 public RPC 僅 authenticated 可執行、anon 不可執行，三張資料表對 anon／authenticated 均無直接 CRUD 權限。GitHub Actions 在 commit e52a889 的既有擲骰回歸工作中，script.js 語法檢查通過；整體測試 72 項中 67 項通過、5 項失敗，失敗集中於既有 PWA 版本字串斷言（仍期待舊 script/style/cache 版本），與公會模組無直接關聯。尚未完成真實登入雙帳號瀏覽器驗證；ui/guild.js 尚未納入自動語法檢查。正式 migration 原始檔未納入分支（AGENTS.md 禁止推送 supabase/ 目錄），需另行處理來源追蹤；尚未建立 PR、合併 main 或部署 GitHub Pages。
+
 - 2026-11-25 叉子：PR #321 已合併，六項棒子已驗收任務完成歸檔。重新依 main 最新 Board 檢查 §15.3：owner_side 有效 in_progress 任務為 0 張；collaborator_side 的 T-0002、T-0038 不屬本方容量。搜尋 Board 任務與紀錄未發現有效 Communicate 優先鎖。兩道閘門均未阻擋，將 T-0128 轉為 in_progress，建立任務分支 task/T-0128-guild-foundation。
 - 2026-11-25 叉子：依棒子「公會基礎系統開始吧」建立第一階段任務。開工前盤點發現 owner_side 目前仍有 6 張有效 in_progress 任務（T-0026、T-0114、T-0117、T-0119、T-0126、T-0127），達到 Board §15.3 的五單上限；本任務先保持 open，不建立任務分支、不修改程式或 Supabase。須待既有任務狀態依正式驗收紀錄更新後，重新檢查容量與 Communicate 優先閘門，再轉為 in_progress。
 
