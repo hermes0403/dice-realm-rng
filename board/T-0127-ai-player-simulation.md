@@ -52,7 +52,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-24 [叉子] 補上公開大廳呈現：新增只回傳在線 AI 顯示名稱的 `public.list_public_ai_activity()`，不暴露 AI 私有資料、骰子背包或紀錄；主頁增加「伺服器旅人」區塊，明確標示部分角色由系統模擬，僅顯示在線 AI，並標明不計入真人在線數及公開排行榜。呼叫只在頁面載入時執行一次，不新增輪詢或 Realtime。
+- 2026-11-24 19:18 [叉子] 補上公開大廳呈現：新增只回傳在線 AI 顯示名稱的 `public.list_public_ai_activity()`，不暴露 AI 私有資料、骰子背包或紀錄；主頁增加「伺服器旅人」區塊，明確標示部分角色由系統模擬，僅顯示在線 AI，並標明不計入真人在線數及公開排行榜。呼叫只在頁面載入時執行一次，不新增輪詢或 Realtime。
 
 - 2026-11-24 18:56 [叉子] 已依獨立模擬方案完成第一輪正式環境建置：Supabase migration `t0127_ai_player_simulation` 建立 `ai_private` 隔離 schema、5 名固定 AI、72 種骰池、獨立背包／擲骰紀錄／批次紀錄，並啟用 RLS、撤銷 anon/authenticated 存取；另套用 `t0127_ai_simulation_fix`，將每次抽選的 random threshold 固定為單次取樣，保留 30 天擲骰事件後自動清理。資料庫驗證：AI 名單 RPC 回傳 5 名；72 顆骰子均已載入；anon 對 schema/table/RPC 權限均為 false，service_role 僅可執行管理 RPC；真人 player_profiles 中沒有這 5 個 AI 名稱。以 transaction + rollback 測試批次函式，結果可模擬 1 名在線、2 次擲骰，交易已回滾，未留下測試骰子。Cron job `dice-rng-ai-simulation-10m` 已建立且 active，排程每 10 分鐘；截至本紀錄時資料庫時間 10:56 UTC，尚未到下一個 11:00 UTC 排程點，`cron.job_run_details` 尚無正式排程執行紀錄，故不可宣稱排程已實際成功跑過。管理員專用 Edge Function `dice-rng-ai-admin` v1 已部署，JWT 驗證開啟，函式另檢查管理員 email；前端管理名單顯示程式、快取版本及 Node 合約測試／CI workflow 已提交到任務分支，尚未合併 main 或部署 GitHub Pages。AI 不寫入真人存檔、真人公告、真人在線心跳或排行榜，也不建立 Auth 帳號；公開玩家數仍只統計真人。
 
