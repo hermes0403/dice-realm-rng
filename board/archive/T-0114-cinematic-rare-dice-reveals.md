@@ -1,7 +1,7 @@
 ---
 id: T-0114
 title: 全稀有度骰子揭示動畫電影級升級
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-25
 depends_on: []
 branch: task/T-0114-cinematic-rare-dice-reveals
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -61,3 +61,5 @@ done_at:
 - 2026-11-20 23:24 [叉子] 開工閘門複查：owner_side 有效 in_progress + review 任務為 T-0110、T-0113，共 2/5；T-0059、T-0085、T-0098、T-0107 已由棒子驗收並歸檔。檢查目前有效 Board 任務及 Communicate 欄位，未發現指派給 owner_side 且狀態為 open／in_progress 的委派單，也未發現 owner_side from 的 returned 委派單或未解除鎖定。兩道閘門均通過。以 main SHA `a46295cb62bf4a9a7d54395d3e55c1cb8b6980f9` 建立任務分支 `task/T-0114-cinematic-rare-dice-reveals`，開始實作。
 
 - 2026-11-21 [叉子] 依棒子最新視覺回饋，調整 1/10,000–99,999 的稀有卡配色為紫晶色系；1/1,000,000 以上加入純黑暗場中央多芒星蓄能揭示，再顯示骰子結果。保留玩家確認後才關閉的流程，不更動任何機率與遊戲資料。
+
+- 2026-11-25 06:04 [代記:棒子/叉子] 驗收結案：依棒子於 2026-11-24 20:24:59（台灣時間）對本任務明確作出的驗收決定，狀態由 in_progress 更新為 done，並移入 board/archive/。本紀錄只登記人類已作出的結案決定；既有紀錄中未提供的瀏覽器驗證、部署或其他技術證據不補寫、不推定。來源：棒子於 2026-11-24 20:24:59（台灣時間）在 ChatGPT 對話中明確驗收本任務。證據：本任務既有紀錄及其可回查程式／資料庫變更紀錄；未記載的驗證項目仍以原紀錄為準。

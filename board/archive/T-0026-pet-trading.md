@@ -1,7 +1,7 @@
 ---
 id: T-0026
 title: 新增玩家寵物交易系統
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-06
-updated: 2026-11-21
+updated: 2026-11-25
 depends_on: [T-0012]
 branch: task/T-0026-pet-trading-mainline
 done_by: 棒子
-done_at:
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -104,3 +104,5 @@ done_at:
 - 2026-11-06 [叉子] 追加玩家搜尋輸入與識別資訊保護：搜尋名稱會先移除 PostgREST／ILIKE 特殊字元，並以清理後的有效字元數重新檢查最短長度，避免只輸入萬用字元就擴大成非預期搜尋；結果卡片不再顯示完整 auth UUID，改顯示前 8 碼玩家代碼。GitHub commit：`7ec3371`。未修改玩家資料，未碰 T-0012，未部署；T-0026 維持 blocked。
 
 - 2026-11-06 [叉子] 玩家搜尋查詢再縮減資料欄位：`player_profiles` 搜尋原本一併讀取未使用的 `last_seen`，已移除，只查詢顯示及發送邀請所需的 `user_id, username`。複查目前 `player_profiles` SELECT policy 為公開可讀，因此交易搜尋只取必要欄位，避免不必要讀取上線時間資料。GitHub commit：`0448519`。未修改玩家資料或 profile RLS；未碰 T-0012，未部署。
+
+- 2026-11-25 06:04 [代記:棒子/叉子] 驗收結案：依棒子於 2026-11-24 20:24:59（台灣時間）對本任務明確作出的驗收決定，狀態由 in_progress 更新為 done，並移入 board/archive/。本紀錄只登記人類已作出的結案決定；既有紀錄中未提供的瀏覽器驗證、部署或其他技術證據不補寫、不推定。來源：棒子於 2026-11-24 20:24:59（台灣時間）在 ChatGPT 對話中明確驗收本任務。證據：本任務既有紀錄及其可回查程式／資料庫變更紀錄；未記載的驗證項目仍以原紀錄為準。

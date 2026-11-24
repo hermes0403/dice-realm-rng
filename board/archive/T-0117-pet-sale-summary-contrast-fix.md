@@ -1,7 +1,7 @@
 ---
 id: T-0117
 title: 修復寵物出售選擇摘要文字對比與快取更新
-status: in_progress
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-25
 depends_on: []
 branch: task/T-0117-pet-sale-summary-contrast-fix
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -39,3 +39,5 @@ done_at:
 
 - 2026-11-21 [叉子] 依棒子要求修復出售摘要文字顏色。既有 T-0116 樣式已在 main，但玩家仍回報異常，因此本任務改以更高優先序選擇器、-webkit-text-fill-color、opacity、filter 與 mix-blend-mode 明確鎖定摘要顯示；不改動交易或玩家資產。
 - 2026-11-21 [叉子] 唯讀核對玩家「想不到可以叫什麼………..(◐‿◑)」：game_saves 有 12 個寵物 UID，融合紀錄扣除 3 個出售 tombstone 後也有 12 個 UID；missing_uids 與 unexpected_saved_uids 均為 null。此刻存檔已包含全部可確認未出售寵物，因此不執行重複補發或任何玩家資料寫入。
+
+- 2026-11-25 06:04 [代記:棒子/叉子] 驗收結案：依棒子於 2026-11-24 20:24:59（台灣時間）對本任務明確作出的驗收決定，狀態由 in_progress 更新為 done，並移入 board/archive/。本紀錄只登記人類已作出的結案決定；既有紀錄中未提供的瀏覽器驗證、部署或其他技術證據不補寫、不推定。來源：棒子於 2026-11-24 20:24:59（台灣時間）在 ChatGPT 對話中明確驗收本任務。證據：本任務既有紀錄及其可回查程式／資料庫變更紀錄；未記載的驗證項目仍以原紀錄為準。

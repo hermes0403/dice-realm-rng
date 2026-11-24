@@ -1,7 +1,7 @@
 ---
 id: T-0126
 title: 工坊材料投入、背包選擇與持久化
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-23
-updated: 2026-11-23
+updated: 2026-11-25
 depends_on: [T-0093, T-0098]
 branch: task/T-0126-workshop-material-deposit
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -69,3 +69,5 @@ done_at:
 
 - 2026-11-23 17:12 [棒子] 在對話中明確授權開始實作並要求部署。要求每項材料可分別添加，從背包選擇後消耗並投入配方槽，材料進度跨頁面及重新登入持久保存；材料齊全後才可合成。介面採精簡單列，完成合成後隱藏材料列表，僅顯示已合成道具與使用按鈕。
 - 2026-11-23 17:13 [叉子] 依 Board §15 檢查最新 main。Board §15.3 五單容量以有效 in_progress 任務計算；owner_side 目前 T-0026、T-0114 共 2/5。最新 Board 任務索引未列出有效 Communicate task，未發現待接收或 returned 委派單。以 main SHA 28c6fa7f9e9aa3a731624f6c194caab2bc2b32b7 建立本任務分支。
+
+- 2026-11-25 06:04 [代記:棒子/叉子] 驗收結案：依棒子於 2026-11-24 20:24:59（台灣時間）對本任務明確作出的驗收決定，狀態由 in_progress 更新為 done，並移入 board/archive/。本紀錄只登記人類已作出的結案決定；既有紀錄中未提供的瀏覽器驗證、部署或其他技術證據不補寫、不推定。來源：棒子於 2026-11-24 20:24:59（台灣時間）在 ChatGPT 對話中明確驗收本任務。證據：本任務既有紀錄及其可回查程式／資料庫變更紀錄；未記載的驗證項目仍以原紀錄為準。

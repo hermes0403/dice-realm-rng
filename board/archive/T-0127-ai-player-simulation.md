@@ -1,7 +1,7 @@
 ---
 id: T-0127
 title: 建立五名 AI 玩家與低流量自動活動系統
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-24
-updated: 2026-11-24
+updated: 2026-11-25
 depends_on: []
 branch: task/T-0127-ai-player-simulation-cleanup
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -82,3 +82,5 @@ done_at:
 
 
 - 2026-11-24 [叉子] 依棒子確認，改為直接移除一般玩家主頁的「伺服器旅人」整個區塊；管理員玩家管理頁的 AI 識別與管理功能保留。修正分支以 main 為乾淨基準，避免舊任務分支混入無關提交。
+
+- 2026-11-25 06:04 [代記:棒子/叉子] 驗收結案：依棒子於 2026-11-24 20:24:59（台灣時間）對本任務明確作出的驗收決定，狀態由 in_progress 更新為 done，並移入 board/archive/。本紀錄只登記人類已作出的結案決定；既有紀錄中未提供的瀏覽器驗證、部署或其他技術證據不補寫、不推定。來源：棒子於 2026-11-24 20:24:59（台灣時間）在 ChatGPT 對話中明確驗收本任務。證據：本任務既有紀錄及其可回查程式／資料庫變更紀錄；未記載的驗證項目仍以原紀錄為準。
