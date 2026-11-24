@@ -33,7 +33,7 @@ import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-re
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
 import { createEquipmentUI } from './ui/equipment.js?v=20261123-t0126-click-capture-fix';
 import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-t0126-click-capture-fix';
-import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
+import { createAdminPlayerManagement } from './admin/player-management.js?v=20261124-t0127-ai-npc-v1';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js?v=20261123-daily-shop-v1';
 import { createPresenceService } from './services/presence.js';
@@ -248,7 +248,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value;if(value){weeklyRealmEvent.refresh();loadAiLobbyActivity()}else{const count=document.getElementById('aiLobbyCount'),list=document.getElementById('aiLobbyPlayers');if(count)count.textContent='未登入';if(list)list.textContent='登入後查看系統旅人狀態。'}}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
  applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
@@ -355,6 +355,23 @@ setupAccountActions({
   save, render, flushCloudSave, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
+async function loadAiLobbyActivity(){
+ const count=document.getElementById('aiLobbyCount');
+ const list=document.getElementById('aiLobbyPlayers');
+ if(!count||!list)return;
+ if(!supabaseClient){count.textContent='暫不可用';list.textContent='目前無法取得系統旅人狀態。';return;}
+ try{
+  const {data,error}=await supabaseClient.rpc('list_public_ai_activity');
+  if(error)throw error;
+  const rows=Array.isArray(data)?data:[];
+  count.textContent=rows.length+' 位在線';
+  list.innerHTML=rows.length?rows.map(p=>'<div class="ai-lobby-player"><span class="ai-lobby-avatar">'+escapeHTML(String(p.display_name||'旅').slice(0,1))+'</span><span class="ai-lobby-name">'+escapeHTML(p.display_name||'系統旅人')+'</span><span class="ai-lobby-online">在線</span></div>').join(''):'<span class="mini">目前沒有系統旅人在線。</span>';
+ }catch(error){
+  console.warn('AI lobby activity unavailable',error);
+  count.textContent='暫不可用';
+  list.textContent='系統旅人狀態暫時無法載入。';
+ }
+}
 save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed','activeMoney']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed')||activePotion('money'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
 
