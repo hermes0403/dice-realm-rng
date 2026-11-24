@@ -1,8 +1,19 @@
 ---
 id: T-0119
 title: 融合機骰子圖案對比度修正
-status: implemented
+status: in_progress
+from: 棒子
+to: 叉子
+owner: 叉子
+contributors: []
+reviewer: 棒子
+priority: P2
 created: 2026-11-21
+updated: 2026-11-24
+depends_on: []
+branch:
+done_by:
+done_at:
 ---
 
 ## 問題
