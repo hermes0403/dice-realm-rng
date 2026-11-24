@@ -7,6 +7,7 @@ import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, p
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
 import { createNavigationUI } from './ui/navigation.js?v=20261123-daily-shop-v1';
+import { createGuildSystem } from './ui/guild.js?v=20261125-t0128-guild-v2';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
@@ -242,8 +243,10 @@ const petTradingSearch = createPetTradingSearch({
   flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast
 });
 petTradingSearch.setup();
+const guildSystem = createGuildSystem({ supabaseClient, getCurrentUser: () => currentUser, documentRef: document, toast });
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop,
+  loadGuildPage: () => guildSystem.load(), refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
