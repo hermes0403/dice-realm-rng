@@ -471,3 +471,11 @@ Board 可見性與權限分離：所有角色 Worktree 都可查看完整 Board�
 - 2026-11-18 19:28:41 [老查] M2 步驟 3.5 v3 經 Barry 審閱放行。診斷改動獨立 commit：`9ba4b5af29c807b92e99ecd60a9c6316d60b4cf8`，僅包含 `scripts/validate-board.mjs` 與 `tests/board-lifecycle.test.mjs`。v3 測試 48／48 PASS；Board validator 0 errors，檢查 2 警告由 22 筆降至 18 筆，T-0092 至 T-0095 均通過檢查 2。
   - 依審閱指示採用。
   - 已知限制：關鍵字比對不是語意判斷；「請驗收並確認」這類同一句、沒有逗號分隔的請託，仍可能被誤判為通過。此限制不阻擋本次採用；M2 步驟 7 若要將檢查 2 升級為阻擋條件，必須先將此限制列明並處理，不得把目前的關鍵字檢查當成語意驗證。
+
+- 2026-11-18 21:04:32 [老查] M2 步驟 4 v2 依 Barry 審閱指示採用；Commit A：`c7e6d5e1f00eb0668dcfaf1ded32bc34233b7205`。步驟 4 的檢查 7、8 **暫定為警告，不阻擋 CI**；人工 SOP 的啟動容量限制不變。
+  - 檢查 7 只計算有效的 `in_progress` 任務；`review` 不計入 validator 容量。5/5 為 `FULL`，超過 5 張為 `EXCEEDED`；未知任務另發 `UNKNOWN` 警告，兩者可同時存在。舊輸出字串依 repo 搜尋結果沒有腳本或 workflow 依賴；README 與 T-0038 中的舊名稱屬人工流程判定名稱，保留不動。
+  - 檢查 8 沿用既有 validator 錯誤訊息，以同一檔名開頭比對；該 Communicate 檔案只要有任何 validator 錯誤，就會保守地判為 `UNKNOWN`。
+  - `blocked_open_tasks` 目前只存在 `gateAnalysis` 資料中，沒有另外產生 validator 警告。
+  - 新增 `scripts/report-board-gates.mjs` 作為全看板試跑工具，掃描 `board/` 與 `board/archive/`，輸出檢查 7、8 及任務狀態 JSON；要求 `HEAD` 等於 `origin/main` 才執行。此新檔沒有自動化測試，本輪以實際執行驗證。
+  - 容量報表以 `node scripts/validate-board.mjs --side=all` 單次直接輸出雙方內容，沒有手動拼接。
+  - **已知不一致，留待 M3 同步：**本文件第 116、137 行仍寫「`in_progress` 與 `review` 合計五張」，與 README §15.3「只計 `in_progress`」不同。本次依指示不修改這兩處，交由 M3 統一。
