@@ -33,7 +33,7 @@ import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-re
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
 import { createEquipmentUI } from './ui/equipment.js?v=20261123-t0126-click-capture-fix';
 import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-t0126-click-capture-fix';
-import { createAdminPlayerManagement } from './admin/player-management.js?v=20261118-t0114-login-name-management';
+import { createAdminPlayerManagement } from './admin/player-management.js?v=20261124-t0127-ai-npc-v1';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js?v=20261123-daily-shop-v1';
 import { createPresenceService } from './services/presence.js';
