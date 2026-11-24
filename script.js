@@ -248,7 +248,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value;if(value){weeklyRealmEvent.refresh();loadAiLobbyActivity()}else{const count=document.getElementById('aiLobbyCount'),list=document.getElementById('aiLobbyPlayers');if(count)count.textContent='未登入';if(list)list.textContent='登入後查看系統旅人狀態。'}}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
  applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
@@ -372,7 +372,7 @@ async function loadAiLobbyActivity(){
   list.textContent='系統旅人狀態暫時無法載入。';
  }
 }
-save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();loadAiLobbyActivity();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed','activeMoney']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed')||activePotion('money'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
+save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed','activeMoney']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed')||activePotion('money'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
 
 /* ---- merged from script2.js: achievement popup controls ---- */
