@@ -1,6 +1,21 @@
+export function addWeatherDiceOdds(entries, pool, weatherTypes, minimumDenominator = 2049) {
+  const activeWeatherTypes = new Set(Array.isArray(weatherTypes) ? weatherTypes : [weatherTypes]);
+  const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
+  if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
+  const weatherDice = pool.filter(dice => activeWeatherTypes.has(dice.weather) && Number(dice.den) >= minimumDenominator);
+  if (!weatherDice.length) return entries;
+  const donors = entries.filter(entry => entry.weight > 10);
+  const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
+  const reserve = weatherDice.length;
+  if (donorTotal <= reserve) return entries;
+  donors.forEach(entry => { entry.weight -= reserve * (entry.weight / donorTotal); });
+  weatherDice.forEach(dice => entries.push({ dice, weight: 1 }));
+  return entries;
+}
+
 import { applyGlitchWeight } from './glitch-dice.js?v=20261114-t0087-heaven-probability';
 import { addDiceToBag } from './dice-locks.js';
-import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights } from './heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
+import { buildHeavenBaseEntries, heavenWeatherBonus, applyHeavenWeatherWeights, consumeHeavenPotionCharge } from './heaven-potion-odds.js?v=20261122-heaven2-min-denominator';
 /**
  * Dice rolling, reveal effects and automatic-roll controls.
  * The composition root owns shared game state and supplies all game services.
@@ -28,6 +43,7 @@ export function createDiceSystem(deps) {
     scheduleUnlock,
     applyPetRollSkills,
     potionMaterialTotal,
+    coinEarningMultiplier = () => 1,
     checkAchievements,
     checkDailyReward,
     save,
@@ -43,6 +59,8 @@ export function createDiceSystem(deps) {
   let autoWatchdog = null;
   let rolling = false;
   let rollingStartedAt = 0;
+  let revealAwaitingDismiss = false;
+  let autoRevealSequence = 0;
   let rollSequence = 0;
 
   function withTimeout(promise, timeoutMs, label) {
@@ -74,7 +92,7 @@ export function createDiceSystem(deps) {
   function startAutoWatchdog() {
     if (autoWatchdog) timerManager.clearInterval(autoWatchdog);
     autoWatchdog = timerManager.setInterval(() => {
-      if (!autoTimer || !rolling || !rollingStartedAt) return;
+      if (!autoTimer || !rolling || !rollingStartedAt || revealAwaitingDismiss) return;
       if (Date.now() - rollingStartedAt < 45000) return;
       console.warn('自動擲骰流程逾時，已解除卡住狀態');
       rollSequence++;
@@ -88,19 +106,7 @@ export function createDiceSystem(deps) {
     autoWatchdog = null;
   }
 
-  function addWeatherOdds(entries, pool, weather) {
-    const baseTotal = entries.reduce((sum, entry) => sum + entry.weight, 0);
-    if (baseTotal > 0) entries.forEach(entry => { entry.weight = entry.weight / baseTotal * 100; });
-    const weatherDice = pool.filter(dice => dice.weather === weather && Number(dice.den) > 2048);
-    if (!weatherDice.length) return entries;
-    const donors = entries.filter(entry => entry.weight > 10);
-    const donorTotal = donors.reduce((sum, entry) => sum + entry.weight, 0);
-    const reserve = weatherDice.length;
-    if (donorTotal <= reserve) return entries;
-    donors.forEach(entry => { entry.weight -= reserve * (entry.weight / donorTotal); });
-    weatherDice.forEach(dice => entries.push({ dice, weight: 1 }));
-    return entries;
-  }
+  const addWeatherOdds = addWeatherDiceOdds;
 
   function isHalloweenDice(dice) {
     return ['d33', 'd34', 'd35', 'd36'].includes(dice?.id);
@@ -134,7 +140,7 @@ export function createDiceSystem(deps) {
         heaven2,
         angel
       );
-      const withWeatherDice = addWeatherOdds(entries, pool, weather);
+      const withWeatherDice = addWeatherOdds(entries, pool, weatherTypes, heaven2 ? 16384 : 2049);
       const total = withWeatherDice.reduce((sum, entry) => sum + entry.weight, 0);
       let roll = Math.random() * total;
       for (const entry of withWeatherDice) {
@@ -168,33 +174,134 @@ export function createDiceSystem(deps) {
     return new Promise(resolve => timerManager.setTimeout(resolve, ms, 'dice-reveal-delay'));
   }
 
+  function playRevealSound(tier, glitch = false) {
+    let context;
+    try {
+      const AudioContextClass = documentRef.defaultView?.AudioContext || documentRef.defaultView?.webkitAudioContext;
+      if (!AudioContextClass) return;
+      context = new AudioContextClass();
+      const now = context.currentTime;
+      const master = context.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.12, now + 0.08);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.9);
+      master.connect(context.destination);
+      const patterns = {
+        comet: [523.25, 783.99, 1046.5],
+        rare: [392, 523.25, 659.25],
+        anomaly: [220, 277.18, 440, 554.37],
+        mythic: [196, 392, 587.33, 783.99],
+        cosmic: [130.81, 196, 261.63, 392, 587.33, 880],
+        halloween: [392, 311.13, 466.16],
+        glitch: [110, 880, 165, 660]
+      };
+      const notes = patterns[glitch ? 'glitch' : tier] || patterns.rare;
+      notes.forEach((frequency, index) => {
+        const start = now + index * (tier === 'cosmic' ? 0.22 : 0.2);
+        const oscillator = context.createOscillator();
+        const envelope = context.createGain();
+        oscillator.type = glitch ? 'square' : 'sine';
+        oscillator.frequency.setValueAtTime(frequency, start);
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(65, frequency * 1.22), start + 0.24);
+        envelope.gain.setValueAtTime(0.0001, start);
+        envelope.gain.exponentialRampToValueAtTime(0.42, start + 0.035);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, start + 0.62);
+        oscillator.connect(envelope);
+        envelope.connect(master);
+        oscillator.start(start);
+        oscillator.stop(start + 0.64);
+      });
+      const resumed = context.resume?.();
+      if (resumed && typeof resumed.catch === 'function') resumed.catch(() => {});
+      timerManager.setTimeout(() => {
+        try { context.close(); } catch {}
+      }, 2400, 'rarity-reveal-audio-cleanup');
+    } catch (error) {
+      try { context?.close(); } catch {}
+    }
+  }
+
+  function waitForRevealDismiss(overlay) {
+    const button = documentRef.getElementById('rarityRevealContinue');
+    if (!button) return Promise.resolve();
+    button.disabled = false;
+    button.textContent = '確認並繼續';
+    revealAwaitingDismiss = true;
+    return new Promise(resolve => {
+      const finish = () => {
+        button.removeEventListener('click', finish);
+        documentRef.removeEventListener('keydown', onKeyDown);
+        revealAwaitingDismiss = false;
+        resolve();
+      };
+      const onKeyDown = event => {
+        if (event.key !== 'Enter' && event.key !== 'Escape') return;
+        event.preventDefault();
+        finish();
+      };
+      button.addEventListener('click', finish, { once: true });
+      documentRef.addEventListener('keydown', onKeyDown);
+      button.focus?.();
+    });
+  }
+
   async function playRarityReveal(dice) {
     const overlay = documentRef.getElementById('rarityOverlay');
     if (!overlay) return;
     if (documentRef.hidden) {
-      overlay.classList.remove('show', 'blackout', 'common');
+      overlay.className = 'rarity-overlay';
       return;
     }
     const isGlitchDice = !!dice.glitchBonus;
-    const ultra = dice.den >= 100000;
-    const tier = dice.den >= 10000000 ? 'cosmic' : dice.den >= 1000000 ? 'mythic' : 'rare';
-    overlay.className = 'rarity-overlay show tier-' + tier + ' ' + (ultra ? 'blackout' : 'common') + (isGlitchDice ? ' glitch-reveal' : '');
-    overlay.style.setProperty('--reveal-color', dice.color);
-    documentRef.getElementById('rarityRevealTitle').textContent = isGlitchDice ? '⚠ SYSTEM BREACH DETECTED ⚠' : ultra ? '✦ ANOMALOUS DISCOVERY ✦' : 'RARE DISCOVERY';
+    const den = Number(dice.den) || 0;
+    const tier = den === 4096 ? 'comet'
+      : den < 100000 ? 'rare'
+      : den < 1000000 ? 'anomaly'
+      : den < 10000000 ? 'mythic'
+      : 'cosmic';
+    const staged = tier !== 'rare';
+    const continueButton = documentRef.getElementById('rarityRevealContinue');
+    if (continueButton) { continueButton.disabled = true; continueButton.textContent = '揭示中…'; }
+    overlay.className = 'rarity-overlay show tier-' + tier + (staged ? ' blackout' : '') + (isGlitchDice ? ' glitch-reveal' : '');
+    const revealColor = den >= 10000 && den < 100000 ? '#a98aff' : den >= 1000000 ? '#e9d5ff' : dice.color;
+    overlay.style.setProperty('--reveal-color', revealColor);
+    overlay.classList.toggle('star-reveal', den >= 1000000);
+    const titles = {
+      comet: '✦ COMET AWAKENING ✦',
+      rare: '✧ RARE DISCOVERY ✧',
+      anomaly: '⚠ SPATIAL ANOMALY ⚠',
+      mythic: '✦ MYTHIC MANIFESTATION ✦',
+      cosmic: '✧ COSMIC TRANSCENDENCE ✧'
+    };
+    documentRef.getElementById('rarityRevealTitle').textContent = isGlitchDice ? '⚠ SYSTEM BREACH DETECTED ⚠' : titles[tier];
     const icon = documentRef.getElementById('rarityRevealIcon');
     icon.textContent = dice.icon;
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
-    if (ultra) {
-      await wait(tier === 'cosmic' ? 1050 : 750);
+    playRevealSound(tier, isGlitchDice);
+    // 自動擲骰時，稀有揭示只播放短暫展示，不等待玩家按鈕，也不阻塞下一抽。
+    if (autoTimer) {
+      overlay.className = 'rarity-overlay show tier-' + tier + (isGlitchDice ? ' glitch-reveal' : '');
+      const revealSequence = ++autoRevealSequence;
+      timerManager.setTimeout(() => {
+        if (revealSequence !== autoRevealSequence) return;
+        overlay.className = 'rarity-overlay';
+        icon.classList.remove('halloween-compact');
+      }, 1500, 'auto-rarity-reveal-cleanup');
+      return;
+    }
+    if (staged) {
+      await wait(den >= 10000000 ? 1350 : den >= 1000000 ? 1150 : tier === 'comet' ? 720 : 750);
       overlay.classList.remove('blackout');
       overlay.classList.add('show');
-      await wait(tier === 'cosmic' ? 4200 : tier === 'mythic' ? 3400 : 2600);
+      await wait(tier === 'cosmic' ? 4200 : tier === 'mythic' ? 3400 : tier === 'anomaly' ? 2600 : 2080);
     } else {
       await wait(1500);
     }
-    overlay.classList.remove('show', 'blackout', 'common', 'tier-rare', 'tier-mythic', 'tier-cosmic', 'glitch-reveal');
+    await waitForRevealDismiss(overlay);
+    overlay.className = 'rarity-overlay';
+    icon.classList.remove('halloween-compact');
   }
 
   async function playSmallReveal(dice, label = 'SPECIAL DISCOVERY') {
@@ -205,6 +312,8 @@ export function createDiceSystem(deps) {
       return;
     }
     const card = overlay.querySelector('.rarity-reveal-card');
+    const continueButton = documentRef.getElementById('rarityRevealContinue');
+    if (continueButton) { continueButton.disabled = true; continueButton.textContent = '揭示中…'; }
     overlay.className = 'rarity-overlay show common';
     card.classList.add('small-reveal-card');
     overlay.style.setProperty('--reveal-color', dice.color);
@@ -214,7 +323,19 @@ export function createDiceSystem(deps) {
     icon.classList.toggle('halloween-compact', ['d33', 'd34', 'd35', 'd36'].includes(dice.id));
     documentRef.getElementById('rarityRevealName').textContent = dice.name;
     documentRef.getElementById('rarityRevealOdds').textContent = chanceText(dice);
+    playRevealSound('halloween');
+    if (autoTimer) {
+      const revealSequence = ++autoRevealSequence;
+      timerManager.setTimeout(() => {
+        if (revealSequence !== autoRevealSequence) return;
+        overlay.classList.remove('show', 'blackout', 'common');
+        card.classList.remove('small-reveal-card');
+        icon.classList.remove('halloween-compact');
+      }, 900, 'auto-small-reveal-cleanup');
+      return;
+    }
     await wait(720);
+    await waitForRevealDismiss(overlay);
     overlay.classList.remove('show', 'blackout', 'common');
     card.classList.remove('small-reveal-card');
   }
@@ -264,7 +385,7 @@ export function createDiceSystem(deps) {
 
         // 先以本抽開始前的寵物幸運 charge 計算權重，再於本抽套用技能並扣除 charge。
         const dice = weightedRoll();
-        const petSkillReward = Number(applyPetRollSkills(dice)) || 0;
+        const petSkillReward = Math.floor((Number(applyPetRollSkills(dice)) || 0) * coinEarningMultiplier());
 
         const weather = getWeather();
         if (weather.type === 'dumpling' && Number(dice.den) === 32000 && !currentState.dumplingWeatherRewardClaimed) {
@@ -281,10 +402,7 @@ export function createDiceSystem(deps) {
         const halloweenVariant = ['d33', 'd34', 'd35', 'd36'].includes(dice.id);
         const now = new Date().toISOString();
         const isNew = !currentState.first[dice.id] && !currentState.bag[dice.id];
-        if (angelUsed) {
-          currentState.potions.angelCharges = Math.max(0, currentState.potions.angelCharges - 1);
-          currentState.potions.angelMode = '';
-        }
+        if (angelUsed) consumeHeavenPotionCharge(currentState.potions);
         if (petSkillReward > 0) {
           currentState.coins = (Number(currentState.coins) || 0) + petSkillReward;
           currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + petSkillReward;
@@ -312,8 +430,11 @@ export function createDiceSystem(deps) {
           sold = false;
         } else if (!autoWeatherDeposit && AUTO_SELL_DICE_IDS.has(dice.id) && !isHalloweenDice(dice)
           && (currentState.autoDeleteDice || []).includes(dice.id)) {
-          currentState.coins = (Number(currentState.coins) || 0) + 1;
-          currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + 1;
+          const saleTotal = Math.max(1, Number(coinEarningMultiplier()) || 1) + (Number(currentState.moneyPotionRemainder) || 0);
+          const saleIncome = Math.floor(saleTotal);
+          currentState.moneyPotionRemainder = saleTotal - saleIncome;
+          currentState.coins = (Number(currentState.coins) || 0) + saleIncome;
+          currentState.quest.coinsEarned = (Number(currentState.quest.coinsEarned) || 0) + saleIncome;
           currentState.autoSold = (Number(currentState.autoSold) || 0) + 1;
           sold = true;
         } else {
@@ -348,7 +469,7 @@ export function createDiceSystem(deps) {
         if (petSkillReward > 0) toast('寵物技能觸發：額外獲得 +' + format(petSkillReward) + '$');
 
         // 全服稀有公告獨立執行，避免遠端公告寫入延遲卡住自動擲骰。
-        Promise.resolve().then(() => broadcastRareRoll(dice)).catch(error => {
+        Promise.resolve().then(() => broadcastRareRoll(dice, weather.type)).catch(error => {
           console.warn('稀有擲骰公告送出失敗', error);
         });
         checkAchievements();
@@ -366,7 +487,7 @@ export function createDiceSystem(deps) {
           }
         }
         if (halloweenVariant) await playSmallReveal(dice, 'HALLOWEEN VARIANT');
-        else if (dice.den === 4096) await playSmallReveal(dice, 'RARE DISCOVERY');
+        else if (dice.den === 4096) await playRarityReveal(dice);
         else if (dice.den >= 10000) await playRarityReveal(dice);
         if (currentRollSequence !== rollSequence) return;
 

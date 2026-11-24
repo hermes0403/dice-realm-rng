@@ -10,6 +10,10 @@ on:
       - 'systems/dice.js'
       - 'systems/pets.js'
       - 'systems/dice-locks.js'
+      - 'ui/pet-selling.js'
+      - 'docs/pet-sale-persistence.sql'
+      - 'supabase/migrations/20261121132250_pet_sale_reject_partial_inventory_mismatch.sql'
+      - 'tests/pet-sale-sort.test.js'
       - 'tests/pet-backpack-sort-and-auto-sell.test.js'
       - '.github/workflows/pet-backpack-tests.yml'
 
@@ -26,7 +30,7 @@ jobs:
         with:
           node-version: 22
       - name: Run pet backpack and auto-sell tests
-        run: node --test tests/pet-backpack-sort-and-auto-sell.test.js
+        run: node --test tests/pet-backpack-sort-and-auto-sell.test.js tests/pet-sale-sort.test.js
       - name: Check patch whitespace
         run: |
           git fetch origin main

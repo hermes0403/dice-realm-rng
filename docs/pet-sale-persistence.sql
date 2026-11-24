@@ -71,6 +71,7 @@ declare
   v_payout numeric := 0;
   v_new_coins numeric := 0;
   v_sold_uids text[] := array[]::text[];
+  v_requested_count integer := 0;
   v_remaining_pets jsonb;
   v_remaining_equipped jsonb;
   v_now timestamptz := now();
@@ -82,9 +83,31 @@ begin
     raise exception '出售清單格式錯誤';
   end if;
 
+  if cardinality(p_pet_uids) <> (
+    select count(distinct requested.uid)
+    from unnest(p_pet_uids) as requested(uid)
+  ) then
+    raise exception '出售清單包含重複寵物識別碼' using errcode = '22023';
+  end if;
+
   select gs.save_data into v_save
   from public.game_saves gs where gs.user_id = v_user_id for update;
   if not found then raise exception '找不到雲端存檔，請重新登入後再試'; end if;
+
+  -- Validate every requested UID maps to exactly one owned instance before
+  -- writing tombstones. Never partially sell, or remove multiple pets that
+  -- happen to share an ambiguous UID.
+  select count(*) into v_requested_count
+  from unnest(p_pet_uids) as requested(uid)
+  where (
+    select count(*)
+    from jsonb_array_elements(case when jsonb_typeof(v_save -> 'pets') = 'array' then v_save -> 'pets' else '[]'::jsonb end) as owned(pet)
+    where owned.pet ->> 'uid' = requested.uid
+  ) = 1;
+
+  if v_requested_count <> cardinality(p_pet_uids) then
+    raise exception 'pet_sale_inventory_out_of_sync' using errcode = 'P0002';
+  end if;
 
   for v_pet in
     select item.pet

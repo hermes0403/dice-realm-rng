@@ -3,7 +3,7 @@ export function createCloudSaveService(dependencies) {
     KEY, D, POTIONS, supabaseClient,
     getState, setState, getCurrentUser,
     fresh, normalizeGloves, migrateCurrency, ensurePetData,
-    restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
+    restoreAutoSellPrefs, totalUnique, getPetIncomePerSecond = () => 0, render, refreshLeaderboards,
     toast, openAuth, showAuthMessage, timerManager,
     localStorageRef = globalThis.localStorage,
     documentRef = globalThis.document,
@@ -177,7 +177,7 @@ export function createCloudSaveService(dependencies) {
     return [...merged];
   }
 
-  function mergePetInstances(baseValue, localValue, cloudValue) {
+  function mergePetInstances(baseValue, localValue, cloudValue, preserveCloudRemovals = false) {
     const toMap = value => new Map(
       (Array.isArray(value) ? value : [])
         .filter(pet => pet && typeof pet === 'object' && typeof pet.uid === 'string' && pet.uid)
@@ -189,11 +189,15 @@ export function createCloudSaveService(dependencies) {
     const legacyCloudPets = cloudList.filter(pet => !pet || typeof pet.uid !== 'string' || !pet.uid);
     const merged = toMap(cloudList);
 
-    // Keep legacy cloud pets without UIDs intact. New fusion results always
-    // have UIDs, so only identifiable instances participate in delta merging.
-    // A stale local copy cannot bring back a pet that the cloud has since removed.
-    for (const uid of base.keys()) {
-      if (!local.has(uid)) merged.delete(uid);
+    // In a normal three-way merge, a local removal since the shared baseline
+    // is respected. If local lifetime counters regressed, treat that snapshot
+    // as stale: keep cloud-side removals authoritative while still retaining
+    // locally-created pet UIDs that are absent from the baseline.
+    // Regression coverage: tests/cloud-save-pet-authority.test.js.
+    if (!preserveCloudRemovals) {
+      for (const uid of base.keys()) {
+        if (!local.has(uid)) merged.delete(uid);
+      }
     }
     for (const [uid, pet] of local) {
       if (!base.has(uid) && !merged.has(uid)) merged.set(uid, clonePayload(pet));
@@ -232,16 +236,27 @@ export function createCloudSaveService(dependencies) {
     const merged = clonePayload(cloud) || {};
 
     // A version-tagged local snapshot can still be stale if another tab
-    // overwrote it with older state. Lifetime counters and discovery records
-    // must never be lower than the baseline they claim to descend from.
-    if ((Number(local.rolls) || 0) < (Number(base.rolls) || 0)) return merged;
+    // overwrote it with older state. Do not merge its regressed counters or
+    // removals, but preserve pet UIDs created locally after the shared baseline.
+    let localProgressRegressed = (Number(local.rolls) || 0) < (Number(base.rolls) || 0);
     for (const [diceId, count] of Object.entries(base.rollCounts || {})) {
-      if ((Number(local.rollCounts?.[diceId]) || 0) < (Number(count) || 0)) return merged;
+      if ((Number(local.rollCounts?.[diceId]) || 0) < (Number(count) || 0)) localProgressRegressed = true;
     }
     for (const diceId of Object.keys(base.first || {})) {
-      if (!local.first?.[diceId]) return merged;
+      if (!local.first?.[diceId]) localProgressRegressed = true;
     }
-    if ((Number(base.best?.den) || 0) > (Number(local.best?.den) || 0)) return merged;
+    if ((Number(base.best?.den) || 0) > (Number(local.best?.den) || 0)) localProgressRegressed = true;
+    if (localProgressRegressed) {
+      merged.pets = mergePetInstances(base.pets, local.pets, cloud.pets, true);
+      const baseEquipped = new Set(Array.isArray(base.equippedPetUids) ? base.equippedPetUids : []);
+      const mergedEquipped = new Set(Array.isArray(cloud.equippedPetUids) ? cloud.equippedPetUids : []);
+      for (const uid of Array.isArray(local.equippedPetUids) ? local.equippedPetUids : []) {
+        if (!baseEquipped.has(uid)) mergedEquipped.add(uid);
+      }
+      merged.equippedPetUids = [...mergedEquipped]
+        .filter(uid => merged.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3);
+      return merged;
+    }
     const protectedFields = new Set([
       'rolls', 'rollCounts', 'bag', 'autoSold', 'first', 'best',
       'lockedDice', 'autoDeleteDice', 'autoDepositDice', 'bagCapacity',
@@ -339,7 +354,7 @@ export function createCloudSaveService(dependencies) {
       lockedDice: Array.isArray(S.lockedDice) ? S.lockedDice.filter(key => typeof key === 'string') : [],
       bagCapacity: S.bagCapacity, first: S.first, rollCounts: S.rollCounts || {},
       gloves: S.gloves, equipped: S.equipped, items: S.items || {}, equippedItem: S.equippedItem || '', best: S.best, coins: S.coins,
-      currencyVersion: 2, adminGrantApplied: S.adminGrantApplied || {},
+      currencyVersion: 2, adminGrantApplied: S.adminGrantApplied || {}, dailyShop: S.dailyShop || null,
       autoSellThreshold: S.autoSellThreshold, autoDeleteDice: S.autoDeleteDice || [],
       autoSold: S.autoSold, autoDepositWeatherEnabled: !!S.autoDepositWeatherEnabled,
       autoDepositThreshold: Number(S.autoDepositThreshold) || 700,
@@ -425,6 +440,10 @@ export function createCloudSaveService(dependencies) {
     }
     const initialUser = getCurrentUser();
     if (!initialUser || !supabaseClient) return false;
+    if (cloudLoadReadyUserId !== initialUser.id) {
+      document.getElementById('saveStatus').textContent = '新帳號雲端存檔載入中，暫停同步以保護資料';
+      return false;
+    }
     if (lastSyncedUserId !== initialUser.id) {
       document.getElementById('saveStatus').textContent = '雲端存檔尚未載入';
       return false;
@@ -440,7 +459,8 @@ export function createCloudSaveService(dependencies) {
       await applyPendingGrants();
       if (getCurrentUser()?.id !== syncingUserId) return false;
       const S = getState();
-      const payload = savePayload();
+      // Freeze the exact request snapshot; nested arrays/objects must not keep live state references.
+      const payload = clonePayload(savePayload());
       const patch = diffPayload(lastSyncedPayload, payload);
 
       // An unchanged snapshot should not produce any game_saves request.
@@ -453,6 +473,7 @@ export function createCloudSaveService(dependencies) {
         username: (S.name || '旅人').trim().slice(0, 20) || '旅人',
         unique_dice: totalUnique(),
         rarest_den: Number(S.best?.den) || 0,
+        pet_income_per_second: Math.max(0, Math.floor(Number(getPetIncomePerSecond()) || 0)),
         ...achievementStats()
       };
       lastCloudSyncAt = Date.now();
@@ -485,8 +506,15 @@ export function createCloudSaveService(dependencies) {
       if (Number.isFinite(Number(syncResult.total_rolls))) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
       }
-      lastSyncedPayload = clonePayload(savePayload());
+      // The RPC only persisted the immutable snapshot captured before the request.
+      // Never mark live state as synced here: mutations can happen while the RPC is
+      // in flight (e.g. a pet fusion), and doing so would silently drop that delta.
+      lastSyncedPayload = clonePayload(payload);
       writeCloudBase(syncingUserId, lastSyncedPayload, cloudSaveVersion);
+      const latestPayload = savePayload();
+      if (Object.keys(diffPayload(lastSyncedPayload, latestPayload)).length > 0) {
+        cloudSyncPending = true;
+      }
       S.petIncomePending = 0;
       S._cloudBaseVersion = cloudSaveVersion;
       try {
@@ -516,8 +544,14 @@ export function createCloudSaveService(dependencies) {
   }
 
   function scheduleCloudSync() {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) return;
+    if (cloudLoadReadyUserId !== user.id) {
+      cloudSyncPending = true;
+      return;
+    }
     cloudSyncPending = true;
-    if (!getCurrentUser() || !supabaseClient || cloudSyncBusy || cloudSyncTimer) return;
+    if (cloudSyncBusy || cloudSyncTimer) return;
     const elapsed = Date.now() - lastCloudSyncAt;
     const delay = lastCloudSyncAt ? Math.max(700, CLOUD_SYNC_MIN_INTERVAL - elapsed) : 700;
     const timer = timerManager.setTimeout(() => {
@@ -537,24 +571,69 @@ export function createCloudSaveService(dependencies) {
 
   function save() {
     const S = getState();
-    persistLocalSnapshot(S);
+    const user = getCurrentUser();
+    const accountReady = !!user && cloudLoadReadyUserId === user.id;
+    // During an account switch, never write the previous player's in-memory
+    // state into the new player's UID-scoped local snapshot.
+    persistLocalSnapshot(S, accountReady ? user.id : null);
     try {
-      const savedAtKey = localSavedAtKey();
+      const savedAtKey = accountReady ? localSavedAtKey(user.id) : null;
       if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
     } catch (e) {}
-    document.getElementById('saveStatus').textContent = getCurrentUser() ? '已儲存本機，雲端每 5 分鐘備份' : '本機存檔';
-    if (getCurrentUser()) scheduleSync();
+    document.getElementById('saveStatus').textContent = accountReady
+      ? '已儲存本機，雲端每 5 分鐘備份'
+      : user ? '新帳號存檔載入中' : '本機存檔';
+    if (accountReady) scheduleSync();
+  }
+
+  // Adopt a server-side inventory transaction into the local/cloud merge baseline.
+  // This prevents the same dice removal from being replayed as a second local delta.
+  function adoptServerBag(bag, updatedAt) {
+    const user = getCurrentUser();
+    if (!user || cloudLoadReadyUserId !== user.id || lastSyncedUserId !== user.id
+      || !lastSyncedPayload || !bag || typeof bag !== 'object' || !updatedAt) return false;
+    const nextPayload = clonePayload(lastSyncedPayload);
+    nextPayload.bag = clonePayload(bag);
+    lastSyncedPayload = nextPayload;
+    cloudSaveVersion = updatedAt;
+    writeCloudBase(user.id, nextPayload, updatedAt);
+    const state = getState();
+    state.bag = clonePayload(bag);
+    state._cloudBaseVersion = updatedAt;
+    persistLocalSnapshot(state, user.id);
+    try {
+      const savedAtKey = localSavedAtKey(user.id);
+      if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
+    } catch {}
+    document.getElementById('saveStatus').textContent = '材料已同步至雲端';
+    if (!valuesEqual(savePayload(), lastSyncedPayload)) {
+      cloudSyncPending = true;
+      scheduleCloudSync();
+    }
+    return true;
   }
 
   async function flushCloudSave() {
-    if (!getCurrentUser() || !supabaseClient) return;
+    const user = getCurrentUser();
+    if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
     }
-    while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    // A background sync already in progress must finish before starting this
+    // explicit flush. Calling syncCloudSave() while busy only queues another
+    // pass and returns false; treating that as a failed flush aborts inventory
+    // transactions even when the in-flight sync succeeds.
+    while (cloudSyncBusy) {
+      await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+      if (getCurrentUser()?.id !== user.id) return false;
+    }
+    if (getCurrentUser()?.id !== user.id || cloudLoadReadyUserId !== user.id) return false;
     const saved = await syncCloudSave();
-    while (cloudSyncBusy) await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+    while (cloudSyncBusy) {
+      await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
+      if (getCurrentUser()?.id !== user.id) return false;
+    }
     return saved === true;
   }
 
@@ -618,6 +697,7 @@ export function createCloudSaveService(dependencies) {
 
   async function loadCloudSave({
     syncAfterLoad = true,
+    renderAfterLoad = true,
     conflictBasePayload = null,
     conflictBaseVersion = null,
     conflictLocalSnapshot = null
@@ -625,7 +705,8 @@ export function createCloudSaveService(dependencies) {
     lastCloudLoadError = null;
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
-    cloudLoadReadyUserId = null;
+    const wasReadyForUser = cloudLoadReadyUserId === user.id;
+    cloudLoadReadyUserId = wasReadyForUser ? user.id : null;
     if (lastSyncedUserId !== user.id) {
       cloudSaveVersion = null;
       lastSyncedPayload = null;
@@ -761,7 +842,7 @@ export function createCloudSaveService(dependencies) {
         restoreAutoSellPrefs();
         persistLocalSnapshot(S, user.id);
         writeCloudBase(user.id, cloudPayload, data.updated_at);
-        render();
+        if (renderAfterLoad) render();
         document.getElementById('saveStatus').textContent = usedLegacyFallback
           ? '雲端存檔已載入；舊版本機資料另存為復原備份'
           : '雲端存檔已載入';
@@ -770,14 +851,24 @@ export function createCloudSaveService(dependencies) {
           ...fresh(),
           ...(latestLocalSnapshot?.bag ? latestLocalSnapshot : {})
         }));
+        if (!latestLocalSnapshot?.bag) {
+          // First-time accounts receive a unique game nickname from their
+          // login name, never the previous account's in-memory state.
+          const baseName = String(user.user_metadata?.username || '玩家')
+            .normalize('NFKC').replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
+          S.name = (baseName + '_' + String(user.id).slice(0, 4)).slice(0, 20);
+        }
         S.petAutoSellRarities = latestLocalSnapshot?.petAutoSellRarities || {};
         S._cloudBaseVersion = null;
         setState(S);
         restoreAutoSellPrefs();
         persistLocalSnapshot(S, user.id);
-        render();
+        if (renderAfterLoad) render();
       }
 
+      // The correct account state is now installed. Only now may any save write
+      // to this UID; all earlier saves were blocked during account switching.
+      cloudLoadReadyUserId = user.id;
       await applyPendingGrants(true);
       if (syncAfterLoad) await syncCloudSave();
       else if (data?.save_data?.bag && stableSerialize(savePayload()) !== stableSerialize(data.save_data)) {
@@ -804,5 +895,5 @@ export function createCloudSaveService(dependencies) {
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
   function getLastCloudLoadError() { return lastCloudLoadError; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
 }

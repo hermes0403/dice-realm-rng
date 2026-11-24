@@ -93,7 +93,7 @@ test('僅在安全來源註冊 Service Worker，並使用專案根目錄 scope',
   const controls = setupDisplayControls(fixture);
   await controls.serviceWorkerReady;
   assert.equal(fixture.registrations.length, 1);
-  assert.ok(fixture.registrations[0].url.endsWith('/sw.js'));
+  assert.ok(fixture.registrations[0].url.includes('/sw.js?v=20261119-settings-buttons-v2'));
   assert.ok(fixture.registrations[0].options.scope.endsWith('/'));
   const insecure = createFixture({ secure: false });
   const blocked = setupDisplayControls(insecure);
@@ -116,11 +116,24 @@ test('PWA manifest 使用專案相對路徑、fullscreen 優先顯示模式與�
   }
 });
 
+test('缺少可選的驗證信按鈕不會中斷設定頁與寵物出售 UI 初始化', async () => {
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(script, /getElementById\('authResendBtn'\)\?\.addEventListener/);
+  assert.match(script, /getElementById\('authResetBtn'\)\?\.addEventListener/);
+  assert.match(script, /setupAccountActions\(\{/);
+  assert.match(script, /setupDisplayControls\(\{/);
+  assert.match(script, /setupPetSellingUI\(\{/);
+  assert.match(worker, /ui\/pet-selling\.js\?v=20261121-pet-inventory-sync-guard/);
+});
+
 test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
+  assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
+  assert.match(html, /script\.js\?v=20261124-t0127-ai-lobby-v1/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -175,15 +188,15 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 });
 
 
-test('V1.51 PWA 快取殼同步更新', async () => {
+test('V1.56 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(html, /V1.51/);
-  assert.match(html, /script\.js\?v=20261118-t0105-username-auth/);
-  assert.match(worker, /dice-realm-shell-v1\.61/);
+  assert.match(html, /V1.56/);
+  assert.match(html, /script\.js\?v=20261124-t0127-ai-lobby-v1/);
+  assert.match(worker, /dice-realm-shell-v2\.12/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
-  assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261114-t0090-secret-pet-skills/);
-  assert.match(worker, /data\/eternal-update\.js\?v=20261115-t0098-eternal/);
+  assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261122-secret-skill-swap-v1/);
+  assert.match(worker, /data\/eternal-update\.js\?v=20261122-eternal-income-v1/);
   assert.match(worker, /assets\/pets\/eternal-dawn-guardian\.svg/);
   assert.match(worker, /assets\/pets\/eternal-starwish-deer\.svg/);
 });
@@ -274,4 +287,56 @@ test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯�
   assert.ok(codex.includes("discovered ? `抽到 ${format(rolls)} 次` : '???'"));
   assert.match(admin, /type==='aura'&&getCurrentUser\(\)\?\.id===targetUserId\)\{await applyPendingGrants\(true\);save\(\);await flushCloudSave\(\);render\(\);\}/);
   assert.match(script, /applyPendingGrants, save, flushCloudSave/);
+});
+
+
+test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const dice = await readFile(new URL('../systems/dice.js', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+
+  assert.match(html, /id="rarityRevealContinue"[^>]*disabled>揭示中…/);
+  assert.match(dice, /function waitForRevealDismiss\(overlay\)/);
+  assert.match(dice, /button\.addEventListener\('click', finish, \{ once: true \}\)/);
+  assert.match(dice, /event\.key !== 'Enter' && event\.key !== 'Escape'/);
+  assert.match(dice, /await waitForRevealDismiss\(overlay\)/);
+  assert.match(dice, /revealAwaitingDismiss/);
+  assert.match(css, /\.rarity-reveal-continue/);
+  assert.match(worker, /dice-realm-shell-v2\.12/);
+  assert.match(worker, /systems\/dice\.js\?v=20261121-t0121-heaven-mode-persistence/);
+});
+
+
+test('T-0114 10,000–99,999 使用紫晶配色，1,000,000 以上先以黑幕中央多芒星揭示', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const dice = await readFile(new URL('../systems/dice.js', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+
+  assert.match(html, /class="rarity-starburst" aria-hidden="true"/);
+  assert.match(dice, /den >= 10000 && den < 100000 \? '#a98aff'/);
+  assert.match(dice, /overlay\.classList\.toggle\('star-reveal', den >= 1000000\)/);
+  assert.match(css, /\.rarity-overlay\.star-reveal\.blackout\{background:#000\}/);
+  assert.match(css, /\.rarity-starburst::before/);
+  assert.match(css, /@keyframes realmStarAppear/);
+  assert.match(worker, /dice-realm-shell-v2\.12/);
+  assert.match(worker, /20261121-t0130-persisted-session-restore-v1/);
+});
+
+
+test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 Service Worker 快取版本一致', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+
+  assert.match(html, /style\.css\?v=20261124-t0127-ai-lobby-v1/);
+  assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
+  assert.match(css, /padding-bottom:calc\(132px \/ var\(--landscape-scale, 1\) \+ env\(safe-area-inset-bottom, 0px\)\)!important/);
+  assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
+  assert.match(css, /mix-blend-mode: normal !important/);
+  assert.match(css, /opacity: 1 !important/);
+  assert.match(worker, /dice-realm-shell-v2\.12/);
+  assert.match(worker, /style\.css\?v=20261124-t0127-ai-lobby-v1/);
+  assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
 });

@@ -52,6 +52,7 @@ export function setupPetSellingUI({
   PET_MUTATIONS = {},
   petIncomePerSecond = () => 0,
   save,
+  flushCloudSave = async () => true,
   toast,
   render,
   renderPetsPage,
@@ -208,12 +209,21 @@ export function setupPetSellingUI({
         event.preventDefault();
         event.stopImmediatePropagation();
         if (selling) return;
-        const ids = [...document.querySelectorAll('#petSellChoices .pet-sell-check:checked')].map(input => input.value);
+        const selectedValues = [...document.querySelectorAll('#petSellChoices .pet-sell-check:checked')].map(input => String(input.value));
+        const ids = [...new Set(selectedValues)];
         if (!ids.length) {
           toast('請先選擇要出售的寵物');
           return;
         }
+        if (ids.length !== selectedValues.length) {
+          toast('寵物識別資料重複，已取消出售；背包沒有變更。');
+          return;
+        }
         const chosen = listPets().filter(item => ids.includes(String(item.uid)));
+        if (chosen.length !== ids.length) {
+          toast('背包資料不一致，已取消出售；寵物沒有被刪除。');
+          return;
+        }
         let previewTotal = 0;
         chosen.forEach(item => previewTotal += values[rarityOf(item)] || 100);
         if (!chosen.length) return;
@@ -222,19 +232,33 @@ export function setupPetSellingUI({
 
         selling = true;
         updateSummary();
-        const S = getState();
+        let S = getState();
         try {
           let soldCount = 0;
           let total = 0;
           if (getCurrentUser?.()) {
             if (!supabaseClient) throw new Error('雲端交易服務暫時無法使用，請稍後重試');
+            const synced = await flushCloudSave();
+            if (synced !== true) {
+              throw new Error('雲端存檔同步尚未完成，這次沒有出售任何寵物；背包資料已保留。請稍後再試。');
+            }
+            S = getState();
+            const latestPets = listPets();
+            const latestChosen = latestPets.filter(item => ids.includes(String(item.uid)));
+            if (latestChosen.length !== ids.length) {
+              throw new Error('雲端背包與目前畫面不同步，未出售任何寵物；背包資料已保留。');
+            }
             const { data, error } = await supabaseClient.rpc('sell_owned_pets', { p_pet_uids: ids });
             if (error) throw error;
             const result = Array.isArray(data) ? data[0] : data;
             if (!result || result.success !== true) throw new Error('伺服器未確認出售結果');
             soldCount = Math.max(0, Number(result.sold_count) || 0);
             total = Math.max(0, Number(result.coins_added) || 0);
-            S.pets = Array.isArray(result.pets) ? result.pets : [];
+            if (soldCount === 0) {
+              throw new Error('伺服器沒有找到選取的寵物，未出售任何寵物；你的背包資料已保留。');
+            }
+            if (!Array.isArray(result.pets)) throw new Error('伺服器回傳的背包資料格式錯誤，請重新同步後再查看。');
+            S.pets = result.pets;
             S.equippedPetUids = Array.isArray(result.equipped_pet_uids) ? result.equipped_pet_uids : [];
             S.coins = Math.max(0, Number(result.coins) || 0);
           } else {

@@ -2,9 +2,48 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getAuthEmailRateLimitMessage,
+  getEdgeFunctionFailureMessage,
   getLoginFailureMessage,
-  runCloudSessionInitialization
+  runCloudSessionInitialization,
+  shouldReuseReadySessionInitialization
 } from '../services/auth.js';
+
+test('Edge Function 409 response shows the server Chinese duplicate-name message and preserves the response body', async () => {
+  const response = new Response(JSON.stringify({ error: '這個玩家名稱已被使用，請換一個名稱。' }), {
+    status: 409,
+    headers: { 'Content-Type': 'application/json' }
+  });
+  const message = await getEdgeFunctionFailureMessage({
+    message: 'Edge Function returned a non-2xx status code',
+    context: response
+  });
+
+  assert.equal(message, '這個玩家名稱已被使用，請換一個名稱。');
+  assert.equal((await response.json()).error, '這個玩家名稱已被使用，請換一個名稱。');
+});
+
+test('Edge Function 400 response displays its Chinese input validation reason', async () => {
+  const response = new Response(JSON.stringify({ error: '玩家名稱需為 3 至 20 個字元。' }), {
+    status: 400,
+    headers: { 'Content-Type': 'application/json' }
+  });
+  assert.equal(await getEdgeFunctionFailureMessage({ context: response }), '玩家名稱需為 3 至 20 個字元。');
+});
+
+test('Edge Function 429 response displays the server Chinese rate limit message', async () => {
+  const response = new Response(JSON.stringify({ error: '註冊操作太頻繁，請稍後再試。' }), {
+    status: 429,
+    headers: { 'Content-Type': 'application/json' }
+  });
+  assert.equal(await getEdgeFunctionFailureMessage({ context: response }), '註冊操作太頻繁，請稍後再試。');
+});
+
+test('Edge Function status fallbacks remain localized when no JSON response body exists', async () => {
+  assert.match(await getEdgeFunctionFailureMessage({ context: new Response('', { status: 401 }) }), /帳號或密碼不正確/);
+  assert.match(await getEdgeFunctionFailureMessage({ context: new Response('', { status: 409 }) }), /玩家名稱已被使用/);
+  assert.match(await getEdgeFunctionFailureMessage({ context: new Response('', { status: 429 }) }), /操作太頻繁/);
+  assert.match(await getEdgeFunctionFailureMessage({ context: new Response('', { status: 503 }) }), /稍後再試/);
+});
 
 test('invalid credentials guide first-time players without revealing account existence', () => {
   const message = getLoginFailureMessage({ message: 'Invalid login credentials' });
@@ -114,4 +153,19 @@ test('an egress restriction stops later initialization requests', async () => {
   assert.equal(result, false);
   assert.equal(restricted, true);
   assert.deepEqual(calls, ['pet-skill', 'pet-odds']);
+});
+
+test('already-loaded account reuses its session without reopening login or reloading cloud save', () => {
+  let readinessChecks = 0;
+  const isCloudSaveReady = userId => { readinessChecks++; return userId === 'player-1'; };
+  assert.equal(shouldReuseReadySessionInitialization({
+    attemptedUserId: 'player-1', userId: 'player-1', isCloudSaveReady
+  }), true);
+  assert.equal(shouldReuseReadySessionInitialization({
+    attemptedUserId: 'player-1', userId: 'player-2', isCloudSaveReady
+  }), false);
+  assert.equal(shouldReuseReadySessionInitialization({
+    force: true, attemptedUserId: 'player-1', userId: 'player-1', isCloudSaveReady
+  }), false);
+  assert.equal(readinessChecks, 1);
 });

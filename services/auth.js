@@ -1,3 +1,47 @@
+export const SESSION_OFFLINE_TIMEOUT_MS = 100000;
+
+// Backgrounding the app or being offline must not revoke a valid login session.
+// Supabase token expiry and normal authentication checks remain authoritative.
+export function hasSessionExpiredAfterOffline() {
+  return false;
+}
+
+export function shouldReuseReadySessionInitialization({ force = false, attemptedUserId, userId, isCloudSaveReady = () => false }) {
+  return !force && !!userId && attemptedUserId === userId && !!isCloudSaveReady(userId);
+}
+
+export async function getEdgeFunctionFailureMessage(error) {
+  const response = error?.context;
+  const status = Number(response?.status ?? error?.status) || 0;
+
+  // Supabase FunctionsHttpError keeps the original Response in context.
+  // Clone it so parsing the JSON does not consume a body another handler may use.
+  if (response && typeof response.clone === 'function') {
+    try {
+      const payload = await response.clone().json();
+      const serverMessage = payload?.error ?? payload?.message;
+      if (typeof serverMessage === 'string' && serverMessage.trim()) {
+        return serverMessage.trim();
+      }
+    } catch {
+      // Fall through to a safe localized status message when the body is empty
+      // or is not valid JSON.
+    }
+  }
+
+  const fallbackMessages = {
+    400: '輸入資料不符合要求，請檢查玩家名稱與密碼。',
+    401: '帳號或密碼不正確。',
+    403: '目前無法使用玩家名稱登入服務，請重新整理後再試。',
+    409: '此玩家名稱已被使用，請換一個名稱。',
+    429: '註冊或登入操作太頻繁，請稍後再試。',
+    500: '目前無法建立帳號，請稍後再試。',
+    502: '玩家名稱登入服務暫時無法使用，請稍後再試。',
+    503: '目前無法完成操作，請稍後再試。'
+  };
+  return fallbackMessages[status] || '玩家名稱登入服務暫時無法使用，請稍後再試。';
+}
+
 export function getLoginFailureMessage(error) {
   const message = String(error?.message || error?.msg || error?.error_description || '').toLowerCase();
   if (error?.status === 429 || message.includes('too many requests') || message.includes('rate limit')) {
@@ -132,6 +176,86 @@ export function createAuthService(deps) {
   let cloudLoadUserId = null;
   let recoveryMode = false;
   let signupCooldownInterval = null;
+  let offlineLifecycleListenersAttached = false;
+  let offlineSignOutBusy = false;
+  const SESSION_OFFLINE_KEY = 'diceRealmSessionOfflineAtV1';
+
+  function getSessionStorage() {
+    try { return globalThis.sessionStorage; } catch { return null; }
+  }
+
+  function markSessionOffline() {
+    const storage = getSessionStorage();
+    if (!storage || !getCurrentUser()) return;
+    try {
+      if (!storage.getItem(SESSION_OFFLINE_KEY)) {
+        storage.setItem(SESSION_OFFLINE_KEY, String(Date.now()));
+      }
+    } catch {}
+  }
+
+  function clearSessionOfflineMark() {
+    try { getSessionStorage()?.removeItem(SESSION_OFFLINE_KEY); } catch {}
+  }
+
+  function hasExpiredOfflineMarker() {
+    const storage = getSessionStorage();
+    if (!storage) return false;
+    try { return hasSessionExpiredAfterOffline(storage.getItem(SESSION_OFFLINE_KEY)); }
+    catch { return false; }
+  }
+
+  async function enforceOfflineSessionTimeout() {
+    const storage = getSessionStorage();
+    if (!storage || !getCurrentUser() || offlineSignOutBusy) return false;
+    let offlineStartedAt = 0;
+    try { offlineStartedAt = Number(storage.getItem(SESSION_OFFLINE_KEY)) || 0; } catch {}
+    if (!hasSessionExpiredAfterOffline(offlineStartedAt)) {
+      if (offlineStartedAt) clearSessionOfflineMark();
+      return false;
+    }
+
+    offlineSignOutBusy = true;
+    try {
+      const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+      if (error) throw error;
+      clearSessionOfflineMark();
+      document.body.classList.add('auth-required');
+      document.getElementById('authModal').style.display = 'flex';
+      document.getElementById('authCloseBtn').hidden = true;
+      document.getElementById('authOpenBtn').hidden = false;
+      showAuthMessage('離線已超過 100 秒，為了保護帳號，請重新登入。');
+      return true;
+    } catch (error) {
+      console.warn('Offline session expiry could not be completed', error);
+      showAuthMessage('離線已超過 100 秒，請恢復網路後重新登入。');
+      return false;
+    } finally {
+      offlineSignOutBusy = false;
+    }
+  }
+
+  function attachOfflineLifecycleListeners() {
+    if (offlineLifecycleListenersAttached) return;
+    const documentObject = globalThis.document;
+    const windowObject = globalThis.window;
+    if (!documentObject?.addEventListener) return;
+    offlineLifecycleListenersAttached = true;
+    const onVisibilityChange = () => {
+      if (documentObject.visibilityState === 'hidden') markSessionOffline();
+      else void enforceOfflineSessionTimeout();
+    };
+    const onPageHide = () => markSessionOffline();
+    const onPageShow = () => void enforceOfflineSessionTimeout();
+    const onOffline = () => markSessionOffline();
+    const onOnline = () => void enforceOfflineSessionTimeout();
+    documentObject.addEventListener('visibilitychange', onVisibilityChange);
+    windowObject?.addEventListener('pagehide', onPageHide);
+    windowObject?.addEventListener('pageshow', onPageShow);
+    windowObject?.addEventListener('offline', onOffline);
+    windowObject?.addEventListener('online', onOnline);
+    timerManager?.setTimeout?.(() => void enforceOfflineSessionTimeout(), 0, 'auth-offline-session-check');
+  }
   const SIGNUP_COOLDOWN_MS = 4 * 60 * 1000;
   const SIGNUP_COOLDOWN_KEY = 'diceRealmEmailActionCooldownUntilV1';
 
@@ -353,8 +477,17 @@ export function createAuthService(deps) {
       return Promise.resolve(false);
     }
     if (sessionInitPromise && sessionInitUserId === user.id) return sessionInitPromise;
+    if (shouldReuseReadySessionInitialization({
+      force, attemptedUserId: sessionInitAttemptedUserId, userId: user.id, isCloudSaveReady
+    })) {
+      // A repeated INITIAL_SESSION/SIGNED_IN event for an already-loaded account
+      // must not leave the login overlay open or trigger another cloud reload.
+      document.getElementById('playerName').textContent = getState()?.name || '玩家';
+      closeAuth();
+      return Promise.resolve(true);
+    }
     if (!force && sessionInitAttemptedUserId === user.id) {
-      return Promise.resolve(!!isCloudSaveReady(user.id));
+      return Promise.resolve(false);
     }
 
     sessionInitAttemptedUserId = user.id;
@@ -405,7 +538,7 @@ export function createAuthService(deps) {
       .then(ready => {
         if (!ready) throw new Error('雲端存檔尚未完成載入，遊戲暫時保持鎖定。');
         if (generation !== sessionGeneration || getCurrentUser()?.id !== user.id) return false;
-        document.getElementById('playerName').textContent = state.name || '玩家';
+        document.getElementById('playerName').textContent = getState()?.name || '玩家';
         document.getElementById('authCloseBtn').hidden = false;
         if (retryButton) retryButton.hidden = true;
         closeAuth();
@@ -469,7 +602,13 @@ export function createAuthService(deps) {
       showAuthMessage(mode === 'login' ? '請輸入玩家名稱或有效的 Gmail。' : '請輸入有效的 Email 地址。');
       return;
     }
-    if (['signup', 'login'].includes(mode) && password.length < 6) {
+    // New email registrations require 8 characters; existing accounts may
+    // still sign in with an older 6–7 character password.
+    if (mode === 'signup' && password.length < 8) {
+      showAuthMessage('密碼至少需要 8 位。');
+      return;
+    }
+    if (mode === 'login' && password.length < 6) {
       showAuthMessage('密碼至少需要 6 位。');
       return;
     }
@@ -490,17 +629,57 @@ export function createAuthService(deps) {
         const { data, error } = await supabaseClient.functions.invoke('dice-rng-auth', {
           body: { action, username, password: signupPassword }
         });
-        if (error) throw new Error(data?.error || error.message || '玩家名稱登入服務暫時無法使用。');
+        if (error) {
+          const message = await getEdgeFunctionFailureMessage(error);
+          const requestError = new Error(message);
+          requestError.status = Number(error?.context?.status ?? error?.status) || undefined;
+          throw requestError;
+        }
         if (data?.error) throw new Error(data.error);
         if (data?.session) {
-          const { error: sessionError } = await supabaseClient.auth.setSession(data.session);
+          // Username login returns a session for the UID resolved by the server.
+          // Confirm that exact identity became the active browser session before
+          // loading any player data; never continue with a previous account.
+          const expectedUserId = data.session.user?.id || null;
+          const { data: activated, error: sessionError } = await supabaseClient.auth.setSession(data.session);
           if (sessionError) throw sessionError;
-          if (mode === 'usernameSignup') {
-            document.getElementById('authUsernameSignupName').value = '';
-            document.getElementById('authUsernameSignupPassword').value = '';
-            document.getElementById('authUsernameSignupPasswordConfirm').value = '';
-            setUsernameSignupMode(false);
+          const signedUser = activated?.user || activated?.session?.user || null;
+          if (!signedUser?.id || (expectedUserId && signedUser.id !== expectedUserId)) {
+            await supabaseClient.auth.signOut().catch(() => {});
+            setCurrentUser(null);
+            throw new Error('登入帳號確認失敗，請重新登入。');
           }
+          if (!enforceDeviceAccountLimit(signedUser)) {
+            await supabaseClient.auth.signOut().catch(() => {});
+            setCurrentUser(null);
+            return;
+          }
+          setCurrentUser(signedUser);
+          await startSessionInitialization(signedUser, 'SIGNED_IN', true);
+          return;
+        }
+        if (mode === 'usernameSignup' && data?.success === true) {
+          // Registration creates the account without a session. If another player
+          // (for example the admin account) is still signed in on this browser,
+          // end that session before asking the player to log in as the new account.
+          let signupNotice = '帳號已建立，請使用剛設定的「建立帳號名稱」登入；它與遊戲暱稱不同。';
+          const { data: activeSession, error: sessionReadError } = await supabaseClient.auth.getSession();
+          if (sessionReadError) {
+            signupNotice = '帳號已建立，但無法確認目前登入狀態。請先登出原帳號，再登入新帳號。';
+          } else if (activeSession?.session) {
+            const { error: signOutError } = await supabaseClient.auth.signOut();
+            if (signOutError) {
+              signupNotice = '帳號已建立，但原本帳號登出失敗。請先手動登出，再登入新帳號。';
+            }
+          }
+          document.getElementById('authEmail').value = username;
+          document.getElementById('authPassword').value = '';
+          document.getElementById('authUsernameSignupName').value = '';
+          document.getElementById('authUsernameSignupPassword').value = '';
+          document.getElementById('authUsernameSignupPasswordConfirm').value = '';
+          setUsernameSignupMode(false);
+          showAuthMessage(signupNotice);
+          document.getElementById('authEmail').focus();
           return;
         }
         showAuthMessage(data?.message || '操作完成，請返回登入。');
@@ -612,8 +791,8 @@ export function createAuthService(deps) {
     if (authBusy || !recoveryMode || !getCurrentUser()) return;
     const password = document.getElementById('authNewPassword').value;
     const confirmation = document.getElementById('authNewPasswordConfirm').value;
-    if (password.length < 6) {
-      showAuthMessage('新密碼至少需要 6 位。');
+    if (password.length < 8) {
+      showAuthMessage('新密碼至少需要 8 位。');
       return;
     }
     if (password !== confirmation) {
@@ -703,12 +882,41 @@ export function createAuthService(deps) {
     }
   }
 
+  // Restore a valid persisted Supabase session on every app boot. The auth
+  // listener remains the primary event stream; this explicit check is a safe
+  // fallback for PWA/page restores where INITIAL_SESSION UI timing can race.
+  async function restorePersistedSession() {
+    if (!supabaseClient?.auth?.getSession) return false;
+    try {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      const user = data?.session?.user;
+      if (!user?.id) return false;
+      if (!user.email_confirmed_at) {
+        showAuthMessage('信箱尚未驗證，請先完成 Email 確認。');
+        return false;
+      }
+      if (!enforceDeviceAccountLimit(user)) return false;
+      const activeUser = getCurrentUser();
+      if (activeUser?.id && activeUser.id !== user.id) return false;
+      setCurrentUser(user);
+      updateAdminVisibility();
+      await startSessionInitialization(user, 'INITIAL_SESSION');
+      return true;
+    } catch (error) {
+      console.warn('Persisted auth session restore failed', error);
+      return false;
+    }
+  }
+
   function registerAuthStateListener() {
     if (!supabaseClient) return null;
     if (authStateSubscription) return authStateSubscription;
     authStateSubscription = supabaseClient.auth.onAuthStateChange((event, session) => {
       const previousUser = getCurrentUser();
       const incomingUser = session?.user || null;
+
+      if (incomingUser) clearSessionOfflineMark();
 
       if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')
         && incomingUser && previousUser?.id === incomingUser.id) {
@@ -755,6 +963,7 @@ export function createAuthService(deps) {
       if (incomingUser && !enforceDeviceAccountLimit(incomingUser)) return;
 
       if (!incomingUser) {
+        clearSessionOfflineMark();
         sessionGeneration++;
         sessionInitPromise = null;
         sessionInitUserId = null;
@@ -797,6 +1006,9 @@ export function createAuthService(deps) {
       }, 0, 'auth-session-init');
     });
     showAuthCallbackError();
+    // onAuthStateChange normally emits INITIAL_SESSION. Explicit getSession()
+    // covers delayed PWA restoration without requiring the player to log in again.
+    void restorePersistedSession();
     return authStateSubscription;
   }
 

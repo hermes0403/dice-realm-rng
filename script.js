@@ -1,52 +1,56 @@
 import { D, G } from './data/dice.js?v=20261117-t0102-void-startrail-gloves';
-import { POTIONS } from './data/equipment.js';
-import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261114-t0090-secret-pet-skills';
-import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261115-t0098-eternal';
+import { POTIONS } from './data/equipment.js?v=20261121-t0123-money-potions';
+import { PET_RARITIES, PETS, PET_BASE_INCOME, PET_INCOME_ROLLS, PET_TIER_CONFIG, PET_TIER_RATES, SECRET_PET_SKILLS, MYTHIC_PET_SKILLS, PET_IMAGE_ASSETS, PET_INDIVIDUAL_ODDS, PET_MUTATIONS, petBaseIncome, randomPet, petById } from './data/pets.js?v=20261122-pet-skill-swap-v1';
+import { NEW_DICE, ETERNAL_PETS, ETERNAL_PET_WEIGHTS, ETERNAL_PET_INCOME, ETERNAL_TIER_CONFIG, ETERNAL_TIER_RATES } from './data/eternal-update.js?v=20261122-eternal-income-v1';
 import { DAILY_TASKS } from './data/progression.js';
-import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261113-t0084-glitch-weather-phase2';
+import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261123-daily-shop-v1';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
-import { createNavigationUI } from './ui/navigation.js?v=20261114-t0094-weather-converter-item-slots';
+import { createNavigationUI } from './ui/navigation.js?v=20261123-daily-shop-v1';
 import { createInventoryUI } from './ui/inventory.js';
-import { createPetIncomeSystem } from './systems/pet-income.js';
+import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
-import { setupPetSellingUI } from './ui/pet-selling.js';
-import { createProgressionSystem } from './systems/progression.js?v=20261116-reward-balance-v1';
+import { setupPetSellingUI } from './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard';
+import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js?v=20261117-t0098-time-crystal-realtime-polling';
+import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261118-t0104-pet-uid-merge';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261123-t0126-time-crystal-material-deposit';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261117-t0103-auth-flow';
-import { createPetSystem } from './systems/pets.js?v=20261115-t0098-eternal-pets';
+import { createAuthService } from './services/auth.js?v=20261121-t0130-persisted-session-restore-v1';
+import { createPetSystem } from './systems/pets.js?v=20261122-secret-skill-swap-v1';
+import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261122-trade-slot-picker-v2';
+import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
-import { createDiceSystem } from './systems/dice.js?v=20261117-t0097-dice-lock-cleanup';
-import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261117-v154-auto-rewards';
-import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261115-t0098-eternal-dice';
+import { createDiceSystem } from './systems/dice.js?v=20261122-auto-roll-rare-continue-v1';
+import { createWeeklyRealmEvent } from './systems/weekly-realm-event.js?v=20261122-weekly-claim-only-v1';
+import { heavenWeatherBonus, HEAVEN_MIDDLE_IDS } from './systems/heaven-potion-odds.js?v=20261121-t0121-heaven-mode-persistence';
 import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-realtime-boost-polling';
-import { createRealmSocialSystem } from './systems/realm-social.js';
-import { createEquipmentUI } from './ui/equipment.js?v=20261117-t0098-time-crystal';
-import { createAdminPlayerManagement } from './admin/player-management.js';
-import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261113-t0084-glitch-weather-phase2';
-import { createGameStateService } from './core/game-state.js';
+import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
+import { createEquipmentUI } from './ui/equipment.js?v=20261123-t0126-click-capture-fix';
+import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-t0126-click-capture-fix';
+import { createAdminPlayerManagement } from './admin/player-management.js?v=20261124-t0127-ai-npc-v1';
+import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
+import { createGameStateService } from './core/game-state.js?v=20261123-daily-shop-v1';
 import { createPresenceService } from './services/presence.js';
 import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
-import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261113-t0084-glitch-weather-phase2';
-import { setupAccountActions } from './services/account-actions.js?v=20261112-t0074-settings';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261113-t0085-landscape-global-scale';
+import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
+import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-rpc-fix';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261119-settings-buttons-v2';
 import { createTimerManager } from './core/timer-manager.js';
-import { setupOnboardingUI } from './ui/onboarding.js?v=20261117-t0101-tutorial-milestone';
+import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-buttons-v2';
 
 // T-0098：新增五顆骰子與永恆寵物；沿用既有本機／雲端存檔結構，不新增輪詢或資料表。
 for (const die of NEW_DICE) if (!D.some(existing => existing.id === die.id)) D.push(die);
-if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ id: 'eternal', name: '永恆', cls: 'pet-rarity-eternal', a: '#9eeaff', b: '#ffaddd' });
+if (!PET_RARITIES.some(rarity => rarity.id === 'eternal')) PET_RARITIES.push({ id: 'eternal', name: '永恆', cls: 'pet-rarity-eternal', a: '#0755d9', b: '#ffaddd' });
+applyEternalPetRarityTheme(document);
 for (const pet of ETERNAL_PETS) if (!PETS.some(existing => existing.id === pet.id)) PETS.push(pet);
 Object.assign(PET_BASE_INCOME, ETERNAL_PET_INCOME);
 PET_INDIVIDUAL_ODDS.eternal = ETERNAL_PET_WEIGHTS.slice();
@@ -66,6 +70,8 @@ let globalBoostState=null;
 let globalBoostSystem=null;
 let realmSocialSystem=null;
 let equipmentUI=null;
+let dailyShopSystem=null;
+function renderDailyShop(){return dailyShopSystem?.renderDailyShop()}
 let adminPetOddsUI=null;
 let adminPlayerManagement=null;
 let adminMonitoringSystem=null;
@@ -98,9 +104,9 @@ let S;
 const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetData, getCurrentUser: () => currentUser, getState: () => S, localStorageRef: localStorage });
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
-const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, localStorageRef: localStorage, timerManager, documentRef: document, toast, isAdmin, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
+const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, documentRef: document, toast, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
-const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
+const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, getMoneyPotionMultiplier: () => activePotion('money')?.multiplier || 1, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
 const { refreshLeaderboards } = createLeaderboardSystem({ supabaseClient, getCurrentUser: () => currentUser, escapeHTML, format, compactNum });
 const { releaseDeviceLock, isLockHeld, isHeartbeatActive, scheduleUnlock } = createDeviceLockService({ getCurrentUser: () => currentUser, supabaseClient, toast, timerManager });
 const { recordGameVisit, startGameVisitTracking } = createVisitTrackingService({ getCurrentUser: () => currentUser, getState: () => S, supabaseClient, timerManager });
@@ -139,10 +145,12 @@ cloudSaveService=createCloudSaveService({
  getState:()=>S, setState:value=>{S=value}, getCurrentUser:()=>currentUser,
  timerManager,
  fresh, normalizeGloves, migrateCurrency, ensurePetData,
- restoreAutoSellPrefs, totalUnique, render, refreshLeaderboards,
+ restoreAutoSellPrefs, totalUnique, getPetIncomePerSecond: () => equippedPetIncomePerSecond(), render, refreshLeaderboards,
  toast, openAuth, showAuthMessage, localStorageRef: localStorage, documentRef: document
 });
 const { scheduleSync } = cloudSaveService;
+dailyShopSystem=createDailyShopSystem({getState:()=>S,getCurrentUser:()=>currentUser,isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId),save,render,toast,format,documentRef:document,timerManager});
+dailyShopSystem.setup();
 presenceService = createPresenceService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S, totalUnique, achievementStats, applyPendingGrants, scheduleSync });
 function save(){return cloudSaveService.save()}
 function userSaveKey(userId){return cloudSaveService.userSaveKey(userId)}
@@ -162,11 +170,11 @@ function glove(id){return G.find(x=>x.id===id)||G[0]}
 function totalUnique(){return new Set([...Object.keys(S.first||{}),...Object.keys(S.bag||{}).filter(k=>S.bag[k]>0)]).size}
 function totalDice(){return Object.values(S.bag).reduce((a,b)=>a+Math.max(0,Number(b)||0),0)}
 function currentGlove(){return S.equipped==='g7'?glove('g0'):glove(S.equipped)}
-function activePotion(category='luck'){const a=category==='speed'?S.potions?.activeSpeed:S.potions?.active;if(a&&a.type&&Number(a.expiresAt)>Date.now())return POTIONS.find(p=>p.id===a.type)||null;return null}
+function activePotion(category='luck'){const slot=category==='speed'?'activeSpeed':category==='money'?'activeMoney':'active';const a=S.potions?.[slot];if(a&&a.type&&Number(a.expiresAt)>Date.now())return POTIONS.find(p=>p.id===a.type)||null;return null}
 function potionLuck(){return activePotion('luck')?.luck||0}
 function potionSpeed(){return activePotion('speed')?.speed||0}
-function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?100:0))}
-function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0))}
+function luck(){return Math.min(500,currentGlove().luck+potionLuck()+petBonusTotals().luck+Number(activeGlobalBoost().luck_percent||0)+((Number(S.petSkillLuckCharges)||0)>0?(Number(S.petSkillLuckBonus)||100):0))}
+function speed(){return Math.min(500,currentGlove().speed+potionSpeed()+petBonusTotals().speed+Number(activeGlobalBoost().speed_percent||0)+(Number(S.petSkillSpeed?.expiresAt)>Date.now()?100:0)+getWeatherSpeedBonus(getWeather()))}
 function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100000000||(Number(S.potions?.angelCharges)||0)>0)return den;const w=getWeather(),types=w.types||[w.type];const bonus=heavenWeatherBonus(d,types,false,false);return Math.floor(den/(1+bonus/100))}
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
@@ -224,15 +232,25 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
+const petTradingSearch = createPetTradingSearch({
+  supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt,
+  onTradeCompleted: async () => {
+    await loadCloudSave({ renderAfterLoad: false });
+    renderPetsPage();
+    renderPetCodex();
+  },
+  flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast
+});
+petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
-  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 authService=createAuthService({
  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value; if(value) weeklyRealmEvent.refresh()}, getState:()=>S,
+ getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value;if(value){weeklyRealmEvent.refresh();loadAiLobbyActivity()}else{const count=document.getElementById('aiLobbyCount'),list=document.getElementById('aiLobbyPlayers');if(count)count.textContent='未登入';if(list)list.textContent='登入後查看系統旅人狀態。'}}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
+ toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
  applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
 });
 authService.registerAuthStateListener();
@@ -253,7 +271,7 @@ adminMonitoringSystem = createAdminMonitoringSystem({
 const { doRoll, stopAuto, restartAutoInterval: restartAutoIntervalImpl, isRolling, isAutoRolling, setupAutoRollUI } = createDiceSystem({
  D, POTIONS, KEY, supabaseClient, timerManager, getState:()=>S, getCurrentUser:()=>currentUser,
  getWeather, luck, speed, byId, format, chanceText, totalDice, go, toast,
- isLockHeld, isHeartbeatActive, scheduleUnlock, applyPetRollSkills, potionMaterialTotal,
+ isLockHeld, isHeartbeatActive, scheduleUnlock, applyPetRollSkills, potionMaterialTotal, coinEarningMultiplier,
  checkAchievements, checkDailyReward, save, autoDepositRolledWeatherDice, broadcastRareRoll,
  render, documentRef:document, recordWeeklyRoll: () => weeklyRealmEvent.recordRoll()
 });
@@ -265,7 +283,8 @@ equipmentUI = createEquipmentUI({
   render, toast, achievementStats, rewardText, grantAchievementReward,
   showAchievementPopup, checkAchievements, logCraft, logPotionAction,
   KEY, userSaveKey, documentRef: document, confirmAction: message => confirm(message),
-  openAuth, totalUnique, restartAutoInterval, chanceText, localStorageRef: localStorage
+  adoptServerBag: (bag, updatedAt) => cloudSaveService?.adoptServerBag(bag, updatedAt) || false,
+  openAuth, totalUnique, restartAutoInterval, chanceText, timerManager, escapeHTML, localStorageRef: localStorage
 });
 equipmentUI.setupEquipmentUI();
 mainRenderUI = createMainRenderUI({
@@ -318,7 +337,7 @@ function analyzeSuspiciousRolls(){return adminPlayerManagement?.analyzeSuspiciou
 
 document.getElementById('upgradeBagBtn').onclick=()=>{const cap=Number(S.bagCapacity)||35;if(cap>=200){toast('背包已達目前上限 200 顆');return}const cost=bagUpgradeCost(cap);if((Number(S.coins)||0)<cost){toast(`$ 不足，擴充需要 ${format(cost)}$`);return}S.coins-=cost;S.bagCapacity=cap+1;save();render();toast(`背包容量已擴充至 ${S.bagCapacity} 顆`)};
 document.getElementById('rollBtn').onclick=doRoll;
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authAction('signup');document.getElementById('authUsernameSignupOpenBtn').onclick=()=>authService?.openUsernameSignup();document.getElementById('authUsernameSignupSubmitBtn').onclick=()=>authAction('usernameSignup');document.getElementById('authUsernameSignupCancelBtn').onclick=()=>authService?.closeUsernameSignup();document.getElementById('authResendBtn').onclick=()=>authAction('resend');document.getElementById('authResetBtn').onclick=()=>authAction('reset');document.getElementById('authPasswordUpdateBtn').onclick=()=>authService?.updateRecoveredPassword();document.getElementById('authPasswordCancelBtn').onclick=()=>authService?.cancelPasswordRecovery();document.getElementById('authRetryCloudBtn').onclick=()=>authService?.retryCloudLoad();document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
+document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authService?.openUsernameSignup();document.getElementById('authUsernameSignupSubmitBtn').onclick=()=>authAction('usernameSignup');document.getElementById('authUsernameSignupCancelBtn').onclick=()=>authService?.closeUsernameSignup();document.getElementById('authResendBtn')?.addEventListener('click', ()=>authAction('resend'));document.getElementById('authResetBtn')?.addEventListener('click', ()=>authAction('reset'));document.getElementById('authPasswordUpdateBtn').onclick=()=>authService?.updateRecoveredPassword();document.getElementById('authPasswordCancelBtn').onclick=()=>authService?.cancelPasswordRecovery();document.getElementById('authRetryCloudBtn').onclick=()=>authService?.retryCloudLoad();document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
 
 function loadAdminOnlineCurve(){return adminMonitoringSystem?.loadAdminOnlineCurve()}
 
@@ -336,10 +355,27 @@ setupAccountActions({
   save, render, flushCloudSave, syncCloudSave, toast, stopAuto, KEY, localStorageRef: localStorage,
   fresh, refreshLeaderboards
 });
-save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
+async function loadAiLobbyActivity(){
+ const count=document.getElementById('aiLobbyCount');
+ const list=document.getElementById('aiLobbyPlayers');
+ if(!count||!list)return;
+ if(!supabaseClient){count.textContent='暫不可用';list.textContent='目前無法取得系統旅人狀態。';return;}
+ try{
+  const {data,error}=await supabaseClient.rpc('list_public_ai_activity');
+  if(error)throw error;
+  const rows=Array.isArray(data)?data:[];
+  count.textContent=rows.length+' 位在線';
+  list.innerHTML=rows.length?rows.map(p=>'<div class="ai-lobby-player"><span class="ai-lobby-avatar">'+escapeHTML(String(p.display_name||'旅').slice(0,1))+'</span><span class="ai-lobby-name">'+escapeHTML(p.display_name||'系統旅人')+'</span><span class="ai-lobby-online">在線</span></div>').join(''):'<span class="mini">目前沒有系統旅人在線。</span>';
+ }catch(error){
+  console.warn('AI lobby activity unavailable',error);
+  count.textContent='暫不可用';
+  list.textContent='系統旅人狀態暫時無法載入。';
+ }
+}
+save();render();refreshGlobalBoost();renderRealmActivity();refreshLeaderboards();startGameVisitTracking();timerManager.setInterval(()=>{const now=Date.now();let changed=false;for(const key of ['active','activeSpeed','activeMoney']){const a=S.potions?.[key];if(a?.type&&Number(a.expiresAt)<=now){S.potions[key]={type:'',expiresAt:0};changed=true}}if(activePotion('luck')||activePotion('speed')||activePotion('money'))renderPotions();if(changed){restartAutoInterval();save();render()}},1000,'potion-expiry');
 
 
 /* ---- merged from script2.js: achievement popup controls ---- */
 
 setupDisplayControls({ documentRef: document, windowRef: window, navigatorRef: navigator, toast });
-setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, toast, render, renderPetsPage, coinEarningMultiplier });
+setupPetSellingUI({ getState: () => S, petById, petRarity, petArt, escapeHTML, PET_MUTATIONS, petIncomePerSecond, save, flushCloudSave, toast, render, renderPetsPage, coinEarningMultiplier, supabaseClient, getCurrentUser: () => currentUser });

@@ -4,8 +4,8 @@ export function setupDisplayControls({
   navigatorRef = windowRef.navigator,
   toast = () => {}
 } = {}) {
-  const button = documentRef.getElementById('fullscreenToggleBtn');
-  if (!button) return { update: () => {}, destroy: () => {} };
+  const getButton = () => documentRef.getElementById('fullscreenToggleBtn');
+  if (!getButton()) return { update: () => {}, destroy: () => {} };
 
   const root = documentRef.documentElement;
   const fullscreenMode = windowRef.matchMedia?.('(display-mode: fullscreen)');
@@ -14,12 +14,18 @@ export function setupDisplayControls({
   function update() {
     const nativeFullscreen = Boolean(documentRef.fullscreenElement);
     const installedFullscreen = isPwaFullscreen();
-    button.textContent = nativeFullscreen ? '退出全螢幕' : '全螢幕';
+    const button = getButton();
+    if (!button) return;
+    button.textContent = nativeFullscreen ? '退出全螢幕' : installedFullscreen ? '已全螢幕' : '全螢幕';
     button.setAttribute('aria-pressed', String(nativeFullscreen || installedFullscreen));
     button.disabled = installedFullscreen && !nativeFullscreen;
   }
 
   async function toggleFullscreen() {
+    if (isPwaFullscreen() && !documentRef.fullscreenElement) {
+      toast('目前已在全螢幕模式；此模式由安裝版視窗控制。');
+      return;
+    }
     if (documentRef.fullscreenElement) {
       if (typeof documentRef.exitFullscreen !== 'function') {
         toast('此瀏覽器無法退出全螢幕');
@@ -60,7 +66,17 @@ export function setupDisplayControls({
     update();
   }
 
-  button.addEventListener('click', toggleFullscreen);
+  const initiallyBoundButtons = new WeakSet();
+  const initialButton = getButton();
+  initialButton.addEventListener('click', toggleFullscreen);
+  initiallyBoundButtons.add(initialButton);
+  const onDocumentClick = event => {
+    const target = event.target?.closest?.('#fullscreenToggleBtn');
+    if (!target || target.disabled || initiallyBoundButtons.has(target)) return;
+    event.preventDefault();
+    void toggleFullscreen();
+  };
+  documentRef.addEventListener?.('click', onDocumentClick, true);
   documentRef.addEventListener('fullscreenchange', onFullscreenChange);
   documentRef.addEventListener('fullscreenerror', onFullscreenError);
   update();
@@ -69,7 +85,7 @@ export function setupDisplayControls({
     if (!navigatorRef?.serviceWorker?.register || windowRef.isSecureContext !== true) {
       return Promise.resolve(null);
     }
-    const workerUrl = new URL('../sw.js', import.meta.url);
+    const workerUrl = new URL('../sw.js?v=20261119-settings-buttons-v2', import.meta.url);
     const scopeUrl = new URL('../', import.meta.url);
     return navigatorRef.serviceWorker.register(workerUrl.href, { scope: scopeUrl.pathname })
       .catch(() => null);
@@ -79,7 +95,8 @@ export function setupDisplayControls({
     update,
     serviceWorkerReady,
     destroy() {
-      button.removeEventListener?.('click', toggleFullscreen);
+      initialButton.removeEventListener?.('click', toggleFullscreen);
+      documentRef.removeEventListener?.('click', onDocumentClick, true);
       documentRef.removeEventListener?.('fullscreenchange', onFullscreenChange);
       documentRef.removeEventListener?.('fullscreenerror', onFullscreenError);
     }

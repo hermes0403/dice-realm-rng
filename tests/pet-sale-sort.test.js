@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { getPetSellMutationTags, sortPetSellItems } from '../ui/pet-selling.js';
 
 const definitions = {
@@ -8,6 +9,8 @@ const definitions = {
   p3: { id: 'p3', name: '神獸', rarity: 'secret' }
 };
 const petById = id => definitions[id] || null;
+const saleSource = readFileSync(new URL('../ui/pet-selling.js', import.meta.url), 'utf8');
+const saleMigration = readFileSync(new URL('../supabase/migrations/20261121132250_pet_sale_reject_partial_inventory_mismatch.sql', import.meta.url), 'utf8');
 
 test('pet sale list sorts rarity in both directions and income in both directions', () => {
   const pets = [
@@ -41,4 +44,20 @@ test('pet sale mutation labels include appearance and weather mutations without 
     'pet-mutation-weather-crystal'
   ]);
   assert.deepEqual(getPetSellMutationTags({ uid: 'plain' }, {}), []);
+});
+
+
+test('authenticated pet sale flushes cloud writes and does not clear local pets when the server sold zero', () => {
+  assert.match(saleSource, /await flushCloudSave\(\)/);
+  assert.match(saleSource, /if \(soldCount === 0\) \{[\s\S]*?throw new Error/);
+  assert.ok(saleSource.indexOf('if (soldCount === 0)') < saleSource.indexOf('S.pets = result.pets'));
+  assert.match(saleSource, /latestChosen\.length !== ids\.length/);
+  assert.match(saleSource, /ids\.length !== selectedValues\.length/);
+});
+
+
+test('database sale RPC rejects missing or ambiguous UIDs before writing sale tombstones', () => {
+  assert.match(saleMigration, /出售清單包含重複寵物識別碼/);
+  assert.match(saleMigration, /v_requested_count <> cardinality\(p_pet_uids\)/);
+  assert.ok(saleMigration.indexOf('pet_sale_inventory_out_of_sync') < saleMigration.indexOf('insert into public.pet_sale_tombstones'));
 });

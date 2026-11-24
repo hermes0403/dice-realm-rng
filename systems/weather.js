@@ -1,5 +1,11 @@
 import { WEATHER_SUMMON_ODDS } from './weather-summon-odds.js';
 
+export function getWeatherSpeedBonus(weatherState) {
+  const types = Array.isArray(weatherState?.types) ? weatherState.types : [weatherState?.type];
+  return types.includes('shark') ? 100 : 0;
+}
+
+
 export function createWeatherSystem(dependencies) {
  const {
   D, WEATHER_TYPES, format, escapeHTML, chanceText, byId, supabaseClient, timerManager,
@@ -19,7 +25,7 @@ let serverWeatherChannel=null;
 let forcedWeatherState=(()=>{try{const v=JSON.parse(localStorage.getItem('diceRealmForcedWeather')||'null');return v&&Number(v.until)>Date.now()?v:null}catch{return null}})();
 function specialWeatherLocked(now=Date.now()){
  const types=serverWeatherState?.types||[serverWeatherState?.type];
- return Number(serverWeatherState?.until)>now&&types.some(type=>['crystal','hell','glitch'].includes(type));
+ return Number(serverWeatherState?.until)>now&&types.some(type=>['crystal','hell','glitch','shark'].includes(type));
 }
 function applyServerWeatherRow(row,announce=false){
  if(!row)return;
@@ -36,12 +42,12 @@ function applyServerWeatherRow(row,announce=false){
  }
  // 召喚成功後，若短時間內讀到舊的晴天資料，保留召喚天氣直到原定結束時間。
  if(row.weather_type==='sunny'&&(!row.weather_type_2||row.weather_type_2==='sunny')&&summonedWeatherGuardUntil>now)return;
- const valid=['sunny','rain','snow','thunder','crystal','hell','dumpling','glitch'];const next=until>now&&valid.includes(row.weather_type)?{type:row.weather_type,types:[row.weather_type,...(valid.includes(row.weather_type_2)&&row.weather_type_2!==row.weather_type?[row.weather_type_2]:[])],until,by:row.summoned_by||'玩家',at:updatedAt||now}:null;
+ const valid=['sunny','rain','snow','thunder','crystal','hell','dumpling','glitch','shark'];const next=until>now&&valid.includes(row.weather_type)?{type:row.weather_type,types:[row.weather_type,...(valid.includes(row.weather_type_2)&&row.weather_type_2!==row.weather_type?[row.weather_type_2]:[])],until,by:row.summoned_by||'玩家',at:updatedAt||now}:null;
  if(updatedAt)lastServerWeatherUpdatedAt=Math.max(lastServerWeatherUpdatedAt,updatedAt);
  if(next&&next.type!=='sunny'){summonedWeatherGuardUntil=next.until;try{localStorage.setItem('diceRealmSummonedWeatherGuard',JSON.stringify({until:next.until,type:next.type}))}catch{}}
  if(!next&&summonedWeatherGuardUntil<=now){summonedWeatherGuardUntil=0;try{localStorage.removeItem('diceRealmSummonedWeatherGuard')}catch{}}
- const key=next&&['crystal','hell','glitch'].includes(next.type)?`${next.type}:${next.at}:${next.by}`:'';
- const changed=!!next&&['crystal','hell','glitch'].includes(next.type)&&key!==lastWeatherAnnouncementKey;
+ const key=next&&['crystal','hell','glitch','shark'].includes(next.type)?`${next.type}:${next.at}:${next.by}`:'';
+ const changed=!!next&&['crystal','hell','glitch','shark'].includes(next.type)&&key!==lastWeatherAnnouncementKey;
  serverWeatherState=next;
  if(next&&changed){lastWeatherAnnouncementKey=key;if(announce)announceWeatherSummon(next.type,next.by,next.at);}
  cachedWeatherMinute=-1;updateWeatherUI();renderCodex();if(document.getElementById('page-weather-summon')?.classList.contains('active'))loadWeatherSummonData(false);
@@ -134,19 +140,21 @@ function updateWeatherUI(){
  document.body.classList.toggle('weather-aura-crystal',activeTypes.includes('crystal'));
  document.body.classList.toggle('weather-aura-hell',activeTypes.includes('hell'));
  document.body.classList.toggle('weather-aura-dumpling',activeTypes.includes('dumpling'));
+ document.body.classList.toggle('weather-aura-shark',activeTypes.includes('shark'));
  document.body.classList.toggle('weather-aura-glitch',activeTypes.includes('glitch'));
  let scene=document.getElementById('weatherSceneOverlay');
  if(!scene){scene=document.createElement('div');scene.id='weatherSceneOverlay';scene.className='weather-scene-overlay';scene.setAttribute('aria-hidden','true');document.body.appendChild(scene)}
  scene.className='weather-scene-overlay'+(['rain','snow','thunder'].includes(state.type)?' '+state.type:'')+(activeTypes.includes('glitch')?' glitch':'');
  if(!wrap)return;
- wrap.classList.remove('weather-rain','weather-snow','weather-thunder','weather-crystal','weather-hell','weather-dumpling','weather-glitch');
+ wrap.classList.remove('weather-rain','weather-snow','weather-thunder','weather-crystal','weather-hell','weather-dumpling','weather-glitch','weather-shark');
  activeTypes.forEach(t=>wrap.classList.add('weather-'+t));
  if(!activeTypes.length){wrap.innerHTML='<span class="weather-item"><span class="weather-icon">☀️</span><span class="weather-name">晴天</span></span>';return}
  const now=Date.now();
  wrap.innerHTML=activeTypes.map(type=>{
   const meta=WEATHER_TYPES[type],until=Number(state.untilByType?.[type]??state[type+'Until']??state.until)||0;
   const left=Math.max(0,Math.ceil((until-now)/1000)),mm=String(Math.floor(left/60)).padStart(2,'0'),ss=String(left%60).padStart(2,'0');
-  return '<span class="weather-item weather-item-'+type+'" data-weather-type="'+type+'"><span class="weather-icon">'+meta.icon+'</span><span class="weather-name">'+meta.label+'</span><span class="weather-countdown">'+mm+':'+ss+'</span></span>';
+  const crystalTextStyle = type === 'crystal' ? ' style="color:#d59aff"' : '';
+  return '<span class="weather-item weather-item-'+type+'" data-weather-type="'+type+'"><span class="weather-icon">'+meta.icon+'</span><span class="weather-name"'+crystalTextStyle+'>'+meta.label+'</span><span class="weather-countdown"'+crystalTextStyle+'>'+mm+':'+ss+'</span></span>';
  }).join('');
 }
 timerManager.setInterval(()=>{updateWeatherUI();if(!document.getElementById('weatherConvertPanel')?.hidden&&getState().equippedItem==='g7')renderGloves()},1000,'weather-ui');updateWeatherUI();
@@ -161,7 +169,7 @@ function renderWeatherSummon(){
  btn.disabled=!getCurrentUser()||points<35000||specialWeatherLocked();
  btn.textContent=specialWeatherLocked()?'特殊天氣鎖定中':'✧ 召喚特殊天氣';
  if(!getCurrentUser())status.textContent='請先登入雲端帳號；投入骰子和召喚需要同步到全服伺服器。';
- else if(specialWeatherLocked()){const lockedType=(serverWeatherState?.types||[serverWeatherState?.type]).find(type=>['crystal','hell','glitch'].includes(type));status.textContent=`目前${WEATHER_TYPES[lockedType]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`}
+ else if(specialWeatherLocked()){const lockedType=(serverWeatherState?.types||[serverWeatherState?.type]).find(type=>['crystal','hell','glitch','shark'].includes(type));status.textContent=`目前${WEATHER_TYPES[lockedType]?.label||'特殊天氣'}正在持續，剩餘 ${Math.max(1,Math.ceil((serverWeatherState.until-Date.now())/1000))} 秒，不能被其他天氣打斷。`}
  else status.textContent=points>=35000?`可以召喚：${summonOddsText()}。召喚後全服持續 5 分鐘。`:`還需要 ${format(remaining)} 能量。`;
  const weatherDice=D.filter(d=>d.weather&&Number(getState().bag?.[d.id])>0).sort((a,b)=>({rain:0,snow:1,thunder:2,crystal:3,hell:4}[a.weather]-({rain:0,snow:1,thunder:2,crystal:3,hell:4}[b.weather])||a.den-b.den));
  if(!getCurrentUser()){list.innerHTML='<div class="empty">登入雲端帳號後，這裡會顯示可投入的天氣變異骰子。</div>';return}

@@ -1,0 +1,52 @@
+name: Weather and announcement display tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'systems/global-announcements.js'
+      - 'systems/realm-social.js'
+      - 'systems/weather.js'
+      - 'script.js'
+      - 'tests/global-announcements-threshold.test.js'
+      - 'tests/weather-crystal-display.test.mjs'
+      - 'board/README.md'
+      - 'board/T-0110-weather-announcement-display.md'
+      - '.github/workflows/weather-announcement-display-tests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'systems/global-announcements.js'
+      - 'systems/realm-social.js'
+      - 'systems/weather.js'
+      - 'script.js'
+      - 'tests/global-announcements-threshold.test.js'
+      - 'tests/weather-crystal-display.test.mjs'
+      - '.github/workflows/weather-announcement-display-tests.yml'
+
+jobs:
+  weather-announcement-display:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test announcements and weather display
+        run: node --test tests/global-announcements-threshold.test.js tests/weather-crystal-display.test.mjs
+      - name: Check JavaScript syntax
+        run: |
+          node --check systems/global-announcements.js
+          node --check systems/realm-social.js
+          node --check systems/weather.js
+          node --check script.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD

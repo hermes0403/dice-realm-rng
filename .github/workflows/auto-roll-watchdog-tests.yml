@@ -7,6 +7,7 @@ on:
     paths:
       - 'systems/dice.js'
       - 'tests/auto-roll-watchdog.test.js'
+      - 'tests/auto-roll-rarity-continuation.test.js'
       - 'tests/lifecycle-regression.test.js'
       - '.github/workflows/auto-roll-watchdog-tests.yml'
 
@@ -23,7 +24,7 @@ jobs:
         with:
           node-version: 22
       - name: Run auto-roll regression tests
-        run: node --test tests/auto-roll-watchdog.test.js tests/lifecycle-regression.test.js
+        run: node --test tests/auto-roll-watchdog.test.js tests/auto-roll-rarity-continuation.test.js tests/lifecycle-regression.test.js
       - name: Check patch whitespace
         run: |
           git fetch origin main

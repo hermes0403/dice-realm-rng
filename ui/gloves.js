@@ -2,7 +2,7 @@
 export function createGloveUI(deps) {
   const {
     getState, D, G, supabaseClient, getCurrentUser, byId, glove, currentGlove,
-    format, formatWalletScientific, save, flushCloudSave, render, toast,
+    format, formatWalletScientific, save, flushCloudSave, adoptServerBag, render, toast, timerManager, escapeHTML = value => String(value),
     rewardText, grantAchievementReward, showAchievementPopup,
     checkAchievements, logCraft, KEY, userSaveKey, documentRef, confirmAction,
     openAuth, localStorageRef = globalThis.localStorage
@@ -12,6 +12,10 @@ export function createGloveUI(deps) {
   let timeCrystalStatus = null;
   let timeCrystalStatusUserId = null;
   let timeCrystalStatusLoading = false;
+  let timeCrystalPickerSlot = null;
+  let timeCrystalSelectedDieId = null;
+  let timeCrystalExpanded = false;
+  let timeCrystalTicker = null;
 
   async function loadTimeCrystalStatus(force = false) {
     const user = getCurrentUser();
@@ -19,7 +23,16 @@ export function createGloveUI(deps) {
     if (!userId || !supabaseClient) {
       timeCrystalStatus = null;
       timeCrystalStatusUserId = null;
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      timeCrystalExpanded = false;
       return null;
+    }
+    if (timeCrystalStatusUserId && timeCrystalStatusUserId !== userId) {
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      timeCrystalExpanded = false;
+      timeCrystalStatus = null;
     }
     if (!force && (timeCrystalStatusUserId === userId || timeCrystalStatusLoading)) return timeCrystalStatus;
     timeCrystalStatusUserId = userId;
@@ -44,49 +57,181 @@ export function createGloveUI(deps) {
   function renderTimeCrystalCard(itemWorkshopList) {
     const state = getState();
     const user = getCurrentUser();
-    const glitchDice = D.filter(dice => dice.glitchBonus);
-    const glitchCount = glitchDice.reduce((sum, dice) => sum + Math.max(0, Number(state.bag?.[dice.id]) || 0), 0);
-    const timeCount = Math.max(0, Number(state.bag?.d15) || 0);
-    const voidCount = Math.max(0, Number(state.bag?.d14) || 0);
-    const enough = timeCount >= 1 && voidCount >= 1 && glitchCount >= 1;
     const statusReady = !!user && timeCrystalStatusUserId === user.id && !!timeCrystalStatus && !timeCrystalStatus.error;
     const owned = statusReady && !!timeCrystalStatus.owned;
+    const materials = timeCrystalStatus?.materials && typeof timeCrystalStatus.materials === 'object'
+      ? timeCrystalStatus.materials : {};
     const pending = !!state.timeCrystalPending;
     const cooldownUntil = Date.parse(timeCrystalStatus?.cooldown_until || '') || 0;
     const left = Math.max(0, cooldownUntil - Date.now());
-    const timeText = left > 0
-      ? String(Math.floor(left / 3600000)).padStart(2, '0') + ':' +
-        String(Math.floor(left % 3600000 / 60000)).padStart(2, '0') + ':' +
-        String(Math.floor(left % 60000 / 1000)).padStart(2, '0')
+    const totalSeconds = Math.ceil(left / 1000);
+    const timeText = totalSeconds > 0
+      ? (totalSeconds >= 3600
+          ? String(Math.floor(totalSeconds / 3600)).padStart(2, '0') + ':' +
+            String(Math.floor(totalSeconds % 3600 / 60)).padStart(2, '0') + ':' +
+            String(totalSeconds % 60).padStart(2, '0')
+          : String(Math.floor(totalSeconds / 60)).padStart(2, '0') + ':' +
+            String(totalSeconds % 60).padStart(2, '0'))
       : '';
-    const materials = [
-      { label: '時序骰子', icon: '⌛', have: timeCount },
-      { label: '虛空骰子', icon: '◉', have: voidCount },
-      { label: '故障骰子（任一故障系列）', icon: '⚠️', have: glitchCount }
-    ].map(item => {
-      const enoughItem = item.have >= 1;
-      return '<p style="color:' + (enoughItem ? '#65e6b2' : '#ff829d') + '">' +
-        (enoughItem ? '✓' : '缺少') + ' ' + item.icon + ' ' + item.label +
-        ' ×1：持有 ' + format(item.have) + '</p>';
+    const slots = [
+      { slot: 'time', label: '時序骰子', icon: '⌛', ids: ['d15'] },
+      { slot: 'void', label: '虛空骰子', icon: '◉', ids: ['d14'] },
+      { slot: 'glitch', label: '故障骰子（任一故障系列）', icon: '⚠️', ids: D.filter(dice => dice.glitchBonus).map(dice => dice.id) }
+    ];
+    const complete = slots.every(item => typeof materials[item.slot] === 'string' && item.ids.includes(materials[item.slot]));
+    const rows = slots.map(item => {
+      const depositedId = materials[item.slot];
+      const depositedDie = depositedId ? byId(depositedId) : null;
+      const completeRow = !!depositedDie && item.ids.includes(depositedId);
+      const label = completeRow && item.slot === 'glitch'
+        ? '故障骰子 · ' + escapeHTML(depositedDie.name)
+        : item.label;
+      return '<div class="time-crystal-material-row">' +
+        '<span class="time-crystal-material-name">' + item.icon + ' ' + label + '</span>' +
+        '<span class="time-crystal-material-progress">' + (completeRow ? '1/1 ✓' : '0/1') + '</span>' +
+        (completeRow ? '<span class="time-crystal-material-done">已投入</span>' :
+          '<button type="button" class="quiet time-crystal-add" data-time-crystal-add="' + item.slot + '"' +
+          (!statusReady || timeCrystalBusy ? ' disabled' : '') + '>添加</button>') +
+        '</div>';
     }).join('');
-    let status = '合成後可重複使用，每次使用冷卻 1 小時。';
-    if (!user) status = '登入雲端帳號後即可合成與使用。';
-    else if (!statusReady) status = timeCrystalStatus?.error ? '雲端狀態讀取失敗，重新整理後再試。' : '正在讀取道具狀態…';
+    let status = '';
+    if (!user) status = '登入雲端帳號後即可投入材料與合成。';
+    else if (!statusReady) status = timeCrystalStatus?.error ? '雲端狀態讀取失敗，請重新讀取。' : '正在讀取道具狀態…';
     else if (pending) status = '效果已啟用：下一次玩家召喚天氣將延長 20%。';
     else if (left > 0) status = '⏳ 冷卻中 · ' + timeText;
+    else if (!owned && complete) status = '材料已齊全，可以合成。';
+    else if (!owned) status = '逐項投入材料，進度 ' + slots.filter(item => materials[item.slot]).length + '/3。';
+
     const button = timeCrystalStatus?.error
-      ? '<button type="button" style="width:100%;min-height:36px" data-refresh-time-crystal>重新讀取道具狀態</button>'
+      ? '<button type="button" class="quiet" style="width:100%;min-height:36px" data-refresh-time-crystal>重新讀取道具狀態</button>'
       : owned
         ? '<button class="primary" type="button" style="width:100%;min-height:38px" data-use-time-crystal ' +
-          (timeCrystalBusy || pending || left > 0 ? 'disabled' : '') + '>⌛ 使用時序結晶</button>'
-        : '<button type="button" style="width:100%;min-height:36px" data-craft-time-crystal ' +
-          (timeCrystalBusy || !statusReady || !enough ? 'disabled' : '') + '>合成時序結晶</button>';
+          (timeCrystalBusy || pending || left > 0 || !statusReady ? 'disabled' : '') + '>' +
+          (pending ? '效果已啟用' : left > 0 ? '冷卻中 ' + timeText : '⌛ 使用時序結晶') + '</button>'
+        : '<button class="primary" type="button" style="width:100%;min-height:38px" data-craft-time-crystal ' +
+          (timeCrystalBusy || !statusReady || !complete ? 'disabled' : '') + '>合成時序結晶</button>';
+
+    let picker = '';
+    if (timeCrystalPickerSlot && !owned) {
+      const selectedSlot = slots.find(item => item.slot === timeCrystalPickerSlot);
+      const available = selectedSlot
+        ? selectedSlot.ids.map(id => byId(id)).filter(dice => dice && Number(state.bag?.[dice.id]) > 0)
+        : [];
+      const options = available.length
+        ? available.map(dice => {
+            const selected = timeCrystalSelectedDieId === dice.id;
+            return '<button type="button" class="time-crystal-die-option' + (selected ? ' selected' : '') +
+              '" data-time-crystal-select="' + dice.id + '" aria-pressed="' + selected + '">' +
+              '<span>' + (dice.icon || '🎲') + ' ' + escapeHTML(dice.name) + '</span>' +
+              '<span>×' + format(Number(state.bag?.[dice.id]) || 0) + '</span></button>';
+          }).join('')
+        : '<p class="mini">背包中沒有符合這項材料的骰子。</p>';
+      picker = '<div class="pet-sell-modal time-crystal-picker" role="dialog" aria-modal="true" aria-labelledby="timeCrystalPickerTitle">' +
+        '<div class="pet-sell-dialog">' +
+        '<div class="section-head"><h3 id="timeCrystalPickerTitle" style="margin:0">選擇投入材料</h3>' +
+        '<button type="button" class="quiet" data-time-crystal-cancel>關閉</button></div>' +
+        '<p class="mini">選擇一顆 ' + (selectedSlot?.label || '配方材料') + '，確認後會從背包消耗。</p>' +
+        '<div class="time-crystal-die-options">' + options + '</div>' +
+        '<div class="pet-sell-actions"><button type="button" class="quiet" data-time-crystal-cancel>取消</button>' +
+        '<button type="button" class="primary" data-time-crystal-confirm ' +
+        (!available.some(dice => dice.id === timeCrystalSelectedDieId) || timeCrystalBusy ? 'disabled' : '') +
+        '>' + (timeCrystalBusy ? '正在投入…' : '確認投入') + '</button></div></div></div>';
+    }
+
+    const progress = slots.filter(item => {
+      const id = materials[item.slot];
+      return typeof id === 'string' && item.ids.includes(id);
+    }).length;
+    const expanded = owned || timeCrystalExpanded;
+    const heading = owned
+      ? '<div class="section-head time-crystal-heading"><h3 style="margin:0">⌛ 時序結晶</h3><span class="pill">已合成</span></div>'
+      : '<button type="button" class="time-crystal-toggle" data-time-crystal-toggle aria-expanded="' + expanded + '">' +
+        '<span class="time-crystal-toggle-title">⌛ 時序結晶</span>' +
+        '<span class="pill">' + (statusReady ? progress + '/3' : '讀取中') + '</span>' +
+        '<span class="time-crystal-toggle-chevron">' + (expanded ? '⌃' : '⌄') + '</span></button>';
+
     itemWorkshopList.innerHTML +=
-      '<div class="recipe weather-converter-card" style="display:block;padding:12px;margin-top:10px">' +
-      '<h3 style="margin:0 0 6px">⌛ 時序結晶' + (owned ? '（已持有）' : '') + '</h3>' +
-      '<p style="margin:0 0 8px">可使下個天氣延長20%時間</p>' +
-      (owned ? '' : materials) + button +
-      '<p class="mini" style="margin:6px 0 0">' + status + '</p></div>';
+      '<div class="recipe weather-converter-card time-crystal-card" style="display:block;padding:12px;margin-top:10px">' +
+      heading +
+      (owned
+        ? '<p class="time-crystal-description">可使下個天氣延長20%時間</p>' + button +
+          '<p class="mini time-crystal-caption">可重複使用，每次使用後冷卻 1 小時。</p>'
+        : expanded
+          ? '<p class="time-crystal-description">可使下個天氣延長20%時間</p>' +
+            '<div class="time-crystal-material-list">' + rows + '</div>' + button +
+            '<p class="mini time-crystal-caption">' + status + '</p>' + picker
+          : '') +
+      '</div>';
+  }
+
+  function openTimeCrystalMaterialPicker(slot) {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) {
+      openAuth();
+      toast('請先登入雲端帳號');
+      return;
+    }
+    if (!['time', 'void', 'glitch'].includes(slot) || timeCrystalBusy) return;
+    const materials = timeCrystalStatus?.materials || {};
+    if (materials[slot]) return;
+    timeCrystalPickerSlot = slot;
+    timeCrystalSelectedDieId = null;
+    timeCrystalExpanded = true;
+    renderGloves();
+  }
+
+  async function depositTimeCrystalMaterial() {
+    const user = getCurrentUser();
+    if (!user || !supabaseClient) {
+      openAuth();
+      toast('請先登入雲端帳號');
+      return;
+    }
+    if (timeCrystalBusy || !timeCrystalPickerSlot || !timeCrystalSelectedDieId) return;
+    const slot = timeCrystalPickerSlot;
+    const dieId = timeCrystalSelectedDieId;
+    const valid = slot === 'time' ? dieId === 'd15'
+      : slot === 'void' ? dieId === 'd14'
+      : slot === 'glitch' ? !!D.find(dice => dice.id === dieId && dice.glitchBonus)
+      : false;
+    if (!valid || Number(getState().bag?.[dieId]) < 1) {
+      toast('背包中沒有可投入的對應骰子，請重新整理背包');
+      return;
+    }
+    timeCrystalBusy = true;
+    toast('正在確認投入材料…');
+    renderGloves();
+    try {
+      const flushed = await flushCloudSave();
+      if (flushed === false) throw new Error('雲端存檔尚未同步完成，材料尚未投入，請稍後重試');
+      if (getCurrentUser()?.id !== user.id) throw new Error('登入帳號已切換，請重新操作');
+      const { data, error } = await supabaseClient.rpc('deposit_time_crystal_material', {
+        p_die_id: dieId,
+        p_expected_user_id: user.id
+      });
+      if (error) throw error;
+      if (!data?.ok || !data?.bag || !data?.materials || !data?.updated_at) throw new Error('伺服器未確認材料投入結果');
+      if (getCurrentUser()?.id !== user.id) throw new Error('登入帳號已切換，請重新載入存檔');
+      if (typeof adoptServerBag !== 'function' || !adoptServerBag(data.bag, data.updated_at)) {
+        throw new Error('材料已由伺服器處理，但本機存檔同步基準未能更新，請重新載入遊戲');
+      }
+      timeCrystalStatus = { ...(timeCrystalStatus || {}), materials: data.materials };
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      render();
+      toast('材料已投入工坊');
+    } catch (error) {
+      console.error('Time Crystal material deposit failed', error);
+      if (/already deposited|已投入/.test(error.message || '')) {
+        timeCrystalPickerSlot = null;
+        timeCrystalSelectedDieId = null;
+        await loadTimeCrystalStatus(true);
+      }
+      toast(error.message || '材料投入失敗，請稍後重試');
+    } finally {
+      timeCrystalBusy = false;
+      renderGloves();
+    }
   }
 
   function canCraft(item) {
@@ -101,6 +246,9 @@ export function createGloveUI(deps) {
     } else if (timeCrystalStatusUserId) {
       timeCrystalStatus = null;
       timeCrystalStatusUserId = null;
+      timeCrystalPickerSlot = null;
+      timeCrystalSelectedDieId = null;
+      timeCrystalExpanded = false;
     }
     const state = getState();
     const equippedGlove = currentGlove();
@@ -303,21 +451,24 @@ export function createGloveUI(deps) {
       return;
     }
     if (timeCrystalBusy) return;
+    const materials = timeCrystalStatus?.materials || {};
+    if (!materials.time || !materials.void || !materials.glitch) {
+      toast('請先投入全部三種材料');
+      return;
+    }
     timeCrystalBusy = true;
     renderGloves();
     try {
-      await flushCloudSave();
+      if (getCurrentUser()?.id !== user.id) throw new Error('登入帳號已切換，請重新操作');
       const { data, error } = await supabaseClient.rpc('craft_time_crystal');
       if (error) throw error;
-      if (!data?.ok || !data?.bag) throw new Error('伺服器未確認合成結果');
-      getState().bag = data.bag;
-      save();
+      if (!data?.ok || !data?.owned) throw new Error('伺服器未確認合成結果');
       await loadTimeCrystalStatus(true);
       render();
       toast('合成成功：時序結晶已放入道具工坊');
     } catch (error) {
       console.error('Time Crystal crafting failed', error);
-      toast(error.message || '時序結晶合成失敗，請稍後再試');
+      toast(error.message || '時序結晶合成失敗，請稍後重試');
     } finally {
       timeCrystalBusy = false;
       renderGloves();
@@ -355,18 +506,45 @@ export function createGloveUI(deps) {
   function setupGloveUI() {
     if (gloveUISetup) return false;
     gloveUISetup = true;
+    // Capture-phase delegation ensures modal actions are handled even if an inner
+    // component stops bubbling before the document's normal click phase.
     documentRef.addEventListener('click', event => {
-      const target = event.target;
+      const rawTarget = event.target;
+      const target = rawTarget?.nodeType === 1 ? rawTarget : rawTarget?.parentElement;
+      if (!target?.closest) return;
       const purchaseButton = target.closest('[data-glove-action]');
       const craftGloveButton = target.closest('[data-craft]');
       const craftTimeCrystalButton = target.closest('[data-craft-time-crystal]');
       const useTimeCrystalButton = target.closest('[data-use-time-crystal]');
       const refreshTimeCrystalButton = target.closest('[data-refresh-time-crystal]');
+      const toggleTimeCrystalButton = target.closest('[data-time-crystal-toggle]');
+      const addTimeCrystalButton = target.closest('[data-time-crystal-add]');
+      const selectTimeCrystalDieButton = target.closest('[data-time-crystal-select]');
+      const confirmTimeCrystalButton = target.closest('[data-time-crystal-confirm]');
+      const cancelTimeCrystalButton = target.closest('[data-time-crystal-cancel]');
       if (purchaseButton) purchaseGlove(purchaseButton.dataset.gloveAction);
       if (craftGloveButton) craft(craftGloveButton.dataset.craft);
       if (craftTimeCrystalButton) craftTimeCrystal();
       if (useTimeCrystalButton) activateTimeCrystal();
       if (refreshTimeCrystalButton) loadTimeCrystalStatus(true).then(renderGloves);
+      if (toggleTimeCrystalButton) {
+        timeCrystalExpanded = !timeCrystalExpanded;
+        renderGloves();
+      }
+      if (addTimeCrystalButton) openTimeCrystalMaterialPicker(addTimeCrystalButton.dataset.timeCrystalAdd);
+      if (selectTimeCrystalDieButton) {
+        timeCrystalSelectedDieId = selectTimeCrystalDieButton.dataset.timeCrystalSelect;
+        renderGloves();
+      }
+      if (confirmTimeCrystalButton) {
+        event.preventDefault?.();
+        return depositTimeCrystalMaterial();
+      }
+      if (cancelTimeCrystalButton) {
+        timeCrystalPickerSlot = null;
+        timeCrystalSelectedDieId = null;
+        renderGloves();
+      }
       const equipButton = target.closest('[data-equip]');
       if (equipButton) {
         const state = getState();
@@ -375,9 +553,16 @@ export function createGloveUI(deps) {
         render();
         toast('已裝備' + glove(state.equipped).name);
       }
-    });
+    }, true);
+    if (timerManager?.setInterval && !timeCrystalTicker) {
+      timeCrystalTicker = timerManager.setInterval(() => {
+        if (getCurrentUser()?.id && timeCrystalStatusUserId === getCurrentUser()?.id && timeCrystalStatus?.owned) {
+          renderGloves();
+        }
+      }, 1000, 'time-crystal-ui');
+    }
     return true;
   }
 
-  return { canCraft, renderGloves, purchaseGlove, craft, craftTimeCrystal, activateTimeCrystal, loadTimeCrystalStatus, setupGloveUI };
+  return { canCraft, renderGloves, purchaseGlove, craft, craftTimeCrystal, depositTimeCrystalMaterial, activateTimeCrystal, loadTimeCrystalStatus, setupGloveUI };
 }

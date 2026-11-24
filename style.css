@@ -108,6 +108,9 @@ button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--li
 .codex-row.codex-weather-hell{--rarity-color:#ff4b24!important;border-color:color-mix(in srgb,#ff4b24 60%,#29304b);background:linear-gradient(100deg,color-mix(in srgb,#ff4b24 20%,#121729),#0f1423 72%);box-shadow:inset 0 0 18px #ff4b2410}.codex-row.codex-weather-hell .codex-chance,.codex-row.codex-weather-hell .codex-icon,.codex-row.codex-weather-hell .codex-name{color:#ff6038;text-shadow:0 0 8px #ff4b2445}.codex-count{font-size:11px;white-space:nowrap}.codex-row .codex-count{font-variant-numeric:tabular-nums}
 .weather-status.weather-crystal{border-color:#df5cff;background:linear-gradient(120deg,#24132f,#3c1e51);color:#f2b5ff;box-shadow:0 0 14px #d94fff22}.weather-status.weather-hell{border-color:#ff542d;background:linear-gradient(120deg,#351711,#542115);color:#ffb09a;box-shadow:0 0 14px #ff4b2422}
 .weather-summon-card{position:relative;overflow:hidden;border:1px solid #6b4f9b;background:radial-gradient(ellipse at 50% 0,#34224f 0,#17152d 45%,#0d1221 100%);box-shadow:inset 0 0 40px #9e62ff0b,0 15px 45px #0003}.weather-summon-card:before{content:"✧  ·  ✦  ·  ✧";display:block;text-align:center;letter-spacing:13px;color:#cda5ff88;font-size:14px;margin:-3px 0 9px}.summon-progress{height:10px;border-radius:999px;background:#0b0e1b;border:1px solid #473d69;overflow:hidden;margin:10px 0}.summon-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#7a55d9,#e35dff,#ff764c);box-shadow:0 0 14px #cb65ff88;transition:width .25s}.summon-dice-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border:1px solid #34314f;border-radius:12px;background:#0c1020;margin:7px 0}.summon-dice-meta{min-width:0}.summon-dice-meta b{display:block;font-size:13px}.summon-dice-meta small{color:var(--muted);font-size:11px}.summon-qty{width:74px;min-width:0;padding:8px 5px!important;text-align:center}.summon-dice-row button{padding:8px 10px;white-space:nowrap}.summon-outcome{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:7px;margin:14px 0}.summon-outcome>div{border:1px solid #5a4779;border-radius:13px;padding:12px;text-align:center;background:#17152b}.summon-outcome strong{display:block;font-size:17px}.summon-outcome small{color:var(--muted)}.announcement-line.weather-summon-announcement{display:block;width:max-content;max-width:none;min-width:max-content;text-align:center;border-left:0;background:linear-gradient(90deg,transparent,#8b32ff55,#8b32ff22,transparent);color:#f8eaff;text-shadow:0 0 8px #d75cff,0 0 18px #a32cff;font-weight:950;animation:weatherSummonSlide 6.5s linear both;padding:5px 22px}.announcement-line.weather-summon-announcement.crystal{color:#f7d6ff;background:linear-gradient(90deg,transparent,#c52cff66,#922dff44,transparent);text-shadow:0 0 8px #ef9dff,0 0 20px #b42cff}.announcement-line.weather-summon-announcement.hell{color:#fff0e8;background:linear-gradient(90deg,transparent,#ff382f66,#a90c1d44,transparent);text-shadow:0 0 8px #ff6a3d,0 0 20px #e51b28}.announcement-line.weather-summon-announcement.glitch{color:#e7ffff;background:linear-gradient(90deg,transparent,#00d9ff66,#ff315a44,transparent);text-shadow:0 0 8px #00eaff,0 0 20px #ff315a}@keyframes weatherSummonSlide{0%{opacity:0;transform:translateX(100vw)}8%{opacity:1}92%{opacity:1}100%{opacity:0;transform:translateX(-110%)}}
+.announcement-line.pet-fusion-announcement.mythic{color:#fff4c7;background:linear-gradient(90deg,transparent,#f5b94277,#b86d2144,transparent);text-shadow:0 0 8px #ffe08a,0 0 20px #d18a28}
+.announcement-line.pet-fusion-announcement.secret{color:#f5ddff;background:linear-gradient(90deg,transparent,#a64dff77,#5b28aa55,transparent);text-shadow:0 0 8px #d78cff,0 0 20px #8e45ff}
+.announcement-line.pet-fusion-announcement.eternal{color:#9eeaff;background:linear-gradient(90deg,transparent,#9eeaff66,#ffaddd66,transparent);text-shadow:0 0 8px #9eeaff,0 0 14px #ffaddd}
 @media(max-width:520px){.summon-dice-row{grid-template-columns:minmax(0,1fr) 68px}.summon-dice-row button{grid-column:1/-1;width:100%}.summon-outcome strong{font-size:15px}}
 
 @media(max-width:760px){#potionList{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.potion-summary{padding:9px;gap:7px;min-height:76px}.potion-summary .potion-card-icon{flex-basis:32px;width:32px;height:32px;font-size:18px}.potion-summary-main b{font-size:12px}.potion-summary-main small{font-size:9px}}
@@ -2043,7 +2046,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #autoSellDiceOptions .auto-sell-bulk-actions button{width:100%;min-width:0;white-space:nowrap}
 
 /* T-0098 Eternal pet tier: pale-blue to pink gradient. */
-.pet-rarity-eternal{background:linear-gradient(90deg,#9eeaff,#d6c4ff 52%,#ffaddd);-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:0 0 12px #a9dfff88,0 0 18px #ffaddd55;font-weight:950}
+.pet-rarity-eternal{background:linear-gradient(90deg,#9eeaff 0%,#ffaddd 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:0 0 12px #a9dfff88,0 0 18px #ffaddd55;font-weight:950}
 .pet-card:has(.pet-rarity-eternal){border-color:#b9cfff;box-shadow:inset 0 0 18px #a8dfff18,0 0 12px #e7b7ff20}
 .pet-skill-description{margin:6px 0 9px;padding:7px 9px;border:1px solid #a9c9ef55;border-radius:9px;background:linear-gradient(100deg,#8bdcff18,#e9aeea18);color:#dcecff;font-size:11px;line-height:1.5}
 
@@ -2193,3 +2196,888 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 @keyframes milestoneRewardEmblem{0%{transform:scale(.35) rotate(-35deg);filter:blur(5px);opacity:0}65%{transform:scale(1.16) rotate(8deg);filter:blur(0);opacity:1}100%{transform:scale(1) rotate(0)}}
 @media(max-width:520px){.onboarding-dialog{padding:24px 16px 16px;border-radius:18px}.onboarding-body{min-height:82px;font-size:13px}.onboarding-actions{align-items:flex-end}.onboarding-actions button{padding:7px 9px}.onboarding-actions>div{display:flex;gap:6px}}
 @media(prefers-reduced-motion:reduce){.onboarding-dialog,.achievement-pop-overlay.is-revealing .achievement-pop-card,.achievement-pop-overlay.is-revealing .achievement-pop-symbol{animation:none!important}}
+
+/* Admin-only Shark weather: clear status cue. */
+.weather-status.weather-shark{border-color:#4ccde8;background:linear-gradient(120deg,#102c3b,#173c55);color:#9beeff;box-shadow:0 0 16px #31c6ef33}body.weather-aura-shark #weatherStatus{border-color:#4ccde8;box-shadow:0 0 20px #31c6ef55;background:linear-gradient(110deg,#0c2636,#123d55)}body.weather-aura-shark .weather-icon,body.weather-aura-shark .weather-name{color:#9beeff;text-shadow:0 0 10px #31c6ef88}
+
+/* v1.55 — completed weekly milestones use a clear success green */
+.weekly-reward-row.is-claimed{border-color:#36b87866;background:linear-gradient(90deg,#176b4633,#123d2b18);color:#d5fbe8}
+.weekly-reward-row.is-claimed .weekly-reward-target,.weekly-reward-row.is-claimed .weekly-reward-description{color:#baf2d2}
+.weekly-reward-status.is-claimed{color:#55e39a;font-weight:900;text-shadow:0 0 9px #35d88933}
+
+
+/* T-0114：每個稀有度都有獨立的電影式揭示語言；保留原有動畫時間與核心構圖。 */
+.rarity-overlay .rarity-reveal-card{isolation:isolate;overflow:hidden;backdrop-filter:blur(2px)}
+.rarity-overlay .rarity-reveal-card>*{position:relative;z-index:2}
+.rarity-overlay .rarity-reveal-card::before,.rarity-overlay .rarity-reveal-card::after{content:"";position:absolute;inset:9px;border:1px solid color-mix(in srgb,var(--reveal-color,#fff) 55%,transparent);border-radius:18px;pointer-events:none;z-index:1}
+.rarity-overlay .rarity-reveal-card::after{inset:16px;border-style:dashed;opacity:.38;transform:rotate(8deg)}
+.rarity-overlay.tier-comet{background:radial-gradient(ellipse at 50% 52%,#182c55 0%,#090d20 48%,#02040c 100%)}
+.rarity-overlay.tier-comet::before{inset:-20%;opacity:.95;background:repeating-conic-gradient(from -18deg at 50% 50%,transparent 0deg 9deg,#8deaff33 10deg 11deg,transparent 13deg 22deg);mask-image:radial-gradient(circle,black 0%,transparent 72%);animation:cometOrbit 8s linear infinite}
+.rarity-overlay.tier-comet::after{inset:12%;opacity:.8;border:2px solid #8deaff;border-left-color:transparent;border-right-color:#c7a8ff;box-shadow:0 0 34px #5fcfff99,inset 0 0 28px #8deaff33;animation:cometRing 2.8s cubic-bezier(.18,.7,.2,1) infinite}
+.rarity-overlay.tier-comet .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 2px,#9eeaff 3px,transparent 8%),radial-gradient(ellipse at 50% 50%,#65caff44 0%,transparent 58%),repeating-radial-gradient(circle at 50% 50%,transparent 0 28px,#8deaff22 29px 30px,transparent 31px 52px);animation:cometPulse 1.15s ease-in-out infinite alternate}
+.rarity-overlay.tier-comet .rarity-reveal-card{border:2px solid #8deaff;background:linear-gradient(145deg,#132c4df2,#101426f7 58%,#211a3af2);box-shadow:0 0 30px #54cfff99,0 0 95px #6e8dff55,inset 0 0 45px #8deaff20;animation:cometArrival 1.05s cubic-bezier(.12,1.3,.2,1) both}
+.rarity-overlay.tier-comet .rarity-reveal-icon{filter:drop-shadow(0 0 12px #fff) drop-shadow(0 0 30px #68d9ff);animation:cometIcon 2.1s ease-in-out infinite}
+.rarity-overlay.tier-comet .rarity-reveal-title{color:#a7edff;text-shadow:0 0 14px #54cfff;letter-spacing:.34em}
+.rarity-overlay.tier-rare{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--reveal-color,#65e6b2) 16%,#11172b),#050813 76%)}
+.rarity-overlay.tier-rare::before{inset:-24%;opacity:.82;background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 14deg,color-mix(in srgb,var(--reveal-color,#65e6b2) 32%,transparent) 15deg 16deg,transparent 18deg 30deg);mask-image:radial-gradient(circle,black 0%,transparent 70%);animation:rareOrbit 18s linear infinite}
+.rarity-overlay.tier-rare::after{inset:17%;opacity:.65;border:1px solid color-mix(in srgb,var(--reveal-color,#65e6b2) 75%,white);box-shadow:0 0 24px var(--reveal-color);animation:rareHalo 1.8s ease-in-out infinite alternate}
+.rarity-overlay.tier-rare .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 1px,transparent 3px),radial-gradient(ellipse at 50% 50%,color-mix(in srgb,var(--reveal-color,#65e6b2) 24%,transparent),transparent 60%),repeating-radial-gradient(circle at 50% 50%,transparent 0 34px,color-mix(in srgb,var(--reveal-color,#65e6b2) 14%,transparent) 35px 36px,transparent 37px 62px);animation:rarePulse 1.35s ease-in-out infinite alternate}
+.rarity-overlay.tier-rare .rarity-reveal-card{border-width:2px;box-shadow:0 0 30px var(--reveal-color),0 0 70px color-mix(in srgb,var(--reveal-color) 35%,transparent),inset 0 0 28px color-mix(in srgb,var(--reveal-color) 18%,transparent);animation:rareArrival .85s cubic-bezier(.18,1.2,.25,1) both}
+.rarity-overlay.tier-rare .rarity-reveal-icon{animation:rareIcon 2.2s ease-in-out infinite;filter:drop-shadow(0 0 18px var(--reveal-color))}
+.rarity-overlay.tier-anomaly{background:radial-gradient(ellipse at 50% 48%,#24152f 0%,#0a0b19 42%,#010207 100%)}
+.rarity-overlay.tier-anomaly::before{inset:-16%;opacity:.9;background:repeating-linear-gradient(108deg,transparent 0 28px,#e879ff13 29px 31px,transparent 33px 58px),radial-gradient(ellipse at 50% 50%,#f34cff30,transparent 58%);mask-image:radial-gradient(ellipse,black 0%,transparent 74%);animation:anomalyRift 3.2s ease-in-out infinite alternate}
+.rarity-overlay.tier-anomaly::after{inset:7%;border:1px solid #f58aff;opacity:.7;box-shadow:0 0 32px #b64dff,inset 0 0 45px #a22cff55;transform:skewY(-9deg) scale(.7);animation:anomalyGate 2.6s ease-in-out infinite}
+.rarity-overlay.tier-anomaly .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 2px,#f4a6ff 4px,transparent 10px),repeating-linear-gradient(0deg,transparent 0 17px,#e77cff13 18px 19px,transparent 20px 36px);animation:anomalyPulse .8s steps(2,end) infinite}
+.rarity-overlay.tier-anomaly .rarity-reveal-card{border:2px solid #dc85ff;background:linear-gradient(145deg,#2b183af5,#101323f8 62%,#1d102bf5);box-shadow:0 0 28px #d45cff,0 0 95px #8d38ff88,inset 0 0 45px #d85cff20;animation:anomalyArrival 1.1s cubic-bezier(.12,1.35,.2,1) both}
+.rarity-overlay.tier-anomaly .rarity-reveal-icon{filter:drop-shadow(0 0 10px white) drop-shadow(0 0 30px #dc72ff);animation:anomalyIcon .9s ease-in-out infinite alternate}
+.rarity-overlay.tier-anomaly .rarity-reveal-title{color:#f0b4ff;text-shadow:0 0 15px #ce58ff;letter-spacing:.2em}
+.rarity-overlay.tier-mythic{background:radial-gradient(ellipse at 50% 45%,#38221d 0%,#171125 40%,#03040b 78%)}
+.rarity-overlay.tier-mythic::before{background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 7deg,#ffd88b33 8deg 9deg,transparent 11deg 18deg);mask-image:radial-gradient(circle,black 0%,transparent 70%);animation:cosmicRays 8s linear infinite}
+.rarity-overlay.tier-mythic::after{inset:5%;border:2px solid #ffd98b;border-radius:44%;box-shadow:0 0 30px #ffbb5b,inset 0 0 42px #ffb75b55;animation:mythicCrown 2.5s ease-in-out infinite}
+.rarity-overlay.tier-mythic .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 2px,#ffe0a1 4px,transparent 12px),repeating-radial-gradient(circle at 50% 50%,transparent 0 22px,#ffce7728 23px 24px,transparent 25px 42px);animation:cosmicPulse .9s ease-in-out infinite alternate}
+.rarity-overlay.tier-mythic .rarity-reveal-card{border-color:#ffda91;background:linear-gradient(145deg,#3a2a28f5,#151326fa 58%,#26172bf5);box-shadow:0 0 34px #ffcb72,0 0 110px #df8a4e88,inset 0 0 48px #ffcf752b}
+.rarity-overlay.tier-mythic .rarity-reveal-title{color:#ffe0a8;text-shadow:0 0 18px #ffc66b}
+.rarity-overlay.tier-cosmic{background:radial-gradient(ellipse at 50% 48%,#202c63 0%,#100b2a 38%,#02030b 78%)}
+.rarity-overlay.tier-cosmic::before{inset:-30%;opacity:1;background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 4deg,#b7a2ff30 5deg 6deg,transparent 8deg 13deg),radial-gradient(circle at 50% 50%,#fff2,transparent 40%);mask-image:radial-gradient(circle,black 0%,transparent 73%);animation:cosmicRays 12s linear infinite}
+.rarity-overlay.tier-cosmic::after{inset:2%;border:2px solid #b9b4ff;border-radius:50%;box-shadow:0 0 36px #a9a0ff,inset 0 0 65px #7c6aff66;animation:cosmicCrown 3.4s ease-in-out infinite}
+.rarity-overlay.tier-cosmic .rarity-particles{background:radial-gradient(circle at 50% 50%,#fff 0 3px,#b5c6ff 6px,transparent 16px),repeating-radial-gradient(circle at 50% 50%,transparent 0 15px,#a8b6ff35 16px 17px,transparent 18px 31px),radial-gradient(ellipse at 50% 50%,#7e69ff55,transparent 65%);animation:cosmicPulse .7s ease-in-out infinite alternate}
+.rarity-overlay.tier-cosmic .rarity-reveal-card{border:2px solid #c7c1ff;background:linear-gradient(145deg,#20265af7,#100e2afc 58%,#281c4af7);box-shadow:0 0 36px #a9a0ff,0 0 130px #7867ffbb,inset 0 0 55px #9a8bff40;animation:cosmicArrival 1.35s cubic-bezier(.1,1.35,.2,1) both}
+.rarity-overlay.tier-cosmic .rarity-reveal-title{font-size:15px;letter-spacing:.4em;color:#e3deff;text-shadow:0 0 18px #b4aaff,0 0 36px #7e6bff}
+.rarity-overlay.glitch-reveal{background:repeating-linear-gradient(0deg,#070b18 0 3px,#0b1721 4px 5px),radial-gradient(ellipse at center,#173c43 0%,#03060d 72%)}
+.rarity-overlay.glitch-reveal::before{opacity:.95;background:repeating-linear-gradient(0deg,transparent 0 6px,#76ffe52a 7px 8px,transparent 9px 13px),linear-gradient(90deg,transparent 0 12%,#ff4b7a35 13% 15%,transparent 17% 75%,#69eaff35 77% 79%,transparent 81%);animation:glitchScan .8s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal::after{inset:4%;border:2px dashed #8dfff0;border-radius:0;box-shadow:0 0 34px #52f4df99, inset 0 0 32px #54ffe522;animation:glitchGate 1.1s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-card{border:1px solid #8dfff0;background:linear-gradient(145deg,#142b36f5,#111322f8);box-shadow:0 0 28px #52f4df99,0 0 90px #ff4c7a55,inset 0 0 30px #54ffe522;animation:glitchCard .18s steps(2,end) infinite}
+.rarity-overlay.glitch-reveal .rarity-reveal-icon{filter:drop-shadow(2px 0 #ff4b7a) drop-shadow(-2px 0 #58eaff) drop-shadow(0 0 22px #8dfff0);animation:glitchIcon .32s steps(2,end) infinite}
+@keyframes cometOrbit{to{transform:rotate(360deg)}}@keyframes cometRing{0%{transform:scale(.42) rotate(-30deg);opacity:0}35%{opacity:.9}100%{transform:scale(1.3) rotate(120deg);opacity:0}}
+@keyframes cometPulse{from{opacity:.38;transform:scale(.88)}to{opacity:1;transform:scale(1.12)}}
+@keyframes cometArrival{0%{opacity:0;transform:scale(.08) rotate(-24deg);filter:brightness(4) blur(18px)}65%{opacity:1;transform:scale(1.12) rotate(4deg);filter:brightness(1.7) blur(0)}100%{transform:scale(1)}}
+@keyframes cometIcon{0%,100%{transform:translateY(4px) rotate(-10deg) scale(.94)}50%{transform:translateY(-8px) rotate(10deg) scale(1.14)}}
+@keyframes rareOrbit{to{transform:rotate(360deg)}}@keyframes rareHalo{from{transform:scale(.88) rotate(-8deg);opacity:.3}to{transform:scale(1.08) rotate(8deg);opacity:.9}}
+@keyframes rarePulse{from{opacity:.35;transform:scale(.88)}to{opacity:.9;transform:scale(1.08)}}
+@keyframes rareArrival{0%{opacity:0;transform:translateY(36px) scale(.55);filter:blur(12px)}75%{opacity:1;transform:translateY(-5px) scale(1.06);filter:blur(0)}100%{transform:translateY(0) scale(1)}}
+@keyframes rareIcon{0%,100%{transform:rotate(-7deg) scale(.96)}50%{transform:rotate(7deg) scale(1.09)}}
+@keyframes anomalyRift{from{transform:rotate(-7deg) scale(.9);opacity:.45}to{transform:rotate(7deg) scale(1.08);opacity:1}}
+@keyframes anomalyGate{0%,100%{transform:skewY(-9deg) scale(.68) rotate(-4deg);opacity:.2}50%{transform:skewY(8deg) scale(1.08) rotate(4deg);opacity:.9}}
+@keyframes anomalyPulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes anomalyArrival{0%{opacity:0;transform:scale(.04) rotate(18deg);filter:brightness(4) blur(20px)}55%{opacity:1;transform:scale(1.12) rotate(-4deg);filter:brightness(1.7) blur(0)}100%{transform:scale(1)}}
+@keyframes anomalyIcon{from{transform:translateY(-4px) rotate(-12deg) scale(.94)}to{transform:translateY(5px) rotate(12deg) scale(1.12)}}
+@keyframes mythicCrown{0%,100%{transform:scale(.86) rotate(0deg);opacity:.35}50%{transform:scale(1.12) rotate(16deg);opacity:.9}}
+@keyframes cosmicCrown{0%,100%{transform:scale(.78) rotate(0deg);opacity:.3}50%{transform:scale(1.18) rotate(180deg);opacity:1}}
+@keyframes cosmicArrival{0%{opacity:0;transform:scale(.015) rotate(-32deg);filter:brightness(5) blur(24px)}48%{opacity:1;transform:scale(1.15) rotate(5deg);filter:brightness(2) blur(0)}76%{transform:scale(.97) rotate(-1deg)}100%{transform:scale(1)}}
+@keyframes glitchGate{0%,100%{transform:translate(0,0) skewX(0)}25%{transform:translate(5px,-2px) skewX(2deg)}50%{transform:translate(-4px,2px) skewX(-3deg)}75%{transform:translate(2px,0) skewX(1deg)}}
+@media(max-width:520px){.rarity-overlay{padding:12px}.rarity-reveal-card{min-width:min(300px,94vw);padding:24px 16px}.rarity-reveal-icon{font-size:72px}}
+@media(prefers-reduced-motion:reduce){.rarity-overlay::before,.rarity-overlay::after,.rarity-overlay .rarity-particles,.rarity-overlay .rarity-reveal-card,.rarity-overlay .rarity-reveal-icon,.rarity-overlay .rarity-reveal-card::before,.rarity-overlay .rarity-reveal-card::after{animation:none!important;transition:none!important}.rarity-overlay.glitch-reveal .rarity-reveal-card{transform:none!important}}
+
+/* T-0114: keep the revealed dice visible until the player confirms. */
+.rarity-reveal-continue{display:block;margin:22px auto 0;min-width:190px;padding:11px 20px;border:1px solid color-mix(in srgb,var(--reveal-color,#aab8ff) 78%,white);border-radius:999px;background:linear-gradient(120deg,color-mix(in srgb,var(--reveal-color,#aab8ff) 34%,#11172a),#171d35);color:#fff;font-size:14px;font-weight:900;letter-spacing:.04em;box-shadow:0 0 22px color-mix(in srgb,var(--reveal-color,#aab8ff) 32%,transparent);cursor:pointer}.rarity-reveal-continue:disabled{opacity:.55;cursor:wait;box-shadow:none}.rarity-reveal-continue:not(:disabled):active{transform:scale(.97)}.rarity-reveal-continue:focus-visible{outline:3px solid #fff;outline-offset:4px}@media(max-width:480px){.rarity-reveal-continue{width:100%;min-width:0;margin-top:18px;padding:12px 14px}}
+
+
+/* T-0114 visual refinement: violet rare palette and central multi-point star reveal. */
+.rarity-overlay.tier-rare{background:radial-gradient(ellipse at 50% 42%,#17112b 0%,#080711 52%,#020207 100%)}
+.rarity-overlay.tier-rare .rarity-reveal-card{border-color:#bca4ff;background:linear-gradient(145deg,rgba(46,31,82,.96),rgba(12,12,28,.98) 65%);box-shadow:0 0 22px #9c78ff88,0 0 68px #7650d955,inset 0 0 28px #bca4ff22}
+.rarity-overlay.tier-rare .rarity-reveal-title,.rarity-overlay.tier-rare .rarity-reveal-odds{color:#d7c6ff;text-shadow:0 0 14px #a98aff99}
+.rarity-overlay.tier-rare .rarity-reveal-icon{filter:drop-shadow(0 0 9px #e5dcff) drop-shadow(0 0 25px #9b75ff)}
+.rarity-starburst{position:absolute;z-index:2;left:50%;top:44%;width:min(66vw,390px);aspect-ratio:1;pointer-events:none;opacity:0;visibility:hidden;transform:translate(-50%,-50%) scale(.12) rotate(-28deg);filter:drop-shadow(0 0 18px #fff) drop-shadow(0 0 52px #9fdcff) drop-shadow(0 0 100px #8362ff)}
+.rarity-starburst::before,.rarity-starburst::after{content:"";position:absolute;inset:0;clip-path:polygon(50% 0%,57% 34%,76% 7%,66% 40%,100% 50%,66% 58%,91% 82%,59% 67%,50% 100%,42% 67%,9% 82%,34% 58%,0% 50%,34% 42%,9% 18%,42% 33%);background:conic-gradient(from 8deg,#fff 0deg,#b8eaff 22deg,#6f83ff 45deg,#fff 67deg,#d9b7ff 90deg,#fff 112deg,#8cecff 135deg,#fff 180deg,#9d7cff 225deg,#fff 270deg,#b8eaff 315deg,#fff 360deg);animation:realmStarSpin 8s linear infinite}
+.rarity-starburst::after{inset:13%;transform:rotate(22.5deg) scale(.76);background:linear-gradient(135deg,#fff 5%,#b8eaff 35%,#8b70ff 70%,#fff 100%);filter:brightness(1.35);animation:realmStarPulse 1.25s ease-in-out infinite alternate}
+.rarity-overlay.star-reveal.blackout{background:#000}
+.rarity-overlay.star-reveal.blackout .rarity-starburst{visibility:visible;opacity:1;animation:realmStarAppear 1.1s cubic-bezier(.12,.8,.18,1) both}
+.rarity-overlay.star-reveal.blackout .rarity-particles{visibility:visible;background:radial-gradient(circle at 50% 44%,#fff 0%,#b9eaff55 2%,transparent 34%);opacity:.85}
+.rarity-overlay.star-reveal:not(.blackout) .rarity-starburst{opacity:0;visibility:hidden;transition:opacity .28s ease}
+@keyframes realmStarAppear{0%{opacity:0;transform:translate(-50%,-50%) scale(.025) rotate(-65deg);filter:brightness(4) blur(12px)}55%{opacity:1;transform:translate(-50%,-50%) scale(1.12) rotate(8deg);filter:brightness(2) blur(0)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0);filter:brightness(1.25) blur(0)}}
+@keyframes realmStarSpin{to{transform:rotate(360deg)}}
+@keyframes realmStarPulse{from{opacity:.72;filter:brightness(1.1)}to{opacity:1;filter:brightness(1.8)}}
+@media(max-width:480px){.rarity-starburst{width:min(78vw,330px);top:43%}}
+@media(prefers-reduced-motion:reduce){.rarity-starburst,.rarity-starburst::before,.rarity-starburst::after{animation:none!important;transition:none!important}.rarity-overlay.star-reveal.blackout .rarity-starburst{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(.82)}}
+
+/* T-0117: Force readable sale-summary text across themes and browser text-fill rules. */
+#petSellModal .pet-sell-dialog #petSellSummary.pet-sell-summary,
+#petSellModal .pet-sell-dialog #petSellSummary.pet-sell-summary * {
+  color: #f3f5ff !important;
+  -webkit-text-fill-color: #f3f5ff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  text-shadow: none !important;
+}
+#petSellModal .pet-sell-dialog #petSellSummary.pet-sell-summary {
+  isolation: isolate !important;
+  background: linear-gradient(120deg, #111629, #1b2340) !important;
+  border: 1px solid #6575a8 !important;
+  box-shadow: inset 0 1px 0 #ffffff18, 0 4px 14px #05081466 !important;
+}
+
+
+/* T-0119: make the selected dice glyphs in both fusion slots clearly visible. */
+#page-pets .pet-slots .pet-slot .pet-art {
+  display: grid !important;
+  place-items: center !important;
+  min-height: 76px !important;
+  border: 1px solid #536da8 !important;
+  border-radius: 12px !important;
+  background: radial-gradient(ellipse at center, #263d68 0%, #121b32 72%) !important;
+  color: #78eaff !important;
+  -webkit-text-fill-color: #78eaff !important;
+  font-family: "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", sans-serif !important;
+  font-size: clamp(54px, 14vw, 76px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  filter: brightness(1.28) saturate(1.7) contrast(1.22) drop-shadow(0 0 7px #42cfff) !important;
+  text-shadow: 0 0 6px #56dfff, 0 0 18px #258dff, 0 2px 3px #050a18 !important;
+  mix-blend-mode: normal !important;
+}
+#page-pets .pet-slots .pet-slot .pet-art img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* T-0120: strengthen the dice glyph itself; keep the change scoped to fusion slots A and B. */
+#page-pets .pet-slots .pet-slot:nth-child(1) .pet-art { background: radial-gradient(ellipse at center, #4b3b1d 0%, #171b2d 74%) !important; border-color: #d6a84e !important; filter: brightness(1.32) saturate(1.75) contrast(1.2) drop-shadow(0 0 8px #f2bd55) !important; }
+#page-pets .pet-slots .pet-slot:nth-child(2) .pet-art { background: radial-gradient(ellipse at center, #173e63 0%, #121b32 74%) !important; border-color: #58cfff !important; filter: brightness(1.32) saturate(1.75) contrast(1.2) drop-shadow(0 0 8px #45bfff) !important; }
+
+
+.pet-trade-panel{position:relative;overflow:hidden;min-width:0;padding:18px;border:1px solid #454b7d;border-radius:17px;background:radial-gradient(ellipse at 80% 0%,#6b55b833,transparent 45%),linear-gradient(155deg,#171d36,#101525 70%);box-shadow:inset 0 1px 0 #ffffff0b,0 12px 34px #05071355}
+
+.pet-trade-topline{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pet-trade-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #5c6c9a;border-radius:99px;padding:4px 8px;color:#a9b9e9;font-size:9px;letter-spacing:1px;font-weight:900}
+.pet-trade-status i{width:6px;height:6px;border-radius:50%;background:#e6b86b;box-shadow:0 0 9px #e6b86b}
+
+.pet-trade-emblem{width:58px;height:58px;display:grid;place-items:center;margin:18px auto 8px;border:1px solid #7774c5;border-radius:18px;background:linear-gradient(145deg,#292d59,#181c37);color:#c5bdff;font-size:34px;box-shadow:0 0 28px #7769ff30}
+.pet-trade-panel h3{text-align:center;font-size:21px;margin:4px 0}
+.pet-trade-panel>p{text-align:center;font-size:12px;margin:0 auto 16px;max-width:270px}
+
+.pet-trade-player-picker{padding:12px;border:1px solid #343d60;border-radius:12px;background:#0d1324aa}
+.pet-trade-player-picker label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#cbd3f1}
+.pet-trade-search{display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid #343d5b;border-radius:9px;background:#090e1c;color:#8d9ac2}
+.pet-trade-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#edf0ff;padding:9px 0;font-size:12px}
+.pet-trade-player-picker button{width:100%;margin-top:9px;font-size:12px;padding:8px}
+.pet-trade-search-results{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:144px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-gutter:stable;padding-right:3px}
+.pet-trade-search-results .pet-trade-search-result{margin:0}
+.pet-trade-search-result{display:flex;flex:0 0 42px;align-items:center;justify-content:space-between;gap:8px;width:100%;height:42px;min-height:42px;box-sizing:border-box;padding:7px 10px;border:1px solid #39466d;border-radius:9px;background:#111a30;color:#e5eaff;text-align:left}
+.pet-trade-search-result strong{font-size:12px;overflow-wrap:anywhere}
+.pet-trade-search-result small{display:block;color:#8f9cbe;font-size:9px;margin-top:3px}
+.pet-trade-search-result[aria-pressed=true]{border-color:#9d8bff;background:#29264b}
+.pet-trade-selected-target{margin-top:8px;padding:9px 10px;border:1px solid #786ac0;border-radius:9px;background:#201d3c;color:#dcd5ff;font-size:11px}
+.pet-trade-search-results:empty{display:none}
+.pet-trade-player-picker button:disabled,.pet-trade-panel button:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.65)}
+.pet-trade-divider{display:flex;align-items:center;gap:8px;margin:16px 0 10px;color:#7e89b1;font-size:9px;letter-spacing:1.3px;font-weight:900}
+.pet-trade-divider:before,.pet-trade-divider:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#41496d)}
+.pet-trade-room{padding:12px;border:1px solid #333d60;border-radius:13px;background:linear-gradient(145deg,#111a30,#101525)}
+.pet-trade-room-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:850}
+.pet-trade-invitations{display:grid;gap:7px;margin-top:10px}
+.pet-trade-invitation{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:8px;padding:10px;border:1px solid #343e62;border-radius:9px;background:#0b1120}
+.pet-trade-invitation>div:first-child,.pet-trade-invitation>small{flex:1 1 100%;min-width:0}
+.pet-trade-invitation-action{flex:0 0 auto}
+.pet-trade-invitation strong{display:block;font-size:11px;color:#e6eaff}
+.pet-trade-invitation small{display:block;margin-top:4px;font-size:9px;color:#929cbd}
+.pet-trade-invitation-action{padding:6px 8px;font-size:10px;white-space:nowrap}
+.pet-trade-lock-note{display:flex;gap:7px;align-items:flex-start;margin-top:12px;color:#aab4d2;font-size:10px;line-height:1.5}
+.pet-trade-panel{padding:14px}
+.pet-trade-invitation{align-items:flex-start;flex-wrap:wrap}
+
+
+/* T-0026 live pet trade room */
+.pet-trade-live-room{display:grid;gap:8px;width:100%;padding:11px;border:1px solid #5b5792;border-radius:11px;background:linear-gradient(145deg,#191b36,#101729);box-shadow:inset 0 0 22px #7564ff12}
+
+.pet-trade-live-room>strong{font-size:12px;color:#e5e3ff}
+
+.pet-trade-live-room label{font-size:10px;color:#aeb8dc;font-weight:800}
+
+.pet-trade-offer-select{width:100%;min-width:0;padding:9px;background:#090f1e;color:#eef0ff;border:1px solid #454e78;border-radius:8px}
+
+.pet-trade-offer-summary{padding:8px;border:1px solid #38466a;border-radius:8px;background:#0c1426;color:#d4dcff;font-size:11px}
+
+.pet-trade-confirm-state,.pet-trade-room-hint{font-size:10px;line-height:1.5;color:#aab4d2}
+
+.pet-trade-confirm-button{width:100%;padding:8px;font-size:11px}
+
+.pet-trade-confirm-button:disabled{opacity:.55;cursor:not-allowed}
+.pet-trade-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px;align-items:start}.pet-trade-main-column{min-width:0}.pet-trade-panel{max-width:100%}
+@media(min-width:1100px){.pet-trade-layout{grid-template-columns:minmax(0,1.4fr) minmax(300px,.8fr)}.pet-trade-panel{position:sticky;top:12px}}
+
+.pet-trade-completed{animation:petTradeCompletePulse 1.1s ease-out}.pet-trade-completed .pet-trade-invitation strong{color:#b9f6d2}@keyframes petTradeCompletePulse{0%{box-shadow:0 0 0 0 #7cf0bb66;border-color:#7cf0bb}100%{box-shadow:0 0 0 14px #7cf0bb00;border-color:#343e62}}
+
+
+/* T-0026 multi-pet trade room: wider lobby, clear offer cards, responsive two-side exchange. */
+.pet-trade-layout{grid-template-columns:minmax(0,1fr);gap:14px}
+.pet-trade-panel{order:-1;position:relative;top:auto;padding:18px}
+.pet-trade-columns{display:grid;grid-template-columns:minmax(250px,.72fr) minmax(0,1.28fr);gap:12px;align-items:start}
+.pet-trade-player-picker,.pet-trade-room{min-width:0;height:100%}
+.pet-trade-room{padding:14px}
+.pet-trade-live-room{gap:12px;padding:14px;border-radius:14px}
+.pet-trade-room-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pet-trade-room-heading strong{display:block;font-size:14px;color:#f0efff}
+.pet-trade-room-heading small{display:block;margin-top:4px;color:#aab4d2;font-size:10px;line-height:1.5}
+.pet-trade-room-code{flex:0 0 auto;padding:6px 8px;border:1px solid #4e5d86;border-radius:8px;background:#101a31;color:#9fafd9;font-size:9px;letter-spacing:.8px}
+.pet-trade-offer-sides{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.pet-trade-offer-side{min-width:0;padding:11px;border:1px solid #39466b;border-radius:12px;background:linear-gradient(145deg,#111a30,#0b1221)}
+.pet-trade-own-side{border-color:#5a5a91;background:linear-gradient(145deg,#1b1d39,#0d1427)}
+.pet-trade-other-side{border-color:#3e6680;background:linear-gradient(145deg,#102338,#0c1425)}
+.pet-trade-side-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pet-trade-side-head strong{font-size:12px;color:#e9edff}
+.pet-trade-offer-count{padding:4px 7px;border-radius:99px;background:#292b50;color:#c7c4ff;font-size:10px;font-weight:850}
+.pet-trade-side-hint{display:block;margin:6px 0 9px;color:#98a5c8;font-size:10px;line-height:1.5}
+.pet-trade-pet-search{width:100%;margin-bottom:8px;padding:8px 10px;font-size:11px}
+.pet-trade-pet-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;max-height:310px;overflow:auto;overscroll-behavior:contain;padding:2px}
+.pet-trade-pet-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-width:0;min-height:116px;padding:7px 5px;border:1px solid #344363;border-radius:9px;background:#0b1221;color:#e5eaff;text-align:center}
+.pet-trade-pet-option{width:100%;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.pet-trade-pet-option:hover{border-color:#7785bd;background:#17223b}
+.pet-trade-pet-option.is-selected{border-color:#b19aff;background:linear-gradient(145deg,#332b59,#171c39);box-shadow:inset 0 0 0 1px #b19aff55,0 0 14px #9274ff22}
+.pet-trade-pet-art{display:grid;place-items:center;width:100%;height:62px;overflow:hidden;border-radius:7px;background:radial-gradient(ellipse at center,#35416a66,transparent 72%)}
+.pet-trade-pet-art img,.pet-trade-pet-art span{max-width:100%;max-height:100%;object-fit:contain}
+.pet-trade-pet-card strong{display:block;width:100%;overflow-wrap:anywhere;color:#edf0ff;font-size:10px;line-height:1.3}
+.pet-trade-pet-card small{display:block;color:#9ca9cb;font-size:9px;line-height:1.25}
+.pet-trade-empty-offer{grid-column:1/-1;display:grid;place-items:center;min-height:104px;padding:12px;border:1px dashed #465171;border-radius:9px;color:#909cbd;font-size:11px;text-align:center}
+.pet-trade-save-offer{width:100%;margin-top:9px;padding:8px 10px;font-size:11px}
+.pet-trade-save-offer:disabled{opacity:.55;cursor:default}
+.pet-trade-confirm-state{display:flex;flex-wrap:wrap;gap:8px;padding:9px 10px;border:1px solid #364365;border-radius:9px;background:#0b1221}
+.pet-trade-confirm-state span{flex:1 1 120px;color:#aab4d2;font-size:11px}
+.pet-trade-confirm-state span.is-confirmed{color:#9df0c5}
+.pet-trade-room-actions{display:flex;gap:8px;align-items:center}
+.pet-trade-confirm-button{flex:1;min-height:38px;font-size:12px}
+.pet-trade-room-hint{display:block;padding:8px 10px;border-radius:8px;background:#0b1221;color:#aab4d2;font-size:10px;line-height:1.5}
+@media(max-width:760px){
+  .pet-trade-columns{grid-template-columns:minmax(0,1fr)}
+  .pet-trade-offer-sides{grid-template-columns:minmax(0,1fr)}
+  .pet-trade-pet-picker{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));max-height:260px}
+  .pet-trade-room-heading{align-items:flex-start;flex-direction:column}
+  .pet-trade-room-code{align-self:flex-start}
+}
+
+
+/* T-0026: keep pet fusion and Realm Exchange as separate sub-pages. */
+.pets-page-head{align-items:center;gap:12px}
+.pets-page-tabs{display:flex;gap:6px;padding:4px;border:1px solid #39466b;border-radius:11px;background:#0b1221}
+.pets-page-tab{min-width:74px;padding:8px 13px;border:1px solid transparent;border-radius:8px;background:transparent;color:#9eacd0;font-size:12px;font-weight:850}
+.pets-page-tab.active{border-color:#7774c5;background:linear-gradient(145deg,#292d59,#181c37);color:#e8e5ff;box-shadow:0 0 16px #7769ff22}
+.pets-subpage[hidden]{display:none!important}
+#petsTradeView .pet-trade-layout{margin-top:0}
+#petsTradeView .pet-trade-panel{width:100%;max-width:none}
+.pet-trade-player-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.pet-trade-player-list-head label{display:block;margin:0}
+.pet-trade-player-list-head small{display:none}
+.pet-trade-player-list-head button{flex:0 0 auto;padding:6px 9px;font-size:10px}
+.pet-trade-search-results{display:flex;flex-direction:column;gap:6px;max-height:390px;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 2px;scrollbar-width:thin;scrollbar-color:#59658d #10172a}
+.pet-trade-search-result{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:9px 11px;border:1px solid #39466d;border-radius:9px;background:#111a30;color:#e5eaff;text-align:left;cursor:pointer}
+.pet-trade-search-result:hover,.pet-trade-search-result.is-selected{border-color:#9d8bff;background:#242344}
+.pet-trade-player-name{display:flex;flex-direction:row;align-items:center;gap:8px;min-width:0}
+.pet-trade-player-name strong{font-size:12px;overflow-wrap:anywhere}
+.pet-trade-player-name small{display:none;font-size:10px}
+.pet-trade-player-name small.is-online{color:#78e6b1}
+.pet-trade-player-name small.is-offline{color:#8995b5}
+.pet-trade-player-select-label{flex:0 0 auto;color:#bdb6ff;font-size:10px;font-weight:800}
+.pet-trade-load-more{width:100%;margin-top:8px;padding:8px;font-size:11px}
+#petTradeInviteBtn{width:100%;margin-top:9px}
+@media(max-width:760px){.pets-page-head{align-items:flex-start;flex-direction:column}.pets-page-tabs{width:100%}.pets-page-tab{flex:1}.pet-trade-search-results{max-height:330px}}
+
+/* T-0026 polish: compact horizontal player list heading; trade lives in the main navigation. */
+.pet-trade-player-list-head{min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #303b5b}
+.pet-trade-player-list-head label{font-size:13px;letter-spacing:.2px;color:#e7ebff}
+.pet-trade-player-list-head button{width:auto!important;min-width:104px;margin:0!important;white-space:nowrap}
+
+
+/* T-0026 trade room UX polish: horizontal pet carousel and clear ready action. */
+.pet-trade-live-room{
+  gap:16px;
+  padding:18px;
+  border:1px solid #4a5481;
+  border-radius:16px;
+  background:radial-gradient(ellipse at 12% 0%,#4c43852b,transparent 42%),linear-gradient(145deg,#171d35,#0b1222 72%);
+  box-shadow:0 14px 38px #03071366,inset 0 1px #a6a5ff12;
+}
+.pet-trade-room-heading{padding:0 0 12px;border-bottom:1px solid #333e61}
+.pet-trade-room-heading strong{font-size:16px;letter-spacing:.3px}
+.pet-trade-room-heading small{font-size:11px;line-height:1.6}
+.pet-trade-room-code{border-color:#555d91;background:#171e39;color:#c5c8ff}
+.pet-trade-offer-sides{gap:12px}
+.pet-trade-offer-side{padding:13px;border-radius:14px;box-shadow:inset 0 1px #ffffff08}
+.pet-trade-side-head strong{font-size:13px}
+.pet-trade-side-hint{font-size:11px;line-height:1.6}
+.pet-trade-pet-search{border:1px solid #3b496e;border-radius:9px;background:#090f1d}
+.pet-trade-pet-picker{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:9px;
+  max-width:100%;
+  min-height:142px;
+  max-height:164px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:thin;
+  scrollbar-color:#7770b7 #111a2d;
+  padding:5px 3px 12px;
+}
+.pet-trade-pet-picker::-webkit-scrollbar{height:6px}
+.pet-trade-pet-picker::-webkit-scrollbar-track{border-radius:99px;background:#111a2d}
+.pet-trade-pet-picker::-webkit-scrollbar-thumb{border-radius:99px;background:#7770b7}
+.pet-trade-pet-card{
+  flex:0 0 116px;
+  width:116px;
+  min-width:116px;
+  min-height:132px;
+  padding:9px 7px;
+  border-color:#3c4a70;
+  border-radius:12px;
+  background:linear-gradient(155deg,#17223b,#0c1426);
+  scroll-snap-align:start;
+}
+.pet-trade-pet-option:hover{transform:translateY(-2px);border-color:#8c91d7;background:linear-gradient(155deg,#202b4b,#111a30)}
+.pet-trade-pet-option.is-selected{
+  border-color:#b8a5ff;
+  background:linear-gradient(155deg,#39315f,#171d3a);
+  box-shadow:inset 0 0 0 1px #b8a5ff55,0 0 18px #9274ff30;
+}
+.pet-trade-pet-art{height:66px;background:radial-gradient(ellipse at center,#5864a255,transparent 72%)}
+.pet-trade-pet-card strong{font-size:11px}
+.pet-trade-pet-card small{font-size:10px}
+.pet-trade-empty-offer{flex:0 0 100%;min-width:100%;min-height:120px}
+.pet-trade-save-offer{min-height:40px;border:1px solid #8176c7;border-radius:10px;background:linear-gradient(110deg,#454078,#30345f);font-size:12px;font-weight:850;letter-spacing:.2px}
+.pet-trade-save-offer:not(:disabled):hover{filter:brightness(1.15);transform:translateY(-1px)}
+.pet-trade-confirm-state{gap:10px;padding:11px;border-radius:11px}
+.pet-trade-confirm-state span{padding:7px 9px;border-radius:8px;background:#111a2c;font-size:12px}
+.pet-trade-confirm-state span.is-confirmed{background:#12332e;color:#a8f3d1}
+.pet-trade-room-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+.pet-trade-confirm-button{
+  min-height:46px;
+  border:1px solid #8d83e3;
+  border-radius:11px;
+  background:linear-gradient(110deg,#6254b2,#3d4c91);
+  box-shadow:0 5px 18px #6556c633,inset 0 1px #ffffff20;
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.4px;
+}
+.pet-trade-confirm-button:not(:disabled):hover{filter:brightness(1.14);transform:translateY(-1px)}
+.pet-trade-confirm-button:disabled{opacity:.62}
+.pet-trade-room-hint{font-size:11px;padding:10px 12px;border:1px solid #303b5c}
+@media(max-width:760px){
+  .pet-trade-live-room{padding:13px;gap:13px}
+  .pet-trade-offer-side{padding:10px}
+  .pet-trade-pet-picker{min-height:136px;max-height:152px}
+  .pet-trade-pet-card{flex-basis:108px;width:108px;min-width:108px}
+}
+
+
+/* T-0027 trade lobby / active-room visual separation and selection clarity. */
+#petsTradeView .pet-trade-panel{
+  border:1px solid #4b5684;border-radius:20px;
+  background:radial-gradient(ellipse at 8% 0%,#8065d52a,transparent 38%),radial-gradient(ellipse at 100% 22%,#28b8c51a,transparent 34%),linear-gradient(145deg,#151d35 0%,#10172a 55%,#0b1221 100%);
+  box-shadow:0 18px 50px #03071370,inset 0 1px #d7dcff18;
+}
+#petsTradeView .pet-trade-topline{color:#aeb9e9}
+#petsTradeView .pet-trade-status{border:1px solid #315b67;background:#102b35;color:#8de7df}
+#petsTradeView .pet-trade-status i{background:#59e2c5;box-shadow:0 0 10px #59e2c5}
+#petsTradeView .pet-trade-emblem{display:grid;place-items:center;width:54px;height:54px;margin:12px 0 8px;border:1px solid #6e69b6;border-radius:16px;color:#e4d8ff;font-size:27px;background:linear-gradient(145deg,#41366d,#1c3150);box-shadow:0 8px 24px #7961c52e,inset 0 1px #ffffff24}
+#petsTradeView #petTradeTitle{color:#f0edff;letter-spacing:.2px}
+#petsTradeView .pet-trade-columns{gap:16px}
+#petsTradeView .pet-trade-player-picker,#petsTradeView .pet-trade-room{border:1px solid #354667;border-radius:16px;background:linear-gradient(155deg,#111c31,#0b1425);box-shadow:inset 0 1px #ffffff08}
+#petsTradeView .pet-trade-player-list-head,#petsTradeView .pet-trade-room-head{padding:12px 13px;border-bottom:1px solid #2e3c5b;color:#e0e7ff}
+#petsTradeView .pet-trade-search-results{gap:6px;padding:9px}
+#petsTradeView .pet-trade-search-result{min-height:43px;padding:9px 11px;border:1px solid #293b5b;border-radius:10px;background:linear-gradient(110deg,#17243a,#121d31);color:#dce7ff;transition:border-color .15s,background .15s,transform .15s}
+#petsTradeView .pet-trade-search-result:hover{border-color:#5f83b4;background:#1b3048}
+#petsTradeView .pet-trade-search-result.is-selected{border:1px solid #65d9d0;background:linear-gradient(105deg,#153e45,#1b3150);box-shadow:inset 0 0 0 1px #65d9d055,0 0 14px #4acfc326}
+#petsTradeView .pet-trade-player-select-label{border:1px solid #46647c;border-radius:7px;padding:4px 8px;color:#9be9df;background:#112b37;font-size:11px;font-weight:800}
+#petsTradeView .pet-trade-selected-target{margin:10px;padding:10px 12px;border:1px solid #4b9b94;border-radius:10px;background:#123438;color:#b9fff0}
+#petsTradeView #petTradeInviteBtn{margin:0 10px 12px;width:calc(100% - 20px);min-height:44px;border:1px solid #5c9eaa;border-radius:11px;background:linear-gradient(110deg,#267d83,#365f9e);box-shadow:0 7px 20px #1d87902b;font-weight:850}
+#petsTradeView .pet-trade-invitation{padding:12px;border:1px solid #344462;border-radius:12px;background:linear-gradient(150deg,#172239,#10192b)}
+#petsTradeView .pet-trade-invitation strong{color:#e5eaff}
+#petsTradeView .pet-trade-invitation small{color:#9eaccb}
+#petsTradeView .pet-trade-live-room{border:1px solid #6572aa;background:radial-gradient(ellipse at 10% 0%,#8b69df25,transparent 40%),radial-gradient(ellipse at 100% 100%,#2bc2b51b,transparent 38%),linear-gradient(145deg,#171f39,#0c1425 76%);box-shadow:0 16px 42px #03071380,inset 0 1px #ffffff15}
+#petsTradeView .pet-trade-offer-side{border:1px solid #3b5272;background:linear-gradient(155deg,#14233a,#101a2d)}
+#petsTradeView .pet-trade-own-side{border-color:#4a9b9a}
+#petsTradeView .pet-trade-other-side{border-color:#7b6ba9}
+#petsTradeView .pet-trade-pet-option{border:1px solid #465777;background:linear-gradient(155deg,#1b2a43,#111b2e)}
+#petsTradeView .pet-trade-pet-option.is-selected,#petsTradeView .pet-trade-pet-option.is-draft-selected{border:2px solid #55e0cb !important;padding:8px 6px;background:linear-gradient(155deg,#164d4b,#203b57 72%) !important;box-shadow:inset 0 0 0 2px #55e0cb45,0 0 0 2px #55e0cb35,0 0 22px #45d9c34a !important}
+#petsTradeView .pet-trade-pet-option.is-selected::after{content:'✓ 已選取';display:block;margin-top:5px;padding:3px 5px;border-radius:6px;background:#0c3436;color:#9ff9e8;font-size:10px;font-weight:900}
+#petsTradeView .pet-trade-save-offer{border:1px solid #62cfc1;background:linear-gradient(110deg,#176d6a,#315c9c);color:#f1fffd;box-shadow:0 6px 18px #2ac9b52a}
+#petsTradeView .pet-trade-confirm-button{border:1px solid #8e8ae6;background:linear-gradient(110deg,#6355b5,#3e6c9b);color:#fff;box-shadow:0 7px 22px #7663d33b}
+#petsTradeView .pet-trade-room-hint{border-color:#3c5274;background:#101d31;color:#c1cee9}
+
+/* During an accepted trade, turn the page into a focused room-only view. */
+#petsTradeView.is-trading .pet-trade-topline,#petsTradeView.is-trading .pet-trade-emblem,#petsTradeView.is-trading #petTradeTitle,#petsTradeView.is-trading > .pet-trade-layout > .pet-trade-panel > p,#petsTradeView.is-trading .pet-trade-player-picker,#petsTradeView.is-trading .pet-trade-room-head,#petsTradeView.is-trading .pet-trade-lock-note{display:none !important}
+#petsTradeView.is-trading .pet-trade-columns{display:block}
+#petsTradeView.is-trading .pet-trade-room{border:0;background:transparent;box-shadow:none;padding:0}
+#petsTradeView.is-trading .pet-trade-invitations{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+#petsTradeView.is-trading .pet-trade-active-room-only{width:100%}
+#petsTradeView.is-trading .pet-trade-live-room{margin:0 auto;max-width:1100px}
+@media(max-width:760px){
+  #petsTradeView .pet-trade-panel{padding:14px;border-radius:15px}
+  #petsTradeView .pet-trade-search-result{min-height:46px}
+  #petsTradeView.is-trading .pet-trade-live-room{max-width:none}
+}
+
+
+/* Trade player list: keep exactly three rows visible; scroll within the list, capped at 40 players. */
+#petsTradeView .pet-trade-search-results{max-height:141px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;}
+
+@media(max-width:760px){#petsTradeView .pet-trade-search-result{min-height:43px;height:43px;}}
+
+
+/* T-0121: sharper, calmer trade UI; avoid excessive pill/circle styling. */
+#petsTradeView .pet-trade-status,
+#petsTradeView .pet-trade-emblem,
+#petsTradeView .pet-trade-player-picker,
+#petsTradeView .pet-trade-search,
+#petsTradeView .pet-trade-search-result,
+#petsTradeView .pet-trade-selected-target,
+#petsTradeView .pet-trade-room,
+#petsTradeView .pet-trade-invitation,
+#petsTradeView .pet-trade-live-room,
+#petsTradeView .pet-trade-offer-side,
+#petsTradeView .pet-trade-offer-select,
+#petsTradeView .pet-trade-offer-summary,
+#petsTradeView .pet-trade-pet-card,
+#petsTradeView .pet-trade-empty-offer,
+#petsTradeView .pet-trade-confirm-state,
+#petsTradeView .pet-trade-room-hint,
+#petsTradeView .pet-trade-room-code {
+  border-radius: 5px;
+}
+#petsTradeView .pet-trade-emblem { border-radius: 7px; box-shadow: inset 0 1px 0 #ffffff12, 0 8px 20px #05071355; }
+#petsTradeView .pet-trade-status { border-radius: 4px; letter-spacing: .6px; }
+#petsTradeView .pet-trade-offer-count { border-radius: 4px; padding: 4px 8px; background: #202b45; border: 1px solid #435274; }
+#petsTradeView .pet-trade-pet-art { border-radius: 3px; }
+#petsTradeView .pet-trade-confirm-state { border-radius: 5px; border-left: 2px solid #6f78ad; }
+#petsTradeView .pet-trade-live-room { border-color: #465477; background: linear-gradient(145deg, #151d31, #0d1423); box-shadow: inset 0 1px 0 #ffffff0a; }
+#petsTradeView .pet-trade-own-side, #petsTradeView .pet-trade-other-side { border-radius: 5px; background: #101a2b; }
+#petsTradeView .pet-trade-own-side { border-left: 2px solid #8a7ad0; }
+#petsTradeView .pet-trade-other-side { border-left: 2px solid #5791ad; }
+#petsTradeView .pet-trade-pet-option.is-selected { box-shadow: inset 0 0 0 1px #b19aff55; }
+#petsTradeView .pet-trade-player-picker, #petsTradeView .pet-trade-room { box-shadow: inset 0 1px 0 #ffffff08; }
+
+
+/* T-0122: slot-based pet offer picker. */
+#petsTradeView .pet-trade-offer-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-height:112px}
+#petsTradeView .pet-trade-add-slot{min-height:112px;border:1px dashed #7182a8;border-radius:5px;background:#111c30;color:#b9c8e8;font-size:32px;font-weight:400;cursor:pointer}
+#petsTradeView .pet-trade-add-slot:disabled{opacity:.3;cursor:not-allowed}
+#petsTradeView .pet-trade-offer-slot{width:100%;cursor:pointer}
+#petsTradeView .pet-trade-offer-slot.is-active{outline:2px solid #a58cff;outline-offset:2px}
+#petsTradeView .pet-trade-slot-actions{display:flex;gap:8px;margin:8px 0}
+#petsTradeView .pet-trade-picker-panel{margin-top:8px;padding:9px;border:1px solid #3e5273;background:#0c1628}
+#petsTradeView .pet-trade-picker-panel[hidden],#petsTradeView .pet-trade-slot-actions[hidden]{display:none!important}
+#petsTradeView .pet-trade-picker-panel .pet-trade-pet-search{width:100%;margin-bottom:8px}
+#petsTradeView .pet-trade-picker-panel .pet-trade-pet-picker{max-height:250px}
+#petsTradeView .pet-trade-picker-panel .pet-trade-pet-option{cursor:pointer}
+@media(max-width:760px){#petsTradeView .pet-trade-offer-slots{grid-template-columns:repeat(2,minmax(0,1fr))}#petsTradeView .pet-trade-add-slot{min-height:104px}}
+
+
+/* T-0123: legendary trade pet names and rarity labels use the same gold tone. */
+#petsTradeView .pet-trade-pet-card strong.pet-rarity-legendary,
+#petsTradeView .pet-trade-pet-card small.pet-rarity-legendary{
+  color:#ffe58a!important;
+  background:none!important;
+  -webkit-background-clip:initial!important;
+  background-clip:initial!important;
+  -webkit-text-fill-color:#ffe58a!important;
+  text-shadow:0 0 7px #d99a0044;
+}
+
+/* T-0125: pet information page. */
+.pet-info-intro{margin-bottom:16px}
+.pet-info-formula{display:grid;gap:5px;margin-top:12px;padding:10px 12px;border-left:3px solid #a58cff;background:#0d1527;color:#bfcaff;font-size:12px}
+.pet-info-formula strong{color:#f0edff;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.pet-info-section{margin-top:20px}
+.pet-info-section>.section-head{margin-bottom:10px}
+.pet-info-table-wrap{overflow-x:auto;border:1px solid #394766;border-radius:10px;background:#0d1424}
+.pet-info-weight-table{width:100%;border-collapse:collapse}
+.pet-info-weight-table th,.pet-info-weight-table td{padding:9px 12px;border-bottom:1px solid #27344d;text-align:left;font-size:13px}
+.pet-info-weight-table th{background:#141d33;color:#cbd4f5;font-size:11px;letter-spacing:.04em}
+.pet-info-weight-table td{color:#dce4fb}
+.pet-info-weight-table td:last-child{color:#f0eaff;font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
+.pet-info-weight-table tr:last-child td{border-bottom:0}
+.pet-info-grid{display:flex;flex-direction:column;gap:8px}
+.pet-info-panel{position:relative;display:grid;grid-template-columns:minmax(94px,125px) minmax(52px,auto) minmax(0,1fr);align-items:center;gap:12px;min-width:0;overflow:hidden;padding:12px 14px;border:1px solid #46516d;border-radius:11px;background:linear-gradient(100deg,#17213a,#0e1628 78%);box-shadow:inset 0 1px #ffffff0d}
+.pet-info-panel h4{margin:0;color:#f2f4ff;font-size:15px}
+.pet-info-panel strong{display:block;margin:0;color:#fff;font-size:22px;font-weight:950;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pet-info-panel p{margin:0;color:#b8c3df;font-size:11px;line-height:1.6}
+.pet-info-kicker{display:block;color:#9eabd0;font-size:9px;font-weight:850;letter-spacing:.12em}
+.pet-info-panel--none{border-color:#68738d}
+.pet-info-panel--golden{border-color:#f4d77b;box-shadow:inset 0 1px #fff1bd22,0 0 14px #d5a83a16}
+.pet-info-panel--golden strong{color:#ffe69a}
+.pet-info-panel--diamond{border-color:#8ed8ff;box-shadow:inset 0 1px #d5f5ff22,0 0 14px #56caff18}
+.pet-info-panel--diamond strong{color:#b9e8ff}
+.pet-info-panel--rainbow{border:1px solid transparent;background:linear-gradient(145deg,#17213a,#0e1628 78%) padding-box,linear-gradient(110deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1) border-box}
+.pet-info-panel--rainbow strong{color:#f7eaff}
+.pet-info-rainbow-strip{position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ff6b6b 0%,#ffd166 20%,#7ee787 40%,#70c7ff 60%,#c69bff 80%,#ff8bd1 100%)}
+.pet-info-panel--rain{border-color:#4ea5ff;box-shadow:inset 0 1px #9fd2ff22,0 0 13px #4ea5ff18}
+.pet-info-panel--rain strong{color:#72baff}
+.pet-info-panel--snow{border-color:#fff4e8;box-shadow:inset 0 1px #fff4e822,0 0 13px #fff4e812}
+.pet-info-panel--snow strong{color:#fff4e8}
+.pet-info-panel--thunder{border-color:#fff12d;box-shadow:inset 0 1px #fff12d22,0 0 13px #fff12d18}
+.pet-info-panel--thunder strong{color:#fff12d}
+.pet-info-panel--crystal{border-color:#a78bfa;box-shadow:inset 0 1px #c4b5fd22,0 0 13px #a78bfa20}
+.pet-info-panel--crystal strong{color:#c4b5fd}
+.pet-info-panel--hell{border-color:#ff5364;box-shadow:inset 0 1px #ff536422,0 0 13px #ff536418}
+.pet-info-panel--hell strong{color:#ff6674}
+@media(max-width:520px){.pet-info-grid{display:flex;flex-direction:column;gap:7px}.pet-info-panel{grid-template-columns:minmax(74px,94px) minmax(48px,auto) minmax(0,1fr);gap:8px;padding:11px 10px 11px 13px}.pet-info-panel h4{font-size:13px}.pet-info-panel strong{font-size:19px}.pet-info-panel p{font-size:10px;line-height:1.45}.pet-info-kicker{font-size:8px}.pet-info-weight-table th,.pet-info-weight-table td{padding:8px 9px;font-size:12px}}
+
+
+/* T-0126: full-width mutation color bars, not border-only accents. */
+.pet-info-panel--none{
+  border-color:#7c879e;
+  background:linear-gradient(100deg,#465166 0%,#293449 78%);
+  box-shadow:inset 0 1px #ffffff20;
+}
+.pet-info-panel--none .pet-info-kicker,
+.pet-info-panel--none h4,
+.pet-info-panel--none strong{color:#f0f3fa}
+
+.pet-info-panel--golden{
+  border-color:#f4d77b;
+  background:linear-gradient(100deg,#8b641b 0%,#59431c 78%);
+  box-shadow:inset 0 1px #fff1bd35,0 0 14px #d5a83a20;
+}
+.pet-info-panel--golden .pet-info-kicker{color:#ffe9a6}
+.pet-info-panel--golden h4,.pet-info-panel--golden strong{color:#fff4c8}
+
+.pet-info-panel--diamond{
+  border-color:#8ed8ff;
+  background:linear-gradient(100deg,#236b91 0%,#17445f 78%);
+  box-shadow:inset 0 1px #d5f5ff35,0 0 14px #56caff22;
+}
+.pet-info-panel--diamond .pet-info-kicker{color:#c8f0ff}
+.pet-info-panel--diamond h4,.pet-info-panel--diamond strong{color:#e8f9ff}
+
+.pet-info-panel--rainbow{
+  border:1px solid transparent;
+  background:linear-gradient(100deg,#713c52 0%,#55416e 22%,#315b68 46%,#52643d 68%,#78542c 100%) padding-box,
+             linear-gradient(110deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1) border-box;
+  box-shadow:inset 0 1px #ffffff28,0 0 16px #c69bff20;
+}
+.pet-info-panel--rainbow .pet-info-kicker,
+.pet-info-panel--rainbow h4,
+.pet-info-panel--rainbow strong{color:#fff!important;text-shadow:0 1px 5px #171027aa}
+
+.pet-info-panel--rain{
+  border-color:#4ea5ff;
+  background:linear-gradient(100deg,#155a9b 0%,#123c68 78%);
+  box-shadow:inset 0 1px #9fd2ff35,0 0 13px #4ea5ff22;
+}
+.pet-info-panel--rain .pet-info-kicker{color:#b9dcff}
+.pet-info-panel--rain h4,.pet-info-panel--rain strong{color:#e5f3ff}
+
+.pet-info-panel--snow{
+  border-color:#fff4e8;
+  background:linear-gradient(100deg,#a8bacb 0%,#657b91 78%);
+  box-shadow:inset 0 1px #ffffff65,0 0 13px #fff4e822;
+}
+.pet-info-panel--snow .pet-info-kicker{color:#fff}
+.pet-info-panel--snow h4,.pet-info-panel--snow strong{color:#fff}
+
+.pet-info-panel--thunder{
+  border-color:#fff12d;
+  background:linear-gradient(100deg,#8b7900 0%,#554b08 78%);
+  box-shadow:inset 0 1px #fff12d44,0 0 13px #fff12d22;
+}
+.pet-info-panel--thunder .pet-info-kicker{color:#fff79a}
+.pet-info-panel--thunder h4,.pet-info-panel--thunder strong{color:#fffbd0}
+
+.pet-info-panel--crystal{
+  border-color:#a78bfa;
+  background:linear-gradient(100deg,#6742a0 0%,#3e2c70 78%);
+  box-shadow:inset 0 1px #c4b5fd35,0 0 13px #a78bfa28;
+}
+.pet-info-panel--crystal .pet-info-kicker{color:#e3d7ff}
+.pet-info-panel--crystal h4,.pet-info-panel--crystal strong{color:#f5efff}
+
+.pet-info-panel--hell{
+  border-color:#ff5364;
+  background:linear-gradient(100deg,#8d2636 0%,#531b2b 78%);
+  box-shadow:inset 0 1px #ff536444,0 0 13px #ff536422;
+}
+.pet-info-panel--hell .pet-info-kicker{color:#ffc1c8}
+.pet-info-panel--hell h4,.pet-info-panel--hell strong{color:#fff0f1}
+
+
+/* Five-entry navigation hub: desktop keeps the existing sidebar; mobile uses a fixed bottom bar. */
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button,.mobile-nav button{display:flex;align-items:center;gap:9px}
+.nav .nav-item-icon,.mobile-nav .nav-item-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;font-size:17px;line-height:1}
+.nav .nav-item-label,.mobile-nav .nav-item-label{min-width:0}
+.nav .nav-more-toggle,.mobile-nav .nav-more-toggle{width:100%;text-align:left;margin:3px 0;background:transparent;border-color:transparent;color:var(--muted)}
+.nav .nav-more-toggle.active,.nav .nav-more-toggle.is-open{background:linear-gradient(110deg,#34386f,#34305f);border-color:#7778c8;color:#fff}
+.nav-more-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:8px 0 2px;padding:10px;border:1px solid #454775;border-radius:14px;background:linear-gradient(145deg,#11182bfa,#17172ff5);box-shadow:0 12px 28px #05071366}
+.nav-more-menu[hidden]{display:none!important}
+.nav .nav-more-item,.mobile-nav .nav-more-item{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;min-width:0;min-height:68px;margin:0;padding:9px 5px;text-align:center;white-space:normal;border:1px solid #343b66;border-radius:11px;background:linear-gradient(145deg,#202644,#151a30);color:#dce4ff;font-size:12px;line-height:1.35}
+.nav .nav-more-item .nav-item-icon,.mobile-nav .nav-more-item .nav-item-icon{font-size:21px;flex-basis:auto}
+.nav .nav-more-item.active,.mobile-nav .nav-more-item.active{border-color:#8984d7;background:linear-gradient(145deg,#34345f,#242747);color:#fff}
+.mobile-nav{display:none}
+@media(max-width:760px){
+  .shell{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .mobile-nav{display:grid;position:fixed;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:1000;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;overflow:visible;background:#0c1020f2;border:1px solid #42476f;border-radius:16px;padding:6px;backdrop-filter:blur(16px);box-shadow:0 8px 28px #0009}
+  .mobile-nav>button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-width:0;min-height:48px;margin:0;padding:5px 2px;border:1px solid transparent;border-radius:10px;background:transparent;color:#aeb8d7;font-size:10px;line-height:1.2}
+  .mobile-nav>button .nav-item-icon{font-size:17px;flex-basis:auto}
+  .mobile-nav>button.active,.mobile-nav>button.is-open{background:linear-gradient(145deg,#34345f,#242747);border-color:#7778c8;color:#fff}
+  .mobile-nav .nav-more-menu{position:absolute;left:0;right:0;bottom:calc(100% + 9px);grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:10px;background:#11172af5;border-color:#555987;box-shadow:0 12px 32px #000b;max-height:min(58vh,420px);overflow-y:auto}
+  .mobile-nav .nav-more-item{min-height:64px;font-size:12px}
+  .toast{bottom:calc(82px + env(safe-area-inset-bottom))}
+}
+
+.nav-more-menu button[hidden]{display:none!important}
+
+
+/* Mobile navigation correction: show only the compact five-button bottom row. */
+@media(max-width:760px){
+  /* Hide the legacy desktop sidebar and its GAME MENU heading on phones. */
+  #sideNav{display:none!important}
+  .shell{padding-bottom:10px!important}
+  .mobile-nav{
+    display:flex!important;
+    position:fixed!important;
+    left:10px!important;
+    right:10px!important;
+    top:auto!important;
+    bottom:calc(8px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    height:58px!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+    flex-direction:row!important;
+    align-items:stretch!important;
+    justify-content:space-between!important;
+    gap:3px!important;
+    margin:0!important;
+    padding:5px!important;
+    overflow:visible!important;
+    border-radius:15px!important;
+    z-index:1000!important;
+  }
+  #mobileNav>button{
+    display:flex!important;
+    flex:1 1 20%!important;
+    width:20%!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:100%!important;
+    margin:0!important;
+    padding:3px 1px!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
+    white-space:normal!important;
+    font-size:10px!important;
+    line-height:1.15!important;
+  }
+  #mobileNav>button .nav-item-icon{font-size:17px!important;flex:0 0 auto!important}
+  #mobileNav>button .nav-item-label{font-size:10px!important;white-space:nowrap!important}
+  #mobileNav>.nav-more-menu{
+    position:absolute!important;
+    left:auto!important;
+    right:0!important;
+    top:auto!important;
+    bottom:calc(100% + 8px)!important;
+    width:min(320px,100%)!important;
+    max-height:min(48vh,340px)!important;
+    overflow-y:auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    margin:0!important;
+    padding:9px!important;
+    border-radius:14px!important;
+    background:#11172af7!important;
+    box-shadow:0 8px 24px #0009!important;
+  }
+  #mobileNav>.nav-more-menu[hidden]{display:none!important}
+  #mobileNav .nav-more-item{min-height:54px!important;padding:6px 4px!important}
+  .content{padding-bottom:calc(132px / var(--landscape-scale, 1) + env(safe-area-inset-bottom, 0px))!important}
+}
+
+
+/* T-0127: remove accumulated mobile top whitespace across every page. */
+@media (max-width: 760px) {
+  .shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4px) !important;
+  }
+  .top {
+    min-height: 0 !important;
+    padding: 0 0 4px !important;
+    gap: 5px !important;
+  }
+  .announcement-panel {
+    margin: 0 0 5px !important;
+  }
+  .layout,
+  .content,
+  .page.active {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .page.active > :first-child {
+    margin-top: 0 !important;
+  }
+  .page.active > .codex-category-switch {
+    margin: 0 0 6px !important;
+    padding-top: 0 !important;
+    padding-bottom: 4px !important;
+  }
+  .page.active > .section-head {
+    margin: 0 0 8px !important;
+  }
+}
+
+
+/* T-0128: hard-reset mobile page flow after legacy landscape navigation rules. */
+@media (max-width: 760px) {
+  #mobileNav {
+    position: fixed !important;
+    inset-block-start: auto !important;
+    inset-block-end: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    height: 58px !important;
+    margin: 0 !important;
+  }
+  .layout {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+  .content {
+    display: block !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    min-height: 0 !important;
+  }
+  .page.active {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    min-height: 0 !important;
+  }
+  .page.active > .section-head:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+
+/* T-0129: mobile vertical spacing and bottom navigation content clearance. */
+@media (max-width: 760px) {
+  /* The mobile bar is fixed UI; keep it completely outside normal document flow. */
+  #mobileNav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    height: 58px !important;
+    z-index: 10000 !important;
+  }
+
+  /* Collapse the persistent mobile spacer between the announcement and active page. */
+  .layout {
+    position: relative !important;
+    display: block !important;
+    /* The legacy mobile shell reserves an oversized blank band before the content. */
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  .content {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 0 0 !important;
+    min-height: 0 !important;
+  }
+  .page.active {
+    display: block !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 0 calc(180px + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .page.active > .section-head:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+/* Daily shop: premium horizontal market cards, with touch-friendly snap scrolling. */
+.daily-shop-hero{position:relative;overflow:hidden;padding:25px 24px;border:1px solid #55518d;border-radius:22px;background:radial-gradient(ellipse at 82% 15%,#5d4a9b55,transparent 40%),linear-gradient(125deg,#121a35,#211a3d 58%,#11172b);box-shadow:inset 0 1px #ffffff12,0 14px 40px #0003}
+.daily-shop-hero:after{content:"";position:absolute;width:220px;height:220px;right:-55px;bottom:-135px;border:1px solid #9d8cff44;border-radius:50%;box-shadow:0 0 0 22px #8d7dff0a,0 0 0 48px #8d7dff08}
+.daily-shop-orbit{position:absolute;right:34px;top:18px;font-size:54px;color:#c4b7ff;text-shadow:0 0 22px #a78bfa;animation:dailyShopGlow 3s ease-in-out infinite alternate}
+@keyframes dailyShopGlow{to{filter:drop-shadow(0 0 14px #a78bfa);transform:rotate(18deg) scale(1.08)}}
+.daily-shop-hero h1{margin:5px 0;font-size:clamp(25px,4vw,34px);letter-spacing:.04em}
+.daily-shop-hero p{max-width:560px;margin:7px 0 13px;color:#b7c0df;font-size:13px}
+.daily-shop-refresh{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid #515b8a;border-radius:99px;background:#0b1125a8;color:#d9ddff;font-size:11px;font-weight:850;letter-spacing:.08em}
+.daily-shop-live-dot{width:7px;height:7px;border-radius:50%;background:#6ee7c0;box-shadow:0 0 10px #6ee7c0}
+.daily-shop-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 12px}
+.daily-shop-toolbar>div:first-child{display:grid;gap:3px}
+.daily-shop-kicker{color:#8e9dce;font-size:10px;font-weight:900;letter-spacing:.13em}
+.daily-shop-toolbar strong{font-size:17px}
+.daily-shop-toolbar strong b{color:#c5a8ff}
+.daily-shop-balance{display:grid;gap:1px;text-align:right;padding:7px 12px;border:1px solid #3b456b;border-radius:12px;background:linear-gradient(135deg,#111a2d,#191b36)}
+.daily-shop-balance small{font-size:10px;color:#8f9abd}
+.daily-shop-balance b{font-size:15px;color:#ffe0a1;font-variant-numeric:tabular-nums}
+.daily-shop-track{display:flex;gap:13px;overflow-x:auto;overflow-y:hidden;padding:3px 2px 15px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#6975bd #111629;-webkit-overflow-scrolling:touch}
+.daily-shop-card{position:relative;display:flex;flex:0 0 244px;flex-direction:column;min-height:0;padding:12px;border:1px solid #3d496e;border-radius:17px;background:radial-gradient(ellipse at 50% 0%,#39416b55,transparent 44%),linear-gradient(155deg,#151d34,#101524 70%);box-shadow:0 9px 24px #0004;scroll-snap-align:start;overflow:hidden}
+.daily-shop-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#7e91ff,#a98aff,#5ed8e8);opacity:.9}
+.daily-shop-rare{border-color:#56618d;background:radial-gradient(ellipse at 50% 0%,#4e427455,transparent 48%),linear-gradient(155deg,#171b35,#101524 70%)}
+.daily-shop-epic{border-color:#7959a7;background:radial-gradient(ellipse at 50% 0%,#7846a955,transparent 48%),linear-gradient(155deg,#211a3b,#101524 70%)}
+.daily-shop-legendary{border-color:#9b794d;background:radial-gradient(ellipse at 50% 0%,#a57a3f55,transparent 48%),linear-gradient(155deg,#292139,#111524 70%)}
+.daily-shop-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;color:#8793b8;font-size:9px;font-weight:900;letter-spacing:.08em}
+.daily-shop-chance{padding:3px 7px;border:1px solid #49547a;border-radius:99px;color:#c5b8ff;font-size:10px;letter-spacing:0;white-space:nowrap}
+.daily-shop-art{display:grid;place-items:center;height:72px;margin:6px 0 1px;font-size:45px;color:#d8dcff;text-shadow:0 0 24px #9a8aff88}
+.daily-shop-card h3{margin:5px 0 3px;font-size:17px;letter-spacing:.02em}
+.daily-shop-desc{min-height:0;margin:0;color:#9da8c7;font-size:11px;line-height:1.55}
+.daily-shop-owned{margin-top:10px;padding-top:9px;border-top:1px solid #ffffff12;color:#8f9aba;font-size:11px}
+.daily-shop-owned b{color:#dbe3ff}
+.daily-shop-buy-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;padding-top:9px}
+.daily-shop-buy-row>strong{color:#ffe0a1;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.daily-shop-buy-row>strong small{margin-left:3px;font-size:11px}
+.daily-shop-buy-row button{min-width:94px;padding:8px 10px;font-size:11px;white-space:nowrap}
+.daily-shop-foot{display:flex;justify-content:space-between;gap:10px;margin:0 2px;color:#7783a8;font-size:10px}
+.daily-shop-empty{display:grid;justify-items:center;gap:7px;margin-top:18px;padding:34px 18px;border:1px dashed #46527c;border-radius:18px;background:linear-gradient(145deg,#11182b,#101424);text-align:center}
+.daily-shop-empty>span{font-size:35px;color:#a99aff;text-shadow:0 0 20px #9d8cff}
+.daily-shop-empty h3{margin:0;font-size:17px}
+.daily-shop-empty p{margin:0 0 7px;color:#98a3c1;font-size:12px}
+@media(max-width:600px){.daily-shop-hero{padding:20px 17px}.daily-shop-orbit{right:18px;top:12px;font-size:43px}.daily-shop-card{flex-basis:min(76vw,250px);min-height:0}.daily-shop-toolbar{align-items:flex-end}.daily-shop-foot{flex-direction:column;gap:3px}.daily-shop-buy-row button{min-width:88px}}
+
+
+/* T-0126: compact, persistent Time Crystal material deposit UI. */
+.time-crystal-card .time-crystal-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px}
+.time-crystal-description{margin:0 0 8px;color:var(--muted)}
+.time-crystal-material-list{display:grid;gap:6px;margin:0 0 10px}
+.time-crystal-material-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;min-width:0;padding:7px 9px;border:1px solid rgba(119,143,201,.22);border-radius:10px;background:rgba(12,19,39,.55)}
+.time-crystal-material-name{min-width:0;overflow-wrap:anywhere;font-size:13px}
+.time-crystal-material-progress{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap}
+.time-crystal-material-done{font-size:11px;font-weight:800;color:#65e6b2;white-space:nowrap}
+.time-crystal-add{min-height:28px;padding:4px 11px;font-size:12px;white-space:nowrap}
+.time-crystal-caption{margin:6px 0 0}
+.time-crystal-picker{z-index:10001}
+.time-crystal-die-options{display:grid;gap:8px;margin:12px 0}
+.time-crystal-die-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0;padding:10px 12px;border:1px solid #303955;border-radius:10px;background:#151d33;color:inherit;text-align:left;cursor:pointer}
+.time-crystal-die-option.selected{border-color:#a78bfa;background:rgba(91,75,155,.28);box-shadow:0 0 0 1px rgba(167,139,250,.24)}
+.time-crystal-die-option span:first-child{min-width:0;overflow-wrap:anywhere}
+@media(max-width:420px){.time-crystal-material-row{gap:5px;padding:7px}.time-crystal-material-name{font-size:12px}.time-crystal-add{padding:4px 8px}}
+
+.time-crystal-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.time-crystal-toggle-title{flex:1;min-width:0;font-size:15px;font-weight:800}
+.time-crystal-toggle-chevron{flex:0 0 auto;color:var(--muted);font-size:18px;line-height:1}
+
+
+/* T-0127: compact, disclosed system-simulated visitors in the roll lobby. */
+.ai-lobby-card{margin:10px 0 12px;padding:12px 14px;border:1px solid rgba(126,145,255,.28);background:linear-gradient(145deg,rgba(20,29,55,.94),rgba(13,19,36,.94))}
+.ai-lobby-heading{align-items:center;margin:0 0 5px}
+.ai-lobby-heading h2{margin:0 0 3px;font-size:16px}
+.ai-lobby-heading .eyebrow{font-size:9px;letter-spacing:.12em}
+.ai-lobby-disclosure{margin:5px 0 10px;color:var(--muted);line-height:1.55}
+.ai-lobby-players{display:flex;flex-wrap:wrap;gap:7px}
+.ai-lobby-player{display:inline-flex;align-items:center;gap:7px;min-width:0;padding:6px 9px;border:1px solid rgba(126,145,255,.2);border-radius:11px;background:rgba(8,14,29,.62);font-size:12px}
+.ai-lobby-avatar{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:8px;background:linear-gradient(135deg,#394d83,#694f9d);color:#eef1ff;font-weight:900}
+.ai-lobby-name{min-width:0;overflow-wrap:anywhere;color:#e1e7ff;font-weight:750}
+.ai-lobby-online{color:#72e0b1;font-size:10px;font-weight:800;white-space:nowrap}

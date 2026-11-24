@@ -12,7 +12,7 @@ function createStorage(initial = {}) {
   };
 }
 
-function createService({ localSave, cloudSave, baseSave = null, baseVersion = '2026-11-13T22:00:00.000Z' }) {
+function createService({ localSave, cloudSave, baseSave = null, baseVersion = '2026-11-13T22:00:00.000Z', rpcImpl = null }) {
   const KEY = 'diceRealmTest';
   const initialStorage = {
     [KEY + '_user_user-a']: JSON.stringify(localSave)
@@ -26,7 +26,11 @@ function createService({ localSave, cloudSave, baseSave = null, baseVersion = '2
     getElementById() { return { textContent: '' }; }
   };
   const supabaseClient = {
-    async rpc(name, args) { writes.push({ name, args }); return { data: { ok: true, conflict: false, updated_at: '2026-11-14T00:34:00.000Z', total_rolls: Number(args.p_save_patch.rolls) || 0 }, error: null }; },
+    async rpc(name, args) {
+      writes.push({ name, args });
+      if (rpcImpl) return rpcImpl(name, args);
+      return { data: { ok: true, conflict: false, updated_at: '2026-11-14T00:34:00.000Z', total_rolls: Number(args.p_save_patch.rolls) || 0 }, error: null };
+    },
     from(table) {
       if (table === 'player_grants') {
         return {
@@ -182,4 +186,95 @@ test('a stale local pet cannot resurrect a pet removed by another device', async
 
   assert.deepEqual(getState().pets.map(pet => pet.uid), [cloudPet.uid]);
   assert.deepEqual(getState().equippedPetUids, [cloudPet.uid]);
+});
+
+test('a regressed local roll counter does not discard a pet fused after the baseline', async () => {
+  const basePet = { uid: 'pet-base-regression', id: 'c1', rarity: 'common' };
+  const localFusedPet = { uid: 'pet-local-fused-after-base', id: 'l6', rarity: 'legendary', kg: 42 };
+  const cloudPet = { uid: 'pet-cloud-current', id: 'r1', rarity: 'rare' };
+  const baseSave = {
+    bag: { d1: 1 }, rolls: 100, rollCounts: { d1: 100 },
+    first: { d1: '2026-11-10T00:00:00.000Z' }, best: { den: 100 },
+    pets: [basePet], equippedPetUids: [basePet.uid]
+  };
+  const localSave = {
+    ...baseSave,
+    rolls: 99,
+    rollCounts: { d1: 99 },
+    pets: [basePet, localFusedPet],
+    equippedPetUids: [basePet.uid, localFusedPet.uid],
+    _cloudBaseVersion: '2026-11-13T22:00:00.000Z'
+  };
+  const cloudSave = {
+    ...baseSave,
+    pets: [cloudPet],
+    equippedPetUids: [cloudPet.uid]
+  };
+  const { service, getState } = createService({ localSave, cloudSave, baseSave });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+
+  assert.deepEqual(new Set(getState().pets.map(pet => pet.uid)),
+    new Set([localFusedPet.uid, cloudPet.uid]));
+  assert.deepEqual(new Set(getState().equippedPetUids),
+    new Set([localFusedPet.uid, cloudPet.uid]));
+  assert.equal(getState().rolls, cloudSave.rolls);
+});
+
+
+test('a pet fused while a cloud save RPC is in flight is sent in the next delta', async () => {
+  let releaseFirstRpc;
+  let rpcCount = 0;
+  const rpcImpl = async (_name, args) => {
+    rpcCount += 1;
+    if (rpcCount === 1) {
+      return new Promise(resolve => { releaseFirstRpc = () => resolve({
+        data: { ok: true, conflict: false, updated_at: '2026-11-14T00:35:00.000Z', total_rolls: 10 },
+        error: null
+      }); });
+    }
+    return {
+      data: { ok: true, conflict: false, updated_at: '2026-11-14T00:40:00.000Z', total_rolls: 10 },
+      error: null
+    };
+  };
+  const cloudSave = {
+    bag: { d1: 1 }, rolls: 10, rollCounts: {}, first: {}, best: {},
+    pets: [], equippedPetUids: [], coins: 100
+  };
+  const { service, writes, getState } = createService({
+    localSave: cloudSave,
+    cloudSave,
+    rpcImpl
+  });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+  getState().coins = 101;
+  const firstSync = service.syncCloudSave();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(typeof releaseFirstRpc, 'function', 'first RPC should be pending');
+
+  const fusedPet = { uid: 'pet-created-during-rpc', id: 'l4', kg: 30, createdAt: '2026-11-14T00:36:00.000Z' };
+  getState().pets.push(fusedPet);
+  service.save();
+  releaseFirstRpc();
+  await firstSync;
+
+  const followUpSync = await service.syncCloudSave();
+  assert.equal(followUpSync, true);
+
+  assert.equal(writes.length, 2, 'a second delta must be sent after the in-flight save');
+  assert.deepEqual(writes[1].args.p_save_patch.pets, [fusedPet]);
+});
+
+
+test('trade completion can refresh authoritative cloud pets without redrawing the whole game', async () => {
+  const localPet = { uid: 'trade-out', id: 'c1', rarity: 'common' };
+  const receivedPet = { uid: 'trade-in', id: 'r1', rarity: 'rare' };
+  const { service, getState } = createService({
+    localSave: { bag: { d1: 1 }, pets: [localPet], equippedPetUids: [], coins: 100 },
+    cloudSave: { bag: { d1: 1 }, pets: [receivedPet], equippedPetUids: [], coins: 100 }
+  });
+  await service.loadCloudSave({ renderAfterLoad: false });
+  assert.deepEqual(getState().pets.map(pet => pet.uid), [receivedPet.uid]);
 });

@@ -62,17 +62,20 @@ export function createPotionUI(deps) {
     renderPotionAutoAddChoices();
     const luckPotion = activePotion('luck');
     const speedPotion = activePotion('speed');
+    const moneyPotion = activePotion('money');
     documentRef.getElementById('potionLuckNow').textContent = '+' + luck() + '%';
     documentRef.getElementById('potionSpeedNow').textContent = '+' + speed() + '%';
 
     const remaining = [];
     if (luckPotion) remaining.push(`${luckPotion.name}：${Math.ceil(Math.max(0, Number(state.potions.active.expiresAt) - Date.now()) / 1000)} 秒`);
     if (speedPotion) remaining.push(`${speedPotion.name}：${Math.ceil(Math.max(0, Number(state.potions.activeSpeed.expiresAt) - Date.now()) / 1000)} 秒`);
+    if (moneyPotion) remaining.push(`${moneyPotion.name}：${Math.ceil(Math.max(0, Number(state.potions.activeMoney.expiresAt) - Date.now()) / 1000)} 秒`);
     documentRef.getElementById('potionTimer').textContent = remaining.join(' · ') || '未啟用';
 
     const statuses = [];
     if (luckPotion) statuses.push(`${luckPotion.name}：運氣 +${luckPotion.luck || 0}%`);
     if (speedPotion) statuses.push(`${speedPotion.name}：擲骰速度 +${speedPotion.speed || 0}%`);
+    if (moneyPotion) statuses.push(`${moneyPotion.name}：金錢收益 ×${moneyPotion.multiplier}`);
     if (state.potions.angelCharges > 0) {
       statuses.push(state.potions.angelMode === 'angel2'
         ? '天堂藥水 II 已準備好，下一抽機率已提升。'
@@ -82,7 +85,7 @@ export function createPotionUI(deps) {
 
     potionList.innerHTML = POTIONS.map(potion => {
       const count = Number(state.potions.inventory[potion.id]) || 0;
-      const active = (potion.speed ? speedPotion : luckPotion)?.id === potion.id;
+      const active = (potion.speed ? speedPotion : potion.multiplier ? moneyPotion : luckPotion)?.id === potion.id;
       const autoSelected = (state.potions.autoAddPotions || []).includes(potion.id);
       const materials = potion.recipe.map(([diceId, needed]) => {
         const material = potionIngredientInfo(diceId, needed);
@@ -151,8 +154,14 @@ export function createPotionUI(deps) {
       return;
     }
     if (id === 'angel1' || id === 'angel2') {
+      const pendingCharges = Math.max(0, Number(state.potions.angelCharges) || 0);
+      const pendingMode = state.potions.angelMode;
+      if (pendingCharges > 0 && pendingMode && pendingMode !== id) {
+        toast('目前仍有另一種天堂藥水待使用，請先完成目前抽數。');
+        return;
+      }
       state.potions.inventory[id] = count - 1;
-      state.potions.angelCharges = (Number(state.potions.angelCharges) || 0) + 1;
+      state.potions.angelCharges = pendingCharges + 1;
       state.potions.angelMode = id;
       if (getCurrentUser()) logPotionAction(id, potion.name, 'use', { mode: 'next_roll', charges: state.potions.angelCharges });
       save();
@@ -163,8 +172,9 @@ export function createPotionUI(deps) {
       return;
     }
 
-    const slot = potion.speed ? 'activeSpeed' : 'active';
-    const current = activePotion(potion.speed ? 'speed' : 'luck');
+    const category = potion.speed ? 'speed' : potion.multiplier ? 'money' : 'luck';
+    const slot = category === 'speed' ? 'activeSpeed' : category === 'money' ? 'activeMoney' : 'active';
+    const current = activePotion(category);
     const stored = state.potions[slot] || { type: '', expiresAt: 0 };
     let nextExpiry = Date.now() + potion.duration;
     if (current && stored.type === id) {

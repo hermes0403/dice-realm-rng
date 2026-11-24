@@ -7,6 +7,20 @@ on:
       - 'services/cloud-save.js'
       - 'services/presence.js'
       - 'services/account-actions.js'
+      - 'services/auth.js'
+      - 'ui/display-controls.js'
+      - 'ui/onboarding.js'
+      - 'systems/progression.js'
+      - 'systems/weather.js'
+      - 'systems/weekly-realm-event.js'
+      - 'systems/dice.js'
+      - 'systems/pet-income.js'
+      - 'systems/global-announcements.js'
+      - 'systems/realm-social.js'
+      - 'admin/monitoring.js'
+      - 'admin/ui-bindings.js'
+      - 'config.js'
+      - 'sw.js'
       - 'script.js'
       - 'tests/**'
       - 'tests/presence-profile-projection.test.js'
@@ -18,6 +32,9 @@ on:
     paths:
       - 'services/cloud-save.js'
       - 'services/account-actions.js'
+      - 'ui/display-controls.js'
+      - 'ui/onboarding.js'
+      - 'systems/progression.js'
       - 'script.js'
       - 'tests/**'
       - 'docs/game-save-delta-sync-locked-dice.sql'
@@ -35,9 +52,9 @@ jobs:
       - name: Check patch whitespace
         run: git diff --check
       - name: Check JavaScript syntax
-        run: node --input-type=module --check < services/cloud-save.js && node --input-type=module --check < services/presence.js && node --input-type=module --check < script.js
+        run: node --input-type=module --check < services/cloud-save.js && node --input-type=module --check < services/presence.js && node --input-type=module --check < services/auth.js && node --input-type=module --check < admin/player-management.js && node --input-type=module --check < admin/ui-bindings.js && node --input-type=module --check < script.js && node --input-type=module --check < services/account-actions.js && node --input-type=module --check < services/auth.js && node --input-type=module --check < ui/display-controls.js && node --input-type=module --check < ui/onboarding.js && node --input-type=module --check < systems/progression.js && node --input-type=module --check < systems/weather.js && node --input-type=module --check < systems/dice.js && node --input-type=module --check < systems/pet-income.js && node --input-type=module --check < systems/global-announcements.js && node --input-type=module --check < systems/realm-social.js && node --input-type=module --check < admin/monitoring.js && node --input-type=module --check < admin/ui-bindings.js && node --input-type=module --check < config.js && node --input-type=module --check < sw.js
       - name: Run focused save and logout regression tests
-        run: node --test tests/local-save-cloud-conflict.test.js tests/cloud-save-resume-reconcile.test.js tests/cloud-save-pet-authority.test.js tests/account-logout-cloud-flush.test.js tests/presence-profile-projection.test.js
+        run: node --test tests/pet-income-mutation-multiplier.test.js tests/heaven-multi-weather-odds.test.js tests/shark-weather-effect.test.js tests/auth-offline-timeout.test.js tests/roll-milestone-rewards.test.js tests/lifecycle-regression.test.js tests/admin-navigation.test.js tests/pwa-display-controls.test.mjs tests/limited-event-preview.test.js tests/pet-image-mapping.test.js tests/local-save-cloud-conflict.test.js tests/cloud-save-resume-reconcile.test.js tests/cloud-save-pet-authority.test.js tests/cloud-save-account-isolation.test.js tests/account-logout-cloud-flush.test.js tests/presence-profile-projection.test.js
       - name: Run full Node regression suite (known unrelated baseline failures are non-blocking)
         run: node --test tests/*.test.js
         continue-on-error: true

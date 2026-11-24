@@ -7,7 +7,7 @@ export const NEW_DICE = [
 ];
 
 export const ETERNAL_PET_WEIGHTS = [60, 40];
-export const ETERNAL_PET_INCOME = { eternal_dawn_guardian: 18000, eternal_starwish_deer: 22000 };
+export const ETERNAL_PET_INCOME = { eternal_dawn_guardian: 50000, eternal_starwish_deer: 62500 };
 
 export const ETERNAL_PETS = [
   { id: 'eternal_dawn_guardian', name: '曙光守望者', icon: '🪽', rarity: 'eternal', skill: '裝備後運氣 +35%、擲骰速度 +35%。' },
@@ -27,13 +27,13 @@ export const ETERNAL_TIER_CONFIG = {
 };
 
 export const ETERNAL_TIER_RATES = {
-  10: { common: 0, rare: 0, legendary: 73, mythic: 25, secret: 2, eternal: 0 },
-  11: { common: 0, rare: 0, legendary: 70, mythic: 27, secret: 3, eternal: 0 },
-  12: { common: 0, rare: 0, legendary: 67, mythic: 28, secret: 5, eternal: 0 },
-  13: { common: 0, rare: 0, legendary: 60, mythic: 23, secret: 16, eternal: 1 },
-  14: { common: 0, rare: 0, legendary: 0, mythic: 49, secret: 45, eternal: 6 },
-  15: { common: 0, rare: 0, legendary: 0, mythic: 7, secret: 75, eternal: 18 },
-  16: { common: 0, rare: 0, legendary: 0, mythic: 0, secret: 35, eternal: 65 },
+  10: { common: 0, rare: 0, legendary: 70, mythic: 27.95, secret: 2, eternal: 0.05 },
+  11: { common: 0, rare: 0, legendary: 63, mythic: 30.9, secret: 6, eternal: 0.1 },
+  12: { common: 0, rare: 0, legendary: 52, mythic: 32, secret: 15, eternal: 1 },
+  13: { common: 0, rare: 0, legendary: 20, mythic: 38, secret: 37, eternal: 5 },
+  14: { common: 0, rare: 0, legendary: 0, mythic: 40, secret: 53, eternal: 7 },
+  15: { common: 0, rare: 0, legendary: 0, mythic: 8, secret: 80, eternal: 12 },
+  16: { common: 0, rare: 0, legendary: 0, mythic: 1, secret: 50, eternal: 49 },
   17: { common: 0, rare: 0, legendary: 0, mythic: 0, secret: 5, eternal: 95 },
   18: { common: 0, rare: 0, legendary: 0, mythic: 0, secret: 0, eternal: 100 }
 };

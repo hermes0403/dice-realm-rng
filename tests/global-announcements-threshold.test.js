@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGlobalAnnouncements } from '../systems/global-announcements.js';
 
-function createHarness() {
+function createHarness(playerName = '測試玩家') {
   let rareRollListener = null;
   const sent = [];
   const rows = [];
@@ -12,9 +12,12 @@ function createHarness() {
     get innerHTML() { return this._innerHTML; },
     set innerHTML(value) {
       this._innerHTML = value;
-      if (value === '') this.children = [];
+      if (value === '') {
+        this.children.forEach(node => { node.parentNode = null; });
+        this.children = [];
+      }
     },
-    appendChild(node) { this.children.push(node); }
+    appendChild(node) { node.parentNode = this; this.children.push(node); }
   };
   const channel = {
     on(type, filter, callback) {
@@ -40,11 +43,26 @@ function createHarness() {
   };
   const documentRef = {
     getElementById(id) { return id === 'globalAnnouncements' ? list : null; },
-    createElement() { return { className: '', innerHTML: '', setAttribute() {}, appendChild() {} }; },
+    createElement() {
+      const listeners = new Map();
+      return {
+        className: '', innerHTML: '', textContent: '', style: {}, parentNode: null, offsetWidth: 1,
+        listeners,
+        addEventListener(name, callback) { listeners.set(name, callback); },
+        setAttribute() {},
+        appendChild() {},
+        remove() {
+          if (!this.parentNode) return;
+          const index = this.parentNode.children.indexOf(this);
+          if (index >= 0) this.parentNode.children.splice(index, 1);
+          this.parentNode = null;
+        }
+      };
+    },
     body: { appendChild() {} }
   };
   const system = createGlobalAnnouncements({
-    getState: () => ({ name: '測試玩家' }),
+    getState: () => ({ name: playerName }),
     getCurrentUser: () => ({ id: 'player-1' }),
     weatherApi: { applyForcedWeather() {}, applyServerWeatherRow() {} },
     supabaseClient,
@@ -52,8 +70,8 @@ function createHarness() {
     isAdmin: () => false,
     petById: () => null,
     escapeHTML: value => String(value),
-    format: value => String(value),
-    WEATHER_TYPES: {},
+    format: value => new Intl.NumberFormat('en-US').format(value),
+    WEATHER_TYPES: { crystal: { label: '水晶天氣', icon: '💎' } },
     documentRef,
     timerManager: { clearTimeout() {}, setTimeout() { return 1; } }
   });
@@ -73,9 +91,10 @@ test('分母等於 4096 時顯示骰子名稱、廣播並寫入雲端歷史', as
   const { system, list, sent, rows } = createHarness();
   await system.broadcastRareRoll({ name: '邊界骰子', den: 4096 });
   assert.equal(list.children.length, 1);
-  assert.match(list.children[0].innerHTML, /測試玩家/);
+  assert.match(list.children[0].innerHTML, /玩家測試玩家/);
+  assert.match(list.children[0].innerHTML, /抽到了/);
+  assert.match(list.children[0].innerHTML, /1\/4,096/);
   assert.match(list.children[0].innerHTML, /邊界骰子/);
-  assert.match(list.children[0].innerHTML, /1\/4096/);
   assert.equal(sent.length, 1);
   assert.equal(sent[0].event, 'rare_roll');
   assert.deepEqual(sent[0].payload, {
@@ -95,6 +114,31 @@ test('接收端也會拒絕 4096 以下事件，並顯示達標事件的骰子�
   assert.equal(list.children.length, 0);
   rareRollListener({ payload: { name: '其他玩家', diceName: '達標骰', den: 4096 } });
   assert.equal(list.children.length, 1);
+  assert.match(list.children[0].innerHTML, /玩家其他玩家/);
+  assert.match(list.children[0].innerHTML, /抽到了/);
+  assert.match(list.children[0].innerHTML, /1\/4,096/);
   assert.match(list.children[0].innerHTML, /達標骰/);
-  assert.match(list.children[0].innerHTML, /1\/4096/);
+});
+
+test('長玩家名稱只顯示前四字並以兩個句點省略', async () => {
+  const { system, list } = createHarness('可愛的孩子們');
+  await system.broadcastRareRoll({ name: '🪐天體骰子', den: 131072 });
+  assert.match(list.children[0].innerHTML, /玩家可愛的孩\.\./);
+  assert.match(list.children[0].innerHTML, /抽到了/);
+  assert.match(list.children[0].innerHTML, /1\/131,072/);
+  assert.match(list.children[0].innerHTML, /🪐天體骰子/);
+});
+
+test('天氣召喚彈幕會依序完整播放兩次', () => {
+  const { system, list } = createHarness();
+  system.announceWeatherSummon('crystal', '玩家甲');
+  assert.equal(list.children.length, 1);
+  const line = list.children[0];
+  const onAnimationEnd = line.listeners.get('animationend');
+  assert.equal(typeof onAnimationEnd, 'function');
+  onAnimationEnd();
+  assert.equal(list.children.length, 1, '第一次播放結束後應重新播放同一則公告');
+  assert.equal(line.parentNode, list);
+  onAnimationEnd();
+  assert.equal(list.children.length, 0, '第二次播放結束後才移除公告');
 });
