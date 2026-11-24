@@ -49,11 +49,11 @@ test('AI roster appears only in the admin player management module', () => {
 
 
 test('public lobby shows only online simulated visitors with clear disclosure', () => {
-  assert.match(migration, /create or replace function public\\.list_public_ai_activity\\(\\)/i);
-  assert.match(migration, /grant execute on function public\\.list_public_ai_activity\\(\\) to authenticated/i);
-  assert.match(migration, /auth\\.uid\\(\\) is not null/i);
+  assert.match(publicMigration, /create or replace function public\.list_public_ai_activity\(\)/i);
+  assert.match(publicMigration, /grant execute on function public\.list_public_ai_activity\(\) to authenticated/i);
+  assert.match(publicMigration, /auth\.uid\(\) is not null/i);
   assert.match(publicUi, /伺服器旅人/);
   assert.match(publicUi, /部分角色由系統模擬/);
-  assert.match(publicScript, /rpc\\('list_public_ai_activity'\\)/);
-  assert.match(publicScript, /escapeHTML\\(p\\.display_name/);
+  assert.match(publicScript, /rpc\('list_public_ai_activity'\)/);
+  assert.match(publicScript, /escapeHTML\(String\(p\.display_name/);
 });
