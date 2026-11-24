@@ -1,7 +1,7 @@
 ---
 id: T-0127
 title: 建立五名 AI 玩家與低流量自動活動系統
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -51,6 +51,8 @@ done_at:
 - [ ] GitHub Actions、GitHub Pages 及任何必要的服務端部署均有各自成功證據；正式資料庫操作有 migration／權限／功能驗證紀錄。
 
 ## 紀錄
+
+- 2026-11-24 [叉子] 棒子已明確同意本任務一次性容量閘門例外。Board §15.3 的權威計算法為 owner_side `from` + `in_progress`，盤點為 4/5；AGENTS.md 另將 `review` 納入，依較嚴格口徑會超過 5。為處理兩份規範衝突，僅對 T-0127 啟用一次性例外；範圍只限本任務開工，不延伸至其他任務，於本任務轉 `review`、`blocked` 或 `cancelled` 時失效。Communicate 閘門已完成 Board 全量掃描，沒有符合 §15.9 的有效觸發項目，結果 `NOT_REQUIRED`，未使用 Communicate 覆寫。分支已快轉同步至最新 main SHA `b5116695bcc99bb98cc1227bd6ffe67a276f73d7`。
 
 - 2026-11-24 05:47 [叉子] 依棒子本次「開始用吧」及「繼續用吧」建立任務。需求確認為五名 AI 玩家、各自獨立身份與骰子紀錄、差異化活動排程、管理員介面專屬 AI 標記；公會系統延期。依 AGENTS.md 與 Board §15，容量／Communicate 閘門未通過前，本任務保持 open，不開始程式或資料庫實作。
 - 2026-11-24 05:48 [叉子] 開單 PR #316 已合併至 main，merge commit `ba1310b8a292d1049be54ffe31f28e069c9d77ea`；回讀 main 確認任務檔存在且 status 仍為 open。容量規則在 AGENTS.md（in_progress + review）與 Board §15.3（僅 in_progress）之間存在定義差異；按較嚴格規則盤點已確認 owner_side 至少 8 張 in_progress／review 任務，超過 5 張上限，因此不啟動實作。Communicate 閘門尚未完成全 Board 掃描，維持未確認。
