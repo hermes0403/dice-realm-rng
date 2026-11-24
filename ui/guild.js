@@ -56,6 +56,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const members = Array.isArray(data.members) ? data.members : [];
     const apps = Array.isArray(data.applications) ? data.applications : [];
     const canManage = ['leader','vice_leader','officer'].includes(data.my_role);
+    const isLeader = data.my_role === 'leader';
     root().innerHTML = `
       <section class="guild-banner card">
         <div class="eyebrow">GUILD · ${escapeHTML(roleLabel(data.my_role))}</div>
@@ -67,7 +68,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       ${canManage ? `<section class="card guild-panel"><div class="section-head"><h3>加入申請</h3><span class="pill">${apps.length} PENDING</span></div>
         <div class="guild-app-list">${apps.map(a => `<div class="guild-app-row"><div><b>${escapeHTML(a.username || '未知玩家')}</b><p>${escapeHTML(a.message || '沒有附加訊息')}</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="${escapeHTML(a.id)}">核准</button><button class="quiet" type="button" data-guild-review="reject" data-app-id="${escapeHTML(a.id)}">拒絕</button></div></div>`).join('') || '<p class="muted">目前沒有待處理申請。</p>'}</div>
       </section>` : ''}
-      <section class="guild-actions"><button type="button" class="danger" id="guildLeaveBtn">退出公會</button><p class="mini">會長需先完成會長轉讓或解散程序，才能退出公會。</p></section>`;
+      <section class="guild-actions"><button type="button" class="danger" id="guildLeaveBtn" ${isLeader ? 'disabled' : ''}>退出公會</button><p class="mini">${isLeader ? '會長需先完成會長轉讓或解散程序，才能退出公會。' : '退出後即可申請加入其他公會。'}</p></section>`;
   }
 
   function renderSearchResults(rows) {
@@ -130,8 +131,8 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (button.dataset.guildApply) {
       run(async () => {
-        await rpc('guild_apply', { p_guild_id: button.dataset.guildApply, p_message: '' });
-        toast('加入公會操作已完成');
+        const result = await rpc('guild_apply', { p_guild_id: button.dataset.guildApply, p_message: '' });
+        toast(result?.joined ? '已加入公會' : '已送出加入申請');
         await load();
       });
       return;
