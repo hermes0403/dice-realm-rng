@@ -308,6 +308,157 @@ function taskFiles(boardDir) {
   return files.sort();
 }
 
+function isArchivedTask(task) {
+  return path.basename(path.dirname(task.filePath)) === 'archive';
+}
+
+function taskIdentityIssues(task, duplicateIds) {
+  const issues = [];
+  const idFromName = task.fileName.match(/^(T-\d{4})-/)?.[1];
+  if (!/^T-\d{4}$/.test(task.fields.id || '') || task.fields.id !== idFromName) {
+    issues.push('invalid or mismatched task ID');
+  }
+  if (duplicateIds.has(task.fields.id)) issues.push('duplicate task ID');
+  if (!SIDES.has(task.fields.from)) issues.push('from does not map to a permission side');
+  return issues;
+}
+
+function countInProgressBySide(tasks, errors = []) {
+  const idCounts = new Map();
+  for (const task of tasks) idCounts.set(task.fields.id, (idCounts.get(task.fields.id) || 0) + 1);
+  const duplicateIds = new Set([...idCounts].filter(([, count]) => count > 1).map(([id]) => id));
+  const counts = { owner_side: [], collaborator_side: [] };
+  const unknown = { owner_side: [], collaborator_side: [] };
+  const archived = [];
+
+  for (const task of tasks.filter(item => item.fields.status === 'in_progress')) {
+    const issues = taskIdentityIssues(task, duplicateIds);
+    const side = SIDES.get(task.fields.from);
+    if (isArchivedTask(task)) {
+      archived.push({ id: task.fields.id, file: task.fileName, from: task.fields.from });
+      continue;
+    }
+    if (issues.length) {
+      const entry = { id: task.fields.id || task.fileName, file: task.fileName, reasons: issues };
+      if (side) unknown[side].push(entry);
+      else for (const key of Object.keys(unknown)) unknown[key].push(entry);
+      continue;
+    }
+    counts[side].push(task);
+  }
+
+  // An unreadable file whose frontmatter still declares in_progress makes both
+  // sides UNKNOWN: its from/ID cannot be safely established.
+  for (const error of errors.filter(item => item.unparsedInProgress)) {
+    const entry = { id: error.fileName, file: error.fileName, reasons: ['frontmatter cannot be parsed'] };
+    for (const key of Object.keys(unknown)) unknown[key].push(entry);
+  }
+  return { counts, unknown, archived, duplicateIds };
+}
+
+function communicateTaskIssues(task, tasks, errors, duplicateIds) {
+  const original = tasks.find(item => item.fields.id === task.delegation?.originalTaskId);
+  const ownErrors = errors.filter(error => typeof error === 'string' && error.startsWith(`${task.fileName}:`));
+  const relatedOriginalErrors = original ? errors.filter(error => typeof error === 'string' && error.startsWith(`${original.fileName}:`)
+    && (error.includes(`references ${task.fields.id}`) || error.includes('more than one active communicate lock'))) : [];
+  const issues = taskIdentityIssues(task, duplicateIds);
+  if (!original) issues.push('linked original task is missing');
+  if (duplicateIds.has(task.delegation?.originalTaskId)) issues.push('linked original task ID is duplicated');
+  return [...issues, ...ownErrors, ...relatedOriginalErrors];
+}
+
+function analyzeAdmissionGates(tasks, errors = []) {
+  const capacity = countInProgressBySide(tasks, errors);
+  const communicate = { owner_side: [], collaborator_side: [] };
+  const communicateUnknown = { owner_side: [], collaborator_side: [] };
+
+  for (const task of tasks.filter(item => item.delegation && ['open', 'in_progress', 'returned'].includes(item.fields.status))) {
+    const { fields, delegation } = task;
+    const original = tasks.find(item => item.fields.id === delegation.originalTaskId);
+    const validationIssues = communicateTaskIssues(task, tasks, errors, capacity.duplicateIds);
+    const valid = !isArchivedTask(task) && validationIssues.length === 0;
+    const fromSide = SIDES.get(fields.from);
+    const toSide = SIDES.get(fields.to);
+    const relevantSides = new Set();
+    if (['open', 'in_progress'].includes(fields.status) && toSide) relevantSides.add(toSide);
+    if (fields.status === 'returned' && fromSide) relevantSides.add(fromSide);
+    const entry = {
+      id: fields.id, from: fields.from, to: fields.to, status: fields.status,
+      file: task.fileName, valid, originalTaskId: delegation.originalTaskId,
+      reasons: valid ? [] : validationIssues
+    };
+    if (valid) {
+      for (const side of relevantSides) communicate[side].push(entry);
+    } else {
+      for (const side of relevantSides) communicateUnknown[side].push(entry);
+      if (!fromSide || (['open', 'in_progress'].includes(fields.status) && !toSide)) {
+        for (const side of Object.keys(communicateUnknown)) communicateUnknown[side].push(entry);
+      }
+    }
+  }
+
+  const checks = {};
+  for (const side of Object.keys(capacity.counts)) {
+    const count = capacity.counts[side].length;
+    const triggeringIds = new Set(communicate[side].map(task => task.id));
+    checks[side] = {
+      capacity_count: count,
+      capacity_limit: 5,
+      capacity_status: count > 5 ? 'EXCEEDED' : capacity.unknown[side].length ? 'UNKNOWN' : count === 5 ? 'FULL' : 'AVAILABLE',
+      capacity_unknown: capacity.unknown[side],
+      communicate_status: communicateUnknown[side].length ? 'UNKNOWN' : communicate[side].length ? 'TRIGGERED' : 'CLEAR',
+      communicate_tasks: communicate[side],
+      communicate_unknown: communicateUnknown[side],
+      blocked_open_tasks: communicate[side].length && !communicateUnknown[side].length
+        ? tasks.filter(task => task.fields.status === 'open'
+          && SIDES.get(task.fields.from) === side && !triggeringIds.has(task.fields.id)
+          && taskIdentityIssues(task, capacity.duplicateIds).length === 0
+          && !isArchivedTask(task)).map(task => task.fields.id)
+        : []
+    };
+  }
+  const communicateCandidates = tasks.filter(task => task.delegation && ['open', 'in_progress', 'returned'].includes(task.fields.status)).map(task => {
+    const issues = communicateTaskIssues(task, tasks, errors, capacity.duplicateIds);
+    const side = task.fields.status === 'returned' ? SIDES.get(task.fields.from) : SIDES.get(task.fields.to);
+    return {
+      id: task.fields.id, from: task.fields.from, to: task.fields.to, status: task.fields.status,
+      side, condition: task.fields.status === 'returned' ? 'B' : 'A',
+      valid: !isArchivedTask(task) && issues.length === 0,
+      reasons: isArchivedTask(task) ? ['task is in archive/'] : issues,
+      location: isArchivedTask(task) ? 'archive/' : 'board/', file: task.fileName
+    };
+  });
+  return {
+    checks,
+    capacity_tasks_by_side: Object.fromEntries(Object.entries(capacity.counts).map(([side, items]) => [side, items.map(task => task.fields.id)])),
+    capacity_unknown_by_side: capacity.unknown,
+    communicate_candidates: communicateCandidates,
+    in_progress: tasks.filter(task => task.fields.status === 'in_progress').map(task => ({
+      id: task.fields.id, from: task.fields.from, to: task.fields.to,
+      status: task.fields.status, updated: task.fields.updated,
+      location: isArchivedTask(task) ? 'archive/' : 'board/', file: task.fileName,
+      side: SIDES.get(task.fields.from) || null,
+      has_communicate_section: Boolean(task.delegation),
+      valid: taskIdentityIssues(task, capacity.duplicateIds).length === 0,
+      reasons: taskIdentityIssues(task, capacity.duplicateIds)
+    })),
+    open_communicate_candidates: tasks.filter(task => task.delegation && task.fields.status === 'open').map(task => ({
+      id: task.fields.id, from: task.fields.from, to: task.fields.to, status: task.fields.status,
+      valid: !isArchivedTask(task) && communicateTaskIssues(task, tasks, errors, capacity.duplicateIds).length === 0,
+      location: isArchivedTask(task) ? 'archive/' : 'board/', file: task.fileName
+    })),
+    returned_tasks: tasks.filter(task => task.fields.status === 'returned').map(task => ({
+      id: task.fields.id, from: task.fields.from, to: task.fields.to,
+      is_communicate_candidate: Boolean(task.delegation),
+      valid: Boolean(task.delegation) && !isArchivedTask(task)
+        && communicateTaskIssues(task, tasks, errors, capacity.duplicateIds).length === 0,
+      location: isArchivedTask(task) ? 'archive/' : 'board/', file: task.fileName
+    })),
+    archive_in_progress: capacity.archived,
+    unparsed_in_progress: errors.filter(item => item?.unparsedInProgress).map(item => ({ file: item.fileName, status: 'in_progress', validity: 'UNKNOWN' }))
+  };
+}
+
 function splitMarkdownTableRow(line) {
   const cells = [];
   let cell = '';
@@ -412,6 +563,7 @@ function validateBoardDirectory(boardDir, { checkIndex = true, recordChecks = 'w
   const errors = [];
   const warnings = [];
   const tasks = [];
+  const unparsedInProgress = [];
   const byId = new Map();
 
   for (const filePath of taskFiles(boardDir)) {
@@ -420,6 +572,10 @@ function validateBoardDirectory(boardDir, { checkIndex = true, recordChecks = 'w
       task = parseTaskFile(filePath);
     } catch (error) {
       errors.push(error.message);
+      const source = fs.readFileSync(filePath, 'utf8');
+      if (/^status:\s*in_progress\s*$/m.test(source)) {
+        unparsedInProgress.push({ fileName: path.basename(filePath), unparsedInProgress: true });
+      }
       continue;
     }
 
@@ -539,21 +695,40 @@ function validateBoardDirectory(boardDir, { checkIndex = true, recordChecks = 'w
     }
   }
 
-  return { tasks, errors, warnings };
+  const gateAnalysis = analyzeAdmissionGates(tasks, [...errors, ...unparsedInProgress]);
+  for (const [side, result] of Object.entries(gateAnalysis.checks)) {
+    const capacitySeverity = recordSeverity(recordChecks, 'check7', side);
+    const communicateSeverity = recordSeverity(recordChecks, 'check8', side);
+    if (result.capacity_status === 'EXCEEDED') addRecordIssue(`${side} [檢查 7] in_progress capacity exceeded: ${result.capacity_count}/5`, capacitySeverity, errors, warnings);
+    if (result.capacity_unknown.length) addRecordIssue(`${side} [檢查 7] capacity UNKNOWN: ${result.capacity_unknown.map(item => item.id).join(', ')}`, capacitySeverity, errors, warnings);
+    if (result.communicate_status === 'TRIGGERED') addRecordIssue(`${side} [檢查 8] Communicate gate triggered: ${result.communicate_tasks.map(item => item.id).join(', ')}`, communicateSeverity, errors, warnings);
+    if (result.communicate_status === 'UNKNOWN') addRecordIssue(`${side} [檢查 8] Communicate gate UNKNOWN: ${result.communicate_unknown.map(item => item.id).join(', ')}`, communicateSeverity, errors, warnings);
+  }
+  for (const task of gateAnalysis.archive_in_progress) {
+    addRecordIssue(`${task.file} [檢查 7] archived task remains in_progress; excluded from capacity`,
+      recordSeverity(recordChecks, 'check7', SIDES.get(task.from)), errors, warnings);
+  }
+
+  return { tasks, errors, warnings, gateAnalysis };
 }
 
-function printCapacityReport(tasks, side) {
+function printCapacityReport(tasks, side, gateAnalysis = analyzeAdmissionGates(tasks)) {
   if (!side) return;
-  if (!['owner_side', 'collaborator_side'].includes(side)) {
-    throw new Error(`Unknown side ${side}; use owner_side or collaborator_side`);
+  const sides = side === 'all' ? ['owner_side', 'collaborator_side'] : [side];
+  if (sides.some(item => !['owner_side', 'collaborator_side'].includes(item))) {
+    throw new Error(`Unknown side ${side}; use owner_side, collaborator_side, or all`);
   }
-  const active = tasks.filter(task => !path.dirname(task.filePath).endsWith(`${path.sep}archive`)
-    && SIDES.get(task.fields.from) === side && ['in_progress', 'review'].includes(task.fields.status));
-  const communicate = active.filter(task => task.delegation && task.fields.status === 'in_progress');
-  console.log(`\n${side} capacity: ${active.length}/5 ${active.length >= 5 ? 'CAPACITY_BLOCKED' : 'AVAILABLE'}`);
-  for (const task of active) console.log(`- ${task.fields.id} ${task.fields.status} owner=${task.fields.owner || '(unassigned)'}`);
-  console.log(`Communicate priority: ${communicate.length ? 'BLOCKED' : 'CLEAR'}`);
-  for (const task of communicate) console.log(`- ${task.fields.id} communicate task (highest priority)`);
+  for (const currentSide of sides) {
+    const result = gateAnalysis.checks[currentSide];
+    const countedIds = new Set(gateAnalysis.capacity_tasks_by_side[currentSide]);
+    console.log(`${currentSide} capacity: ${result.capacity_count}/5 ${result.capacity_status}`);
+    for (const task of tasks.filter(item => item.fields.status === 'in_progress' && countedIds.has(item.fields.id) && !isArchivedTask(item))) {
+      console.log(`- ${task.fields.id} ${task.fields.status} owner=${task.fields.owner || '(unassigned)'}`);
+    }
+    for (const unknown of result.capacity_unknown) console.log(`- UNKNOWN ${unknown.id} ${unknown.reasons.join('; ')}`);
+    console.log(`${currentSide} Communicate priority: ${result.communicate_status}`);
+    for (const task of result.communicate_tasks) console.log(`- ${task.id} communicate task (highest priority)`);
+  }
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -561,8 +736,8 @@ if (isMain) {
   const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const boardDir = path.join(projectRoot, 'board');
   const sideArg = process.argv.find(arg => arg.startsWith('--side='))?.slice('--side='.length);
-  const { tasks, errors, warnings } = validateBoardDirectory(boardDir, { recordChecks: 'warning' });
-  printCapacityReport(tasks, sideArg);
+  const { tasks, errors, warnings, gateAnalysis } = validateBoardDirectory(boardDir, { recordChecks: 'warning' });
+  printCapacityReport(tasks, sideArg, gateAnalysis);
   if (warnings.length) {
     console.warn(`\nBoard validation warnings (${warnings.length}):`);
     for (const warning of warnings) console.warn(`- ${warning}`);
@@ -579,5 +754,5 @@ if (isMain) {
 export {
   parseFrontmatter, parseDelegation, parseLockEvents, parseTaskFile, splitMarkdownTableRow,
   parseTaskIndex, missingIdRanges, markdownSections, parseSectionRecords, parseRecordAuthor,
-  recordTimestampIssue, validateBoardDirectory
+  recordTimestampIssue, validateBoardDirectory, countInProgressBySide, analyzeAdmissionGates
 };

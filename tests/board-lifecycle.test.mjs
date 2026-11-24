@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
-  parseRecordAuthor, parseTaskIndex, recordTimestampIssue, splitMarkdownTableRow, validateBoardDirectory
+  analyzeAdmissionGates, countInProgressBySide, parseRecordAuthor, parseTaskIndex,
+  recordTimestampIssue, splitMarkdownTableRow, validateBoardDirectory
 } from '../scripts/validate-board.mjs';
 
 function makeBoard(t) {
@@ -726,4 +727,184 @@ test('README is mandatory by default but test boards may explicitly disable inde
   assert.ok(required.errors.some(error => error.includes('required Board README is missing')));
   const testOnly = validateBoardDirectory(board, { checkIndex: false });
   assert.deepEqual(testOnly.errors, []);
+});
+
+test('Check 7: five is FULL, six is EXCEEDED, and the two sides are counted separately', t => {
+  const board = makeBoard(t);
+  for (let index = 1; index <= 5; index++) {
+    const id = `T-${String(index).padStart(4, '0')}`;
+    writeTask(board, id, taskFile({ id, status: 'in_progress', from: '\u68d2\u5b50' }));
+  }
+  let result = analyzeAdmissionGates(validateTestBoard(board).tasks);
+  assert.equal(result.checks.owner_side.capacity_count, 5);
+  assert.equal(result.checks.owner_side.capacity_status, 'FULL');
+  assert.equal(result.checks.collaborator_side.capacity_count, 0);
+
+  writeTask(board, 'T-0006', taskFile({ id: 'T-0006', status: 'in_progress', from: 'barry' }));
+  result = analyzeAdmissionGates(validateTestBoard(board).tasks);
+  assert.equal(result.checks.owner_side.capacity_count, 5);
+  assert.equal(result.checks.owner_side.capacity_status, 'FULL');
+  assert.equal(result.checks.collaborator_side.capacity_count, 1);
+
+  writeTask(board, 'T-0007', taskFile({ id: 'T-0007', status: 'in_progress', from: '\u53c9\u5b50' }));
+  result = analyzeAdmissionGates(validateTestBoard(board).tasks);
+  assert.equal(result.checks.owner_side.capacity_count, 6);
+  assert.equal(result.checks.owner_side.capacity_status, 'EXCEEDED');
+});
+
+test('Check 7: review is excluded from the shared in_progress capacity counter', t => {
+  const board = makeBoard(t);
+  writeTask(board, 'T-0001', taskFile({ id: 'T-0001', status: 'in_progress', from: '\u68d2\u5b50' }));
+  writeTask(board, 'T-0002', taskFile({ id: 'T-0002', status: 'review', from: '\u68d2\u5b50' }));
+  const tasks = validateTestBoard(board).tasks;
+  assert.equal(countInProgressBySide(tasks).counts.owner_side.length, 1);
+  assert.equal(analyzeAdmissionGates(tasks).checks.owner_side.capacity_count, 1);
+});
+
+test('Check 7: archive in_progress is excluded from capacity and warned separately', t => {
+  const board = makeBoard(t);
+  fs.writeFileSync(path.join(board, 'archive', 'T-0001-archived.md'), taskFile({
+    id: 'T-0001', status: 'in_progress', from: '\u68d2\u5b50'
+  }), 'utf8');
+  const result = validateTestBoard(board);
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_count, 0);
+  assert.equal(result.gateAnalysis.archive_in_progress.length, 1);
+  assert.ok(result.warnings.some(warning => warning.includes('archived task remains in_progress')));
+});
+
+test('Check 7: missing or unmappable from returns UNKNOWN and is not counted', t => {
+  for (const from of ['', 'not-a-role']) {
+    const board = makeBoard(t);
+    writeTask(board, 'T-0001', taskFile({ id: 'T-0001', status: 'in_progress', from }));
+    const result = validateTestBoard(board);
+    assert.equal(result.gateAnalysis.checks.owner_side.capacity_count, 0);
+    assert.equal(result.gateAnalysis.checks.collaborator_side.capacity_count, 0);
+    assert.equal(result.gateAnalysis.checks.owner_side.capacity_status, 'UNKNOWN');
+    assert.equal(result.gateAnalysis.checks.collaborator_side.capacity_status, 'UNKNOWN');
+  }
+});
+
+test('Check 7: an unreadable in_progress frontmatter returns UNKNOWN for both sides', t => {
+  const board = makeBoard(t);
+  fs.writeFileSync(path.join(board, 'T-0001-broken.md'), [
+    '---', 'id: T-0001', 'status: in_progress', 'from: barry', 'invalid frontmatter line', '---', ''
+  ].join('\n'), 'utf8');
+  const result = validateTestBoard(board);
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_status, 'UNKNOWN');
+  assert.equal(result.gateAnalysis.checks.collaborator_side.capacity_status, 'UNKNOWN');
+  assert.equal(result.gateAnalysis.unparsed_in_progress.length, 1);
+});
+
+test('an unreadable in_progress file does not break existing Communicate validation', t => {
+  const board = makeBoard(t);
+  createValidCommunicatePair(board, 'open');
+  fs.writeFileSync(path.join(board, 'T-0003-broken.md'), [
+    '---', 'id: T-0003', 'status: in_progress', 'from: barry', 'invalid frontmatter line', '---', ''
+  ].join('\n'), 'utf8');
+  const result = validateTestBoard(board);
+  assert.equal(result.gateAnalysis.checks.owner_side.communicate_status, 'TRIGGERED');
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_status, 'UNKNOWN');
+});
+
+test('Check 7: duplicate task IDs return UNKNOWN rather than counting either copy', t => {
+  const board = makeBoard(t);
+  fs.writeFileSync(path.join(board, 'T-0001-first.md'), taskFile({ id: 'T-0001', status: 'in_progress', from: '\u68d2\u5b50' }), 'utf8');
+  fs.writeFileSync(path.join(board, 'T-0001-second.md'), taskFile({ id: 'T-0001', status: 'in_progress', from: 'barry' }), 'utf8');
+  const result = validateTestBoard(board);
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_count, 0);
+  assert.equal(result.gateAnalysis.checks.collaborator_side.capacity_count, 0);
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_status, 'UNKNOWN');
+  assert.equal(result.gateAnalysis.checks.collaborator_side.capacity_status, 'UNKNOWN');
+});
+
+test('Check 7: EXCEEDED and UNKNOWN warnings are both reported for the same side', t => {
+  const board = makeBoard(t);
+  for (let index = 1; index <= 7; index++) {
+    const id = `T-${String(index).padStart(4, '0')}`;
+    writeTask(board, id, taskFile({ id, status: 'in_progress', from: '\u68d2\u5b50' }));
+  }
+  fs.writeFileSync(path.join(board, 'T-0008-first.md'), taskFile({
+    id: 'T-0008', status: 'in_progress', from: '\u68d2\u5b50'
+  }), 'utf8');
+  fs.writeFileSync(path.join(board, 'T-0008-second.md'), taskFile({
+    id: 'T-0008', status: 'in_progress', from: '\u68d2\u5b50'
+  }), 'utf8');
+
+  const result = validateTestBoard(board);
+  const ownerWarnings = result.warnings.filter(warning => warning.includes('owner_side [檢查 7]'));
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_count, 7);
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_status, 'EXCEEDED');
+  assert.equal(result.gateAnalysis.checks.owner_side.capacity_unknown.length, 2);
+  assert.ok(ownerWarnings.some(warning => warning.includes('capacity exceeded: 7/5')));
+  assert.ok(ownerWarnings.some(warning => warning.includes('capacity UNKNOWN: T-0008, T-0008')));
+});
+
+test('Check 8 A: open/in_progress communicate triggers and does not block itself', t => {
+  for (const status of ['open', 'in_progress']) {
+    const board = makeBoard(t);
+    createValidCommunicatePair(board, status);
+    writeTask(board, 'T-0003', taskFile({ id: 'T-0003', status: 'open', from: '\u68d2\u5b50' }));
+    const gate = validateTestBoard(board).gateAnalysis.checks.owner_side;
+    assert.equal(gate.communicate_status, 'TRIGGERED');
+    assert.ok(gate.communicate_tasks.some(task => task.id === 'T-0002'));
+    assert.ok(!gate.blocked_open_tasks.includes('T-0002'));
+    assert.ok(gate.blocked_open_tasks.includes('T-0003'));
+  }
+});
+
+test('Check 8 B: returned communicate triggers the requester side', t => {
+  const board = makeBoard(t);
+  createValidCommunicatePair(board, 'returned');
+  const gate = validateTestBoard(board).gateAnalysis.checks.collaborator_side;
+  assert.equal(gate.communicate_status, 'TRIGGERED');
+  assert.ok(gate.communicate_tasks.some(task => task.id === 'T-0002'));
+});
+
+test('Check 8 does not trigger for blocked or done communicate tasks', t => {
+  for (const status of ['blocked', 'done']) {
+    const board = makeBoard(t);
+    createValidCommunicatePair(board, status);
+    const result = validateTestBoard(board).gateAnalysis;
+    assert.equal(result.checks.owner_side.communicate_status, 'CLEAR');
+    assert.equal(result.checks.collaborator_side.communicate_status, 'CLEAR');
+  }
+});
+
+test('Check 8 CLEAR does not report ordinary open tasks as blocked', t => {
+  const board = makeBoard(t);
+  writeTask(board, 'T-0001', taskFile({ id: 'T-0001', status: 'open', from: 'barry' }));
+  const gate = validateTestBoard(board).gateAnalysis.checks.collaborator_side;
+  assert.equal(gate.communicate_status, 'CLEAR');
+  assert.deepEqual(gate.blocked_open_tasks, []);
+});
+
+test('Check 8 reuses existing delegation validation and reports invalid candidates as UNKNOWN', t => {
+  const board = makeBoard(t);
+  createValidCommunicatePair(board, 'open');
+  const communicatePath = path.join(board, 'T-0002-test.md');
+  const source = fs.readFileSync(communicatePath, 'utf8').replace(/^to: .*$/m, 'to: \u68d2\u5b50');
+  fs.writeFileSync(communicatePath, source, 'utf8');
+  const result = validateTestBoard(board);
+  assert.ok(result.errors.some(error => error.includes('to must match')));
+  assert.equal(result.gateAnalysis.checks.owner_side.communicate_status, 'UNKNOWN');
+});
+
+test('Check 7 and Check 8 use the existing recordChecks severity interface', t => {
+  const board = makeBoard(t);
+  createValidCommunicatePair(board, 'open');
+  for (let index = 3; index <= 8; index++) {
+    const id = `T-${String(index).padStart(4, '0')}`;
+    writeTask(board, id, taskFile({ id, status: 'in_progress', from: '\u68d2\u5b50' }));
+  }
+  const defaultResult = validateBoardDirectory(board, { checkIndex: false });
+  assert.deepEqual(defaultResult.errors, []);
+  assert.ok(defaultResult.warnings.some(warning => warning.includes('[檢查 7]')));
+  assert.ok(defaultResult.warnings.some(warning => warning.includes('[檢查 8]')));
+
+  const configuredResult = validateBoardDirectory(board, {
+    checkIndex: false,
+    recordChecks: { check7: 'error', check8: 'error' }
+  });
+  assert.ok(configuredResult.errors.some(error => error.includes('[檢查 7]')));
+  assert.ok(configuredResult.errors.some(error => error.includes('[檢查 8]')));
 });
