@@ -77,7 +77,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     el.innerHTML = rows.map(g => `
       <article class="guild-result-row">
         <div><b>${escapeHTML(g.name)}</b><p>${escapeHTML(g.description || '尚未設定介紹')}</p><small>會長：${escapeHTML(g.leader_name || '未知玩家')} · ${Number(g.member_count) || 0} 人</small></div>
-        <button type="button" data-guild-apply="${escapeHTML(g.id)}">申請加入</button>
+        <button type="button" data-guild-apply="${escapeHTML(g.id)}">${g.join_mode === 'open' ? '直接加入' : '申請加入'}</button>
       </article>`).join('');
   }
 
