@@ -6,7 +6,6 @@ import { dirname, resolve } from 'node:path';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const migration = readFileSync(resolve(root, 'docs/database/20261124_t0127_ai_player_simulation.sql'), 'utf8');
-const publicMigration = readFileSync(resolve(root, 'docs/database/20261124_t0127_public_ai_activity.sql'), 'utf8');
 const fix = readFileSync(resolve(root, 'docs/database/20261124_t0127_ai_simulation_fix.sql'), 'utf8');
 const adminFunction = readFileSync(resolve(root, 'backend/edge-functions/dice-rng-ai-admin/index.ts'), 'utf8');
 const adminUi = readFileSync(resolve(root, 'admin/player-management.js'), 'utf8');
@@ -48,12 +47,9 @@ test('AI roster appears only in the admin player management module', () => {
 });
 
 
-test('public lobby shows only online simulated visitors with clear disclosure', () => {
-  assert.match(publicMigration, /create or replace function public\.list_public_ai_activity\(\)/i);
-  assert.match(publicMigration, /grant execute on function public\.list_public_ai_activity\(\) to authenticated/i);
-  assert.match(publicMigration, /auth\.uid\(\) is not null/i);
-  assert.match(publicUi, /伺服器旅人/);
-  assert.match(publicUi, /部分角色由系統模擬/);
-  assert.match(publicScript, /rpc\('list_public_ai_activity'\)/);
-  assert.match(publicScript, /escapeHTML\(String\(p\.display_name/);
+test('AI activity is absent from the public lobby and remains admin-only', () => {
+  assert.doesNotMatch(publicUi, /伺服器旅人|SYSTEM SIMULATION|部分角色由系統模擬/);
+  assert.doesNotMatch(publicScript, /list_public_ai_activity|aiLobbyActivity|aiLobbyPlayers/);
+  assert.match(adminUi, /supabaseClient\.functions\.invoke\('dice-rng-ai-admin'/);
+  assert.match(adminUi, /AI 模擬玩家/);
 });
