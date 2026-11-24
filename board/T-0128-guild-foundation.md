@@ -63,6 +63,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 [叉子] 修正先前 5 項 PWA 回歸測試失敗：將 HTML script/style 版本斷言更新為目前實際載入版本，Service Worker 快取殼升至 v2.14，並同步預快取目前 script.js、ui/guild.js、style.css、guild.css。GitHub Actions run 45511969931 成功：11 個既有語法檢查步驟全部成功，回歸測試 72/72 通過、0 失敗（其中原先 5 項失敗已通過）。另新增 docs/migrations/20261124221835_guild_foundation.sql，依 2026-11-25 正式 Supabase 的表欄位、constraints、indexes、RLS、role-limit trigger、private/public RPC 定義與 grants 反向整理，補回版本 20261124221835 的來源追蹤；此為來源檔補登，未重新套用正式資料庫。檔案依既有 docs/migrations 慣例放置，未觸碰禁止推送的 supabase/。CI run 發生於 migration 來源檔補登之前，SQL 尚未由獨立資料庫測試環境執行；正式環境僅完成唯讀結構比對。
+
 - 2026-11-25 06:57 [叉子] 已完成公會前端第一階段串接：script.js 匯入並建立 createGuildSystem，導航切換時才載入公會資料；搜尋結果依 join_mode 顯示直接加入／申請加入，操作提示依 RPC 回傳區分；會長退出按鈕停用並提示需先轉讓或解散。Supabase 正式環境 guild_foundation migration（版本 20261124221835）已存在，三張公會表均啟用 RLS；查核 public RPC 僅 authenticated 可執行、anon 不可執行，三張資料表對 anon／authenticated 均無直接 CRUD 權限。GitHub Actions 在 commit e52a889 的既有擲骰回歸工作中，script.js 語法檢查通過；整體測試 72 項中 67 項通過、5 項失敗，失敗集中於既有 PWA 版本字串斷言（仍期待舊 script/style/cache 版本），與公會模組無直接關聯。尚未完成真實登入雙帳號瀏覽器驗證；ui/guild.js 尚未納入自動語法檢查。正式 migration 原始檔未納入分支（AGENTS.md 禁止推送 supabase/ 目錄），需另行處理來源追蹤；尚未建立 PR、合併 main 或部署 GitHub Pages。
 
 - 2026-11-25 叉子：PR #321 已合併，六項棒子已驗收任務完成歸檔。重新依 main 最新 Board 檢查 §15.3：owner_side 有效 in_progress 任務為 0 張；collaborator_side 的 T-0002、T-0038 不屬本方容量。搜尋 Board 任務與紀錄未發現有效 Communicate 優先鎖。兩道閘門均未阻擋，將 T-0128 轉為 in_progress，建立任務分支 task/T-0128-guild-foundation。
