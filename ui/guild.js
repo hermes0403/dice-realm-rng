@@ -250,6 +250,8 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   function renderMembers(members) {
+    const viceCount = members.filter(member => member.role === 'vice_leader').length;
+    const isLeader = currentData?.my_role === 'leader';
     const visible = showAllMembers ? members : members.slice(0, 3);
     const rows = visible.map((member, index) => {
       const username = String(member.username || '未知玩家').trim();
@@ -268,10 +270,18 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
         ? '<button type="button" class="guild-member-remove" data-guild-remove-member="' + escapeHTML(member.user_id) +
           '" data-guild-remove-name="' + name + '">移除</button>'
         : '';
+      const canChangeVice = isLeader && Boolean(member.user_id) && (role === 'member' || role === 'vice_leader');
+      const viceAction = !canChangeVice ? '' : role === 'vice_leader'
+        ? '<button type="button" class="guild-member-role-action" data-guild-vice-action="demote" data-guild-member-id="' +
+          escapeHTML(member.user_id) + '" data-guild-member-name="' + name + '">撤除副會長</button>'
+        : '<button type="button" class="guild-member-role-action" data-guild-vice-action="promote" data-guild-member-id="' +
+          escapeHTML(member.user_id) + '" data-guild-member-name="' + name + '"' +
+          (viceCount >= 2 ? ' disabled' : '') + '>' + (viceCount >= 2 ? '副會長名額已滿' : '任命副會長') + '</button>';
+      const actions = viceAction + removeAction;
       return '<div class="guild-member-row"><span class="guild-member-identity"><span class="guild-member-avatar avatar-tone-' +
         (index % 4) + '">' + initial + crown + '</span><span class="guild-member-name"><b>' + name + '</b></span></span>' +
         '<span class="guild-role role-' + escapeHTML(role) + '">' + escapeHTML(roleLabel(role)) + '</span>' +
-        levelLabel + (removeAction ? '<span class="guild-member-actions">' + removeAction + '</span>' : '') + '</div>';
+        levelLabel + (actions ? '<span class="guild-member-actions">' + actions + '</span>' : '') + '</div>';
     }).join('');
     const toggle = members.length > 3
       ? '<button type="button" class="guild-members-toggle" data-guild-members-toggle aria-expanded="' + showAllMembers + '">' +
@@ -459,6 +469,23 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (button.matches('[data-guild-ranking-refresh]')) { loadRanking(); return; }
     if (button.matches('[data-guild-refresh]')) { loadTasks(); return; }
+    if (button.matches('[data-guild-vice-action]')) {
+      const action = button.dataset.guildViceAction;
+      const targetId = button.dataset.guildMemberId;
+      const targetName = button.dataset.guildMemberName || '這位成員';
+      const promote = action === 'promote';
+      const confirmText = promote
+        ? '確定要任命「' + targetName + '」為副會長嗎？'
+        : '確定要撤除「' + targetName + '」的副會長職位嗎？';
+      if (!window.confirm(confirmText)) return;
+      run(async () => {
+        await rpc('guild_set_vice_leader', { p_user_id: targetId, p_make_vice_leader: promote });
+        await load();
+        toast(promote ? '已任命副會長' : '已撤除副會長職位');
+        message(promote ? '已任命「' + targetName + '」為副會長。' : '已撤除「' + targetName + '」的副會長職位。', 'success');
+      });
+      return;
+    }
     if (button.matches('[data-guild-remove-member]')) {
       const targetId = button.dataset.guildRemoveMember;
       const targetName = button.dataset.guildRemoveName || '這位成員';
