@@ -118,6 +118,10 @@ test('cloud bootstrap never merges pet discoveries from the previous in-memory a
     ...freshState(), name: 'newplayer', coins: 9876, bag: { d42: 2 },
     petDiscovered: { newPet: true }
   };
+  storage.setItem(key + '_user_' + user.id, JSON.stringify({
+    ...freshState(), name: 'legacy-contaminated', coins: 999999, bag: { d99: 9 },
+    petDiscovered: { oldPet: true }
+  }));
   const documentRef = {
     visibilityState: 'visible',
     getElementById() { return { textContent: '' }; },
