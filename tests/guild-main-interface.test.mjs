@@ -39,7 +39,9 @@ test('公會每日任務與設定頁均已接入實際功能', () => {
   assert.match(source, /加入公會後即可查看每日任務與共享經驗/);
   assert.match(source, /guild_get_ranking/);
   assert.match(source, /guild-ranking-row/);
-  assert.match(source, /function renderSettings\(\)/);\n  assert.match(source, /guild_update_settings/);\n  assert.doesNotMatch(source, /公會設定功能尚未開放/);
+  assert.match(source, /function renderSettings\(\)/);
+  assert.match(source, /guild_update_settings/);
+  assert.doesNotMatch(source, /公會設定功能尚未開放/);
 });
 
 test('既有公會操作仍由伺服器 RPC 執行', () => {
