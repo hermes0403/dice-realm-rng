@@ -17,6 +17,14 @@ test('公會主導覽包含示意圖的五個彩色功能卡片', () => {
   }
 });
 
+test('公會子頁獨立顯示，並提供返回公會主頁操作', () => {
+  assert.match(source, /function renderBackButton\(\)/);
+  assert.match(source, /data-guild-back/);
+  assert.match(source, /button\.matches\('\[data-guild-back\]'\)/);
+  assert.match(source, /activeView = currentData\?\.guild \? 'home' : 'find'/);
+  assert.match(source, /root\(\)\.innerHTML = renderBackButton\(\)/);
+});
+
 test('公會成員資訊由 RPC 回傳資料產生，且可展開完整名單', () => {
   assert.match(source, /guild\.member_count/);
   assert.match(source, /member\.username/);
