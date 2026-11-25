@@ -129,7 +129,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<div class="guild-banner-main"><div class="guild-banner-topline"><span class="eyebrow">GUILD PROFILE</span>' +
       '<span class="guild-joined"><i></i> 已加入</span></div><h2>' + escapeHTML(guild.name) + '</h2>' +
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
-      '<div class="guild-banner-meta"><span>♟ ' + count + ' / ' + (Number(guild.max_members) || '—') + ' 人</span>' +
+      '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
       '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
       '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div>' +
