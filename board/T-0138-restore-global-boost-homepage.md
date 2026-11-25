@@ -1,7 +1,7 @@
 ---
 id: T-0138
 title: 修復主頁管理員全服加成活動卡片消失
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-26
 depends_on: []
 branch: task/T-0138-restore-global-boost-homepage
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -44,6 +44,8 @@ done_at:
 ## 紀錄
 
 - 2026-11-25 22:17 [叉子] 開工：最新 main 的 T-0136 紀錄確認 owner_side in_progress 容量為 0/5，且 Communicate 優先閘門未發現有效鎖定；T-0137 ID 已由既有公開任務分支占用，因此本任務使用 T-0138。Task branch 由 main 建立，僅處理主頁全服加成顯示回歸。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 
