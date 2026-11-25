@@ -39,7 +39,7 @@ const APP_SHELL = [
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
   './style.css?v=20261124-t0127-remove-public-ai-panel-v1',
-  './guild.css?v=20261125-t0129-guild-pastel-v2',
+  './guild.css?v=20261125-t0130-guild-muted-v1',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
