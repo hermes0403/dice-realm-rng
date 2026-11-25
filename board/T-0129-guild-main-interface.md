@@ -50,6 +50,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-25 [叉子] 依棒子明確要求建立 T-0129。開工閘門依 main 的 Board 檔案盤點：owner_side 有效 in_progress 任務僅 T-0128（1/5）；目前有效的 owner_side 任務中未發現符合 §15.9 條件的 communicate task 或 COMMUNICATE_LOCK，Communicate 優先閘門未觸發。由 main commit e13b4a418032d70c04104ef318a13cf4aec65737 建立 task/T-0129-guild-main-interface，任務轉為 in_progress。
+- 2026-11-25 [叉子] 已重製公會前端資訊架構：新增五項導覽入口、已加入公會的主資訊與成員名單、尋找公會檢視，以及今日任務／排行榜／設定的明確未開放狀態；保留既有建立、搜尋、加入／申請、幹部審核及退出 RPC。同步更新 guild CSS、HTML／JS 資產版本與 Service Worker 快取殼至 v2.15。新增公會介面靜態回歸測試並接入 PWA workflow；待 PR CI 實際執行及瀏覽器驗證。
 
 ## 完工回報
 
