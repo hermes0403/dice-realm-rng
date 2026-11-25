@@ -254,7 +254,7 @@ authService=createAuthService({
  getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value;if(value){weeklyRealmEvent.refresh()}}, getState:()=>S,
  releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
  toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
- applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
+ applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), resetAccountSession:userId=>cloudSaveService.resetAccountSession(userId,userId?null:gameStateService.load()), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
 });
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
