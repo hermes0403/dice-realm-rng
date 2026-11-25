@@ -95,7 +95,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-25 [叉子] 棒子要求依最新確認規則修訂已合併但尚未驗收的 T-0130，作為 Owner 指示的 rework：全員登入獎勵至少 2 位有效成員；在線每累積 30 分鐘可重複 +10 XP；擲骰每累積 1,000 次可重複 +15 XP；每日 00:00 Asia/Taipei 重置進度，但每輪領取紀錄獨立且冪等；移除「返回主頁／回到遊戲主畫面」入口。重新檢查 Board：owner_side 的 in_progress/review 任務為 T-0128、T-0129、T-0130，共 3/5；T-0002、T-0017、T-0021、T-0038 均屬 collaborator_side。未找到有效 Communicate task／鎖定。容量與 Communicate 閘門均未阻擋。正式資料庫現況確認目前欄位仍將在線封頂 1,800 秒、擲骰封頂 1,000 次，且各只有單一發獎旗標；將以增量 migration 修正，不回寫或重複發放既有 XP。
+- 2026-11-25 [叉子] 棒子要求依最新確認規則修訂已合併但尚未驗收的 T-0130，作為 Owner 指示的 rework：全員登入獎勵至少 2 位有效成員；在線每累積 30 分鐘可重複 +10 XP；擲骰每累積 1,000 次可重複 +15 XP；每日 00:00 Asia/Taipei 重置進度，但每輪領取紀錄獨立且冪等；移除「返回主頁／回到遊戲主畫面」入口。重新檢查 Board：owner_side 的 in_progress/review 任務為 T-0128、T-0129、T-0130，共 3/5；T-0002、T-0017、T-0021、T-0038 均屬 collaborator_side。未找到有效 Communicate task／鎖定。容量與 Communicate 閘門均未阻擋。正式資料庫現況確認目前欄位仍將在線封頂 1,800 秒、擲骰封頂 1,000 次，且各只有單一發獎旗標；已套用正式 migration `20261125101918_guild_repeatable_daily_quests`，將既有完成資料轉為 cycle #1 領取紀錄，不重複發放 XP。
 
 - 2026-11-25 17:11 [叉子] 依棒子本次確認的四項每日任務與 XP 數值建立需求。最新 main Board 容量盤點依 AGENTS.md 共同閘門計入 owner_side 的 in_progress 與 review 任務：T-0110、T-0113、T-0121、T-0125（review），T-0128、T-0129（in_progress），共 6 張，已達五單上限；本任務保持 open，不建立任務分支、不修改遊戲程式或資料庫。Communicate 優先閘門依目前可見 board/ 與 board/archive/ 任務清單未發現有效指派給 owner_side 的 communicate task；仍須在正式接手時重新檢查。
 
