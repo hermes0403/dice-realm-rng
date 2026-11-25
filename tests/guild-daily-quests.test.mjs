@@ -41,7 +41,7 @@ test('每日完成紀錄與全員登入獎勵具有唯一鍵及冪等欄位', ()
 
 test('公會升級門檻完整且最高等級為 20', () => {
   for (const threshold of [100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500]) {
-    assert.match(guildRewards, new RegExp('\\\\b' + threshold + '\\\\b'));
+    assert.match(guildRewards, new RegExp('\\b' + threshold + '\\b'));
   }
   assert.match(guildRewards, /guild_level between 2 and 20/);
   assert.match(guildRewards, /private\\.guild_level_for_xp/);
