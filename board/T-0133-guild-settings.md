@@ -1,7 +1,7 @@
 ---
 id: T-0133
 title: 開放公會設定：修改名稱、介紹與加入方式
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -57,6 +57,8 @@ done_at:
 - [ ] 不新增高頻輪詢／Realtime；專項測試及既有回歸測試通過。
 
 ## 紀錄
+
+- 2026-11-25 21:03 [叉子] 狀態轉換：open → in_progress。依最新 main `67c242acb7f44c6d17cf7fad0af8b44769d1f5cd` 重新盤點 owner_side 有效 in_progress 任務：僅 T-0132，共 1/5；T-0002、T-0038 屬 collaborator_side，不計入本方容量。board/ 與 board/archive/ 未發現有效 Communicate task，亦未發現有效 COMMUNICATE_LOCK。兩道啟動閘門均未阻擋；開始 T-0133 實作。
 
 - 2026-11-25 21:03 [叉子] 依棒子新需求建立 T-0133，先以 open 狀態開單。工作範圍限定公會名稱、介紹及加入方式；暫定僅會長可修改，其他角色可查看。開工前須依 Board §15.3 重新確認容量及 Communicate 優先閘門。
 
