@@ -1,7 +1,7 @@
 ---
 id: T-0128
 title: 建立公會基礎系統
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-25
 updated: 2026-11-25
 depends_on: []
 branch: task/T-0128-guild-foundation
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -62,6 +62,8 @@ done_at:
 - [ ] 手機與桌面版操作正常；未執行的真實瀏覽器／雙帳號驗證須明確標示。
 
 ## 紀錄
+
+- 2026-11-25 20:36 [代記:棒子/叉子] 驗收：棒子正式確認 T-0128 驗收成功，採線上路徑；桌面實機未由叉子獨立測試，棒子接受此項作為非阻斷限制。來源：棒子於 2026-11-25 20:36 回覆「是的驗收成功」。證據：正式 Supabase migration 20261125121831 已套用；15/15 回滾式資料庫行為測試通過；兩組並行建立／加入競態測試各為一成功、一筆 already_in_guild；6 張公會表 RLS／grants／RPC 權限唯讀查核通過；交付 PR #336、Board 證據 PR #338、驗收紀錄 PR（本次）合併，相關 GitHub Actions 成功。
 
 - 2026-11-25 20:25 [叉子] 狀態轉換：in_progress → review。正式資料庫權限漏洞已修正，15 項回滾式行為測試與兩組並行競態測試通過；交付 PR #336 與 Board 證據 PR #338 均已合併，PWA／Board／Cloud Save／Coin Boost workflow 全部成功。送棒子進行最終 Owner 驗收；桌面實機未獨立驗證，已如實標示。
 
