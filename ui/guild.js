@@ -315,7 +315,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const members = Array.isArray(data.members) ? data.members : [];
     const apps = Array.isArray(data.applications) ? data.applications : [];
     const canManage = ['leader', 'vice_leader', 'officer'].includes(data.my_role);
-    const isLeader = data.my_role === 'leader';
     const announcement = guild.announcement && typeof guild.announcement === 'object' ? guild.announcement : null;
     const announcementMessage = typeof announcement?.message === 'string' ? announcement.message : '';
     const announcementUpdatedAt = announcement?.updated_at ? new Date(announcement.updated_at).toLocaleString('zh-TW') : '';
@@ -343,11 +342,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           escapeHTML(a.username || '未知玩家') + '</b><p>' + escapeHTML(a.message || '沒有附加訊息') +
           '</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="' +
           escapeHTML(a.id) + '">核准</button><button class="quiet" type="button" data-guild-review="reject" data-app-id="' +
-          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') +
-      '<section class="guild-actions"><button type="button" class="danger" id="guildLeaveBtn" ' +
-      (isLeader ? 'disabled' : '') + '>退出公會</button><p class="mini">' +
-      (isLeader ? '會長需先完成會長轉讓或解散程序，才能退出公會。' : '退出後即可申請加入其他公會。') +
-      '</p></section>';
+          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '');
   }
 
   function render() {
