@@ -98,7 +98,8 @@ test('全員登入門檻依有效成員數採 min(人數, 3)，單人公會等�
   assert.match(loginThreshold, /3 位以上成員每日登入/);
   assert.match(loginThreshold, /2 位成員每日登入/);
   assert.match(loginThreshold, /等待第 2 位成員加入/);
-  assert.match(loginThreshold, /'target',case when v_member_count>=2 then least\(v_member_count,3\) else 0 end/);
+  assert.match(loginThreshold, /v_all_login_target := case when v_member_count >= 2 then least\(v_member_count, 3\) else 0 end/);
+  assert.match(loginThreshold, /'target',v_all_login_target/);
   assert.match(ui, /waitingForMember = task\.key === 'all_login' && task\.eligible === false/);
   assert.doesNotMatch(ui, /至少需要 2 位有效成員/);
 });
