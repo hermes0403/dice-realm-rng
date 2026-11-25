@@ -10,7 +10,7 @@ const NAV_ITEMS = [
 const VIEWS = {
   tasks: { title: '公會今日任務', description: '加入公會後即可查看每日任務與共享經驗。' },
   ranking: { title: '公會排行榜', description: '依公會等級與總 XP 排名，只顯示公開公會資訊。' },
-  settings: { title: '公會設定', description: '公會設定功能尚未開放。現階段公會名稱、介紹與加入方式尚不能在此修改。' }
+  settings: { title: '公會設定', description: '管理公會名稱、介紹與加入方式。' }
 };
 
 export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef = document, toast = () => {} }) {
@@ -216,6 +216,29 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
   }
 
+
+  function renderSettings() {
+    const guild = currentData?.guild;
+    if (!guild) { renderFeatureView('settings'); return; }
+    const canEdit = currentData.my_role === 'leader';
+    const disabled = canEdit ? '' : ' disabled';
+    const joinMode = guild.join_mode === 'open' ? 'open' : 'application';
+    root().innerHTML = renderBackButton() +
+      '<section class="card guild-settings-panel"><div class="eyebrow">GUILD SETTINGS</div>' +
+      '<h2>公會設定</h2><form id="guildSettingsForm" class="guild-settings-form">' +
+      '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="24" required value="' +
+      escapeHTML(guild.name || '') + '"' + disabled + '><small>2～24 個字</small></label>' +
+      '<label>公會介紹<textarea name="description" maxlength="160" rows="4"' + disabled + '>' +
+      escapeHTML(guild.description || '') + '</textarea><small>最多 160 字</small></label>' +
+      '<label>加入方式<select name="join_mode"' + disabled + '>' +
+      '<option value="application"' + (joinMode === 'application' ? ' selected' : '') + '>需審核申請</option>' +
+      '<option value="open"' + (joinMode === 'open' ? ' selected' : '') + '>公開直接加入</option>' +
+      '</select><small>選擇玩家加入公會時，是否需要幹部審核</small></label>' +
+      (canEdit ? '<button class="primary" type="submit">儲存設定</button>' :
+        '<p class="guild-settings-readonly">只有會長可以修改公會設定；目前為檢視模式。</p>') +
+      '</form></section>';
+  }
+
   function renderMembers(members) {
     const visible = showAllMembers ? members : members.slice(0, 3);
     const rows = visible.map((member, index) => {
@@ -285,6 +308,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (activeView === 'tasks') { loadTasks(); return; }
     if (activeView === 'ranking') { loadRanking(); return; }
+    if (activeView === 'settings') { renderSettings(); return; }
     if (VIEWS[activeView]) { renderFeatureView(activeView); return; }
     activeView = 'home';
     renderHome();
@@ -329,6 +353,25 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   documentRef.addEventListener('submit', event => {
+    if (event.target?.id === 'guildSettingsForm') {
+      event.preventDefault();
+      if (currentData?.my_role !== 'leader') {
+        message('只有會長可以修改公會設定。', 'error');
+        return;
+      }
+      const form = new FormData(event.target);
+      run(async () => {
+        await rpc('guild_update_settings', {
+          p_name: String(form.get('name') || '').trim(),
+          p_description: String(form.get('description') || ''),
+          p_join_mode: String(form.get('join_mode') || 'application')
+        });
+        await load();
+        toast('公會設定已儲存');
+        message('公會設定已儲存。', 'success');
+      });
+      return;
+    }
     if (event.target?.id !== 'guildCreateForm') return;
     event.preventDefault();
     const form = new FormData(event.target);
