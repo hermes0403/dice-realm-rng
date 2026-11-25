@@ -221,6 +221,9 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const guild = currentData?.guild;
     if (!guild) { renderFeatureView('settings'); return; }
     const canEdit = currentData.my_role === 'leader';
+    const canEditAnnouncement = ['leader', 'vice_leader'].includes(currentData.my_role);
+    const announcementDisabled = canEditAnnouncement ? '' : ' disabled';
+    const announcementMessage = typeof guild.announcement?.message === 'string' ? guild.announcement.message : '';
     const disabled = canEdit ? '' : ' disabled';
     const joinMode = guild.join_mode === 'open' ? 'open' : 'application';
     root().innerHTML = renderBackButton() +
@@ -236,6 +239,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '</select><small>選擇玩家加入公會時，是否需要幹部審核</small></label>' +
       (canEdit ? '<button class="primary" type="submit">儲存設定</button>' :
         '<p class="guild-settings-readonly">只有會長可以修改公會設定；目前為檢視模式。</p>') +
+      '</form></section>' +
+      '<section class="card guild-settings-panel guild-announcement-settings"><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
+      '<h3>公會公告</h3><form id="guildAnnouncementForm" class="guild-settings-form">' +
+      '<label>公告內容<textarea name="message" maxlength="200" rows="4"' + announcementDisabled + '>' +
+      escapeHTML(announcementMessage) + '</textarea><small>最多 200 字；留空可清除公告</small></label>' +
+      (canEditAnnouncement ? '<button class="primary" type="submit">發布公告</button>' :
+        '<p class="guild-settings-readonly">只有會長與副會長可發布、修改或清除公告。</p>') +
       '</form></section>';
   }
 
@@ -268,6 +278,9 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const apps = Array.isArray(data.applications) ? data.applications : [];
     const canManage = ['leader', 'vice_leader', 'officer'].includes(data.my_role);
     const isLeader = data.my_role === 'leader';
+    const announcement = guild.announcement && typeof guild.announcement === 'object' ? guild.announcement : null;
+    const announcementMessage = typeof announcement?.message === 'string' ? announcement.message : '';
+    const announcementUpdatedAt = announcement?.updated_at ? new Date(announcement.updated_at).toLocaleString('zh-TW') : '';
     const count = Number(guild.member_count) || members.length;
     root().innerHTML = navMarkup() +
       '<section class="guild-banner card"><div class="guild-banner-emblem" aria-hidden="true"><span>✦</span></div>' +
@@ -276,6 +289,12 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
       '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
+      '<section class="card guild-panel guild-announcement-panel"><div class="section-head"><div><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
+      '<h3>公會公告</h3></div><span class="guild-roster-total">ANNOUNCEMENT</span></div>' +
+      (announcementMessage ? '<p class="guild-announcement-message">' + escapeHTML(announcementMessage) + '</p>' +
+        '<small class="guild-announcement-meta">發布者：' + escapeHTML(announcement.updated_by || '未知玩家') +
+        (announcementUpdatedAt ? ' · ' + escapeHTML(announcementUpdatedAt) : '') + '</small>' :
+        '<p class="muted guild-announcement-empty">目前沒有公告。</p>') + '</section>' +
       '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
       '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div>' +
       '<span class="guild-roster-total">' + members.length + ' MEMBERS</span></div>' +
@@ -353,6 +372,26 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   documentRef.addEventListener('submit', event => {
+    if (event.target?.id === 'guildAnnouncementForm') {
+      event.preventDefault();
+      if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
+        message('只有會長與副會長可以修改公會公告。', 'error');
+        return;
+      }
+      const form = new FormData(event.target);
+      const announcementMessage = String(form.get('message') || '').trim();
+      if (Array.from(announcementMessage).length > 200) {
+        message('公會公告最多 200 字。', 'error');
+        return;
+      }
+      run(async () => {
+        await rpc('guild_update_announcement', { p_message: announcementMessage });
+        await load();
+        toast('公會公告已更新');
+        message('公會公告已更新。', 'success');
+      });
+      return;
+    }
     if (event.target?.id === 'guildSettingsForm') {
       event.preventDefault();
       if (currentData?.my_role !== 'leader') {
