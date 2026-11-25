@@ -1,7 +1,7 @@
 ---
 id: T-0134
 title: 將公會名稱限制調整為 2～16 字
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -43,13 +43,33 @@ done_at:
 ## 紀錄
 
 - 2026-11-25 21:21 [叉子] 依棒子要求接手任務，狀態 open → in_progress。最新 main Board 為 4ead7981bae817ac8ed9cb4d81ace3b63b2ba7ed；owner_side 有效 in_progress 任務確認為 T-0132，共 1/5，T-0133 為 review 不計容量；Communicate 優先閘門未發現有效鎖定。開始前置程式與資料庫盤點。
+- 2026-11-25 21:32 [叉子] 狀態轉換：in_progress → review。PR #348 已合併至 main，merge commit `76fd06ad74e3454802b3a747b54e8130dc81bc08`；正式 Supabase migration `guild_name_limit_16` 已套用，資料盤點超過 16 字名稱為 0，CHECK constraint 與建立／修改 RPC 均確認 2～16 字；交易內測試建立 16 字、修改 2 字及拒絕 17 字成功，測試交易已 rollback。17 個 GitHub Actions workflows 全數 success；Pages run `45624545706` build、deploy、report-build-status 全部 success。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `ui/guild.js`：建立、設定及搜尋公會名稱輸入上限改為 16 字，加入送出前 Unicode 字元數驗證。
+- `docs/migrations/20261125212100_guild_name_limit_16.sql`：將 `public.guilds.guilds_name_length` CHECK constraint 收緊至 2～16 字；同步更新 `private.guild_create` 與 `private.guild_update_settings`，保留 SECURITY DEFINER、空 search_path 及既有權限模型。
+- `tests/guild-settings.test.mjs`、`tests/guild-daily-quests.test.mjs`、`tests/pwa-display-controls.test.mjs`：更新名稱限制及 PWA 快取斷言。
+- `index.html`、`script.js`、`sw.js`：更新資產版本與 Service Worker cache 至 `dice-realm-shell-v2.24`。
+- `.github/workflows/pwa-display-tests.yml`：加入新 migration 的測試觸發路徑。
+- PR #348 已合併，merge commit `76fd06ad74e3454802b3a747b54e8130dc81bc08`。
+
 ### 怎麼驗證的
+
+- 正式資料庫盤點：超過 16 字的既有公會名稱為 0，沒有改寫任何既有名稱。
+- 正式資料庫查核：名稱 CHECK constraint 為 2～16；建立及修改 RPC 均包含 2～16 伺服器端驗證；authenticated 可執行、anon 不可執行。
+- 交易內 RPC 測試：建立 16 字名稱成功、修改為 2 字成功、修改 17 字遭拒、建立 17 字遭拒；測試交易已 rollback，未留下測試公會。
+- PR head `5ee9ba8c642238294a05a4e2ba5559209474ec15` 的 17 個 GitHub Actions workflows 全數 success；PWA display regression tests success，包含 JavaScript syntax check。
+- GitHub Pages run `45624545706`：build、deploy、report-build-status 全部 success。
+- Supabase security advisor 仍列出其他既有 RPC 的權限警告；本任務涉及的兩個公會設定 RPC 未出現在 anon 可執行警告中，未擴大修改無關函式。
 
 ### 沒做／做不到的
 
+- 未使用真實玩家帳號進行手機與桌面實機操作；已完成自動化測試及正式資料庫交易測試，仍待棒子驗收。
+- 未自動截斷或更改既有公會名稱。
+
 ### 衍生任務／影響任務
+
+- 後續公會公告、成員管理及職位管理將另開任務，依序實作；本任務未修改這些功能。
