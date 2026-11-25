@@ -22,6 +22,9 @@ on:
       - 'ui/guild.js'
       - 'guild.css'
       - 'tests/guild-main-interface.test.mjs'
+      - 'tests/guild-daily-quests.test.mjs'
+      - 'docs/migrations/20261125093419_guild_daily_quests_xp.sql'
+      - 'docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql'
       - 'tests/pwa-display-controls.test.mjs'
       - '.github/workflows/pwa-display-tests.yml'
 
@@ -38,7 +41,7 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs
+        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs
       - name: Check JavaScript syntax
         run: |
           node --check script.js
