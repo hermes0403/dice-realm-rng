@@ -1,7 +1,7 @@
 ---
 id: T-0134
 title: 將公會名稱限制調整為 2～16 字
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -42,7 +42,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-25 21:21 [叉子] 依棒子要求建立任務，先保持 open；本任務只處理公會名稱 2～16 字限制，其他公會管理功能將依序另開任務，避免範圍混雜。
+- 2026-11-25 21:21 [叉子] 依棒子要求接手任務，狀態 open → in_progress。最新 main Board 為 4ead7981bae817ac8ed9cb4d81ace3b63b2ba7ed；owner_side 有效 in_progress 任務確認為 T-0132，共 1/5，T-0133 為 review 不計容量；Communicate 優先閘門未發現有效鎖定。開始前置程式與資料庫盤點。
 
 ## 完工回報
 
