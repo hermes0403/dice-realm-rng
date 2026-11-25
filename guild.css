@@ -75,3 +75,18 @@
 .guild-ranking-refresh{justify-self:start;padding:8px 12px;border:1px solid #45405e;border-radius:10px;background:#29263d;color:#d8ccff;font:inherit;font-size:12px;cursor:pointer}
 .guild-ranking-refresh:hover{background:#34304c}
 @media(max-width:520px){.guild-ranking-panel{padding:14px}.guild-ranking-row{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:11px 9px}.guild-ranking-rank{width:31px;height:34px;font-size:12px}.guild-ranking-main b{font-size:12px}.guild-ranking-stats b{font-size:11px}.guild-ranking-stats small{font-size:10px}}
+
+
+/* T-0133: editable guild settings */
+.guild-settings-panel{display:grid;gap:14px;padding:18px}
+.guild-settings-panel h2{margin:0;color:#d9dbea}
+.guild-settings-form{display:grid;gap:14px}
+.guild-settings-form label{display:grid;gap:7px;color:#c0c5d6;font-size:13px;font-weight:700}
+.guild-settings-form input,.guild-settings-form textarea,.guild-settings-form select{width:100%;min-width:0;box-sizing:border-box;padding:11px 12px;border:1px solid #41475f;border-radius:11px;background:#151a2b;color:#e0e3ef;font:inherit;font-size:14px}
+.guild-settings-form textarea{resize:vertical;min-height:90px;line-height:1.55}
+.guild-settings-form select{cursor:pointer}
+.guild-settings-form input:disabled,.guild-settings-form textarea:disabled,.guild-settings-form select:disabled{opacity:.72;cursor:not-allowed}
+.guild-settings-form label small{color:#9299b1;font-size:11px;font-weight:400}
+.guild-settings-form button{justify-self:start;min-width:130px}
+.guild-settings-readonly{margin:0;padding:12px 14px;border:1px solid rgba(155,139,201,.2);border-radius:11px;background:#242238;color:#b9afd9;font-size:12px;line-height:1.6}
+@media(max-width:520px){.guild-settings-panel{padding:14px}.guild-settings-form button{width:100%}}
