@@ -2,7 +2,6 @@ import { escapeHTML } from '../core/format.js';
 
 const ROLE_LABELS = { leader: '會長', vice_leader: '副會長', officer: '幹部', member: '一般成員' };
 const NAV_ITEMS = [
-  { key: 'home', label: '返回主頁', description: '回到遊戲主畫面', icon: '⌂', tone: 'blue', go: 'roll' },
   { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
   { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
   { key: 'find', label: '尋找公會', description: '搜尋並加入其他公會', icon: '⌕', tone: 'teal' },
@@ -115,19 +114,27 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const taskCards = tasks.map(task => {
       const progress = Math.max(0, Number(task.progress) || 0);
       const target = Math.max(1, Number(task.target) || 1);
+      const cycles = Math.max(0, Number(task.cycles_completed) || 0);
       const percent = Math.min(100, progress / target * 100);
       let progressLabel = Math.round(progress) + ' / ' + target;
-      if (task.key === 'online') progressLabel = Math.floor(progress / 60) + ' / 30 分鐘';
+      if (task.key === 'online') progressLabel = '已領取 ' + cycles + ' 輪 · 本輪 ' + Math.floor(progress / 60) + ' / 30 分鐘';
+      if (task.key === 'rolls') progressLabel = '已領取 ' + cycles + ' 輪 · 本輪 ' + Math.floor(progress) + ' / 1,000 次';
       if (task.key === 'all_login') progressLabel = progress + ' / ' + target + ' 人';
       if (task.key === 'login') progressLabel = (task.completed ? '1' : '0') + ' / 1';
+      const xpLabel = task.key === 'online' || task.key === 'rolls'
+        ? '每輪 +' + Math.max(0, Number(task.xp) || 0) + ' XP'
+        : '+' + Math.max(0, Number(task.xp) || 0) + ' XP';
+      const stateLabel = task.key === 'all_login' && task.eligible === false
+        ? '至少需要 2 位有效成員'
+        : (task.completed ? '✓ 本輪已完成' : '進行中');
       return '<article class="guild-task-card' + (task.completed ? ' is-complete' : '') + '">' +
         '<div class="guild-task-top"><div><b>' + escapeHTML(task.title || '每日任務') + '</b>' +
-        '<small>' + escapeHTML(progressLabel) + '</small></div><span class="guild-task-xp">+' +
-        Math.max(0, Number(task.xp) || 0) + ' XP</span></div>' +
+        '<small>' + escapeHTML(progressLabel) + '</small></div><span class="guild-task-xp">' +
+        xpLabel + '</span></div>' +
         '<div class="guild-task-track" role="progressbar" aria-label="' + escapeHTML(task.title || '每日任務') +
         '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(percent) + '">' +
         '<span style="width:' + percent.toFixed(2) + '%"></span></div>' +
-        '<small class="guild-task-state">' + (task.completed ? '✓ 已完成' : '進行中') + '</small></article>';
+        '<small class="guild-task-state">' + stateLabel + '</small></article>';
     }).join('');
     root().innerHTML = renderBackButton() +
       '<section class="card guild-xp-panel"><div class="eyebrow">GUILD PROGRESSION</div>' +
@@ -140,7 +147,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<section class="guild-task-section"><div class="section-head"><div><div class="eyebrow">DAILY GUILD QUESTS</div>' +
       '<h3>今日任務</h3></div><span class="guild-roster-total">每日 00:00 重置</span></div>' +
       '<div class="guild-task-list">' + (taskCards || '<p class="muted">目前沒有任務資料。</p>') + '</div>' +
-      '<p class="guild-task-note">個人任務完成後自動加入公會經驗；全員登入獎勵每日最多發放一次。</p>' +
+      '<p class="guild-task-note">在線每滿 30 分鐘、擲骰每滿 1,000 次都會重複獲得 XP；全員登入需至少 2 位有效成員，且每日最多發放一次。</p>' +
       '<button type="button" class="guild-task-refresh" data-guild-refresh>重新整理進度</button></section>';
   }
 
