@@ -90,3 +90,11 @@
 .guild-settings-form button{justify-self:start;min-width:130px}
 .guild-settings-readonly{margin:0;padding:12px 14px;border:1px solid rgba(155,139,201,.2);border-radius:11px;background:#242238;color:#b9afd9;font-size:12px;line-height:1.6}
 @media(max-width:520px){.guild-settings-panel{padding:14px}.guild-settings-form button{width:100%}}
+
+.guild-announcement-panel{display:grid;gap:12px}
+.guild-announcement-panel .section-head{margin:0}
+.guild-announcement-message{margin:0;color:#e1e5f2;font-size:14px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+.guild-announcement-meta{color:#9299b1;font-size:11px;line-height:1.5}
+.guild-announcement-empty{margin:0}
+.guild-announcement-settings{margin-top:14px}
+.guild-announcement-settings h3{margin:0;color:#d9dbea}
