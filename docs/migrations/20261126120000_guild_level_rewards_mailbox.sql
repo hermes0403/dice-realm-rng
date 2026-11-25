@@ -327,7 +327,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION private.guild_get_my_guild()
@@ -455,7 +455,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 
 
 create or replace function private.guild_get_mailbox(p_limit integer default 50)
