@@ -7,7 +7,6 @@ const ui = read('../ui/guild.js');
 const css = read('../guild.css');
 const migration = read('../docs/migrations/20261125210321_guild_settings.sql');
 const nameLimitMigration = read('../docs/migrations/20261125212100_guild_name_limit_16.sql');
-const nameLimitMigration = read('../docs/migrations/20261125212100_guild_name_limit_16.sql');
 
 test('公會設定頁顯示名稱、介紹及加入方式，並使用 2～16 字名稱限制', () => {
   assert.match(ui, /function renderSettings\(\)/);
@@ -47,7 +46,7 @@ test('讀取公會資料 RPC 會回傳目前加入方式', () => {
 });
 
 test('設定 RPC 只允許登入且為會長的玩家修改自己的公會', () => {
-  assert.match(migration, /create or replace function private\.guild_update_settings/);
+  assert.match(nameLimitMigration, /create or replace function private\.guild_update_settings/);
   assert.match(nameLimitMigration, /security definer\s+set search_path to ''/);
   assert.match(nameLimitMigration, /v_uid uuid := auth\.uid\(\)/);
   assert.match(nameLimitMigration, /gm\.user_id = v_uid\s+and gm\.role = 'leader'/);
@@ -59,13 +58,13 @@ test('設定 RPC 只允許登入且為會長的玩家修改自己的公會', () 
 
 test('建立與修改公會名稱均採用 2～16 字伺服器驗證', () => {
   assert.match(nameLimitMigration, /create or replace function private\.guild_create/);
-  assert.match(nameLimitMigration, /char_length\(btrim\(p_name\)\) not between 2 and 16/g);
+  assert.equal((nameLimitMigration.match(/not between 2 and 16/g) || []).length, 2);
   assert.match(nameLimitMigration, /add constraint guilds_name_length[\s\S]*between 2 and 16/);
   assert.match(nameLimitMigration, /guild_name_limit_preflight_failed_existing_names_over_16/);
 });
 
 test('伺服器端驗證名稱、介紹與加入方式，只更新三個設定欄位', () => {
-  assert.match(migration, /char_length\(btrim\(p_name\)\) not between 2 and 16/);
+  assert.equal((nameLimitMigration.match(/not between 2 and 16/g) || []).length, 2);
   assert.match(nameLimitMigration, /char_length\(coalesce\(p_description, ''\)\) > 160/);
   assert.match(nameLimitMigration, /p_join_mode not in \('application', 'open'\)/);
   assert.match(nameLimitMigration, /set\s+name = btrim\(p_name\),\s+description = coalesce\(p_description, ''\),\s+join_mode = p_join_mode/s);
