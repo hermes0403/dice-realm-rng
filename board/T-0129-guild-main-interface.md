@@ -27,7 +27,7 @@ done_at:
 - 公會成員區需呈現「公會成員 · N 人」及成員名單、玩家名稱與職位；視覺層級以示意圖中的 Hermes、玩家 A、玩家 B 名單呈現方式為準，實際內容必須來自登入玩家所屬公會資料。
 - 保留 T-0128 已完成的建立公會、搜尋公會、加入／申請、申請審核、成員讀取及退出能力，並整合至新介面。
 - 今日任務、公會排行榜、公會設定需建立清楚的頁面入口與版面。若對應資料表／RPC／規則尚不存在，先標示尚未開放或尚未設定，不得使用假資料冒充正式功能；需新增後端功能時另列依賴或後續任務。
-- 手機與桌面均需符合遊戲既有深色科幻紫藍風格及響應式版面。
+- 手機與桌面均採示意圖的明亮白底、柔和彩色功能卡與紫色公會識別，並維持響應式版面。
 
 ## 不要動
 
@@ -51,14 +51,15 @@ done_at:
 
 - 2026-11-25 [叉子] 依棒子明確要求建立 T-0129。開工閘門依 main 的 Board 檔案盤點：owner_side 有效 in_progress 任務僅 T-0128（1/5）；目前有效的 owner_side 任務中未發現符合 §15.9 條件的 communicate task 或 COMMUNICATE_LOCK，Communicate 優先閘門未觸發。由 main commit e13b4a418032d70c04104ef318a13cf4aec65737 建立 task/T-0129-guild-main-interface，任務轉為 in_progress。
 - 2026-11-25 [叉子] 已重製公會前端資訊架構：新增五項導覽入口、已加入公會的主資訊與成員名單、尋找公會檢視，以及今日任務／排行榜／設定的明確未開放狀態；保留既有建立、搜尋、加入／申請、幹部審核及退出 RPC。同步更新 guild CSS、HTML／JS 資產版本與 Service Worker 快取殼至 v2.15。新增公會介面靜態回歸測試並接入 PWA workflow；PR #323 的 CI 已完成：本任務最新程式提交 e629d317ee76a6aeb6008bbcbf5c8aab3ac19a61 對應的 16 個 GitHub Actions workflow 全部 success；其中 PWA display workflow 已執行新增的公會 UI 測試及 ui/guild.js 語法檢查。真實雙帳號瀏覽器驗證尚未執行。
+- 2026-11-25 [叉子] 棒子補充明確 UI 目標為使用者手機截圖：本次改為白底、柔和彩色五入口卡片、紫色公會識別卡、成員清單；手機版改為雙欄入口卡，較窄螢幕自動縮減次要說明。成員列表預設顯示前三位，另提供展開完整名單；不使用示意圖中的 Hermes／玩家 A／玩家 B 假資料，仍讀取 RPC 真實成員名稱及職位。今日任務／排行榜／設定保留尚未開放提示，不製造假功能。PWA 快取升至 v2.16，資產 query key 更新為 `20261125-t0129-guild-pastel-v2`。本次更新的 CI 與部署尚待執行。
 
 ## 完工回報
 
 ### 改了什麼
 
 - `ui/guild.js`：公會頁導覽、主資訊、成員名單、尋找公會及未開放功能提示。
-- `guild.css`：深色科幻風格導覽、資訊卡、成員列表與手機響應式版面。
-- `index.html`、`script.js`、`sw.js`：更新公會資產版本與 PWA 快取殼。
+- `guild.css`：白底柔和彩色導覽卡、公會徽章資訊卡、成員清單及手機響應式版面。
+- `index.html`、`script.js`、`sw.js`：更新公會主標題、資產版本與 PWA 快取殼至 v2.16。
 - `tests/guild-main-interface.test.mjs`、`.github/workflows/pwa-display-tests.yml`、`tests/pwa-display-controls.test.mjs`：新增公會 UI 回歸測試並更新快取版本斷言。
 
 ### 怎麼驗證的
