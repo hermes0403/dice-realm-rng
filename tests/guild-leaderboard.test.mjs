@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const ui = read('../ui/guild.js');
 const css = read('../guild.css');
-const migration = read('../docs/migrations/20261125204200_guild_leaderboard.sql');
+const migration = read('../docs/migrations/20261125124301_guild_leaderboard.sql');
 
 test('排行榜頁開啟時才載入 RPC，並提供手動重新整理', () => {
   assert.match(ui, /rpc\('guild_get_ranking'\)/);
