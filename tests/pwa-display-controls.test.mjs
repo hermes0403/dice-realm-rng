@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261125-t0132-guild-login-threshold/);
+  assert.match(html, /script\.js\?v=20261125-t0131-guild-leaderboard/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -192,7 +192,7 @@ test('V1.56 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(html, /V1.56/);
-  assert.match(html, /script\.js\?v=20261125-t0132-guild-login-threshold/);
+  assert.match(html, /script\.js\?v=20261125-t0131-guild-leaderboard/);
   assert.match(worker, /dice-realm-shell-v2\.21/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261122-secret-skill-swap-v1/);
@@ -338,8 +338,8 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /dice-realm-shell-v2\.21/);
   assert.match(worker, /style\.css\?v=20261124-t0127-remove-public-ai-panel-v1/);
-  assert.match(worker, /script\.js\?v=20261125-t0132-guild-login-threshold/);
-  assert.match(worker, /ui\/guild\.js\?v=20261125-t0132-guild-login-threshold/);
-  assert.match(worker, /guild\.css\?v=20261125-t0132-guild-login-threshold/);
+  assert.match(worker, /script\.js\?v=20261125-t0131-guild-leaderboard/);
+  assert.match(worker, /ui\/guild\.js\?v=20261125-t0131-guild-leaderboard/);
+  assert.match(worker, /guild\.css\?v=20261125-t0131-guild-leaderboard/);
   assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
 });
