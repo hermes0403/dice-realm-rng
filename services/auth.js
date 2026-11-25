@@ -655,8 +655,7 @@ export function createAuthService(deps) {
             return;
           }
           resetAccountSession(signedUser.id);
-          resetAccountSession(signedUser.id);
-       setCurrentUser(signedUser);
+          setCurrentUser(signedUser);
           await startSessionInitialization(signedUser, 'SIGNED_IN', true);
           return;
         }
@@ -720,8 +719,7 @@ export function createAuthService(deps) {
             return;
           }
           resetAccountSession(signedUser.id);
-          resetAccountSession(signedUser.id);
-       setCurrentUser(signedUser);
+          setCurrentUser(signedUser);
           await startSessionInitialization(signedUser, 'SIGNED_IN', true);
           return;
         }
@@ -763,6 +761,7 @@ export function createAuthService(deps) {
         showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置；已使用過的 3 個帳號仍可繼續登入。');
         return;
       }
+      resetAccountSession(signedUser.id);
       setCurrentUser(signedUser);
       await startSessionInitialization(signedUser, 'SIGNED_IN', true);
     } catch (error) {
