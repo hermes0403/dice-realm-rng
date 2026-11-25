@@ -9,7 +9,7 @@ const NAV_ITEMS = [
 ];
 const VIEWS = {
   tasks: { title: '公會今日任務', description: '加入公會後即可查看每日任務與共享經驗。' },
-  ranking: { title: '公會排行榜', description: '公會排行榜尚未開放，目前不會顯示虛構排名或分數。' },
+  ranking: { title: '公會排行榜', description: '依公會等級與總 XP 排名，只顯示公開公會資訊。' },
   settings: { title: '公會設定', description: '公會設定功能尚未開放。現階段公會名稱、介紹與加入方式尚不能在此修改。' }
 };
 
@@ -80,6 +80,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       root().innerHTML = navMarkup() + renderBackButton() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>';
       return;
     }
+    if (activeView === 'ranking') { loadRanking(); return; }
     renderFeatureView(activeView);
   }
 
@@ -172,6 +173,49 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
   }
 
+
+  function renderRanking(rows) {
+    const ranking = Array.isArray(rows) ? rows : [];
+    const items = ranking.map(guild => {
+      const rank = Math.max(1, Number(guild.rank) || 1);
+      const level = Math.max(1, Number(guild.level) || 1);
+      const xp = Math.max(0, Number(guild.xp_total) || 0);
+      const members = Math.max(0, Number(guild.member_count) || 0);
+      return '<article class="guild-ranking-row">' +
+        '<span class="guild-ranking-rank">#' + rank + '</span>' +
+        '<span class="guild-ranking-main"><b>' + escapeHTML(guild.name || '未命名公會') + '</b>' +
+        '<small>Lv.' + level + '</small></span>' +
+        '<span class="guild-ranking-stats"><b>' + xp.toLocaleString('en-US') + ' XP</b>' +
+        '<small>' + members + ' 位成員</small></span></article>';
+    }).join('');
+    root().innerHTML = renderBackButton() +
+      '<section class="card guild-ranking-panel"><div class="section-head"><div>' +
+      '<div class="eyebrow">GUILD LEADERBOARD</div><h3>公會排行榜</h3></div>' +
+      '<button type="button" class="guild-ranking-refresh" data-guild-ranking-refresh>重新整理</button></div>' +
+      '<p class="guild-ranking-note">依公會等級由高至低、總 XP 由高至低排序；只顯示公開公會資訊。</p>' +
+      '<div class="guild-ranking-list">' + (items || '<p class="guild-ranking-empty">目前沒有公開公會。</p>') +
+      '</div></section>';
+  }
+
+  async function loadRanking() {
+    activeView = 'ranking';
+    root().innerHTML = renderBackButton() +
+      '<section class="card guild-ranking-panel"><p class="muted">正在載入公會排行榜…</p></section>';
+    try {
+      const rows = await rpc('guild_get_ranking');
+      if (activeView !== 'ranking') return;
+      renderRanking(rows);
+      message('');
+    } catch (error) {
+      if (activeView !== 'ranking') return;
+      root().innerHTML = renderBackButton() +
+        '<section class="card guild-ranking-panel"><h3>排行榜載入失敗</h3>' +
+        '<p>無法取得公開公會排名，請稍後重試。</p>' +
+        '<button type="button" class="guild-ranking-refresh" data-guild-ranking-refresh>重新載入</button></section>';
+      message(error.message || '排行榜載入失敗', 'error');
+    }
+  }
+
   function renderMembers(members) {
     const visible = showAllMembers ? members : members.slice(0, 3);
     const rows = visible.map((member, index) => {
@@ -240,6 +284,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       return;
     }
     if (activeView === 'tasks') { loadTasks(); return; }
+    if (activeView === 'ranking') { loadRanking(); return; }
     if (VIEWS[activeView]) { renderFeatureView(activeView); return; }
     activeView = 'home';
     renderHome();
@@ -309,6 +354,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       else render();
       return;
     }
+    if (button.matches('[data-guild-ranking-refresh]')) { loadRanking(); return; }
     if (button.matches('[data-guild-refresh]')) { loadTasks(); return; }
     if (button.matches('[data-guild-members-toggle]')) {
       showAllMembers = !showAllMembers;
