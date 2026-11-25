@@ -471,11 +471,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const button = event.target.closest('button');
     if (!button) return;
     if (button.matches('[data-guild-back]')) {
+      leaveConfirmStep = 0;
       activeView = currentData?.guild ? 'home' : 'find';
       render();
       return;
     }
     if (button.dataset.guildView) {
+      leaveConfirmStep = 0;
       activeView = button.dataset.guildView;
       if (activeView === 'tasks') loadTasks();
       else render();
@@ -528,13 +530,36 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       return;
     }
     if (button.id === 'guildLeaveBtn') {
-      run(async () => {
-        if (!window.confirm('確定要退出目前公會嗎？')) return;
+      if (busy || currentData?.my_role === 'leader') return;
+      leaveConfirmStep = 1;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-leave-cancel]')) {
+      leaveConfirmStep = 0;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-leave-next]')) {
+      if (leaveConfirmStep !== 1 || currentData?.my_role === 'leader') return;
+      leaveConfirmStep = 2;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-leave-confirm]')) {
+      if (busy || leaveConfirmStep !== 2 || currentData?.my_role === 'leader') return;
+      const confirmButton = button;
+      const action = run(async () => {
+        if (!currentData?.guild?.id) throw new Error('公會資料已變更，請重新載入。');
         await rpc('guild_leave');
+        leaveConfirmStep = 0;
         toast('已退出公會');
         activeView = 'find';
         await load();
       });
+      confirmButton.disabled = true;
+      void action.finally(() => { confirmButton.disabled = false; });
+      return;
     }
   });
 
