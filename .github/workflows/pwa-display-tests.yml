@@ -26,6 +26,7 @@ on:
       - 'tests/guild-leaderboard.test.mjs'
       - 'tests/guild-settings.test.mjs'
       - 'docs/migrations/20261125210321_guild_settings.sql'
+      - 'docs/migrations/20261125212100_guild_name_limit_16.sql'
       - 'docs/migrations/20261125124301_guild_leaderboard.sql'
       - 'tests/guild-foundation-authorization.test.mjs'
       - 'tests/sql/guild-foundation-behavior.sql'

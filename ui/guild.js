@@ -61,7 +61,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   function renderCreatePanel() {
     return '<section class="card guild-panel"><div class="eyebrow">CREATE GUILD</div><h2>建立公會</h2>' +
       '<form id="guildCreateForm" class="guild-form">' +
-      '<label>公會名稱<input name="name" minlength="2" maxlength="24" required placeholder="2～24 個字"></label>' +
+      '<label>公會名稱<input name="name" minlength="2" maxlength="16" required placeholder="2～16 個字"></label>' +
       '<label>公會介紹<textarea name="description" maxlength="160" rows="3" placeholder="最多 160 字"></textarea></label>' +
       '<button class="primary" type="submit">建立公會</button></form>' +
       '<p class="mini">建立者會自動成為會長；每位玩家同一時間只能加入一個公會。</p></section>';
@@ -69,7 +69,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
 
   function renderFindPanel() {
     return '<section class="card guild-panel"><div class="eyebrow">FIND GUILD</div><h2>尋找公會</h2>' +
-      '<div class="guild-search"><input id="guildSearchInput" maxlength="24" placeholder="輸入公會名稱" aria-label="輸入公會名稱">' +
+      '<div class="guild-search"><input id="guildSearchInput" maxlength="16" placeholder="輸入公會名稱" aria-label="輸入公會名稱">' +
       '<button type="button" id="guildSearchBtn">搜尋</button></div>' +
       '<div id="guildSearchResults" class="guild-results"><p class="muted">輸入名稱後搜尋公開公會。</p></div></section>';
   }
@@ -226,8 +226,8 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     root().innerHTML = renderBackButton() +
       '<section class="card guild-settings-panel"><div class="eyebrow">GUILD SETTINGS</div>' +
       '<h2>公會設定</h2><form id="guildSettingsForm" class="guild-settings-form">' +
-      '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="24" required value="' +
-      escapeHTML(guild.name || '') + '"' + disabled + '><small>2～24 個字</small></label>' +
+      '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="16" required value="' +
+      escapeHTML(guild.name || '') + '"' + disabled + '><small>2～16 個字</small></label>' +
       '<label>公會介紹<textarea name="description" maxlength="160" rows="4"' + disabled + '>' +
       escapeHTML(guild.description || '') + '</textarea><small>最多 160 字</small></label>' +
       '<label>加入方式<select name="join_mode"' + disabled + '>' +
@@ -301,7 +301,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       root().innerHTML = navMarkup() + renderBackButton() + '<section class="card guild-find-existing"><div class="eyebrow">FIND GUILD</div>' +
         '<h2>尋找公會</h2><p class="muted">你目前已加入「' + escapeHTML(currentData.guild.name) +
         '」。你可以瀏覽公開公會，但需先退出目前公會才能加入其他公會。</p>' +
-        '<div class="guild-search"><input id="guildSearchInput" maxlength="24" placeholder="輸入公會名稱" aria-label="輸入公會名稱">' +
+        '<div class="guild-search"><input id="guildSearchInput" maxlength="16" placeholder="輸入公會名稱" aria-label="輸入公會名稱">' +
         '<button type="button" id="guildSearchBtn">搜尋</button></div><div id="guildSearchResults" class="guild-results">' +
         '<p class="muted">輸入名稱後搜尋公開公會。</p></div></section>';
       return;
@@ -360,9 +360,15 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
         return;
       }
       const form = new FormData(event.target);
+      const guildName = String(form.get('name') || '').trim();
+      const guildNameLength = Array.from(guildName).length;
+      if (guildNameLength < 2 || guildNameLength > 16) {
+        message('公會名稱必須為 2～16 字。', 'error');
+        return;
+      }
       run(async () => {
         await rpc('guild_update_settings', {
-          p_name: String(form.get('name') || '').trim(),
+          p_name: guildName,
           p_description: String(form.get('description') || ''),
           p_join_mode: String(form.get('join_mode') || 'application')
         });
@@ -375,8 +381,14 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id !== 'guildCreateForm') return;
     event.preventDefault();
     const form = new FormData(event.target);
+    const guildName = String(form.get('name') || '').trim();
+    const guildNameLength = Array.from(guildName).length;
+    if (guildNameLength < 2 || guildNameLength > 16) {
+      message('公會名稱必須為 2～16 字。', 'error');
+      return;
+    }
     run(async () => {
-      await rpc('guild_create', { p_name: String(form.get('name') || '').trim(), p_description: String(form.get('description') || '').trim() });
+      await rpc('guild_create', { p_name: guildName, p_description: String(form.get('description') || '').trim() });
       toast('公會建立成功');
       activeView = 'home';
       await load();
