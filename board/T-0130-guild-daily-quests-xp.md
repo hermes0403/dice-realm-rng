@@ -1,7 +1,7 @@
 ---
 id: T-0130
 title: 公會每日任務與經驗升級系統
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P1
 created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0128, T-0129]
-branch:
+branch: task/T-0130-guild-daily-quests-xp
 done_by:
 done_at:
 ---
@@ -105,3 +105,5 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-25 [叉子] 棒子確認 T-0110、T-0113、T-0121、T-0125 驗收成功並結案。依最新 main Board，owner_side 正在執行的公會任務為 T-0128、T-0129，共 2/5；`board/` 與 `board/archive/` 未找到有效 Communicate task 檔案，搜尋也未發現 COMMUNICATE_LOCK 紀錄。T-0128 基礎系統及 T-0129 介面／子頁返回導覽的程式已合併 main，T-0129 子頁導覽 PR #327 已合併；因此開始本任務實作，建立 task/T-0130-guild-daily-quests-xp 分支。真實雙帳號／手機驗證仍屬前置任務待 Owner 驗收，本任務會在整合前確認相依功能不被破壞。
