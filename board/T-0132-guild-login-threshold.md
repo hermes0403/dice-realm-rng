@@ -1,7 +1,7 @@
 ---
 id: T-0132
 title: 修正公會每日登入門檻與單人等待文案
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P2
 created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0130]
-branch:
+branch: task/T-0132-guild-login-threshold
 done_by:
 done_at:
 ---
@@ -53,6 +53,8 @@ done_at:
 - [ ] 相關資料庫交易、權限、單元與回歸測試通過；不新增高頻請求。
 
 ## 紀錄
+
+- 2026-11-25 [叉子] 重新依最新 main Board 檢查准入：owner_side 有效 in_progress 任務為 T-0128、T-0129，共 2/5；T-0130 已完成且不計入。board/ 與 board/archive/ 未發現有效 communicate task，無 COMMUNICATE_LOCK 紀錄。前置 T-0130 已完成；兩道啟動閘門均未阻擋，開始執行 T-0132。來源：main Board 與 archive 最新內容。
 
 - 2026-11-25 [叉子] 依棒子確認的規則建立修正任務。Owner side 容量盤點為 4/5；本任務先保持 open，不建立任務分支、不開始程式或資料庫實作。待容量准入條件解除後重新檢查。
 
