@@ -50,14 +50,26 @@ done_at:
 ## 紀錄
 
 - 2026-11-25 [叉子] 依棒子明確要求建立 T-0129。開工閘門依 main 的 Board 檔案盤點：owner_side 有效 in_progress 任務僅 T-0128（1/5）；目前有效的 owner_side 任務中未發現符合 §15.9 條件的 communicate task 或 COMMUNICATE_LOCK，Communicate 優先閘門未觸發。由 main commit e13b4a418032d70c04104ef318a13cf4aec65737 建立 task/T-0129-guild-main-interface，任務轉為 in_progress。
-- 2026-11-25 [叉子] 已重製公會前端資訊架構：新增五項導覽入口、已加入公會的主資訊與成員名單、尋找公會檢視，以及今日任務／排行榜／設定的明確未開放狀態；保留既有建立、搜尋、加入／申請、幹部審核及退出 RPC。同步更新 guild CSS、HTML／JS 資產版本與 Service Worker 快取殼至 v2.15。新增公會介面靜態回歸測試並接入 PWA workflow；待 PR CI 實際執行及瀏覽器驗證。
+- 2026-11-25 [叉子] 已重製公會前端資訊架構：新增五項導覽入口、已加入公會的主資訊與成員名單、尋找公會檢視，以及今日任務／排行榜／設定的明確未開放狀態；保留既有建立、搜尋、加入／申請、幹部審核及退出 RPC。同步更新 guild CSS、HTML／JS 資產版本與 Service Worker 快取殼至 v2.15。新增公會介面靜態回歸測試並接入 PWA workflow；PR #323 的 CI 已完成：本任務最新程式提交 e629d317ee76a6aeb6008bbcbf5c8aab3ac19a61 對應的 16 個 GitHub Actions workflow 全部 success；其中 PWA display workflow 已執行新增的公會 UI 測試及 ui/guild.js 語法檢查。真實雙帳號瀏覽器驗證尚未執行。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `ui/guild.js`：公會頁導覽、主資訊、成員名單、尋找公會及未開放功能提示。
+- `guild.css`：深色科幻風格導覽、資訊卡、成員列表與手機響應式版面。
+- `index.html`、`script.js`、`sw.js`：更新公會資產版本與 PWA 快取殼。
+- `tests/guild-main-interface.test.mjs`、`.github/workflows/pwa-display-tests.yml`、`tests/pwa-display-controls.test.mjs`：新增公會 UI 回歸測試並更新快取版本斷言。
+
 ### 怎麼驗證的
 
+- GitHub Actions commit `e629d317ee76a6aeb6008bbcbf5c8aab3ac19a61`：16 個 workflow 全部 success（包含 PWA display、Dice roll save、Cloud save rollback、Board lifecycle 等）。
+- PWA display workflow 已通過公會 UI 測試及 `node --check ui/guild.js`。
+- PR #323：`https://github.com/hermes0403/dice-realm-rng/pull/323`。
+
 ### 沒做／做不到的
+
+- 尚未完成真實登入雙帳號瀏覽器測試及手機實機驗證。
+- 今日任務、公會排行榜、公會設定目前只有明確的未開放提示，尚無對應後端功能。
 
 ### 衍生任務／影響任務
