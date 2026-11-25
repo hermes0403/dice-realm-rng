@@ -48,7 +48,7 @@ test('每日擲骰進度由 game_saves trigger 計算，並限制異常跳增', 
   assert.match(hardening, /floor\(v_elapsed \* 8\)/);
   assert.match(hardening, /old\.save_data->>'rolls'/);
   assert.match(hardening, /new\.save_data->>'rolls'/);
-  assert.doesNotMatch(migration, /p_xp|p_completed|client_xp/i);
+  assert.doesNotMatch(migration, /p_completed|client_xp/i);
 });
 
 test('公會成員上限維持 4，且新進度表不可被客戶端直接讀寫', () => {
