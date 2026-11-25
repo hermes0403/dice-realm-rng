@@ -87,6 +87,7 @@ test('account switching cannot copy the previous player state into a new UID dur
   const loading = service.loadCloudSave();
   service.save();
 
+  assert.deepEqual(JSON.parse(storage.getItem(key)), oldPlayer, 'a pending account must not overwrite the shared offline snapshot');
   assert.equal(storage.getItem(key + '_user_' + user.id), null);
   assert.equal(rpcCalls.length, 0);
   assert.equal(service.isLoadedFor(user.id), false);
@@ -104,4 +105,61 @@ test('account switching cannot copy the previous player state into a new UID dur
   assert.equal(rpcCalls[0].name, 'sync_player_game_save_delta');
   assert.equal(rpcCalls[0].args.p_save_patch.name, 'newplayer_' + user.id.slice(0, 4));
   assert.equal(rpcCalls[0].args.p_save_patch.coins, 0);
+});
+
+
+test('cloud bootstrap never merges pet discoveries from the previous in-memory account', async () => {
+  const key = 'diceRealm';
+  const storage = storageMock();
+  const oldPlayer = { ...freshState(), name: 'old-account', petDiscovered: { oldPet: true } };
+  let state = { ...oldPlayer };
+  const user = { id: 'new-user-5678', user_metadata: { username: 'newplayer' } };
+  const cloudPayload = {
+    ...freshState(), name: 'newplayer', coins: 9876, bag: { d42: 2 },
+    petDiscovered: { newPet: true }
+  };
+  const documentRef = {
+    visibilityState: 'visible',
+    getElementById() { return { textContent: '' }; },
+    addEventListener() {}
+  };
+  const service = createCloudSaveService({
+    KEY: key, D: [], POTIONS: [],
+    supabaseClient: {
+      from(table) {
+        if (table === 'game_saves') {
+          return {
+            select() { return this; },
+            eq() { return this; },
+            async maybeSingle() { return { data: { save_data: cloudPayload, updated_at: '2026-11-26T00:00:00.000Z' }, error: null }; }
+          };
+        }
+        if (table === 'player_grants') {
+          return { select() { return this; }, eq() { return this; }, async maybeSingle() { return { data: null, error: null }; } };
+        }
+        throw new Error('Unexpected table ' + table);
+      }
+    },
+    getState: () => state,
+    setState: value => { state = value; },
+    getCurrentUser: () => user,
+    fresh: freshState,
+    normalizeGloves: value => value,
+    migrateCurrency: value => value,
+    ensurePetData() {}, restoreAutoSellPrefs() {},
+    totalUnique: () => 0, render() {}, refreshLeaderboards: async () => {},
+    toast() {}, openAuth() {}, showAuthMessage() {},
+    timerManager: timersMock(), localStorageRef: storage, documentRef,
+    windowRef: { addEventListener() {} }
+  });
+
+  await service.loadCloudSave({ syncAfterLoad: false });
+
+  assert.equal(service.isLoadedFor(user.id), true);
+  assert.equal(state.name, 'newplayer');
+  assert.equal(state.coins, 9876);
+  assert.deepEqual(state.bag, { d42: 2 });
+  assert.deepEqual(state.petDiscovered, { newPet: true });
+  assert.equal(storage.getItem(key), null, 'cloud account data must not be written to the shared offline key');
+  assert.ok(storage.getItem(key + '_user_' + user.id));
 });
