@@ -117,3 +117,5 @@ done_at:
 - 2026-11-25 [叉子] PR #328 第一輪修正後，17 個 GitHub Actions 檢查全部成功（含 board-lifecycle、pwa-display、cloud-save-regression、dice-roll-save）；任務專項測試已加入 PWA workflow。程式已具備進入 Owner 驗收條件，但尚未取得真實手機／桌面操作與雙帳號跨日驗收，因此維持 review，不標記 done。
 
 - 2026-11-25 [叉子] 補上成員異動邊界 migration `20261125094852_guild_daily_quests_membership_boundary`：加入、退出、轉移公會時重新檢查當日全員登入；同時在已達 1,000 次擲骰後停止對進度列做多餘 UPDATE。資料庫交易測試確認「3 人中 2 人已登入、第 3 人退出」後會補發一次 +20 XP；重複 heartbeat 不會重複發放個人登入 XP；測試交易 rollback 後再次確認 XP=0、progress／bonus rows=0、公會人數=1。
+
+- 2026-11-25 [叉子] PR #328 已於 09:51 UTC 合併至 main（merge commit `bd3a4201a942633364e94b4fe60b4e77dcab4f5f`）。PR head 上 17/17 GitHub Actions 全數成功；合併後 main 的 Board、Cloud Save、Dice Roll、Weather、Pet Announcement 五項 push workflow 亦全數成功。main 的 index.html／script.js／sw.js 已確認包含 T-0130 新資產版本。GitHub Pages 線上頁面無法由目前可用的讀取介面獨立確認，因此不宣稱已完成線上部署；任務維持 review，待棒子實際手機／桌面驗收與雙帳號跨日確認。
