@@ -1,7 +1,7 @@
 ---
 id: T-0131
 title: 公會排行榜依等級與總 XP 排名
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P2
 created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0128, T-0129]
-branch:
+branch: task/T-0131-guild-leaderboard
 done_by:
 done_at:
 ---
@@ -60,6 +60,8 @@ done_at:
 - [ ] 真實多公會資料驗證結果如實記錄，未執行項目不得宣稱通過。
 
 ## 紀錄
+
+- 2026-11-25 20:40 [叉子] 依棒子「是的驗收成功」正式結案 T-0128、T-0129；兩項均已歸檔並同步 main，依賴解除。重新檢查 main `794451ac31e02d91bc0a53efaafc205f96e07e5b`：owner_side 有效 in_progress 任務 1/5（T-0132）；T-0002、T-0038 為 collaborator_side，不計入本方容量；未發現本方有效 Communicate 優先鎖。T-0131 由 open → in_progress，建立 task branch `task/T-0131-guild-leaderboard`，來源 main SHA 如上。
 
 - 2026-11-25 [叉子] 依棒子指示建立排行榜需求。Owner side 容量盤點為 4/5，T-0128、T-0129 仍為 in_progress；本任務先保持 open，不建立任務分支、不開始程式或資料庫實作。待容量與前置任務條件解除後重新檢查准入閘門。
 

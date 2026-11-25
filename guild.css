@@ -57,3 +57,21 @@
 .guild-task-note{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
 .guild-task-refresh{justify-self:start;padding:8px 13px;border:1px solid #45405e;border-radius:10px;background:#29263d;color:#d8ccff;font:inherit;cursor:pointer}
 @media(max-width:520px){.guild-xp-panel,.guild-task-section{padding:14px}.guild-task-top{align-items:flex-start}.guild-xp-heading strong{font-size:26px}}
+
+
+/* T-0131: public guild leaderboard */
+.guild-ranking-panel{display:grid;gap:13px;padding:18px}
+.guild-ranking-panel .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.guild-ranking-panel h3{margin:2px 0;color:#d9dbea}
+.guild-ranking-note,.guild-ranking-empty{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-ranking-list{display:grid;gap:9px;min-width:0}
+.guild-ranking-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0;padding:13px 14px;border:1px solid rgba(140,149,184,.17);border-radius:14px;background:#1a1f31;color:#dfe2ee}
+.guild-ranking-rank{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#29263d;color:#bdb2e8;font-size:14px;font-weight:800}
+.guild-ranking-main{display:grid;gap:4px;min-width:0}
+.guild-ranking-main b{overflow-wrap:anywhere;color:#e1e3ef;font-size:14px}
+.guild-ranking-main small,.guild-ranking-stats small{color:#969db3;font-size:11px}
+.guild-ranking-stats{display:grid;gap:4px;text-align:right;white-space:nowrap}
+.guild-ranking-stats b{color:#c8bdf0;font-size:13px}
+.guild-ranking-refresh{justify-self:start;padding:8px 12px;border:1px solid #45405e;border-radius:10px;background:#29263d;color:#d8ccff;font:inherit;font-size:12px;cursor:pointer}
+.guild-ranking-refresh:hover{background:#34304c}
+@media(max-width:520px){.guild-ranking-panel{padding:14px}.guild-ranking-row{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:11px 9px}.guild-ranking-rank{width:31px;height:34px;font-size:12px}.guild-ranking-main b{font-size:12px}.guild-ranking-stats b{font-size:11px}.guild-ranking-stats small{font-size:10px}}
