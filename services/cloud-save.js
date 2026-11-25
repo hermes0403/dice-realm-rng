@@ -24,6 +24,8 @@ export function createCloudSaveService(dependencies) {
   let lastSyncedUserId = null;
   let cloudLoadReadyUserId = null;
   let lastCloudLoadError = null;
+  let activeAccountSessionId = null;
+  let accountSessionGeneration = 0;
   const grantCheckAtByUser = new Map();
   const CLOUD_SYNC_MIN_INTERVAL = 5 * 60 * 1000;
   const GRANT_CHECK_INTERVAL = 5 * 60 * 1000;
@@ -76,10 +78,30 @@ export function createCloudSaveService(dependencies) {
     try {
       const scopedKey = userSaveKey(userId);
       if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(snapshot));
-      localStorage.setItem(KEY, JSON.stringify(snapshot));
+      else localStorage.setItem(KEY, JSON.stringify(snapshot));
     } catch (error) {
       console.warn('Local save snapshot failed', error);
     }
+  }
+
+  function resetAccountSession(userId, offlineSnapshot = null) {
+    const nextUserId = userId ? String(userId) : null;
+    if (activeAccountSessionId === nextUserId) return accountSessionGeneration;
+    activeAccountSessionId = nextUserId;
+    accountSessionGeneration += 1;
+    if (cloudSyncTimer) {
+      timerManager.clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = null;
+    }
+    cloudSyncPending = false;
+    cloudLoadReadyUserId = null;
+    cloudSaveVersion = null;
+    lastSyncedPayload = null;
+    lastSyncedUserId = null;
+    lastCloudLoadError = null;
+    resumeRefreshPending = false;
+    setState(nextUserId ? fresh() : (offlineSnapshot?.bag ? offlineSnapshot : fresh()));
+    return accountSessionGeneration;
   }
 
   function preserveLegacyLocalSnapshot(userId, snapshot, cloudVersion) {
@@ -376,6 +398,7 @@ export function createCloudSaveService(dependencies) {
   async function applyPendingGrants(force = false) {
     const user = getCurrentUser();
     if (!user || !supabaseClient) return false;
+    const grantGeneration = accountSessionGeneration;
     const lastCheckAt = grantCheckAtByUser.get(user.id) || 0;
     if (!force && Date.now() - lastCheckAt < GRANT_CHECK_INTERVAL) return false;
     const S = getState();
@@ -387,7 +410,7 @@ export function createCloudSaveService(dependencies) {
         .select('coins_total,luck1_total,luck2_total,luck3_total,angel1_total,angel2_total,dice_grants')
         .eq('user_id', user.id).maybeSingle();
       if (error) throw error;
-      if (getCurrentUser()?.id !== user.id) return false;
+      if (getCurrentUser()?.id !== user.id || grantGeneration !== accountSessionGeneration) return false;
       grantCheckAtByUser.set(user.id, Date.now());
       if (!data) return false;
       let changed = false;
@@ -421,8 +444,7 @@ export function createCloudSaveService(dependencies) {
         }
         S.adminGrantApplied[col] = Math.max(applied, total);
       }
-      if (changed) {
-        localStorage.setItem(KEY, JSON.stringify(S));
+      if (changed && getCurrentUser()?.id === user.id && grantGeneration === accountSessionGeneration) {
         const scopedKey = userSaveKey(user.id);
         if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(S));
       }
@@ -455,9 +477,11 @@ export function createCloudSaveService(dependencies) {
     cloudSyncPending = false;
     cloudSyncBusy = true;
     const syncingUserId = initialUser.id;
+    const syncingGeneration = accountSessionGeneration;
+    const isCurrentSync = () => getCurrentUser()?.id === syncingUserId && accountSessionGeneration === syncingGeneration;
     try {
       await applyPendingGrants();
-      if (getCurrentUser()?.id !== syncingUserId) return false;
+      if (!isCurrentSync()) return false;
       const S = getState();
       // Freeze the exact request snapshot; nested arrays/objects must not keep live state references.
       const payload = clonePayload(savePayload());
@@ -483,6 +507,7 @@ export function createCloudSaveService(dependencies) {
         p_profile: profilePayload
       });
       if (error) throw error;
+      if (!isCurrentSync()) return false;
       if (!syncResult?.ok) {
         if (syncResult?.conflict) {
           document.getElementById('saveStatus').textContent = '偵測到其他裝置更新，正在合併存檔差異…';
@@ -495,13 +520,14 @@ export function createCloudSaveService(dependencies) {
             conflictBaseVersion,
             conflictLocalSnapshot
           });
+          if (!isCurrentSync()) return false;
           cloudSyncPending = true;
           toast('已重新比對其他分頁／裝置的存檔差異，正在保留可安全合併的進度並重新同步。');
           return false;
         }
         throw new Error(syncResult?.message || 'Cloud save version check failed');
       }
-      if (getCurrentUser()?.id !== syncingUserId) return false;
+      if (!isCurrentSync()) return false;
       cloudSaveVersion = syncResult.updated_at || null;
       if (Number.isFinite(Number(syncResult.total_rolls))) {
         S.rolls = Math.max(Number(S.rolls) || 0, Number(syncResult.total_rolls));
@@ -529,14 +555,16 @@ export function createCloudSaveService(dependencies) {
       document.getElementById('saveStatus').textContent = '雲端已同步';
       return true;
     } catch (e) {
+      if (!isCurrentSync()) return false;
       console.error('Cloud sync failed', e);
-      cloudSyncPending = getCurrentUser()?.id === syncingUserId;
+      cloudSyncPending = true;
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
       return false;
     } finally {
       cloudSyncBusy = false;
-      if (cloudSyncPending) scheduleCloudSync();
-      if (resumeRefreshPending) {
+      const activeUser = getCurrentUser();
+      if (cloudSyncPending && activeUser && cloudLoadReadyUserId === activeUser.id) scheduleCloudSync();
+      if (resumeRefreshPending && activeUser && cloudLoadReadyUserId === activeUser.id) {
         resumeRefreshPending = false;
         void refreshCloudSaveOnResume('sync-complete');
       }
@@ -573,8 +601,12 @@ export function createCloudSaveService(dependencies) {
     const S = getState();
     const user = getCurrentUser();
     const accountReady = !!user && cloudLoadReadyUserId === user.id;
-    // During an account switch, never write the previous player's in-memory
-    // state into the new player's UID-scoped local snapshot.
+    // Never persist a signed-in player's state to the shared offline key while
+    // their own UID-scoped cloud bootstrap is still pending.
+    if (user && !accountReady) {
+      document.getElementById('saveStatus').textContent = '新帳號存檔載入中';
+      return false;
+    }
     persistLocalSnapshot(S, accountReady ? user.id : null);
     try {
       const savedAtKey = accountReady ? localSavedAtKey(user.id) : null;
@@ -616,6 +648,7 @@ export function createCloudSaveService(dependencies) {
   async function flushCloudSave() {
     const user = getCurrentUser();
     if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
+    const flushGeneration = accountSessionGeneration;
     if (cloudSyncTimer) {
       timerManager.clearTimeout(cloudSyncTimer);
       cloudSyncTimer = null;
@@ -626,13 +659,13 @@ export function createCloudSaveService(dependencies) {
     // transactions even when the in-flight sync succeeds.
     while (cloudSyncBusy) {
       await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
-      if (getCurrentUser()?.id !== user.id) return false;
+      if (getCurrentUser()?.id !== user.id || flushGeneration !== accountSessionGeneration) return false;
     }
-    if (getCurrentUser()?.id !== user.id || cloudLoadReadyUserId !== user.id) return false;
+    if (getCurrentUser()?.id !== user.id || cloudLoadReadyUserId !== user.id || flushGeneration !== accountSessionGeneration) return false;
     const saved = await syncCloudSave();
     while (cloudSyncBusy) {
       await new Promise(resolve => timerManager.setTimeout(resolve, 100, 'cloud-save-flush-wait'));
-      if (getCurrentUser()?.id !== user.id) return false;
+      if (getCurrentUser()?.id !== user.id || flushGeneration !== accountSessionGeneration) return false;
     }
     return saved === true;
   }
@@ -646,6 +679,7 @@ export function createCloudSaveService(dependencies) {
   async function refreshCloudSaveOnResume(reason = 'resume') {
     const user = getCurrentUser();
     if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
+    const resumeGeneration = accountSessionGeneration;
     if (document?.visibilityState === 'hidden') return false;
     if (resumeRefreshPromise) return resumeRefreshPromise;
     if (reason !== 'sync-complete' && Date.now() - lastResumeRefreshAt < 2500) return false;
@@ -659,7 +693,7 @@ export function createCloudSaveService(dependencies) {
       if (getCurrentUser()?.id !== user.id) return false;
       document.getElementById('saveStatus').textContent = '頁面恢復中，正在核對雲端存檔…';
       await loadCloudSave({ syncAfterLoad: false });
-      const stillSignedIn = getCurrentUser()?.id === user.id;
+      const stillSignedIn = getCurrentUser()?.id === user.id && resumeGeneration === accountSessionGeneration;
       const loaded = stillSignedIn && cloudLoadReadyUserId === user.id;
       if (loaded && cloudSyncPending) scheduleCloudSync();
       if (!loaded) console.warn('Cloud save resume reconciliation did not complete:', reason);
@@ -705,6 +739,9 @@ export function createCloudSaveService(dependencies) {
     lastCloudLoadError = null;
     const user = getCurrentUser();
     if (!user || !supabaseClient) return;
+    if (activeAccountSessionId !== user.id) resetAccountSession(user.id);
+    const loadGeneration = accountSessionGeneration;
+    const isCurrentLoad = () => getCurrentUser()?.id === user.id && accountSessionGeneration === loadGeneration;
     const wasReadyForUser = cloudLoadReadyUserId === user.id;
     cloudLoadReadyUserId = wasReadyForUser ? user.id : null;
     if (lastSyncedUserId !== user.id) {
@@ -722,11 +759,10 @@ export function createCloudSaveService(dependencies) {
         try { return JSON.parse(localSaveAtLoadStart || 'null'); }
         catch { return null; }
       })();
-      const localPetDiscoveredBeforeCloud = { ...(getState()?.petDiscovered || {}) };
       const { data, error } = await supabaseClient.from('game_saves')
         .select('save_data,updated_at').eq('user_id', user.id).maybeSingle();
       if (error) throw error;
-      if (getCurrentUser()?.id !== user.id) return;
+      if (!isCurrentLoad()) return;
 
       cloudSaveVersion = data?.updated_at || null;
       lastSyncedPayload = clonePayload(data?.save_data || null);
@@ -794,15 +830,11 @@ export function createCloudSaveService(dependencies) {
           ? [...new Set(S.equippedPetUids)]
             .filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
           : [];
-        S.petDiscovered = {
-          ...localPetDiscoveredBeforeCloud,
-          ...(localSnapshotForMerge?.petDiscovered || {}),
-          ...(cloudPayload.petDiscovered || {})
-        };
-        S.petAutoSellRarities = {
-          ...(localSnapshotForMerge?.petAutoSellRarities || {}),
-          ...(cloudPayload.petAutoSellRarities || {})
-        };
+        // Only merge these maps through the versioned base above. An unversioned
+        // local snapshot may be a legacy cross-account cache and must not override
+        // the authenticated account's cloud data.
+        S.petDiscovered = { ...(mergedPayload.petDiscovered || {}) };
+        S.petAutoSellRarities = { ...(mergedPayload.petAutoSellRarities || {}) };
         S.autoDeleteDice = Array.isArray(S.autoDeleteDice)
           ? S.autoDeleteDice.filter(id => D.some(d => d.id === id && !d.weather && Number(d.den) >= 2 && Number(d.den) <= 600000))
           : [];
@@ -838,6 +870,7 @@ export function createCloudSaveService(dependencies) {
         }
         S.halloweenUnlocked = S.halloweenUnlocked || { d33: false, d34: false };
         S._cloudBaseVersion = data.updated_at || null;
+        if (!isCurrentLoad()) return;
         setState(S);
         restoreAutoSellPrefs();
         persistLocalSnapshot(S, user.id);
@@ -860,6 +893,7 @@ export function createCloudSaveService(dependencies) {
         }
         S.petAutoSellRarities = latestLocalSnapshot?.petAutoSellRarities || {};
         S._cloudBaseVersion = null;
+        if (!isCurrentLoad()) return;
         setState(S);
         restoreAutoSellPrefs();
         persistLocalSnapshot(S, user.id);
@@ -868,15 +902,20 @@ export function createCloudSaveService(dependencies) {
 
       // The correct account state is now installed. Only now may any save write
       // to this UID; all earlier saves were blocked during account switching.
+      if (!isCurrentLoad()) return;
       cloudLoadReadyUserId = user.id;
       await applyPendingGrants(true);
+      if (!isCurrentLoad()) return;
       if (syncAfterLoad) await syncCloudSave();
       else if (data?.save_data?.bag && stableSerialize(savePayload()) !== stableSerialize(data.save_data)) {
         cloudSyncPending = true;
       }
+      if (!isCurrentLoad()) return;
       await refreshLeaderboards();
+      if (!isCurrentLoad()) return;
       cloudLoadReadyUserId = user.id;
     } catch (e) {
+      if (!isCurrentLoad()) return;
       cloudLoadReadyUserId = null;
       lastCloudLoadError = e;
       console.error(e);
@@ -895,5 +934,5 @@ export function createCloudSaveService(dependencies) {
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
   function getLastCloudLoadError() { return lastCloudLoadError; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, refreshCloudSaveOnResume, isLoadedFor, getLastCloudLoadError };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, refreshCloudSaveOnResume, resetAccountSession, isLoadedFor, getLastCloudLoadError };
 }

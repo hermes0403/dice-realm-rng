@@ -160,6 +160,7 @@ export function createAuthService(deps) {
     loadWeatherSummonData,
     applyPetLoginSkill = () => 0,
     isCloudSaveReady = () => false,
+    resetAccountSession = () => {},
     getCloudLoadError = () => null,
     onboardingMaybeShow = () => false,
     timerManager
@@ -498,7 +499,6 @@ export function createAuthService(deps) {
       const base = String(user.user_metadata?.username || (user.email || '玩家').split('@')[0])
         .replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 12) || '玩家';
       state.name = base + '_' + user.id.slice(0, 4);
-      localStorage.setItem(KEY, JSON.stringify(state));
     }
 
     document.getElementById('authModal').style.display = 'flex';
@@ -654,6 +654,7 @@ export function createAuthService(deps) {
             setCurrentUser(null);
             return;
           }
+          resetAccountSession(signedUser.id);
           setCurrentUser(signedUser);
           await startSessionInitialization(signedUser, 'SIGNED_IN', true);
           return;
@@ -717,6 +718,7 @@ export function createAuthService(deps) {
             showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置。');
             return;
           }
+          resetAccountSession(signedUser.id);
           setCurrentUser(signedUser);
           await startSessionInitialization(signedUser, 'SIGNED_IN', true);
           return;
@@ -759,6 +761,7 @@ export function createAuthService(deps) {
         showAuthMessage('此裝置今日已登入過 3 個不同帳號，暫時無法登入第 4 個帳號。明天台灣時間 00:00 後會重置；已使用過的 3 個帳號仍可繼續登入。');
         return;
       }
+      resetAccountSession(signedUser.id);
       setCurrentUser(signedUser);
       await startSessionInitialization(signedUser, 'SIGNED_IN', true);
     } catch (error) {
@@ -899,6 +902,7 @@ export function createAuthService(deps) {
       if (!enforceDeviceAccountLimit(user)) return false;
       const activeUser = getCurrentUser();
       if (activeUser?.id && activeUser.id !== user.id) return false;
+      resetAccountSession(user.id);
       setCurrentUser(user);
       updateAdminVisibility();
       await startSessionInitialization(user, 'INITIAL_SESSION');
@@ -915,6 +919,11 @@ export function createAuthService(deps) {
     authStateSubscription = supabaseClient.auth.onAuthStateChange((event, session) => {
       const previousUser = getCurrentUser();
       const incomingUser = session?.user || null;
+      if (incomingUser?.id) {
+        if (previousUser?.id !== incomingUser.id) resetAccountSession(incomingUser.id);
+      } else {
+        resetAccountSession(null);
+      }
 
       if (incomingUser) clearSessionOfflineMark();
 
