@@ -40,11 +40,11 @@ test('每日完成紀錄與全員登入獎勵具有唯一鍵及冪等欄位', ()
 });
 
 test('公會升級門檻完整且最高等級為 20', () => {
-  for (const threshold of [100,250,500,850,1300,1900,2700,3700,5000,6600,8500,10800,13500,16800,20800,25500,31000,37500,45000]) {
-    assert.match(migration, new RegExp('\\b' + threshold + '\\b'));
+  for (const threshold of [100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500]) {
+    assert.match(guildRewards, new RegExp('\\\\b' + threshold + '\\\\b'));
   }
-  assert.match(migration, /level between 1 and 20/);
-  assert.match(migration, /private\.guild_level_for_xp/);
+  assert.match(guildRewards, /guild_level between 2 and 20/);
+  assert.match(guildRewards, /private\\.guild_level_for_xp/);
 });
 
 test('每日擲骰進度由 game_saves trigger 計算，並限制異常跳增', () => {
