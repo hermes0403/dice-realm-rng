@@ -1,7 +1,7 @@
 ---
 id: T-0131
 title: 公會排行榜依等級與總 XP 排名
-status: in_progress
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0128, T-0129]
 branch: task/T-0131-guild-leaderboard
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -58,6 +58,10 @@ done_at:
 - [ ] 手機與桌面版均可閱讀及操作，無水平溢位。
 - [ ] 不新增高頻輪詢／Realtime；相關單元與回歸測試通過。
 - [ ] 真實多公會資料驗證結果如實記錄，未執行項目不得宣稱通過。
+
+## Owner 驗收紀錄
+
+- 2026-11-25 21:03 [代記:棒子/叉子] 驗收：棒子確認公會排行榜已成功上線並驗收成功。來源：棒子於 2026-11-25 21:03 在本對話表示「排行榜成功了喔，驗收成功」。證據：交付 PR #344 已合併，merge commit `67c242acb7f44c6d17cf7fad0af8b44769d1f5cd`；合併後 GitHub Pages 部署 workflow `45618848973` success；合併後骰子存檔、雲端存檔回歸及天氣公告測試 success；正式 Supabase 唯讀排行榜 RPC migration `20261125124301` 已套用並完成權限查核。
 
 ## 紀錄
 
