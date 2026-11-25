@@ -20,7 +20,7 @@ test('公會設定頁顯示名稱、介紹及加入方式，並使用 2～16 字
   assert.doesNotMatch(ui, /公會設定功能尚未開放/);
 });
 
-test('只有會長看到可儲存表單，其他角色為唯讀', () => {
+test('只有會長看到可儲存表單，非會長幹部為唯讀', () => {
   assert.match(ui, /const canEdit = role === 'leader'/);
   assert.match(ui, /只有會長可以修改公會設定/);
   assert.match(ui, /disabled/);
