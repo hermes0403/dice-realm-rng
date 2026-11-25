@@ -10,7 +10,7 @@ reviewer: 棒子
 priority: P1
 created: 2026-11-26
 updated: 2026-11-26
-depends_on: [T-0133, T-0135]
+depends_on: []
 branch: task/T-0140-guild-member-settings-exit
 done_by:
 done_at:
