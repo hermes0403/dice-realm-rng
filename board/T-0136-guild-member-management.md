@@ -1,7 +1,7 @@
 ---
 id: T-0136
 title: 新增公會成員管理與安全移除功能
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-26
 depends_on: []
 branch: task/T-0136-guild-member-management
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -56,6 +56,8 @@ done_at:
 
 - 2026-11-25 21:41 [叉子] 依棒子要求接續成員管理。最新 main Board 的 owner_side 有效 in_progress 任務為 0/5（目前兩張 in_progress 任務均屬 collaborator_side）；Communicate 優先閘門未發現有效鎖定。現有 role 值已確認為 leader、vice_leader、officer、member，開始檢查成員 payload、刪除 trigger 與權限。
 - 2026-11-25 21:46 [叉子] 狀態轉換：in_progress → review。PR #353 已合併至 main，merge commit `d5d2f086b599586d4d82fac8651bf6f717a930ee`；正式 Supabase migration `guild_member_management` 已套用。RPC 交易測試涵蓋會長移除副會長、 副會長移除成員、禁止自我移除、禁止副會長移除會長、跨公會目標拒絕及一般成員拒絕，測試交易已 rollback。正式權限查核確認 guild_members RLS 啟用、anon/authenticated 無直接 DELETE、anon 無 RPC 權限、authenticated 僅能呼叫 public wrapper；既有每日登入 DELETE trigger 仍存在。17 個 GitHub Actions workflows 全數 success；Pages run `45626835730` build、deploy、report-build-status 全部 success。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 
