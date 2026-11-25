@@ -49,6 +49,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 20:20 [叉子] 棒子已回覆手機實機及雙帳號操作測試通過，測試範圍包含建立／加入公會、成員名單顯示與退出，並表示目前介面滿意；此為 Owner 提供的人工測試證據。先前紀錄中的「尚未完成真實雙帳號與手機驗證」已由本筆新紀錄更新現況。桌面實機仍未由本工作環境獨立驗證；本任務依賴 T-0128 正式完成後才可結案。
+
 - 2026-11-25 [叉子] 依棒子明確要求建立 T-0129。開工閘門依 main 的 Board 檔案盤點：owner_side 有效 in_progress 任務僅 T-0128（1/5）；目前有效的 owner_side 任務中未發現符合 §15.9 條件的 communicate task 或 COMMUNICATE_LOCK，Communicate 優先閘門未觸發。由 main commit e13b4a418032d70c04104ef318a13cf4aec65737 建立 task/T-0129-guild-main-interface，任務轉為 in_progress。
 - 2026-11-25 [叉子] 已重製公會前端資訊架構：新增五項導覽入口、已加入公會的主資訊與成員名單、尋找公會檢視，以及今日任務／排行榜／設定的明確未開放狀態；保留既有建立、搜尋、加入／申請、幹部審核及退出 RPC。同步更新 guild CSS、HTML／JS 資產版本與 Service Worker 快取殼至 v2.15。新增公會介面靜態回歸測試並接入 PWA workflow；PR #323 的 CI 已完成：本任務最新程式提交 e629d317ee76a6aeb6008bbcbf5c8aab3ac19a61 對應的 16 個 GitHub Actions workflow 全部 success；其中 PWA display workflow 已執行新增的公會 UI 測試及 ui/guild.js 語法檢查。真實雙帳號瀏覽器驗證尚未執行。
 - 2026-11-25 [叉子] 棒子補充明確 UI 目標為使用者手機截圖：本次改為白底、柔和彩色五入口卡片、紫色公會識別卡、成員清單；手機版改為雙欄入口卡，較窄螢幕自動縮減次要說明。成員列表預設顯示前三位，另提供展開完整名單；不使用示意圖中的 Hermes／玩家 A／玩家 B 假資料，仍讀取 RPC 真實成員名稱及職位。今日任務／排行榜／設定保留尚未開放提示，不製造假功能。PWA 快取升至 v2.16，資產 query key 更新為 `20261125-t0129-guild-pastel-v2`。PR #324 已合併，merge commit `b12522a9640ad94e07d5c7120725ff7360c4f0ce`；該提交的 17 項 GitHub Actions workflow 全部 success。GitHub Pages deployment run `45522303605` 已於 2026-11-25 01:00:04Z 顯示 success。線上頁面未能由本工作環境直接擷取畫面，真實雙帳號與手機實機驗證仍待棒子檢查。
@@ -66,6 +68,7 @@ done_at:
 
 - PR #323（基礎公會頁）及 PR #324（淺色介面重製）均已合併。
 - PR #324 head commit `e6e0b214a87a4c3e6402cfc2422d6eb7391b4a49`：17 個 GitHub Actions workflow 全部 success，包含 PWA display regression、Board lifecycle、存檔與其他既有回歸測試。
+- 棒子於本對話確認手機實機及雙帳號建立／加入／成員顯示／退出操作通過；桌面實機仍待補驗。
 - merge commit `b12522a9640ad94e07d5c7120725ff7360c4f0ce` 的 GitHub Pages deployment run `45522303605`：`success`。
 - 尚未完成真實雙帳號瀏覽器測試及手機實機驗證；此項待棒子驗收。
 
