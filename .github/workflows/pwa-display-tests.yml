@@ -40,6 +40,8 @@ on:
       - 'docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql'
       - 'docs/migrations/20261125101918_guild_repeatable_daily_quests.sql'
       - 'tests/pwa-display-controls.test.mjs'
+      - 'systems/global-boost.js'
+      - 'tests/global-boost-homepage-render.test.mjs'
       - '.github/workflows/pwa-display-tests.yml'
 
 jobs:
@@ -55,7 +57,7 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs tests/guild-foundation-authorization.test.mjs tests/guild-settings.test.mjs tests/guild-announcements.test.mjs tests/guild-member-management.test.mjs
+        run: node --test tests/global-boost-homepage-render.test.mjs tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs tests/guild-foundation-authorization.test.mjs tests/guild-settings.test.mjs tests/guild-announcements.test.mjs tests/guild-member-management.test.mjs
       - name: Check JavaScript syntax
         run: |
           node --check script.js
