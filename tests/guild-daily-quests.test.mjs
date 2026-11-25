@@ -8,7 +8,7 @@ const css = read('../guild.css');
 const migration = read('../docs/migrations/20261125093419_guild_daily_quests_xp.sql');
 const hardening = read('../docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql');
 const membership = read('../docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql');
-const repeatable = read('../docs/migrations/20261125103000_guild_repeatable_daily_quests.sql');
+const repeatable = read('../docs/migrations/20261125101918_guild_repeatable_daily_quests.sql');
 const sw = read('../sw.js');
 const html = read('../index.html');
 
