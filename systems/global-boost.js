@@ -123,7 +123,7 @@ export function createGlobalBoostSystem({
   function renderRealmActivity() {
     const welcome = documentRef.getElementById('realmHeroWelcome');
     const panel = documentRef.getElementById('realmAdminActivity');
-    if (!welcome || !panel) return;
+    if (!panel) return;
     const boost = activeGlobalBoost();
     const luckPercent = Number(boost.luck_percent) || 0;
     const speedPercent = Number(boost.speed_percent) || 0;
@@ -132,7 +132,7 @@ export function createGlobalBoostSystem({
     const hasLuckOrSpeed = !!getBoostState() && (luckPercent > 0 || speedPercent > 0);
     const hasCoinBoost = !!coinBoost;
     const hasBoost = hasLuckOrSpeed || !!fusionBoost || hasCoinBoost;
-    welcome.hidden = hasBoost;
+    if (welcome) welcome.hidden = hasBoost;
     panel.hidden = !hasBoost;
     if (!hasBoost) {
       panel.innerHTML = '';
