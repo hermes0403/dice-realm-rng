@@ -49,6 +49,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 20:24 [叉子] T-0129 Owner 測試證據更新 PR #337 已合併，merge commit `7f07f895da3958f728d18334304a7b78aaff9b49`；Board lifecycle validation success。手機雙帳號測試已由棒子確認，桌面實機尚待補驗；任務狀態維持 in_progress，且仍依賴 T-0128 正式完成。
+
 - 2026-11-25 20:20 [叉子] 棒子已回覆手機實機及雙帳號操作測試通過，測試範圍包含建立／加入公會、成員名單顯示與退出，並表示目前介面滿意；此為 Owner 提供的人工測試證據。先前紀錄中的「尚未完成真實雙帳號與手機驗證」已由本筆新紀錄更新現況。桌面實機仍未由本工作環境獨立驗證；本任務依賴 T-0128 正式完成後才可結案。
 
 - 2026-11-25 [叉子] 依棒子明確要求建立 T-0129。開工閘門依 main 的 Board 檔案盤點：owner_side 有效 in_progress 任務僅 T-0128（1/5）；目前有效的 owner_side 任務中未發現符合 §15.9 條件的 communicate task 或 COMMUNICATE_LOCK，Communicate 優先閘門未觸發。由 main commit e13b4a418032d70c04104ef318a13cf4aec65737 建立 task/T-0129-guild-main-interface，任務轉為 in_progress。
