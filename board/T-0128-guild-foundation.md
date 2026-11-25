@@ -63,6 +63,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 20:24 [叉子] T-0128 交付 PR #336 已以 merge commit `3a0f23c59a3db137f27b7230b72fba23dcd2c8cc` 合併至 main；PWA display regression、Board lifecycle validation、Cloud save rollback、Coin boost regression 四項 PR workflow 均 success。任務實作與證據已同步到 main；狀態維持 in_progress，等待棒子正式驗收及桌面版操作確認。
+
 - 2026-11-25 20:20 [叉子] T-0128 正式資料庫交易測試先發現一項權限漏洞：未加入公會的登入玩家因 `v_role` 為 NULL，舊判斷 `v_role NOT IN (...)` 不會進入拒絕分支，竟可審核申請。已以 migration `20261125121831_guild_review_application_null_role_guard` 修正為明確拒絕 `v_role IS NULL`，正式 Supabase migration history 已記錄。修正後以明確 `BEGIN ... ROLLBACK` 執行 15 項行為測試，全部 PASS；測試涵蓋未登入拒絕、建立會長、重複建立、搜尋公開欄位、重複申請、未授權審核、核准／拒絕、重複核准、會長退出限制、副會長／幹部人數上限、公會 4 人上限、單一公會唯一成員及公開公會直接加入。測試使用暫存交易資料，已回滾，未留下測試公會或成員。安全權限唯讀查核亦確認 6 張公會資料表啟用 RLS、anon/authenticated 無直接 CRUD、anon 無公會 RPC EXECUTE、職位及總人數 trigger 存在。另以兩個同時 Supabase SQL 連線平行執行建立公會與公開公會加入競態測試，各自觀察到一筆成功、一筆 `already_in_guild`，並立即刪除唯一測試公會；確認資料庫只保留一份成員關係。棒子先前確認手機雙帳號的建立／加入／成員顯示／退出流程已實測；桌面實機尚未由本工作環境獨立驗證。
 
 - 2026-11-25 [叉子] 修正先前 5 項 PWA 回歸測試失敗：將 HTML script/style 版本斷言更新為目前實際載入版本，Service Worker 快取殼升至 v2.14，並同步預快取目前 script.js、ui/guild.js、style.css、guild.css。GitHub Actions run 45511969931 成功：11 個既有語法檢查步驟全部成功，回歸測試 72/72 通過、0 失敗（其中原先 5 項失敗已通過）。另新增 docs/migrations/20261124221835_guild_foundation.sql，依 2026-11-25 正式 Supabase 的表欄位、constraints、indexes、RLS、role-limit trigger、private/public RPC 定義與 grants 反向整理，補回版本 20261124221835 的來源追蹤；此為來源檔補登，未重新套用正式資料庫。檔案依既有 docs/migrations 慣例放置，未觸碰禁止推送的 supabase/。CI run 發生於 migration 來源檔補登之前，SQL 尚未由獨立資料庫測試環境執行；正式環境僅完成唯讀結構比對。
