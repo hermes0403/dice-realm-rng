@@ -78,16 +78,22 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   function renderNoGuild() {
     if (activeView === 'home') activeView = 'find';
     if (activeView === 'find') {
-      root().innerHTML = navMarkup() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>';
+      root().innerHTML = navMarkup() + renderBackButton() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>';
       return;
     }
     renderFeatureView(activeView);
   }
 
+  function renderBackButton() {
+    return '<div class="guild-subpage-head" style="display:flex;align-items:center;margin:0 0 12px">' +
+      '<button type="button" class="guild-nav-card tone-blue guild-back-button" data-guild-back style="min-height:42px;padding:9px 14px;gap:8px;border-radius:12px">' +
+      '<span aria-hidden="true">‹</span><span>返回公會主頁</span></button></div>';
+  }
+
   function renderFeatureView(view) {
     const feature = VIEWS[view];
     if (!feature) { activeView = 'home'; render(); return; }
-    root().innerHTML = navMarkup() +
+    root().innerHTML = renderBackButton() +
       '<section class="card guild-feature-placeholder"><div class="guild-feature-icon" aria-hidden="true">' +
       (view === 'tasks' ? '✓' : view === 'ranking' ? '♜' : '⚙') + '</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>' + feature.title + '</h2><p>' + feature.description + '</p>' +
@@ -153,7 +159,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (!getCurrentUser()) { renderGuest(); return; }
     if (!currentData?.guild) { renderNoGuild(); return; }
     if (activeView === 'find') {
-      root().innerHTML = navMarkup() + '<section class="card guild-find-existing"><div class="eyebrow">FIND GUILD</div>' +
+      root().innerHTML = navMarkup() + renderBackButton() + '<section class="card guild-find-existing"><div class="eyebrow">FIND GUILD</div>' +
         '<h2>尋找公會</h2><p class="muted">你目前已加入「' + escapeHTML(currentData.guild.name) +
         '」。你可以瀏覽公開公會，但需先退出目前公會才能加入其他公會。</p>' +
         '<div class="guild-search"><input id="guildSearchInput" maxlength="24" placeholder="輸入公會名稱" aria-label="輸入公會名稱">' +
@@ -219,6 +225,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   documentRef.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button) return;
+    if (button.matches('[data-guild-back]')) {
+      activeView = currentData?.guild ? 'home' : 'find';
+      render();
+      return;
+    }
     if (button.dataset.guildView) {
       activeView = button.dataset.guildView;
       render();
