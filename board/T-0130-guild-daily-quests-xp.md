@@ -1,7 +1,7 @@
 ---
 id: T-0130
 title: 公會每日任務與經驗升級系統
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0128, T-0129]
 branch: task/T-0130-guild-daily-quests-xp
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -92,6 +92,10 @@ done_at:
 - [ ] 任務頁能正確顯示在線／擲骰已完成輪數及當前輪進度、單人公會全員登入資格、公會等級與 XP，手機／桌面版正常；公會導覽不再顯示「返回主頁／回到遊戲主畫面」。
 - [x] 不新增高頻輪詢；相關語法、單元、資料庫及既有回歸測試通過，記錄實際命令與結果。
 - [ ] 真實登入、多成員及跨日驗證結果如實記錄；未執行項目不得宣稱通過。
+
+## Owner 驗收紀錄
+
+- 2026-11-25 18:26 [棒子] 確認 T-0130 驗收完成並同意結案；真實手機／桌面操作與雙帳號跨日驗收尚未執行，相關項目保留未勾選且不宣稱通過，作為本次結案的明確保留事項。來源：棒子於本次對話指示「完成吧」。證據：PR #330、PR #331 已合併；PR #330 的 17/17 檢查通過；GitHub Pages build/deployment workflow 45594690706 成功；正式 migration 20261125101918_guild_repeatable_daily_quests 已套用；Asia/Taipei 00:00 邊界 SQL 測試通過。
 
 ## 紀錄
 
