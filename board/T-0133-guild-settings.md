@@ -1,7 +1,7 @@
 ---
 id: T-0133
 title: 開放公會設定：修改名稱、介紹與加入方式
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-26
 depends_on: [T-0128, T-0129]
 branch: task/T-0133-guild-settings
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -63,6 +63,8 @@ done_at:
 - 2026-11-25 21:03 [叉子] 狀態轉換：open → in_progress。依最新 main `67c242acb7f44c6d17cf7fad0af8b44769d1f5cd` 重新盤點 owner_side 有效 in_progress 任務：僅 T-0132，共 1/5；T-0002、T-0038 屬 collaborator_side，不計入本方容量。board/ 與 board/archive/ 未發現有效 Communicate task，亦未發現有效 COMMUNICATE_LOCK。兩道啟動閘門均未阻擋；開始 T-0133 實作。
 
 - 2026-11-25 21:03 [叉子] 依棒子新需求建立 T-0133，先以 open 狀態開單。工作範圍限定公會名稱、介紹及加入方式；暫定僅會長可修改，其他角色可查看。開工前須依 Board §15.3 重新確認容量及 Communicate 優先閘門。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 
