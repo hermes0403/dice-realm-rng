@@ -103,3 +103,20 @@
 .guild-member-remove{padding:6px 10px;border:1px solid #e5c7cc;border-radius:8px;background:#fff7f8;color:#a33e50;font:inherit;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
 .guild-member-remove:hover{background:#fcebed;border-color:#dbaeb7}
 @media(max-width:520px){.guild-member-row{gap:8px;flex-wrap:wrap}.guild-member-identity{flex:1 1 150px}.guild-member-actions{margin-left:auto}.guild-member-remove{padding:7px 11px}}
+
+
+/* T-0140: role-aware settings and explicit two-step guild exit confirmation */
+.guild-leave-panel{display:grid;gap:10px}
+.guild-leave-panel h3{margin:0;color:#d9dbea}
+.guild-leave-description{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-leave-button,.guild-leave-next,.guild-leave-confirm,.guild-leave-cancel{min-height:40px;padding:9px 14px;border:1px solid rgba(190,130,145,.28);border-radius:10px;background:#30232e;color:#e8b7c2;font:inherit;font-weight:700;cursor:pointer}
+.guild-leave-button:disabled{opacity:.55;cursor:not-allowed}
+.guild-leave-overlay{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:18px;background:rgba(4,7,16,.76);backdrop-filter:blur(5px)}
+.guild-leave-dialog{display:grid;gap:13px;width:min(100%,420px);padding:22px;border:1px solid rgba(155,139,201,.28)!important;border-radius:18px;background:#191e30!important;box-shadow:0 22px 70px rgba(0,0,0,.45)}
+.guild-leave-dialog h3{margin:0;color:#e1d9f5;font-size:20px}
+.guild-leave-dialog p{margin:0;color:#b3b8ca;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.guild-leave-dialog-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.guild-leave-cancel{border-color:rgba(140,149,184,.24);background:#252a3e;color:#c1c6d7}
+.guild-leave-next{border-color:rgba(155,139,201,.32);background:#302b47;color:#d1c5f1}
+.guild-leave-confirm{border-color:rgba(190,100,125,.42);background:#482631;color:#ffd1d9}
+@media(max-width:520px){.guild-leave-panel{padding:14px}.guild-leave-button{width:100%}.guild-leave-dialog{padding:17px}.guild-leave-dialog-actions>*{flex:1}}
