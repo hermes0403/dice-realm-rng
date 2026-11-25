@@ -19,10 +19,10 @@ import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261123-t0126-time-crystal-material-deposit';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261126-t0139-account-isolation';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
-import { createAuthService } from './services/auth.js?v=20261121-t0130-persisted-session-restore-v1';
+import { createAuthService } from './services/auth.js?v=20261126-t0139-account-isolation';
 import { createPetSystem } from './systems/pets.js?v=20261122-secret-skill-swap-v1';
 import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261122-trade-slot-picker-v2';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
