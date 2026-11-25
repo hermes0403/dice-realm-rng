@@ -1,7 +1,7 @@
 ---
 id: T-0135
 title: 新增公會公告功能
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-26
 depends_on: []
 branch: task/T-0135-guild-announcements
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -55,6 +55,8 @@ done_at:
 
 - 2026-11-25 21:35 [叉子] 依棒子要求接續下一項公會功能。owner_side 有效 in_progress 任務盤點為 0/5；T-0132、T-0134 均已轉 review，不計容量；Communicate 優先閘門未發現有效鎖定。先檢查現有角色欄位及公會資料載入方式。
 - 2026-11-25 21:40 [叉子] 狀態轉換：in_progress → review。PR #351 已合併至 main，merge commit `498c5d4676b20cb2db6d75660924995923f78fc4`；正式 Supabase migration `guild_announcements` 已套用。公告表 RLS 已啟用，anon 無表讀取／RPC 執行權限，authenticated 無表直接寫入權限；公告寫入 RPC 為 SECURITY DEFINER 且固定空 search_path。交易測試驗證 200 字成功、201 字拒絕、空白清除及非會長／副會長拒絕寫入，測試交易已 rollback。17 個 GitHub Actions workflows 全數 success；Pages run `45625769416` build、deploy、report-build-status 全部 success。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 
