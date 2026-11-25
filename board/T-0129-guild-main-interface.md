@@ -1,7 +1,7 @@
 ---
 id: T-0129
 title: 公會主介面依示意圖重製
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -48,6 +48,8 @@ done_at:
 - [ ] 未修改公會以外的遊戲資料或系統。
 
 ## 紀錄
+
+- 2026-11-25 20:25 [叉子] 狀態轉換：in_progress → review。公會主介面及子頁返回導覽已合併部署；棒子確認手機雙帳號建立／加入／成員顯示／退出測試通過，Board 證據 PR #337 與本次紀錄 PR #339 已合併，Board lifecycle validation 成功。送棒子進行最終 Owner 驗收；桌面實機未獨立驗證，且仍依賴 T-0128 正式完成。
 
 - 2026-11-25 20:24 [叉子] T-0129 Owner 測試證據更新 PR #337 已合併，merge commit `7f07f895da3958f728d18334304a7b78aaff9b49`；Board lifecycle validation success。手機雙帳號測試已由棒子確認，桌面實機尚待補驗；任務狀態維持 in_progress，且仍依賴 T-0128 正式完成。
 
