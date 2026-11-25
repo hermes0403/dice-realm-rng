@@ -8,6 +8,7 @@ const css = read('../guild.css');
 const migration = read('../docs/migrations/20261125093419_guild_daily_quests_xp.sql');
 const hardening = read('../docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql');
 const membership = read('../docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql');
+const repeatable = read('../docs/migrations/20261125103000_guild_repeatable_daily_quests.sql');
 const sw = read('../sw.js');
 const html = read('../index.html');
 
@@ -60,12 +61,12 @@ test('公會成員上限維持 4，且新進度表不可被客戶端直接讀寫
 });
 
 test('公會任務資產版本與 Service Worker 快取一致', () => {
-  const version = '20261125-t0130-guild-daily-quests';
+  const version = '20261125-t0130-repeatable-guild-quests';
   assert.ok(html.includes('guild.css?v=' + version));
   assert.ok(html.includes('script.js?v=' + version));
   assert.ok(sw.includes('ui/guild.js?v=' + version));
   assert.ok(sw.includes('guild.css?v=' + version));
-  assert.ok(sw.includes('dice-realm-shell-v2.19'));
+  assert.ok(sw.includes('dice-realm-shell-v2.20'));
   assert.ok(css.includes('.guild-task-card'));
 });
 
@@ -75,4 +76,18 @@ test('全員登入獎勵會在成員加入、退出或轉移公會後重新依�
   assert.match(membership, /after delete on public\.guild_members/);
   assert.match(membership, /after update of guild_id on public\.guild_members/);
   assert.match(membership, /on conflict \(guild_id, task_date\) do nothing/);
+});
+
+
+test('在線與擲骰任務支援每日多輪領取，且每輪紀錄具唯一鍵', () => {
+  assert.match(repeatable, /create table if not exists public\.guild_daily_task_claims/);
+  assert.match(repeatable, /primary key \(guild_id, user_id, task_date, task_key, cycle_number\)/);
+  assert.match(repeatable, /generate_series\([\s\S]*v_online_cycles_completed/);
+  assert.match(repeatable, /generate_series\([\s\S]*v_roll_cycles_completed/);
+  assert.match(repeatable, /online_cycles_completed = online_cycles_completed \+ v_new_cycles/);
+  assert.match(repeatable, /roll_cycles_completed = roll_cycles_completed \+ v_new_cycles/);
+  assert.match(repeatable, /v_member_count >= 2/);
+  assert.match(repeatable, /'eligible',v_member_count>=2/);
+  assert.match(ui, /已領取 ' \+ cycles \+ ' 輪/);
+  assert.doesNotMatch(ui, /label: '返回主頁'/);
 });
