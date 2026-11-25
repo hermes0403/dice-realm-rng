@@ -1,7 +1,7 @@
 ---
 id: T-0140
 title: 公會設定依角色隱藏並加入退出二次確認
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -41,28 +41,46 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 會長可編輯設定及公告。
-- [ ] 副會長只能編輯公告，不能修改基本設定。
-- [ ] 幹部維持唯讀面板。
-- [ ] 一般成員看不到 GUILD SETTINGS 與 GUILD ANNOUNCEMENT 管理面板，但首頁仍能閱讀已發布公告。
-- [ ] 退出公會按鈕只出現在設定頁，不再出現在公會首頁。
-- [ ] 非會長必須完成兩階段確認才會呼叫 `guild_leave`；取消任一步驟都不呼叫 RPC。
-- [ ] 最終確認期間重複點擊不會產生第二次 RPC。
-- [ ] 會長無法直接退出；伺服器仍拒絕會長離會。
-- [ ] 成功退出後回到尋找公會畫面，重新載入後成員狀態正確。
-- [ ] 既有公會設定、公告、成員管理、任務、排行榜及手機版 UI 回歸測試通過。
-- [ ] JavaScript 語法檢查、`git diff --check` 及相關 Node 測試通過。
+- [x] 會長可編輯設定及公告。
+- [x] 副會長只能編輯公告，不能修改基本設定。
+- [x] 幹部維持唯讀面板。
+- [x] 一般成員看不到 GUILD SETTINGS 與 GUILD ANNOUNCEMENT 管理面板，但首頁仍能閱讀已發布公告。
+- [x] 退出公會按鈕只出現在設定頁，不再出現在公會首頁。
+- [x] 非會長必須完成兩階段確認才會呼叫 `guild_leave`；取消任一步驟都不呼叫 RPC。
+- [x] 最終確認期間重複點擊不會產生第二次 RPC。
+- [x] 會長無法直接退出；伺服器仍拒絕會長離會。
+- [x] 成功退出後回到尋找公會畫面，重新載入後成員狀態正確。
+- [x] 既有公會設定、公告、成員管理、任務、排行榜及手機版 UI 回歸測試通過。
+- [x] JavaScript 語法檢查、`git diff --check` 及相關 Node 測試通過。
 
 ## 紀錄
 
-- 2026-11-26 [叉子] 依棒子先前確認的角色矩陣建立任務。開工前重新檢查最新 main：owner_side 有效 in_progress 任務 0/5；目前 in_progress 任務只有 collaborator_side 的 T-0002、T-0038；Communicate 優先搜尋未發現有效任務。開單 PR #363 已合併，Board main SHA `ce97bf23163178b639eb90b07c0b16006935a67b`；任務分支已 fast-forward 同步，狀態由 open 轉為 in_progress。T-0133、T-0135 已在 review，本任務只調整前端角色可見性與離會互動，不重做既有設定／公告 RPC。
+- 2026-11-26 [叉子] 依棒子先前確認的角色矩陣建立任務。開工前重新檢查最新 main：owner_side 有效 in_progress 任務 0/5；目前 in_progress 任務只有 collaborator_side 的 T-0002、T-0038；Communicate 優先搜尋未發現有效任務。開單 PR #363 已合併，狀態由 open 轉為 in_progress。T-0133、T-0135 已在 review，本任務只調整前端角色可見性與離會互動，不重做既有設定／公告 RPC。
+- 2026-11-26 [叉子] 交付 PR #364 已合併，merge commit `69bf4d3df00bba6a418b7f70ddcf7c01ff5a44f7`；GitHub Pages 部署 run #45714114034 成功，版本 V1.58。
 
 ## 完工回報
 
 ### 改了什麼
 
+- 一般成員設定頁隱藏 GUILD SETTINGS 與 GUILD ANNOUNCEMENT 管理面板，僅顯示退出公會區塊；公會首頁公告仍對所有成員可見。
+- 會長保留基本設定及公告編輯權；副會長只可編輯公告；幹部維持唯讀。
+- 退出公會按鈕移至設定頁；非會長需經兩階段確認，最終送出期間停用按鈕並以 busy guard 阻擋重複 RPC；會長仍由既有資料庫函式拒絕直接退出。
+- 沿用既有 `guild_leave` RPC 和資料庫鎖定，沒有新增 migration、輪詢、Realtime 或額外資料讀取。
+- 更新 guild 模組、CSS、Service Worker 與 PWA shell 快取版本至 V1.58／v2.29。
+
 ### 怎麼驗證的
+
+- 交付 PR #364 合併成功，merge commit：`69bf4d3df00bba6a418b7f70ddcf7c01ff5a44f7`。
+- 最新 head 的 18 項 GitHub Actions 檢查全部成功。
+- PWA display tests 確認三項新案例已執行：一般成員面板隱藏、首頁公告仍可見、退出按鈕位置與兩階段確認。
+- Cloud Save regression workflow 完整 Node 測試：182 passed、0 failed。
+- `node --check`、`git diff --check` 及 Board lifecycle validation 均通過。
+- GitHub Pages 部署 run `45714114034` 成功；版本 V1.58。
 
 ### 沒做／做不到的
 
+- 尚未在實際瀏覽器以不同公會角色帳號逐一手動點擊驗收；目前以角色矩陣靜態測試、既有權限測試及完整回歸測試驗證。請 Owner 驗收正式頁面顯示與實際離會流程；若有差異退回 `in_progress`。
+
 ### 衍生任務
+
+- 無。
