@@ -830,14 +830,11 @@ export function createCloudSaveService(dependencies) {
           ? [...new Set(S.equippedPetUids)]
             .filter(uid => S.pets.some(pet => String(pet.uid) === String(uid))).slice(0, 3)
           : [];
-        S.petDiscovered = {
-          ...(localSnapshotForMerge?.petDiscovered || {}),
-          ...(cloudPayload.petDiscovered || {})
-        };
-        S.petAutoSellRarities = {
-          ...(localSnapshotForMerge?.petAutoSellRarities || {}),
-          ...(cloudPayload.petAutoSellRarities || {})
-        };
+        // Only merge these maps through the versioned base above. An unversioned
+        // local snapshot may be a legacy cross-account cache and must not override
+        // the authenticated account's cloud data.
+        S.petDiscovered = { ...(mergedPayload.petDiscovered || {}) };
+        S.petAutoSellRarities = { ...(mergedPayload.petAutoSellRarities || {}) };
         S.autoDeleteDice = Array.isArray(S.autoDeleteDice)
           ? S.autoDeleteDice.filter(id => D.some(d => d.id === id && !d.weather && Number(d.den) >= 2 && Number(d.den) <= 600000))
           : [];
