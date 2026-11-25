@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const ui = read('../ui/guild.js');
 const css = read('../guild.css');
 const migration = read('../docs/migrations/20261125093419_guild_daily_quests_xp.sql');
+const guildRewards = read('../docs/migrations/20261126120000_guild_level_rewards_mailbox.sql');
 const hardening = read('../docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql');
 const membership = read('../docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql');
 const repeatable = read('../docs/migrations/20261125101918_guild_repeatable_daily_quests.sql');
@@ -62,13 +63,13 @@ test('公會成員上限維持 4，且新進度表不可被客戶端直接讀寫
 });
 
 test('公會任務資產版本與 Service Worker 快取一致', () => {
-  const guildVersion = '20261126-t0140-guild-role-panels-exit';
-  const scriptVersion = '20261126-t0140-guild-role-panels-exit';
+  const guildVersion = '20261126-t0141-guild-rewards-mailbox';
+  const scriptVersion = '20261126-t0141-guild-rewards-mailbox';
   assert.ok(html.includes('guild.css?v=' + guildVersion));
   assert.ok(html.includes('script.js?v=' + scriptVersion));
   assert.ok(sw.includes('ui/guild.js?v=' + guildVersion));
   assert.ok(sw.includes('guild.css?v=' + guildVersion));
-  assert.ok(sw.includes('dice-realm-shell-v2.29'));
+  assert.ok(sw.includes('dice-realm-shell-v2.30'));
   assert.ok(css.includes('.guild-task-card'));
 });
 
