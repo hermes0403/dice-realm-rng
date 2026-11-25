@@ -369,6 +369,8 @@ begin
   select jsonb_build_object(
     'id', g.id,
     'name', g.name,
+    'level', g.level,
+    'xp_total', g.xp_total,
     'description', g.description,
     'join_mode', g.join_mode,
     'member_count', (
