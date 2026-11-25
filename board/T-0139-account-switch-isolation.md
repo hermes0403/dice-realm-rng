@@ -1,7 +1,7 @@
 ---
 id: T-0139
 title: 修復玩家切換帳號時雲端資料互相污染
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-26
 updated: 2026-11-26
 depends_on: []
 branch: task/T-0139-account-switch-isolation
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -48,6 +48,8 @@ done_at:
 
 - 2026-11-26 06:07 [叉子] 依棒子要求建立獨立修復任務。最新 main Board 檢查：owner_side 有效 in_progress 任務 0/5；Communicate 優先閘門搜尋未發現有效任務。現有 T-0004 為 collaborator_side 的廣泛雲端 bootstrap 任務，本任務限定處理目前線上玩家切換帳號時資料互相污染的 P0 回歸，不修改或接管 T-0004。
 - 2026-11-26 06:07 [叉子] 狀態轉換：open → in_progress。T-0139 開單 PR #360 已合併至 main，merge commit `6b00bbf3565e7de79813bb7b44ff3f89d037cf88`；重新檢查 owner_side 有效 in_progress 任務仍低於五張，Communicate 優先閘門未發現有效任務。任務分支已 fast-forward 同步至最新 main，開始程式調查與修復。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 

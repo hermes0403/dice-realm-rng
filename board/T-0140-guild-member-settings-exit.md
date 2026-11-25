@@ -1,7 +1,7 @@
 ---
 id: T-0140
 title: 公會設定依角色隱藏並加入退出二次確認
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-26
 updated: 2026-11-26
 depends_on: []
 branch: task/T-0140-guild-member-settings-exit
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -57,6 +57,8 @@ done_at:
 
 - 2026-11-26 [叉子] 依棒子先前確認的角色矩陣建立任務。開工前重新檢查最新 main：owner_side 有效 in_progress 任務 0/5；目前 in_progress 任務只有 collaborator_side 的 T-0002、T-0038；Communicate 優先搜尋未發現有效任務。開單 PR #363 已合併，狀態由 open 轉為 in_progress。T-0133、T-0135 已在 review，本任務只調整前端角色可見性與離會互動，不重做既有設定／公告 RPC。
 - 2026-11-26 [叉子] 交付 PR #364 已合併，merge commit `69bf4d3df00bba6a418b7f70ddcf7c01ff5a44f7`；GitHub Pages 部署 run #45714114034 成功，版本 V1.58。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 
