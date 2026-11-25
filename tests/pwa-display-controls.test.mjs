@@ -321,7 +321,7 @@ test('T-0114 10,000–99,999 使用紫晶配色，1,000,000 以上先以黑幕�
   assert.match(css, /\.rarity-starburst::before/);
   assert.match(css, /@keyframes realmStarAppear/);
   assert.match(worker, /dice-realm-shell-v2\.28/);
-  assert.match(worker, /20261121-t0130-persisted-session-restore-v1/);
+  assert.match(worker, /20261126-t0139-account-isolation/);
 });
 
 
