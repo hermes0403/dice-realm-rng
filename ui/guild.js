@@ -1,10 +1,17 @@
 import { escapeHTML } from '../core/format.js';
 
 const ROLE_LABELS = { leader: '會長', vice_leader: '副會長', officer: '幹部', member: '一般成員' };
+const NAV_ITEMS = [
+  { key: 'home', label: '返回主頁', description: '回到遊戲主畫面', icon: '⌂', tone: 'blue', go: 'roll' },
+  { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
+  { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
+  { key: 'find', label: '尋找公會', description: '搜尋並加入其他公會', icon: '⌕', tone: 'teal' },
+  { key: 'settings', label: '公會設定', description: '管理公會設定與權限', icon: '⚙', tone: 'purple' }
+];
 const VIEWS = {
-  tasks: { label: '今日任務', title: '公會今日任務', description: '公會任務系統尚未開放。正式任務與進度接上伺服器後，會在這裡顯示。' },
-  ranking: { label: '公會排行榜', title: '公會排行榜', description: '公會排行榜尚未開放，目前不會顯示虛構排名或分數。' },
-  settings: { label: '公會設定', title: '公會設定', description: '公會設定功能尚未開放。現階段公會名稱、介紹與加入方式尚不能在此修改。' }
+  tasks: { title: '公會今日任務', description: '公會任務系統尚未開放。正式任務與進度接上伺服器後，會在這裡顯示。' },
+  ranking: { title: '公會排行榜', description: '公會排行榜尚未開放，目前不會顯示虛構排名或分數。' },
+  settings: { title: '公會設定', description: '公會設定功能尚未開放。現階段公會名稱、介紹與加入方式尚不能在此修改。' }
 };
 
 export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef = document, toast = () => {} }) {
@@ -12,6 +19,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   let busy = false;
   let currentData = null;
   let activeView = 'home';
+  let showAllMembers = false;
   let searchResults = [];
 
   async function rpc(name, params = {}) {
@@ -30,25 +38,25 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
 
   function roleLabel(role) { return ROLE_LABELS[role] || '一般成員'; }
 
-  function navMarkup(showTabs = true) {
-    const tabs = [
-      ['tasks', '今日任務'],
-      ['ranking', '公會排行榜'],
-      ['find', '尋找公會'],
-      ['settings', '公會設定']
-    ];
-    return '<nav class="guild-nav" aria-label="公會導覽">' +
-      '<button type="button" class="guild-nav-back" data-go="roll">返回主頁</button>' +
-      (showTabs ? tabs.map(([key, label]) => '<button type="button" class="guild-nav-tab' + (activeView === key ? ' is-active' : '') +
-        '" data-guild-view="' + key + '"' + (activeView === key ? ' aria-current="page"' : '') + '>' + label + '</button>').join('') : '') +
-      '</nav>';
+  function navMarkup() {
+    return '<div class="guild-nav-grid" aria-label="公會功能導覽">' +
+      NAV_ITEMS.map(item => {
+        const active = item.key !== 'home' && activeView === item.key;
+        const action = item.go ? ' data-go="' + item.go + '"' : ' data-guild-view="' + item.key + '"';
+        return '<button type="button" class="guild-nav-card tone-' + item.tone + (active ? ' is-active' : '') + '"' +
+          action + (active ? ' aria-current="page"' : '') + '>' +
+          '<span class="guild-nav-icon" aria-hidden="true">' + item.icon + '</span>' +
+          '<span class="guild-nav-copy"><b>' + item.label + '</b><small>' + item.description + '</small></span>' +
+          '<span class="guild-nav-arrow" aria-hidden="true">›</span></button>';
+      }).join('') + '</div>';
   }
 
   function renderGuest() {
-    root().innerHTML = navMarkup(false) +
-      '<div class="guild-empty card"><div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
+    root().innerHTML = navMarkup() +
+      '<section class="guild-empty card"><div class="guild-empty-emblem" aria-hidden="true">✦</div>' +
+      '<div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
       '<p class="muted">公會資料會綁定目前登入的遊戲帳號。</p>' +
-      '<button class="primary" type="button" data-guild-login>登入／註冊</button></div>';
+      '<button class="primary" type="button" data-guild-login>登入／註冊</button></section>';
   }
 
   function renderCreatePanel() {
@@ -68,32 +76,44 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   function renderNoGuild() {
-    const view = activeView === 'home' ? 'find' : activeView;
-    if (view === 'find') {
+    if (activeView === 'home') activeView = 'find';
+    if (activeView === 'find') {
       root().innerHTML = navMarkup() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>';
       return;
     }
-    renderFeatureView(view);
+    renderFeatureView(activeView);
   }
 
   function renderFeatureView(view) {
     const feature = VIEWS[view];
     if (!feature) { activeView = 'home'; render(); return; }
     root().innerHTML = navMarkup() +
-      '<section class="card guild-feature-placeholder"><div class="eyebrow">GUILD NETWORK</div>' +
-      '<h2>' + feature.title + '</h2><p>' + feature.description + '</p>' +
-      '<span class="guild-coming-soon">COMING SOON</span></section>';
+      '<section class="card guild-feature-placeholder"><div class="guild-feature-icon" aria-hidden="true">' +
+      (view === 'tasks' ? '✓' : view === 'ranking' ? '♜' : '⚙') + '</div>' +
+      '<div class="eyebrow">GUILD NETWORK</div><h2>' + feature.title + '</h2><p>' + feature.description + '</p>' +
+      '<span class="guild-coming-soon">尚未開放</span></section>';
   }
 
   function renderMembers(members) {
-    return members.map((member, index) => {
-      const name = escapeHTML(member.username || '未知玩家');
+    const visible = showAllMembers ? members : members.slice(0, 3);
+    const rows = visible.map((member, index) => {
+      const username = String(member.username || '未知玩家').trim();
+      const name = escapeHTML(username);
       const role = member.role || 'member';
-      const initial = escapeHTML((member.username || '?').trim().slice(0, 1) || '?');
-      return '<div class="guild-member-row"><span class="guild-member-identity"><span class="guild-member-avatar">' +
-        initial + '</span><span class="guild-member-name">' + name + (index === 0 && role === 'leader' ? '<small>公會創建者</small>' : '') +
-        '</span></span><span class="guild-role role-' + escapeHTML(role) + '">' + escapeHTML(roleLabel(role)) + '</span></div>';
-    }).join('') || '<p class="muted">目前沒有成員資料。</p>';
+      const initial = escapeHTML(username.slice(0, 1) || '?');
+      const level = Number(member.level);
+      const levelLabel = Number.isFinite(level) && level > 0 ? '<span class="guild-member-level">Lv.' + level + '</span>' : '';
+      const crown = role === 'leader' ? '<span class="guild-member-crown" aria-label="會長">♛</span>' : '';
+      return '<div class="guild-member-row"><span class="guild-member-identity"><span class="guild-member-avatar avatar-tone-' +
+        (index % 4) + '">' + initial + crown + '</span><span class="guild-member-name"><b>' + name + '</b></span></span>' +
+        '<span class="guild-role role-' + escapeHTML(role) + '">' + escapeHTML(roleLabel(role)) + '</span>' +
+        levelLabel + '</div>';
+    }).join('');
+    const toggle = members.length > 3
+      ? '<button type="button" class="guild-members-toggle" data-guild-members-toggle aria-expanded="' + showAllMembers + '">' +
+        (showAllMembers ? '收起成員' : '⌄ 查看更多成員') + '</button>'
+      : '';
+    return (rows || '<p class="muted">目前沒有成員資料。</p>') + toggle;
   }
 
   function renderHome() {
@@ -105,14 +125,18 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const isLeader = data.my_role === 'leader';
     const count = Number(guild.member_count) || members.length;
     root().innerHTML = navMarkup() +
-      '<section class="guild-banner card"><div class="eyebrow">GUILD NETWORK · ' + escapeHTML(roleLabel(data.my_role)) + '</div>' +
-      '<div class="guild-banner-title"><div><h2>' + escapeHTML(guild.name) + '</h2><p>' +
-      escapeHTML(guild.description || '尚未設定公會介紹') + '</p></div><span class="guild-member-count">' + count + ' 人</span></div></section>' +
+      '<section class="guild-banner card"><div class="guild-banner-emblem" aria-hidden="true"><span>✦</span></div>' +
+      '<div class="guild-banner-main"><div class="guild-banner-topline"><span class="eyebrow">GUILD PROFILE</span>' +
+      '<span class="guild-joined"><i></i> 已加入</span></div><h2>' + escapeHTML(guild.name) + '</h2>' +
+      '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
+      '<div class="guild-banner-meta"><span>♟ ' + count + ' / ' + (Number(guild.max_members) || '—') + ' 人</span>' +
+      '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
       '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
-      '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div><span class="pill">' +
-      members.length + ' MEMBERS</span></div><div class="guild-member-list">' + renderMembers(members) + '</div></section>' +
-      (canManage ? '<section class="card guild-panel"><div class="section-head"><div><div class="eyebrow">APPLICATIONS</div>' +
-        '<h3>加入申請</h3></div><span class="pill">' + apps.length + ' PENDING</span></div>' +
+      '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div>' +
+      '<span class="guild-roster-total">' + members.length + ' MEMBERS</span></div>' +
+      '<div class="guild-member-list">' + renderMembers(members) + '</div></section>' +
+      (canManage ? '<section class="card guild-panel guild-applications"><div class="section-head"><div><div class="eyebrow">APPLICATIONS</div>' +
+        '<h3>加入申請</h3></div><span class="guild-roster-total">' + apps.length + ' PENDING</span></div>' +
         '<div class="guild-app-list">' + (apps.map(a => '<div class="guild-app-row"><div><b>' +
           escapeHTML(a.username || '未知玩家') + '</b><p>' + escapeHTML(a.message || '沒有附加訊息') +
           '</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="' +
@@ -197,6 +221,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (!button) return;
     if (button.dataset.guildView) {
       activeView = button.dataset.guildView;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-members-toggle]')) {
+      showAllMembers = !showAllMembers;
       render();
       return;
     }
