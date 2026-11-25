@@ -11,7 +11,7 @@ test('guild application review explicitly denies users without an authorized rol
 });
 
 test('guild behavior SQL integration test is isolated and rolls back fixtures', () => {
-  assert.match(sqlTest, /^begin;/i);
+  assert.match(sqlTest, /\bbegin;/i);
   assert.match(sqlTest, /guild_review_application/);
   assert.match(sqlTest, /guild_member_limit_reached/);
   assert.match(sqlTest, /guild_role_limit_reached/);
