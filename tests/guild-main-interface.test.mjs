@@ -3,19 +3,27 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../ui/guild.js', import.meta.url), 'utf8');
+const styles = await readFile(new URL('../guild.css', import.meta.url), 'utf8');
 
-test('公會主導覽包含示意圖的五個入口', () => {
+test('公會主導覽包含示意圖的五個彩色功能卡片', () => {
   for (const label of ['返回主頁', '今日任務', '公會排行榜', '尋找公會', '公會設定']) {
     assert.ok(source.includes(label), '缺少導覽項目：' + label);
   }
+  assert.match(source, /guild-nav-grid/);
+  assert.match(source, /guild-nav-card/);
   assert.match(source, /data-go="roll"/);
+  for (const tone of ['blue', 'green', 'gold', 'teal', 'purple']) {
+    assert.ok(source.includes("tone: '" + tone + "'"), '缺少卡片色系：' + tone);
+  }
 });
 
-test('公會成員資訊由 RPC 回傳資料產生', () => {
+test('公會成員資訊由 RPC 回傳資料產生，且可展開完整名單', () => {
   assert.match(source, /guild\.member_count/);
   assert.match(source, /member\.username/);
   assert.match(source, /member\.role/);
   assert.match(source, /guild_get_my_guild/);
+  assert.match(source, /data-guild-members-toggle/);
+  assert.match(source, /showAllMembers/);
 });
 
 test('未完成的公會功能明確標示尚未開放', () => {
@@ -28,4 +36,12 @@ test('既有公會操作仍由伺服器 RPC 執行', () => {
   for (const rpc of ['guild_create', 'guild_search', 'guild_apply', 'guild_review_application', 'guild_leave']) {
     assert.ok(source.includes("'" + rpc + "'"), '缺少 RPC：' + rpc);
   }
+});
+
+test('公會樣式採淺色卡片與五種柔和彩色入口', () => {
+  assert.match(styles, /#fff/);
+  for (const tone of ['blue', 'green', 'gold', 'teal', 'purple']) {
+    assert.ok(styles.includes('.tone-' + tone), '缺少樣式色系：' + tone);
+  }
+  assert.match(styles, /@media\(max-width:700px\)/);
 });
