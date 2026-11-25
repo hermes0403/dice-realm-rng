@@ -38,10 +38,13 @@ test('既有公會操作仍由伺服器 RPC 執行', () => {
   }
 });
 
-test('公會樣式採淺色卡片與五種柔和彩色入口', () => {
+test('公會樣式採低亮度深色面板與柔和色系', () => {
   assert.match(styles, /#fff/);
   for (const tone of ['blue', 'green', 'gold', 'teal', 'purple']) {
     assert.ok(styles.includes('.tone-' + tone), '缺少樣式色系：' + tone);
   }
   assert.match(styles, /@media\(max-width:700px\)/);
+  assert.match(styles, /\.guild-nav-card\{background:#191e30/);
+  assert.match(styles, /\.guild-nav-icon\{background:transparent/);
+  assert.match(styles, /\.guild-feature-placeholder,\.guild-find-existing\{background:#191e30!important/);
 });
