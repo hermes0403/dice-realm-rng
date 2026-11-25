@@ -134,6 +134,24 @@ begin
   end;
   insert into guild_t128_test_results values('玩家不能同時加入兩個公會',ok,'unique user_id constraint');
 
+  perform set_config('request.jwt.claim.sub',u[20]::text,true);
+  result := public.guild_search('T128-',30);
+  insert into guild_t128_test_results values('搜尋只回傳公開公會欄位',
+    jsonb_typeof(result)='array'
+      and exists(select 1 from jsonb_array_elements(result) x where x->>'id'=g1::text)
+      and not exists(select 1 from jsonb_array_elements(result) x where x ? 'created_by' or x ? 'user_id' or x ? 'email'),
+    'public search payload only');
+
+  result := public.guild_apply(g1,'rejection test');
+  app_id_2 := (result->>'application_id')::uuid;
+  perform set_config('request.jwt.claim.sub',u[1]::text,true);
+  result := public.guild_review_application(app_id_2,false);
+  insert into guild_t128_test_results values('幹部可拒絕申請且申請者不會加入',
+    (result->>'status')='rejected'
+      and exists(select 1 from public.guild_applications where id=app_id_2 and status='rejected')
+      and not exists(select 1 from public.guild_members where guild_id=g1 and user_id=u[20]),
+    result::text);
+
   perform set_config('request.jwt.claim.sub',u[18]::text,true);
   result := public.guild_create('T128-open-'||substr(gen_random_uuid()::text,1,8),'');
   g5 := (result->>'guild_id')::uuid;
