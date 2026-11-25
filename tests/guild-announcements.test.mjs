@@ -45,7 +45,7 @@ test('公會首頁顯示公告並安全跳脫文字', () => {
 });
 
 test('設定頁只有會長與副會長可編輯公告', () => {
-  assert.match(ui, /const canEditAnnouncement = \['leader', 'vice_leader'\]\.includes\(currentData\.my_role\)/);
+  assert.match(ui, /const canEditAnnouncement = \['leader', 'vice_leader'\]\.includes\(role\)/);
   assert.match(ui, /id="guildAnnouncementForm"/);
   assert.match(ui, /maxlength="200"/);
   assert.match(ui, /只有會長與副會長可發布、修改或清除公告/);
@@ -66,4 +66,12 @@ test('公告面板支援換行與手機版寬度', () => {
   assert.match(css, /white-space:pre-wrap/);
   assert.match(css, /overflow-wrap:anywhere/);
   assert.match(css, /guild-announcement-settings/);
+});
+
+
+test('一般成員隱藏公告管理面板，但公會首頁公告仍對所有成員顯示', () => {
+  assert.match(ui, /const announcementPanel = isOrdinaryMember \? ''/);
+  const home = ui.slice(ui.indexOf('function renderHome()'), ui.indexOf('function render()'));
+  assert.match(home, /guild-announcement-panel/);
+  assert.match(home, /escapeHTML\(announcementMessage\)/);
 });

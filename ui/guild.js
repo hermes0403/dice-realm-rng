@@ -5,12 +5,12 @@ const NAV_ITEMS = [
   { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
   { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
   { key: 'find', label: '尋找公會', description: '搜尋並加入其他公會', icon: '⌕', tone: 'teal' },
-  { key: 'settings', label: '公會設定', description: '管理公會設定與權限', icon: '⚙', tone: 'purple' }
+  { key: 'settings', label: '公會設定', description: '查看設定與退出公會', icon: '⚙', tone: 'purple' }
 ];
 const VIEWS = {
   tasks: { title: '公會今日任務', description: '加入公會後即可查看每日任務與共享經驗。' },
   ranking: { title: '公會排行榜', description: '依公會等級與總 XP 排名，只顯示公開公會資訊。' },
-  settings: { title: '公會設定', description: '管理公會名稱、介紹與加入方式。' }
+  settings: { title: '公會設定', description: '查看公會設定及退出選項。' }
 };
 
 export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef = document, toast = () => {} }) {
@@ -20,6 +20,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   let activeView = 'home';
   let showAllMembers = false;
   let searchResults = [];
+  let leaveConfirmStep = 0;
 
   async function rpc(name, params = {}) {
     if (!supabaseClient) throw new Error('雲端服務暫時無法使用');
@@ -217,16 +218,36 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
 
+  function renderLeaveConfirmation() {
+    if (!leaveConfirmStep) return '';
+    const guildName = escapeHTML(currentData?.guild?.name || '目前公會');
+    const finalStep = leaveConfirmStep === 2;
+    return '<div class="guild-leave-overlay"><section class="card guild-leave-dialog" role="dialog" aria-modal="true" aria-labelledby="guildLeaveDialogTitle">' +
+      '<div class="eyebrow">LEAVE GUILD</div>' +
+      '<h3 id="guildLeaveDialogTitle">' + (finalStep ? '最後確認' : '確認退出公會') + '</h3>' +
+      '<p>' + (finalStep
+        ? '請再次確認，你確定要退出「' + guildName + '」嗎？確認後會立即離開公會。'
+        : '你即將退出「' + guildName + '」。離開後將不再是公會成員，請確認是否繼續。') + '</p>' +
+      '<div class="guild-leave-dialog-actions">' +
+      '<button type="button" class="guild-leave-cancel" data-guild-leave-cancel>取消</button>' +
+      (finalStep
+        ? '<button type="button" class="guild-leave-confirm" data-guild-leave-confirm>確認退出公會</button>'
+        : '<button type="button" class="guild-leave-next" data-guild-leave-next>下一步</button>') +
+      '</div></section></div>';
+  }
+
   function renderSettings() {
     const guild = currentData?.guild;
     if (!guild) { renderFeatureView('settings'); return; }
-    const canEdit = currentData.my_role === 'leader';
-    const canEditAnnouncement = ['leader', 'vice_leader'].includes(currentData.my_role);
+    const role = currentData.my_role;
+    const isOrdinaryMember = role === 'member';
+    const canEdit = role === 'leader';
+    const canEditAnnouncement = ['leader', 'vice_leader'].includes(role);
     const announcementDisabled = canEditAnnouncement ? '' : ' disabled';
     const announcementMessage = typeof guild.announcement?.message === 'string' ? guild.announcement.message : '';
     const disabled = canEdit ? '' : ' disabled';
     const joinMode = guild.join_mode === 'open' ? 'open' : 'application';
-    root().innerHTML = renderBackButton() +
+    const settingsPanel = isOrdinaryMember ? '' :
       '<section class="card guild-settings-panel"><div class="eyebrow">GUILD SETTINGS</div>' +
       '<h2>公會設定</h2><form id="guildSettingsForm" class="guild-settings-form">' +
       '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="16" required value="' +
@@ -239,7 +260,8 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '</select><small>選擇玩家加入公會時，是否需要幹部審核</small></label>' +
       (canEdit ? '<button class="primary" type="submit">儲存設定</button>' :
         '<p class="guild-settings-readonly">只有會長可以修改公會設定；目前為檢視模式。</p>') +
-      '</form></section>' +
+      '</form></section>';
+    const announcementPanel = isOrdinaryMember ? '' :
       '<section class="card guild-settings-panel guild-announcement-settings"><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
       '<h3>公會公告</h3><form id="guildAnnouncementForm" class="guild-settings-form">' +
       '<label>公告內容<textarea name="message" maxlength="200" rows="4"' + announcementDisabled + '>' +
@@ -247,6 +269,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       (canEditAnnouncement ? '<button class="primary" type="submit">發布公告</button>' :
         '<p class="guild-settings-readonly">只有會長與副會長可發布、修改或清除公告。</p>') +
       '</form></section>';
+    const isLeader = role === 'leader';
+    const leavePanel = '<section class="card guild-settings-panel guild-leave-panel"><div class="eyebrow">GUILD MEMBERSHIP</div>' +
+      '<h3>退出公會</h3><p class="guild-leave-description">' +
+      (isLeader ? '會長需先完成會長轉讓或解散程序，才能退出公會。' : '退出前會再次確認，避免誤觸。') +
+      '</p><button type="button" class="guild-leave-button" id="guildLeaveBtn" ' + (isLeader ? 'disabled' : '') +
+      '>退出公會</button></section>';
+    root().innerHTML = renderBackButton() + settingsPanel + announcementPanel + leavePanel + renderLeaveConfirmation();
   }
 
   function renderMembers(members) {
@@ -286,7 +315,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const members = Array.isArray(data.members) ? data.members : [];
     const apps = Array.isArray(data.applications) ? data.applications : [];
     const canManage = ['leader', 'vice_leader', 'officer'].includes(data.my_role);
-    const isLeader = data.my_role === 'leader';
     const announcement = guild.announcement && typeof guild.announcement === 'object' ? guild.announcement : null;
     const announcementMessage = typeof announcement?.message === 'string' ? announcement.message : '';
     const announcementUpdatedAt = announcement?.updated_at ? new Date(announcement.updated_at).toLocaleString('zh-TW') : '';
@@ -314,11 +342,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           escapeHTML(a.username || '未知玩家') + '</b><p>' + escapeHTML(a.message || '沒有附加訊息') +
           '</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="' +
           escapeHTML(a.id) + '">核准</button><button class="quiet" type="button" data-guild-review="reject" data-app-id="' +
-          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') +
-      '<section class="guild-actions"><button type="button" class="danger" id="guildLeaveBtn" ' +
-      (isLeader ? 'disabled' : '') + '>退出公會</button><p class="mini">' +
-      (isLeader ? '會長需先完成會長轉讓或解散程序，才能退出公會。' : '退出後即可申請加入其他公會。') +
-      '</p></section>';
+          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '');
   }
 
   function render() {
@@ -447,11 +471,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const button = event.target.closest('button');
     if (!button) return;
     if (button.matches('[data-guild-back]')) {
+      leaveConfirmStep = 0;
       activeView = currentData?.guild ? 'home' : 'find';
       render();
       return;
     }
     if (button.dataset.guildView) {
+      leaveConfirmStep = 0;
       activeView = button.dataset.guildView;
       if (activeView === 'tasks') loadTasks();
       else render();
@@ -504,13 +530,36 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       return;
     }
     if (button.id === 'guildLeaveBtn') {
-      run(async () => {
-        if (!window.confirm('確定要退出目前公會嗎？')) return;
+      if (busy || currentData?.my_role === 'leader') return;
+      leaveConfirmStep = 1;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-leave-cancel]')) {
+      leaveConfirmStep = 0;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-leave-next]')) {
+      if (leaveConfirmStep !== 1 || currentData?.my_role === 'leader') return;
+      leaveConfirmStep = 2;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-leave-confirm]')) {
+      if (busy || leaveConfirmStep !== 2 || currentData?.my_role === 'leader') return;
+      const confirmButton = button;
+      const action = run(async () => {
+        if (!currentData?.guild?.id) throw new Error('公會資料已變更，請重新載入。');
         await rpc('guild_leave');
+        leaveConfirmStep = 0;
         toast('已退出公會');
         activeView = 'find';
         await load();
       });
+      confirmButton.disabled = true;
+      void action.finally(() => { confirmButton.disabled = false; });
+      return;
     }
   });
 

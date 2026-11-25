@@ -1,7 +1,7 @@
 ---
 id: T-0140
 title: 公會設定依角色隱藏並加入退出二次確認
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -55,7 +55,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-26 [叉子] 依棒子先前確認的角色矩陣建立任務。最新 main Board：owner_side 有效 in_progress 任務 0/5；目前 in_progress 任務只有 collaborator_side 的 T-0002、T-0038；Communicate 優先搜尋未發現有效任務。T-0133、T-0135 已在 review，本任務只調整前端角色可見性與離會互動，不重做既有設定／公告 RPC。
+- 2026-11-26 [叉子] 依棒子先前確認的角色矩陣建立任務。開工前重新檢查最新 main：owner_side 有效 in_progress 任務 0/5；目前 in_progress 任務只有 collaborator_side 的 T-0002、T-0038；Communicate 優先搜尋未發現有效任務。開單 PR #363 已合併，Board main SHA `ce97bf23163178b639eb90b07c0b16006935a67b`；任務分支已 fast-forward 同步，狀態由 open 轉為 in_progress。T-0133、T-0135 已在 review，本任務只調整前端角色可見性與離會互動，不重做既有設定／公告 RPC。
 
 ## 完工回報
 

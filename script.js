@@ -7,7 +7,7 @@ import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, p
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
 import { createNavigationUI } from './ui/navigation.js?v=20261123-daily-shop-v1';
-import { createGuildSystem } from './ui/guild.js?v=20261125-t0136-guild-member-management';
+import { createGuildSystem } from './ui/guild.js?v=20261126-t0140-guild-role-panels-exit';
 import { createInventoryUI } from './ui/inventory.js';
 import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
@@ -44,7 +44,7 @@ import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
 import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-rpc-fix';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261119-settings-buttons-v2';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261126-t0140-guild-role-panels-exit';
 import { createTimerManager } from './core/timer-manager.js';
 import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-buttons-v2';
 

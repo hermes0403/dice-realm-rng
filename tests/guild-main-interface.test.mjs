@@ -57,3 +57,18 @@ test('公會樣式採淺色卡片與五種柔和彩色入口', () => {
   }
   assert.match(styles, /@media\(max-width:700px\)/);
 });
+
+
+test('退出公會只在設定頁出現，並且必須完成兩階段確認', () => {
+  const settings = source.slice(source.indexOf('function renderSettings()'), source.indexOf('function renderMembers'));
+  const home = source.slice(source.indexOf('function renderHome()'), source.indexOf('function render()'));
+  assert.match(settings, /id="guildLeaveBtn"/);
+  assert.doesNotMatch(home, /guildLeaveBtn/);
+  assert.match(source, /data-guild-leave-next/);
+  assert.match(source, /data-guild-leave-confirm/);
+  assert.match(source, /leaveConfirmStep !== 2/);
+  assert.match(source, /confirmButton\.disabled = true/);
+  assert.match(source, /await rpc\('guild_leave'\)/);
+  assert.match(source, /會長需先完成會長轉讓或解散程序/);
+  assert.match(styles, /guild-leave-overlay/);
+});
