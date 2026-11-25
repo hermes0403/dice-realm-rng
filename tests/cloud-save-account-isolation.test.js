@@ -163,3 +163,70 @@ test('cloud bootstrap never merges pet discoveries from the previous in-memory a
   assert.equal(storage.getItem(key), null, 'cloud account data must not be written to the shared offline key');
   assert.ok(storage.getItem(key + '_user_' + user.id));
 });
+
+
+test('late cloud response from account A cannot replace account B after a switch', async () => {
+  const key = 'diceRealm';
+  const storage = storageMock();
+  let state = { ...freshState(), name: 'boot-old-state', coins: 999999, bag: { d99: 9 } };
+  let currentUser = { id: 'account-A', user_metadata: { username: 'alpha' } };
+  let finishA;
+  const readA = new Promise(resolve => { finishA = resolve; });
+  const payloadA = { ...freshState(), name: 'alpha', coins: 111, bag: { d1: 1 } };
+  const payloadB = { ...freshState(), name: 'bravo', coins: 222, bag: { d2: 2 } };
+  const documentRef = {
+    visibilityState: 'visible',
+    getElementById() { return { textContent: '' }; },
+    addEventListener() {}
+  };
+  const service = createCloudSaveService({
+    KEY: key, D: [], POTIONS: [],
+    supabaseClient: {
+      from(table) {
+        let requestedUserId = null;
+        return {
+          select() { return this; },
+          eq(column, value) { requestedUserId = value; return this; },
+          async maybeSingle() {
+            if (table === 'game_saves') {
+              if (requestedUserId === 'account-A') return readA;
+              if (requestedUserId === 'account-B') return { data: { save_data: payloadB, updated_at: '2026-11-26T00:02:00.000Z' }, error: null };
+            }
+            if (table === 'player_grants') return { data: null, error: null };
+            throw new Error('Unexpected table ' + table);
+          }
+        };
+      }
+    },
+    getState: () => state,
+    setState: value => { state = value; },
+    getCurrentUser: () => currentUser,
+    fresh: freshState,
+    normalizeGloves: value => value,
+    migrateCurrency: value => value,
+    ensurePetData() {}, restoreAutoSellPrefs() {},
+    totalUnique: () => 0, render() {}, refreshLeaderboards: async () => {},
+    toast() {}, openAuth() {}, showAuthMessage() {},
+    timerManager: timersMock(), localStorageRef: storage, documentRef,
+    windowRef: { addEventListener() {} }
+  });
+
+  const loadA = service.loadCloudSave({ syncAfterLoad: false });
+  currentUser = { id: 'account-B', user_metadata: { username: 'bravo' } };
+  service.resetAccountSession(currentUser.id);
+  const loadB = service.loadCloudSave({ syncAfterLoad: false });
+  await loadB;
+
+  assert.equal(state.name, 'bravo');
+  assert.equal(state.coins, 222);
+  assert.deepEqual(state.bag, { d2: 2 });
+
+  finishA({ data: { save_data: payloadA, updated_at: '2026-11-26T00:01:00.000Z' }, error: null });
+  await loadA;
+
+  assert.equal(service.isLoadedFor('account-B'), true);
+  assert.equal(state.name, 'bravo');
+  assert.equal(state.coins, 222);
+  assert.deepEqual(state.bag, { d2: 2 });
+  assert.equal(storage.getItem(key + '_user_account-A'), null);
+});
