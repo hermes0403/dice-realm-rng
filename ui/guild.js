@@ -97,7 +97,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<section class="card guild-feature-placeholder"><div class="guild-feature-icon" aria-hidden="true">' +
       (view === 'tasks' ? '✓' : view === 'ranking' ? '♜' : '⚙') + '</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>' + feature.title + '</h2><p>' + feature.description + '</p>' +
-      '<span class="guild-coming-soon">尚未開放</span></section>';
+      '<span class="guild-coming-soon">' + (view === 'tasks' ? '加入公會後開放' : '尚未開放') + '</span></section>';
   }
 
   function renderTasks(data) {
