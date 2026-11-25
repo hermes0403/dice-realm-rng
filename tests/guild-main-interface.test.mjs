@@ -17,6 +17,14 @@ test('公會主導覽包含示意圖的五個彩色功能卡片', () => {
   }
 });
 
+test('公會子頁獨立顯示，並提供返回公會主頁操作', () => {
+  assert.match(source, /function renderBackButton\(\)/);
+  assert.match(source, /data-guild-back/);
+  assert.match(source, /button\.matches\('\[data-guild-back\]'\)/);
+  assert.match(source, /activeView = currentData\?\.guild \? 'home' : 'find'/);
+  assert.match(source, /root\(\)\.innerHTML = renderBackButton\(\)/);
+});
+
 test('公會成員資訊由 RPC 回傳資料產生，且可展開完整名單', () => {
   assert.match(source, /guild\.member_count/);
   assert.match(source, /member\.username/);
@@ -38,13 +46,10 @@ test('既有公會操作仍由伺服器 RPC 執行', () => {
   }
 });
 
-test('公會樣式採低亮度深色面板與柔和色系', () => {
+test('公會樣式採淺色卡片與五種柔和彩色入口', () => {
   assert.match(styles, /#fff/);
   for (const tone of ['blue', 'green', 'gold', 'teal', 'purple']) {
     assert.ok(styles.includes('.tone-' + tone), '缺少樣式色系：' + tone);
   }
   assert.match(styles, /@media\(max-width:700px\)/);
-  assert.match(styles, /\.guild-nav-card\{background:#191e30/);
-  assert.match(styles, /\.guild-nav-icon\{background:transparent/);
-  assert.match(styles, /\.guild-feature-placeholder,\.guild-find-existing\{background:#191e30!important/);
 });
