@@ -1,7 +1,7 @@
 ---
 id: T-0121
 title: 修正天堂藥水多抽數模式被清空
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-25
 depends_on: [T-0087]
 branch: task/T-0121-heaven-potion-mode-persistence
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 問題
@@ -33,9 +33,14 @@ done_at:
 - [x] 天堂 II 低運氣機率池不含彗星骰子，虛空骰子固定 17%。
 - [x] 多抽數消耗後保留天堂模式，最後一抽才清空。
 - [x] 待抽天堂藥水期間不可切換另一種模式。
-- [ ] 天堂機率專項測試與擲骰回歸測試通過。
-- [ ] GitHub Pages 部署完成並驗證線上版本。
+- [x] 天堂機率專項測試與擲骰回歸測試通過，棒子驗收成功。
+- [x] GitHub Pages 線上版本經棒子驗收正常。
 
 ## 注意
 
 既有玩家若在舊版程式已經發生「`angelCharges` 大於 0、但 `angelMode` 已被清空」，舊程式沒有留下原本模式的紀錄，無法從現有資料還原該批抽數原本屬於天堂 I 或 II。新版會避免再次發生。
+
+
+## 驗收結案
+
+- 2026-11-25 [棒子] 使用者確認本任務驗收成功，功能沒有問題，正式結案。
