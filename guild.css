@@ -103,3 +103,9 @@
 .guild-member-remove{padding:6px 10px;border:1px solid #e5c7cc;border-radius:8px;background:#fff7f8;color:#a33e50;font:inherit;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
 .guild-member-remove:hover{background:#fcebed;border-color:#dbaeb7}
 @media(max-width:520px){.guild-member-row{gap:8px;flex-wrap:wrap}.guild-member-identity{flex:1 1 150px}.guild-member-actions{margin-left:auto}.guild-member-remove{padding:7px 11px}}
+
+.guild-member-actions{display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:100%}
+.guild-member-role-action{padding:6px 10px;border:1px solid #c8c4e8;border-radius:8px;background:#f6f4ff;color:#5949a6;font:inherit;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
+.guild-member-role-action:hover{background:#ece8ff;border-color:#a99edb}
+.guild-member-role-action:disabled{opacity:.58;cursor:not-allowed;background:#f1f1f5;border-color:#d8dbe4;color:#777d8e}
+@media(max-width:520px){.guild-member-actions{flex:1 1 100%;margin-left:0;justify-content:flex-end}.guild-member-role-action{padding:7px 10px}}
