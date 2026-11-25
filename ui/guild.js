@@ -259,10 +259,19 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       const level = Number(member.level);
       const levelLabel = Number.isFinite(level) && level > 0 ? '<span class="guild-member-level">Lv.' + level + '</span>' : '';
       const crown = role === 'leader' ? '<span class="guild-member-crown" aria-label="會長">♛</span>' : '';
+      const actorRole = currentData?.my_role;
+      const canRemoveTarget = Boolean(member.user_id) && (
+        (actorRole === 'leader' && ['vice_leader', 'officer', 'member'].includes(role)) ||
+        (actorRole === 'vice_leader' && ['officer', 'member'].includes(role))
+      );
+      const removeAction = canRemoveTarget
+        ? '<button type="button" class="guild-member-remove" data-guild-remove-member="' + escapeHTML(member.user_id) +
+          '" data-guild-remove-name="' + name + '">移除</button>'
+        : '';
       return '<div class="guild-member-row"><span class="guild-member-identity"><span class="guild-member-avatar avatar-tone-' +
         (index % 4) + '">' + initial + crown + '</span><span class="guild-member-name"><b>' + name + '</b></span></span>' +
         '<span class="guild-role role-' + escapeHTML(role) + '">' + escapeHTML(roleLabel(role)) + '</span>' +
-        levelLabel + '</div>';
+        levelLabel + (removeAction ? '<span class="guild-member-actions">' + removeAction + '</span>' : '') + '</div>';
     }).join('');
     const toggle = members.length > 3
       ? '<button type="button" class="guild-members-toggle" data-guild-members-toggle aria-expanded="' + showAllMembers + '">' +
@@ -450,6 +459,18 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (button.matches('[data-guild-ranking-refresh]')) { loadRanking(); return; }
     if (button.matches('[data-guild-refresh]')) { loadTasks(); return; }
+    if (button.matches('[data-guild-remove-member]')) {
+      const targetId = button.dataset.guildRemoveMember;
+      const targetName = button.dataset.guildRemoveName || '這位成員';
+      if (!window.confirm('確定要將「' + targetName + '」移出公會嗎？')) return;
+      run(async () => {
+        await rpc('guild_remove_member', { p_user_id: targetId });
+        await load();
+        toast('已移除成員');
+        message('已移除「' + targetName + '」。', 'success');
+      });
+      return;
+    }
     if (button.matches('[data-guild-members-toggle]')) {
       showAllMembers = !showAllMembers;
       render();
