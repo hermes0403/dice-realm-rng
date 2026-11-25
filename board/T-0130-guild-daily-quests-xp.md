@@ -1,7 +1,7 @@
 ---
 id: T-0130
 title: 公會每日任務與經驗升級系統
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -113,3 +113,5 @@ done_at:
 - 2026-11-25 [叉子] 資料庫交易測試（全部 rollback，未留下測試進度／XP）：31 次模擬 heartbeat 將在線累積推至 30 分鐘，確認登入 15、在線 10、單人公會全員登入 20 的合計 XP 路徑；game_saves trigger 模擬 1,000 次累積擲骰，確認 roll_count=1,000 且只觸發一次完成旗標；成員上限測試確認第 5 位會被拒絕；升級函式邊界 0→Lv.1、100→Lv.2、350→Lv.3、850→Lv.4、大量 XP→Lv.20。測試後確認正式資料 xp_total=0、progress/bonus rows=0、成員數仍為 1。
 - 2026-11-25 [叉子] 權限檢查確認 anon 無法執行 guild_get_daily_tasks／touch_player_presence，authenticated 可執行任務讀取 RPC，但不能直接 SELECT／INSERT 任務進度表。Supabase Advisor 對新表的「RLS enabled without policy」為預期拒絕式設定（資料僅透過 RPC 讀取）；新增 user_id 查詢索引。
 - 2026-11-25 [叉子] 前端任務頁、進度條、XP／等級顯示、手動刷新、手機樣式與 PWA cache version 已加入分支；新增 tests/guild-daily-quests.test.mjs 與更新既有 PWA cache 測試。尚待 GitHub Actions 執行、真實瀏覽器／手機驗收及雙帳號跨日測試，未宣稱已部署。
+
+- 2026-11-25 [叉子] PR #328 第一輪修正後，17 個 GitHub Actions 檢查全部成功（含 board-lifecycle、pwa-display、cloud-save-regression、dice-roll-save）；任務專項測試已加入 PWA workflow。程式已具備進入 Owner 驗收條件，但尚未取得真實手機／桌面操作與雙帳號跨日驗收，因此維持 review，不標記 done。
