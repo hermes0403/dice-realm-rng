@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { key: 'settings', label: '公會設定', description: '管理公會設定與權限', icon: '⚙', tone: 'purple' }
 ];
 const VIEWS = {
-  tasks: { title: '公會今日任務', description: '公會任務系統尚未開放。正式任務與進度接上伺服器後，會在這裡顯示。' },
+  tasks: { title: '公會今日任務', description: '加入公會後即可查看每日任務與共享經驗。' },
   ranking: { title: '公會排行榜', description: '公會排行榜尚未開放，目前不會顯示虛構排名或分數。' },
   settings: { title: '公會設定', description: '公會設定功能尚未開放。現階段公會名稱、介紹與加入方式尚不能在此修改。' }
 };
@@ -97,7 +97,72 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<section class="card guild-feature-placeholder"><div class="guild-feature-icon" aria-hidden="true">' +
       (view === 'tasks' ? '✓' : view === 'ranking' ? '♜' : '⚙') + '</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>' + feature.title + '</h2><p>' + feature.description + '</p>' +
-      '<span class="guild-coming-soon">尚未開放</span></section>';
+      '<span class="guild-coming-soon">' + (view === 'tasks' ? '加入公會後開放' : '尚未開放') + '</span></section>';
+  }
+
+  function renderTasks(data) {
+    const guild = data?.guild;
+    const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
+    if (!guild) {
+      renderFeatureView('tasks');
+      return;
+    }
+    const level = Math.max(1, Math.min(20, Number(guild.level) || 1));
+    const xpTotal = Math.max(0, Number(guild.xp_total) || 0);
+    const xpInLevel = Math.max(0, Number(guild.xp_in_level) || 0);
+    const xpToNext = Math.max(0, Number(guild.xp_to_next) || 0);
+    const xpPercent = level >= 20 ? 100 : (xpToNext > 0 ? Math.min(100, xpInLevel / xpToNext * 100) : 0);
+    const taskCards = tasks.map(task => {
+      const progress = Math.max(0, Number(task.progress) || 0);
+      const target = Math.max(1, Number(task.target) || 1);
+      const percent = Math.min(100, progress / target * 100);
+      let progressLabel = Math.round(progress) + ' / ' + target;
+      if (task.key === 'online') progressLabel = Math.floor(progress / 60) + ' / 30 分鐘';
+      if (task.key === 'all_login') progressLabel = progress + ' / ' + target + ' 人';
+      if (task.key === 'login') progressLabel = (task.completed ? '1' : '0') + ' / 1';
+      return '<article class="guild-task-card' + (task.completed ? ' is-complete' : '') + '">' +
+        '<div class="guild-task-top"><div><b>' + escapeHTML(task.title || '每日任務') + '</b>' +
+        '<small>' + escapeHTML(progressLabel) + '</small></div><span class="guild-task-xp">+' +
+        Math.max(0, Number(task.xp) || 0) + ' XP</span></div>' +
+        '<div class="guild-task-track" role="progressbar" aria-label="' + escapeHTML(task.title || '每日任務') +
+        '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(percent) + '">' +
+        '<span style="width:' + percent.toFixed(2) + '%"></span></div>' +
+        '<small class="guild-task-state">' + (task.completed ? '✓ 已完成' : '進行中') + '</small></article>';
+    }).join('');
+    root().innerHTML = renderBackButton() +
+      '<section class="card guild-xp-panel"><div class="eyebrow">GUILD PROGRESSION</div>' +
+      '<div class="guild-xp-heading"><div><span class="guild-level-label">公會等級</span><strong>Lv.' + level +
+      '</strong></div><span class="guild-xp-total">' + xpTotal.toLocaleString('en-US') + ' XP</span></div>' +
+      '<div class="guild-task-track guild-xp-track" role="progressbar" aria-label="公會升級進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+      Math.round(xpPercent) + '"><span style="width:' + xpPercent.toFixed(2) + '%"></span></div>' +
+      '<p class="guild-xp-caption">' + (level >= 20 ? '已達最高等級' :
+      xpInLevel.toLocaleString('en-US') + ' / ' + xpToNext.toLocaleString('en-US') + ' XP · 下一級') + '</p></section>' +
+      '<section class="guild-task-section"><div class="section-head"><div><div class="eyebrow">DAILY GUILD QUESTS</div>' +
+      '<h3>今日任務</h3></div><span class="guild-roster-total">每日 00:00 重置</span></div>' +
+      '<div class="guild-task-list">' + (taskCards || '<p class="muted">目前沒有任務資料。</p>') + '</div>' +
+      '<p class="guild-task-note">個人任務完成後自動加入公會經驗；全員登入獎勵每日最多發放一次。</p>' +
+      '<button type="button" class="guild-task-refresh" data-guild-refresh>重新整理進度</button></section>';
+  }
+
+  async function loadTasks() {
+    activeView = 'tasks';
+    if (!currentData?.guild) {
+      renderFeatureView('tasks');
+      return;
+    }
+    root().innerHTML = renderBackButton() +
+      '<section class="card guild-feature-placeholder"><p class="muted">正在載入公會每日任務…</p></section>';
+    try {
+      const data = await rpc('guild_get_daily_tasks');
+      if (activeView !== 'tasks') return;
+      renderTasks(data);
+    } catch (error) {
+      if (activeView !== 'tasks') return;
+      root().innerHTML = renderBackButton() +
+        '<section class="card guild-feature-placeholder"><h2>任務載入失敗</h2>' +
+        '<p>無法取得公會每日任務，請稍後重試。</p><button type="button" data-guild-refresh>重新載入</button></section>';
+      message(error.message || '任務載入失敗', 'error');
+    }
   }
 
   function renderMembers(members) {
@@ -167,6 +232,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
         '<p class="muted">輸入名稱後搜尋公開公會。</p></div></section>';
       return;
     }
+    if (activeView === 'tasks') { loadTasks(); return; }
     if (VIEWS[activeView]) { renderFeatureView(activeView); return; }
     activeView = 'home';
     renderHome();
@@ -232,9 +298,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (button.dataset.guildView) {
       activeView = button.dataset.guildView;
-      render();
+      if (activeView === 'tasks') loadTasks();
+      else render();
       return;
     }
+    if (button.matches('[data-guild-refresh]')) { loadTasks(); return; }
     if (button.matches('[data-guild-members-toggle]')) {
       showAllMembers = !showAllMembers;
       render();

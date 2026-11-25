@@ -1,7 +1,7 @@
 ---
 id: T-0130
 title: 公會每日任務與經驗升級系統
-status: open
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P1
 created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0128, T-0129]
-branch:
+branch: task/T-0130-guild-daily-quests-xp
 done_by:
 done_at:
 ---
@@ -30,7 +30,7 @@ done_at:
 | 全員每日登入 | 當日公會全體成員均完成每日登入 | 額外 20 XP／公會 |
 
 - 個人任務每位成員每日各完成一次；全員登入獎勵每個公會每日最多發放一次。
-- 全員登入獎勵以當日公會有效成員名單判定；成員異動與每日重置的邊界規則須在實作前明確定義並測試。
+- 全員登入獎勵以判定當下的有效公會成員名單計算；新加入者當天也必須有登入紀錄，成員退出／轉移公會後立即重新檢查舊公會與新公會，若剩餘成員均已登入則補發一次，唯一鍵防止重複。每日日期仍以 Asia/Taipei 判定。
 - 任務進度與 XP 必須由伺服器判定，不可信任客戶端自行回報的完成狀態或 XP 數值。
 - 任務完成、XP 入帳與每日唯一完成紀錄必須具備交易原子性及冪等保護，避免重複領取。
 - 每日週期使用台灣時間（Asia/Taipei）00:00 重置。
@@ -105,3 +105,15 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-25 [叉子] 棒子確認 T-0110、T-0113、T-0121、T-0125 驗收成功並結案。依最新 main Board，owner_side 正在執行的公會任務為 T-0128、T-0129，共 2/5；`board/` 與 `board/archive/` 未找到有效 Communicate task 檔案，搜尋也未發現 COMMUNICATE_LOCK 紀錄。T-0128 基礎系統及 T-0129 介面／子頁返回導覽的程式已合併 main，T-0129 子頁導覽 PR #327 已合併；因此開始本任務實作，建立 task/T-0130-guild-daily-quests-xp 分支。真實雙帳號／手機驗證仍屬前置任務待 Owner 驗收，本任務會在整合前確認相依功能不被破壞。
+
+- 2026-11-25 [叉子] 已在 Supabase 正式專案套用兩筆增量 migration：`20261125093419_guild_daily_quests_xp`、`20261125093530_guild_daily_quests_xp_hardening`。新增台北時區每日進度、個人任務 XP、全員登入一次性獎勵、公會 XP／Lv.1–20、任務讀取 RPC；新增 DB trigger 保留 4 人上限並攔截第 5 位成員。
+- 2026-11-25 [叉子] 登入與在線時間沿用既有每 60 秒 presence heartbeat；每日任務頁只在開啟／手動重新整理時呼叫 RPC，沒有新增 Realtime 或輪詢。擲骰進度由 game_saves 更新 trigger 讀取累積擲骰數增量，最多按 8 次／秒計入，不接受客戶端直接提交任務進度、完成狀態或 XP，也沒有新增每抽網路請求。限制：目前骰子抽取本身仍在前端產生，這層速率檢查可防止一次性異常跳增，但不是伺服器 RNG 的密碼學證明；若要完全防腳本偽造，需另立伺服器擲骰架構任務。
+- 2026-11-25 [叉子] 資料庫交易測試（全部 rollback，未留下測試進度／XP）：31 次模擬 heartbeat 將在線累積推至 30 分鐘，確認登入 15、在線 10、單人公會全員登入 20 的合計 XP 路徑；game_saves trigger 模擬 1,000 次累積擲骰，確認 roll_count=1,000 且只觸發一次完成旗標；成員上限測試確認第 5 位會被拒絕；升級函式邊界 0→Lv.1、100→Lv.2、350→Lv.3、850→Lv.4、大量 XP→Lv.20。測試後確認正式資料 xp_total=0、progress/bonus rows=0、成員數仍為 1。
+- 2026-11-25 [叉子] 權限檢查確認 anon 無法執行 guild_get_daily_tasks／touch_player_presence，authenticated 可執行任務讀取 RPC，但不能直接 SELECT／INSERT 任務進度表。Supabase Advisor 對新表的「RLS enabled without policy」為預期拒絕式設定（資料僅透過 RPC 讀取）；新增 user_id 查詢索引。
+- 2026-11-25 [叉子] 前端任務頁、進度條、XP／等級顯示、手動刷新、手機樣式與 PWA cache version 已加入分支；新增 tests/guild-daily-quests.test.mjs 與更新既有 PWA cache 測試。尚待 GitHub Actions 執行、真實瀏覽器／手機驗收及雙帳號跨日測試，未宣稱已部署。
+
+- 2026-11-25 [叉子] PR #328 第一輪修正後，17 個 GitHub Actions 檢查全部成功（含 board-lifecycle、pwa-display、cloud-save-regression、dice-roll-save）；任務專項測試已加入 PWA workflow。程式已具備進入 Owner 驗收條件，但尚未取得真實手機／桌面操作與雙帳號跨日驗收，因此維持 review，不標記 done。
+
+- 2026-11-25 [叉子] 補上成員異動邊界 migration `20261125094852_guild_daily_quests_membership_boundary`：加入、退出、轉移公會時重新檢查當日全員登入；同時在已達 1,000 次擲骰後停止對進度列做多餘 UPDATE。資料庫交易測試確認「3 人中 2 人已登入、第 3 人退出」後會補發一次 +20 XP；重複 heartbeat 不會重複發放個人登入 XP；測試交易 rollback 後再次確認 XP=0、progress／bonus rows=0、公會人數=1。

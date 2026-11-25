@@ -36,3 +36,24 @@
 .guild-feature-placeholder,.guild-find-existing{background:#191e30!important;border-color:rgba(130,139,178,.16)!important}
 .guild-coming-soon{background:#29263d;color:#b5a8e2}.guild-message{color:#a0a7bc}.guild-message[data-kind=error]{color:#e18a98}
 @media(max-width:700px){.guild-nav-card{background:#191e30}.guild-banner{background:linear-gradient(112deg,#1b1d32,#191e30 72%)!important}}
+
+.guild-xp-panel,.guild-task-section{display:grid;gap:13px;padding:18px;border:1px solid rgba(140,149,184,.18);border-radius:18px;background:#191e30;color:#e0e3ef}
+.guild-xp-heading{display:flex;align-items:end;justify-content:space-between;gap:12px}
+.guild-xp-heading>div{display:grid;gap:3px}.guild-level-label,.guild-xp-caption,.guild-task-state,.guild-task-top small{color:#9ca3b9}
+.guild-xp-heading strong{font-size:30px;line-height:1.1;color:#d8ccff}
+.guild-xp-total{font-size:13px;font-weight:700;color:#bdb2e8}
+.guild-task-track{height:9px;overflow:hidden;border-radius:99px;background:#30364c}
+.guild-task-track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#8296db,#a99bd8);transition:width .2s ease}
+.guild-xp-caption{margin:0;font-size:12px}
+.guild-task-section{padding:0;border:0;background:transparent}
+.guild-task-list{display:grid;gap:10px}
+.guild-task-card{display:grid;gap:10px;padding:14px 15px;border:1px solid rgba(140,149,184,.18);border-radius:15px;background:#1a1f31;color:#dfe2ee}
+.guild-task-card.is-complete{border-color:rgba(119,166,145,.35);background:#1a292b}
+.guild-task-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.guild-task-top>div{display:grid;gap:4px}.guild-task-top b{font-size:14px}
+.guild-task-top small,.guild-task-state{font-size:12px}
+.guild-task-xp{flex:0 0 auto;color:#bdb2e8;font-size:12px;font-weight:800}
+.guild-task-card.is-complete .guild-task-xp,.guild-task-card.is-complete .guild-task-state{color:#9ac9ad}
+.guild-task-note{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-task-refresh{justify-self:start;padding:8px 13px;border:1px solid #45405e;border-radius:10px;background:#29263d;color:#d8ccff;font:inherit;cursor:pointer}
+@media(max-width:520px){.guild-xp-panel,.guild-task-section{padding:14px}.guild-task-top{align-items:flex-start}.guild-xp-heading strong{font-size:26px}}

@@ -34,8 +34,9 @@ test('公會成員資訊由 RPC 回傳資料產生，且可展開完整名單', 
   assert.match(source, /showAllMembers/);
 });
 
-test('未完成的公會功能明確標示尚未開放', () => {
-  assert.match(source, /公會任務系統尚未開放/);
+test('公會每日任務已接入伺服器 RPC，其他未完成功能仍標示尚未開放', () => {
+  assert.match(source, /guild_get_daily_tasks/);
+  assert.match(source, /加入公會後即可查看每日任務與共享經驗/);
   assert.match(source, /公會排行榜尚未開放/);
   assert.match(source, /公會設定功能尚未開放/);
 });
