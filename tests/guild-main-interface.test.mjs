@@ -11,7 +11,7 @@ test('公會主導覽包含示意圖的五個彩色功能卡片', () => {
   }
   assert.match(source, /guild-nav-grid/);
   assert.match(source, /guild-nav-card/);
-  assert.match(source, /data-go="roll"/);
+  assert.match(source, /go: 'roll'/);
   for (const tone of ['blue', 'green', 'gold', 'teal', 'purple']) {
     assert.ok(source.includes("tone: '" + tone + "'"), '缺少卡片色系：' + tone);
   }
