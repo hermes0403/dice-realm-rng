@@ -1,7 +1,7 @@
 ---
 id: T-0129
 title: 公會主介面依示意圖重製
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -11,7 +11,7 @@ priority: P1
 created: 2026-11-25
 updated: 2026-11-25
 depends_on: [T-0128]
-branch:
+branch: task/T-0129-guild-main-interface
 done_by:
 done_at:
 ---
@@ -49,7 +49,7 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-25 [叉子] 依棒子本次明確要求建立後續任務。T-0128 範圍僅為公會基礎功能，原示意圖中的完整主介面尚未實作，因此另開 T-0129，避免擴大或改寫已合併的 T-0128。開工前需重新確認五單容量與 Communicate 優先閘門；本次未建立 task branch、未修改程式碼。
+- 2026-11-25 [叉子] 依棒子明確要求建立 T-0129。開工閘門依 main 的 Board 檔案盤點：owner_side 有效 in_progress 任務僅 T-0128（1/5）；目前有效的 owner_side 任務中未發現符合 §15.9 條件的 communicate task 或 COMMUNICATE_LOCK，Communicate 優先閘門未觸發。由 main commit e13b4a418032d70c04104ef318a13cf4aec65737 建立 task/T-0129-guild-main-interface，任務轉為 in_progress。
 
 ## 完工回報
 
