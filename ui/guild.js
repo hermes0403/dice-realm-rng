@@ -30,7 +30,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
 
   function roleLabel(role) { return ROLE_LABELS[role] || '一般成員'; }
 
-  function navMarkup() {
+  function navMarkup(showTabs = true) {
     const tabs = [
       ['tasks', '今日任務'],
       ['ranking', '公會排行榜'],
@@ -39,13 +39,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     ];
     return '<nav class="guild-nav" aria-label="公會導覽">' +
       '<button type="button" class="guild-nav-back" data-go="roll">返回主頁</button>' +
-      tabs.map(([key, label]) => '<button type="button" class="guild-nav-tab' + (activeView === key ? ' is-active' : '') +
-        '" data-guild-view="' + key + '"' + (activeView === key ? ' aria-current="page"' : '') + '>' + label + '</button>').join('') +
+      (showTabs ? tabs.map(([key, label]) => '<button type="button" class="guild-nav-tab' + (activeView === key ? ' is-active' : '') +
+        '" data-guild-view="' + key + '"' + (activeView === key ? ' aria-current="page"' : '') + '>' + label + '</button>').join('') : '') +
       '</nav>';
   }
 
   function renderGuest() {
-    root().innerHTML = navMarkup() +
+    root().innerHTML = navMarkup(false) +
       '<div class="guild-empty card"><div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
       '<p class="muted">公會資料會綁定目前登入的遊戲帳號。</p>' +
       '<button class="primary" type="button" data-guild-login>登入／註冊</button></div>';
