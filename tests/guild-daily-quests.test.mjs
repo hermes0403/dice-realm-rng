@@ -7,6 +7,7 @@ const ui = read('../ui/guild.js');
 const css = read('../guild.css');
 const migration = read('../docs/migrations/20261125093419_guild_daily_quests_xp.sql');
 const hardening = read('../docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql');
+const membership = read('../docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql');
 const sw = read('../sw.js');
 const html = read('../index.html');
 
@@ -66,4 +67,12 @@ test('公會任務資產版本與 Service Worker 快取一致', () => {
   assert.ok(sw.includes('guild.css?v=' + version));
   assert.ok(sw.includes('dice-realm-shell-v2.19'));
   assert.ok(css.includes('.guild-task-card'));
+});
+
+test('全員登入獎勵會在成員加入、退出或轉移公會後重新依目前名單判定', () => {
+  assert.match(membership, /private\.award_guild_daily_login_bonus/);
+  assert.match(membership, /after insert on public\.guild_members/);
+  assert.match(membership, /after delete on public\.guild_members/);
+  assert.match(membership, /after update of guild_id on public\.guild_members/);
+  assert.match(membership, /on conflict \(guild_id, task_date\) do nothing/);
 });
