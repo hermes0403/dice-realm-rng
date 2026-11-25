@@ -25,8 +25,10 @@ on:
       - 'tests/guild-daily-quests.test.mjs'
       - 'tests/guild-leaderboard.test.mjs'
       - 'tests/guild-settings.test.mjs'
+      - 'tests/guild-announcements.test.mjs'
       - 'docs/migrations/20261125210321_guild_settings.sql'
       - 'docs/migrations/20261125212100_guild_name_limit_16.sql'
+      - 'docs/migrations/20261125213600_guild_announcements.sql'
       - 'docs/migrations/20261125124301_guild_leaderboard.sql'
       - 'tests/guild-foundation-authorization.test.mjs'
       - 'tests/sql/guild-foundation-behavior.sql'
@@ -51,7 +53,7 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs tests/guild-foundation-authorization.test.mjs tests/guild-settings.test.mjs
+        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs tests/guild-foundation-authorization.test.mjs tests/guild-settings.test.mjs tests/guild-announcements.test.mjs
       - name: Check JavaScript syntax
         run: |
           node --check script.js
