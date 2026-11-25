@@ -7,9 +7,10 @@ on:
     paths:
       - 'AGENTS.md'
       - 'README.md'
+      - 'board/README.md'
       - 'board/**'
-      - 'scripts/validate-board.mjs'
-      - 'tests/board-lifecycle.test.mjs'
+      - 'scripts/**'
+      - 'tests/**'
       - '.github/workflows/board-lifecycle-validation.yml'
   push:
     branches:
@@ -17,9 +18,10 @@ on:
     paths:
       - 'AGENTS.md'
       - 'README.md'
+      - 'board/README.md'
       - 'board/**'
-      - 'scripts/validate-board.mjs'
-      - 'tests/board-lifecycle.test.mjs'
+      - 'scripts/**'
+      - 'tests/**'
       - '.github/workflows/board-lifecycle-validation.yml'
 
 jobs:
@@ -38,7 +40,40 @@ jobs:
         run: node scripts/validate-board.mjs
       - name: Test Board lifecycle validator
         run: node --test tests/board-lifecycle.test.mjs
-      - name: Check patch whitespace
+      - name: Report pull_request event context
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          git fetch origin main
-          git diff --check origin/main...HEAD
+          echo "PR event: pull_request; base=${PR_BASE_SHA}; head=${PR_HEAD_SHA}; PR-diff framework pending 5a-2"
+      - name: Skip PR-diff for push events
+        if: github.event_name == 'push'
+        run: 'echo "PR-diff skipped: push event has no PR base"'
+      - name: Check patch whitespace
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin main
+            git diff --check origin/main...HEAD --
+          elif [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            if [[ "${GITHUB_EVENT_BEFORE}" =~ ^0{40}$ ]]; then
+              if git rev-parse --verify "${GITHUB_EVENT_AFTER}^" >/dev/null 2>&1; then
+                git diff --check "${GITHUB_EVENT_AFTER}^" "${GITHUB_EVENT_AFTER}" --
+              else
+                git show --check --format= "${GITHUB_EVENT_AFTER}" --
+              fi
+            elif git cat-file -e "${GITHUB_EVENT_BEFORE}^{commit}" 2>/dev/null; then
+              git diff --check "${GITHUB_EVENT_BEFORE}" "${GITHUB_EVENT_AFTER}" --
+            else
+              if git rev-parse --verify "${GITHUB_EVENT_AFTER}^" >/dev/null 2>&1; then
+                git diff --check "${GITHUB_EVENT_AFTER}^" "${GITHUB_EVENT_AFTER}" --
+              else
+                git show --check --format= "${GITHUB_EVENT_AFTER}" --
+              fi
+            fi
+          fi
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_EVENT_AFTER: ${{ github.event.after }}
