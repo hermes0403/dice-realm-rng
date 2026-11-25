@@ -1,7 +1,7 @@
 ---
 id: T-0141
 title: 更新公會升級門檻、等級獎勵與公會郵箱
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -87,6 +87,8 @@ Lv.3、Lv.7 的原成員上限 +1 改為幸運藥水 III ×1；Lv.17 的原成�
 9. 遷移及正式資料庫變更先審查 SQL、RLS、權限與安全性；不得未驗證即部署。
 
 ## 紀錄
+
+- 2026-11-26 [叉子] 狀態轉換：open → in_progress。依最新 main `86d33b60a61b42277a673aa9e9a24136e2dd7ddc` 盤點 owner_side 有效 in_progress／review 任務為 0/5；Communicate 優先搜尋未發現有效任務。兩道啟動閘門均未阻擋，開始 T-0141 實作。
 
 - 2026-11-26 [叉子] 新需求開單。T-0130 已結案；本任務承接其 XP 系統，只調整最新門檻並增加等級獎勵與個人公會郵件。開工前須重新檢查五單容量及 Communicate 優先閘門。
 
