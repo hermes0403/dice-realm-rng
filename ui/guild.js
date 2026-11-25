@@ -5,12 +5,12 @@ const NAV_ITEMS = [
   { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
   { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
   { key: 'find', label: '尋找公會', description: '搜尋並加入其他公會', icon: '⌕', tone: 'teal' },
-  { key: 'settings', label: '公會設定', description: '管理公會設定與權限', icon: '⚙', tone: 'purple' }
+  { key: 'settings', label: '公會設定', description: '查看設定與退出公會', icon: '⚙', tone: 'purple' }
 ];
 const VIEWS = {
   tasks: { title: '公會今日任務', description: '加入公會後即可查看每日任務與共享經驗。' },
   ranking: { title: '公會排行榜', description: '依公會等級與總 XP 排名，只顯示公開公會資訊。' },
-  settings: { title: '公會設定', description: '管理公會名稱、介紹與加入方式。' }
+  settings: { title: '公會設定', description: '查看公會設定及退出選項。' }
 };
 
 export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef = document, toast = () => {} }) {
