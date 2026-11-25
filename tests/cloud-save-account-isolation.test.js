@@ -230,3 +230,116 @@ test('late cloud response from account A cannot replace account B after a switch
   assert.deepEqual(state.bag, { d2: 2 });
   assert.equal(storage.getItem(key + '_user_account-A'), null);
 });
+
+
+test('late player grant response from account A cannot mutate account B', async () => {
+  const storage = storageMock();
+  let currentUser = { id: 'grant-A' };
+  let state = { ...freshState(), name: 'alpha', coins: 0, bag: {} };
+  let finishGrant;
+  const grantRead = new Promise(resolve => { finishGrant = resolve; });
+  const documentRef = {
+    visibilityState: 'visible',
+    getElementById() { return { textContent: '' }; },
+    addEventListener() {}
+  };
+  const service = createCloudSaveService({
+    KEY: 'diceRealm', D: [], POTIONS: [],
+    supabaseClient: {
+      from(table) {
+        if (table !== 'player_grants') throw new Error('Unexpected table ' + table);
+        return { select() { return this; }, eq() { return this; }, async maybeSingle() { return grantRead; } };
+      }
+    },
+    getState: () => state,
+    setState: value => { state = value; },
+    getCurrentUser: () => currentUser,
+    fresh: freshState,
+    normalizeGloves: value => value,
+    migrateCurrency: value => value,
+    ensurePetData() {}, restoreAutoSellPrefs() {},
+    totalUnique: () => 0, render() {}, refreshLeaderboards: async () => {},
+    toast() {}, openAuth() {}, showAuthMessage() {},
+    timerManager: timersMock(), localStorageRef: storage, documentRef,
+    windowRef: { addEventListener() {} }
+  });
+
+  service.resetAccountSession(currentUser.id);
+  state = { ...freshState(), name: 'alpha', coins: 0, bag: {} };
+  const pendingGrant = service.applyPendingGrants(true);
+
+  currentUser = { id: 'grant-B' };
+  service.resetAccountSession(currentUser.id);
+  finishGrant({
+    data: { coins_total: 5000, dice_grants: { d9: 3 } },
+    error: null
+  });
+  await pendingGrant;
+
+  assert.equal(state.coins, 0);
+  assert.deepEqual(state.bag, {});
+  assert.equal(storage.getItem('diceRealm_user_grant-B'), null);
+});
+
+
+test('late save RPC response from account A cannot write into account B local state', async () => {
+  const storage = storageMock();
+  let currentUser = { id: 'sync-A', user_metadata: { username: 'alpha' } };
+  let state = { ...freshState(), name: 'alpha', coins: 100, bag: { d1: 1 } };
+  let finishRpc;
+  let rpcStarted = false;
+  const rpcRead = new Promise(resolve => { finishRpc = resolve; });
+  const documentRef = {
+    visibilityState: 'visible',
+    getElementById() { return { textContent: '' }; },
+    addEventListener() {}
+  };
+  const service = createCloudSaveService({
+    KEY: 'diceRealm', D: [], POTIONS: [],
+    supabaseClient: {
+      from(table) {
+        if (table === 'game_saves') {
+          return { select() { return this; }, eq() { return this; }, async maybeSingle() {
+            return { data: { save_data: { ...freshState(), name: 'alpha', coins: 100, bag: { d1: 1 } }, updated_at: '2026-11-26T00:03:00.000Z' }, error: null };
+          } };
+        }
+        if (table === 'player_grants') {
+          return { select() { return this; }, eq() { return this; }, async maybeSingle() { return { data: null, error: null }; } };
+        }
+        throw new Error('Unexpected table ' + table);
+      },
+      async rpc() { rpcStarted = true; return rpcRead; }
+    },
+    getState: () => state,
+    setState: value => { state = value; },
+    getCurrentUser: () => currentUser,
+    fresh: freshState,
+    normalizeGloves: value => value,
+    migrateCurrency: value => value,
+    ensurePetData() {}, restoreAutoSellPrefs() {},
+    totalUnique: () => 1, render() {}, refreshLeaderboards: async () => {},
+    toast() {}, openAuth() {}, showAuthMessage() {},
+    timerManager: timersMock(), localStorageRef: storage, documentRef,
+    windowRef: { addEventListener() {} }
+  });
+
+  service.resetAccountSession(currentUser.id);
+  await service.loadCloudSave({ syncAfterLoad: false });
+  state.coins = 200;
+  const pendingSync = service.syncCloudSave();
+  await Promise.resolve();
+  assert.equal(rpcStarted, true);
+
+  currentUser = { id: 'sync-B', user_metadata: { username: 'bravo' } };
+  service.resetAccountSession(currentUser.id);
+  finishRpc({
+    data: { ok: true, updated_at: '2026-11-26T00:04:00.000Z', total_rolls: 0 },
+    error: null
+  });
+  await pendingSync;
+
+  assert.equal(state.name, '旅人');
+  assert.equal(state.coins, 0);
+  assert.deepEqual(state.bag, {});
+  assert.equal(storage.getItem('diceRealm_user_sync-B'), null);
+});
