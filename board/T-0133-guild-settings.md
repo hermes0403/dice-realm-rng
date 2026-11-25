@@ -1,7 +1,7 @@
 ---
 id: T-0133
 title: 開放公會設定：修改名稱、介紹與加入方式
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -58,6 +58,8 @@ done_at:
 
 ## 紀錄
 
+- 2026-11-25 21:11 [叉子] 狀態轉換：in_progress → review。T-0133 程式與資料庫交付已合併 PR #346，merge commit `33727bb3c8e9e3dfbe59787e44c95175855fc00b`；PR head `a85592cb278d8f99aeea032360081d2d4355c2b1` 的 17/17 GitHub Actions 全部 success，其中 PWA 專項 61/61 通過；main 的 Pages workflow `45620849164` build、deploy、report-build-status 全部 success。正式 Supabase 已套用 `20261125210321_guild_settings.sql`；唯讀權限查核確認 private RPC 為 SECURITY DEFINER、固定空 search_path，anon 無 EXECUTE、authenticated 有 EXECUTE，public wrapper 同樣只允許 authenticated；anon/authenticated 均無 public.guilds UPDATE 權限。會長 RPC 在 authenticated 角色下以交易執行後 rollback，回傳預期設定；無公會成員的登入身分呼叫被拒絕 `guild_settings_permission_denied`。尚未完成真實手機／桌面登入操作與不同職位的前端實機驗證，交由棒子驗收，不宣稱通過。
+
 - 2026-11-25 21:03 [叉子] 狀態轉換：open → in_progress。依最新 main `67c242acb7f44c6d17cf7fad0af8b44769d1f5cd` 重新盤點 owner_side 有效 in_progress 任務：僅 T-0132，共 1/5；T-0002、T-0038 屬 collaborator_side，不計入本方容量。board/ 與 board/archive/ 未發現有效 Communicate task，亦未發現有效 COMMUNICATE_LOCK。兩道啟動閘門均未阻擋；開始 T-0133 實作。
 
 - 2026-11-25 21:03 [叉子] 依棒子新需求建立 T-0133，先以 open 狀態開單。工作範圍限定公會名稱、介紹及加入方式；暫定僅會長可修改，其他角色可查看。開工前須依 Board §15.3 重新確認容量及 Communicate 優先閘門。
@@ -66,8 +68,24 @@ done_at:
 
 ### 改了什麼
 
+- `ui/guild.js`：公會設定頁改為可編輯表單，提供名稱、介紹及加入方式；會長可儲存，其他角色為唯讀。
+- `guild.css`：新增手機與桌面響應式設定表單樣式。
+- `docs/migrations/20261125210321_guild_settings.sql`：新增會長限定的 `guild_update_settings` RPC，伺服器端驗證名稱 2～24 字、介紹最多 160 字及 `application`／`open` 加入模式；`guild_get_my_guild` 新增回傳 `join_mode`。
+- 新增 `tests/guild-settings.test.mjs`，更新公會介面、每日任務快取斷言、PWA 版本及 workflow 測試清單；PWA cache 升至 `dice-realm-shell-v2.23`。
+- PR #346 已合併，merge commit `33727bb3c8e9e3dfbe59787e44c95175855fc00b`。
+
 ### 怎麼驗證的
+
+- PR head `a85592cb278d8f99aeea032360081d2d4355c2b1`：17/17 GitHub Actions checks success；PWA run `45620721784`：61/61 tests pass，JavaScript syntax checks pass；Board lifecycle validation pass。
+- GitHub Pages run `45620849164`：build、deploy、report-build-status 全部 success。
+- Supabase project `pkdctcfifauygnjipmab`：migration 已套用；private RPC 為 SECURITY DEFINER 且固定空 search_path；anon EXECUTE denied、authenticated EXECUTE granted；public wrapper 僅 authenticated 可執行；anon/authenticated 直接 UPDATE `public.guilds` 均 denied。
+- authenticated 會長 RPC 在交易內測試成功並 rollback；無公會成員的登入身分呼叫遭 `guild_settings_permission_denied` 拒絕，未留下測試資料。
 
 ### 沒做／做不到的
 
+- 尚未完成真實手機／桌面登入操作及不同職位帳號的前端實機驗證，待棒子驗收。
+- 尚未取得棒子對 T-0133 的最終驗收；目前維持 review，不標記 done。
+
 ### 衍生任務／影響任務
+
+- 未修改公會成員上限、職位配置、每日任務、XP、排行榜或其他玩家資料；未新增輪詢或 Realtime。
