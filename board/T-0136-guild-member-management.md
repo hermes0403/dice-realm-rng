@@ -1,7 +1,7 @@
 ---
 id: T-0136
 title: 新增公會成員管理與安全移除功能
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -55,13 +55,35 @@ done_at:
 ## 紀錄
 
 - 2026-11-25 21:41 [叉子] 依棒子要求接續成員管理。最新 main Board 的 owner_side 有效 in_progress 任務為 0/5（目前兩張 in_progress 任務均屬 collaborator_side）；Communicate 優先閘門未發現有效鎖定。現有 role 值已確認為 leader、vice_leader、officer、member，開始檢查成員 payload、刪除 trigger 與權限。
+- 2026-11-25 21:46 [叉子] 狀態轉換：in_progress → review。PR #353 已合併至 main，merge commit `d5d2f086b599586d4d82fac8651bf6f717a930ee`；正式 Supabase migration `guild_member_management` 已套用。RPC 交易測試涵蓋會長移除副會長、 副會長移除成員、禁止自我移除、禁止副會長移除會長、跨公會目標拒絕及一般成員拒絕，測試交易已 rollback。正式權限查核確認 guild_members RLS 啟用、anon/authenticated 無直接 DELETE、anon 無 RPC 權限、authenticated 僅能呼叫 public wrapper；既有每日登入 DELETE trigger 仍存在。17 個 GitHub Actions workflows 全數 success；Pages run `45626835730` build、deploy、report-build-status 全部 success。
 
 ## 完工回報
 
 ### 改了什麼
 
+- `private.guild_get_my_guild()` 僅對 leader／vice_leader 回傳成員 user_id；普通成員取得 null。
+- 新增 `private.guild_remove_member(uuid)` 與 authenticated-only public wrapper，伺服器驗證同公會、操作者階級、目標階級及禁止自我移除。
+- 成員列表加入依權限顯示的移除按鈕，點擊後顯示玩家名稱並要求確認；成功後重新載入公會資料。
+- 更新手機版成員列樣式、PWA 資產版本與 Service Worker cache 至 `dice-realm-shell-v2.26`。
+- 新增 `tests/guild-member-management.test.mjs` 並更新 PWA workflow。
+- PR #353 已合併，merge commit `d5d2f086b599586d4d82fac8651bf6f717a930ee`。
+
 ### 怎麼驗證的
+
+- 正式資料庫查核：guild_members RLS 啟用，anon/authenticated 無直接 DELETE 權限；anon 無 RPC 執行權限，authenticated 可呼叫 public wrapper，不能直接呼叫 private RPC。
+- SECURITY DEFINER RPC 使用固定空 search_path。
+- 正式資料庫交易測試：leader 可移除 vice_leader；vice_leader 可移除 member；leader／vice_leader 不能移除自己；vice_leader 不能移除 leader；跨公會目標與一般成員操作遭拒。
+- 驗證管理者 payload 包含 user_id，普通成員 payload 不暴露 user_id。
+- 交易測試已 rollback，未永久移動或移除任何玩家。
+- 既有 `guild_members_daily_login_recheck_delete` trigger 仍存在。
+- PR head `b10e90d26ee6a2310a827621ccd93000da16a59f` 的 17 個 GitHub Actions workflows 全數 success；PWA display regression tests success。
+- GitHub Pages run `45626835730`：build、deploy、report-build-status 全部 success。
 
 ### 沒做／做不到的
 
+- 未使用真實玩家帳號進行手機與桌面實機操作；已完成自動化及正式資料庫交易測試，仍待棒子驗收。
+- 本任務不包含角色任命／降職、會長轉讓或解散公會。
+
 ### 衍生任務／影響任務
+
+- 後續職位管理、會長轉讓及解散公會將另開任務，依序實作。
