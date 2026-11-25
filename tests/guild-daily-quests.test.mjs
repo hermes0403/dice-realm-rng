@@ -9,6 +9,7 @@ const migration = read('../docs/migrations/20261125093419_guild_daily_quests_xp.
 const hardening = read('../docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql');
 const membership = read('../docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql');
 const repeatable = read('../docs/migrations/20261125101918_guild_repeatable_daily_quests.sql');
+const loginThreshold = read('../docs/migrations/20261125110000_guild_daily_login_threshold.sql');
 const sw = read('../sw.js');
 const html = read('../index.html');
 
@@ -61,12 +62,12 @@ test('公會成員上限維持 4，且新進度表不可被客戶端直接讀寫
 });
 
 test('公會任務資產版本與 Service Worker 快取一致', () => {
-  const version = '20261125-t0130-repeatable-guild-quests';
+  const version = '20261125-t0132-guild-login-threshold';
   assert.ok(html.includes('guild.css?v=' + version));
   assert.ok(html.includes('script.js?v=' + version));
   assert.ok(sw.includes('ui/guild.js?v=' + version));
   assert.ok(sw.includes('guild.css?v=' + version));
-  assert.ok(sw.includes('dice-realm-shell-v2.20'));
+  assert.ok(sw.includes('dice-realm-shell-v2.21'));
   assert.ok(css.includes('.guild-task-card'));
 });
 
@@ -90,4 +91,21 @@ test('在線與擲骰任務支援每日多輪領取，且每輪紀錄具唯一�
   assert.match(repeatable, /'eligible',v_member_count>=2/);
   assert.match(ui, /已領取 ' \+ cycles \+ ' 輪/);
   assert.doesNotMatch(ui, /label: '返回主頁'/);
+});
+
+test('全員登入門檻依有效成員數採 min(人數, 3)，單人公會等待第二位成員', () => {
+  assert.match(loginThreshold, /v_logged_in_count\s*>=\s*least\(v_member_count,\s*3\)/);
+  assert.match(loginThreshold, /3 位以上成員每日登入/);
+  assert.match(loginThreshold, /2 位成員每日登入/);
+  assert.match(loginThreshold, /等待第 2 位成員加入/);
+  assert.match(loginThreshold, /v_all_login_target := case when v_member_count >= 2 then least\(v_member_count, 3\) else 0 end/);
+  assert.match(loginThreshold, /'target',v_all_login_target/);
+  assert.match(ui, /waitingForMember = task\.key === 'all_login' && task\.eligible === false/);
+  assert.doesNotMatch(ui, /至少需要 2 位有效成員/);
+});
+
+test('單人公會不顯示全員登入進度條或可領 XP', () => {
+  assert.match(ui, /waitingForMember \? '尚未開放'/);
+  assert.match(ui, /target > 0 \? '<div class="guild-task-track"/);
+  assert.match(loginThreshold, /'eligible',v_member_count>=2/);
 });
