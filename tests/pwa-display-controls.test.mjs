@@ -339,7 +339,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(worker, /dice-realm-shell-v2\.29/);
   assert.match(worker, /style\.css\?v=20261124-t0127-remove-public-ai-panel-v1/);
   assert.match(worker, /script\.js\?v=20261126-t0140-guild-role-panels-exit/);
-  assert.match(worker, /ui\/guild\.js\?v=20261125-t0136-guild-member-management/);
-  assert.match(worker, /guild\.css\?v=20261125-t0136-guild-member-management/);
+  assert.match(worker, /ui\/guild\.js\?v=20261126-t0140-guild-role-panels-exit/);
+  assert.match(worker, /guild\.css\?v=20261126-t0140-guild-role-panels-exit/);
   assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
 });
