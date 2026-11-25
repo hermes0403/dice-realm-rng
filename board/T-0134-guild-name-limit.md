@@ -1,7 +1,7 @@
 ---
 id: T-0134
 title: 將公會名稱限制調整為 2～16 字
-status: review
+status: done
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-25
-updated: 2026-11-25
+updated: 2026-11-26
 depends_on: []
 branch: task/T-0134-guild-name-limit
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-26
 ---
 
 ## 任務
@@ -44,6 +44,8 @@ done_at:
 
 - 2026-11-25 21:21 [叉子] 依棒子要求接手任務，狀態 open → in_progress。最新 main Board 為 4ead7981bae817ac8ed9cb4d81ace3b63b2ba7ed；owner_side 有效 in_progress 任務確認為 T-0132，共 1/5，T-0133 為 review 不計容量；Communicate 優先閘門未發現有效鎖定。開始前置程式與資料庫盤點。
 - 2026-11-25 21:32 [叉子] 狀態轉換：in_progress → review。PR #348 已合併至 main，merge commit `76fd06ad74e3454802b3a747b54e8130dc81bc08`；正式 Supabase migration `guild_name_limit_16` 已套用，資料盤點超過 16 字名稱為 0，CHECK constraint 與建立／修改 RPC 均確認 2～16 字；交易內測試建立 16 字、修改 2 字及拒絕 17 字成功，測試交易已 rollback。17 個 GitHub Actions workflows 全數 success；Pages run `45624545706` build、deploy、report-build-status 全部 success。
+
+- 2026-11-26 [棒子] 驗收：棒子於本次對話明確確認先前列出的八項任務「全部我驗收過了 成功」，並確認可繼續進行公會功能；本任務驗收通過。來源：棒子於 2026-11-26 本次對話的明確驗收回覆。證據：本次對話紀錄，使用者明確確認八項任務全部成功。
 
 ## 完工回報
 
