@@ -21,7 +21,7 @@ test('公會設定頁顯示名稱、介紹及加入方式，並使用 2～16 字
 });
 
 test('只有會長看到可儲存表單，其他角色為唯讀', () => {
-  assert.match(ui, /currentData\.my_role === 'leader'/);
+  assert.match(ui, /const canEdit = role === 'leader'/);
   assert.match(ui, /只有會長可以修改公會設定/);
   assert.match(ui, /disabled/);
   assert.match(ui, /if \(currentData\?\.my_role !== 'leader'\)/);
@@ -75,4 +75,13 @@ test('設定表單在手機寬度下維持單欄與可用輸入寬度', () => {
   assert.match(css, /guild-settings-form/);
   assert.match(css, /min-width:0/);
   assert.match(css, /@media\(max-width:520px\)/);
+});
+
+
+test('一般成員的設定頁完全隱藏設定與公告管理面板', () => {
+  assert.match(ui, /const isOrdinaryMember = role === 'member'/);
+  assert.match(ui, /const settingsPanel = isOrdinaryMember \? ''/);
+  assert.match(ui, /const announcementPanel = isOrdinaryMember \? ''/);
+  assert.match(ui, /const leavePanel =/);
+  assert.match(ui, /root\(\)\.innerHTML = renderBackButton\(\) \+ settingsPanel \+ announcementPanel \+ leavePanel/);
 });
