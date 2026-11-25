@@ -1,7 +1,7 @@
 ---
 id: T-0110
 title: 天氣召喚公告播放兩次、公告名稱縮短與水晶天氣紫色文字
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -9,11 +9,11 @@ contributors: []
 reviewer: 棒子
 priority: P2
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-25
 depends_on: []
 branch: task/T-0110-weather-announcement-display
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-25
 ---
 
 ## 任務
@@ -41,7 +41,7 @@ done_at:
 - [x] 稀有公告格式為「玩家{名稱}抽到了1/{分母} {骰子名稱}」，分母仍使用既有千分位格式。
 - [x] 保留 1/4096 公告門檻、Broadcast 及雲端歷史紀錄行為。
 - [x] 新增／更新回歸測試；專用測試、JavaScript 語法檢查與差異空白檢查通過。
-- [ ] GitHub Actions 與 GitHub Pages 部署成功；不操作 Supabase 正式資料。
+- [x] GitHub Actions 與 GitHub Pages 部署成功；不操作 Supabase 正式資料。
 
 ## 紀錄
 
@@ -50,3 +50,8 @@ done_at:
 - 2026-11-20 21:46 [叉子] 狀態轉換：open → in_progress。以最新 main SHA `82ff4767ce43e887b81c481fed608824061c5d82` 複查 owner_side 容量為 1/5（T-0085）；有效 Communicate 優先閘門未觸發。任務分支由 main 建立，僅修改不與 T-0085 重疊的公告／天氣模組與測試，開始實作。
 
 - 2026-11-20 22:01 [叉子] 程式與回歸測試完成，PR #234 已建立；專用測試 6/6 通過、JavaScript 語法檢查通過、`git diff --check` 通過，Board validator 通過。狀態轉為 review；正式合併與 GitHub Pages 部署仍待完成。
+
+
+## 驗收結案
+
+- 2026-11-25 [棒子] 使用者確認本任務驗收成功，功能沒有問題，正式結案。
