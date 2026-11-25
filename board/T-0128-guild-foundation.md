@@ -1,7 +1,7 @@
 ---
 id: T-0128
 title: 建立公會基礎系統
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -62,6 +62,8 @@ done_at:
 - [ ] 手機與桌面版操作正常；未執行的真實瀏覽器／雙帳號驗證須明確標示。
 
 ## 紀錄
+
+- 2026-11-25 20:25 [叉子] 狀態轉換：in_progress → review。正式資料庫權限漏洞已修正，15 項回滾式行為測試與兩組並行競態測試通過；交付 PR #336 與 Board 證據 PR #338 均已合併，PWA／Board／Cloud Save／Coin Boost workflow 全部成功。送棒子進行最終 Owner 驗收；桌面實機未獨立驗證，已如實標示。
 
 - 2026-11-25 20:24 [叉子] T-0128 交付 PR #336 已以 merge commit `3a0f23c59a3db137f27b7230b72fba23dcd2c8cc` 合併至 main；PWA display regression、Board lifecycle validation、Cloud save rollback、Coin boost regression 四項 PR workflow 均 success。任務實作與證據已同步到 main；狀態維持 in_progress，等待棒子正式驗收及桌面版操作確認。
 
