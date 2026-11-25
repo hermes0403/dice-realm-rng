@@ -1,7 +1,7 @@
 ---
 id: T-0135
 title: 新增公會公告功能
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -54,13 +54,34 @@ done_at:
 ## 紀錄
 
 - 2026-11-25 21:35 [叉子] 依棒子要求接續下一項公會功能。owner_side 有效 in_progress 任務盤點為 0/5；T-0132、T-0134 均已轉 review，不計容量；Communicate 優先閘門未發現有效鎖定。先檢查現有角色欄位及公會資料載入方式。
+- 2026-11-25 21:40 [叉子] 狀態轉換：in_progress → review。PR #351 已合併至 main，merge commit `498c5d4676b20cb2db6d75660924995923f78fc4`；正式 Supabase migration `guild_announcements` 已套用。公告表 RLS 已啟用，anon 無表讀取／RPC 執行權限，authenticated 無表直接寫入權限；公告寫入 RPC 為 SECURITY DEFINER 且固定空 search_path。交易測試驗證 200 字成功、201 字拒絕、空白清除及非會長／副會長拒絕寫入，測試交易已 rollback。17 個 GitHub Actions workflows 全數 success；Pages run `45625769416` build、deploy、report-build-status 全部 success。
 
 ## 完工回報
 
 ### 改了什麼
 
+- 新增 `public.guild_announcements`，每個公會只保留一則公告，最多 200 字，保存發布者及更新時間。
+- `private.guild_get_my_guild()` 將公告資料隨既有公會資料一併回傳，不增加額外讀取 RPC。
+- 新增 `private.guild_update_announcement(text)` 與 authenticated-only public wrapper；僅 leader、vice_leader 可發布、修改及清除。
+- 公會首頁顯示公告、發布者、更新時間及空狀態；公會設定頁新增公告編輯欄位。
+- 更新 `guild.css`、PWA 資產版本與 Service Worker cache 至 `dice-realm-shell-v2.25`。
+- 新增 `tests/guild-announcements.test.mjs` 並更新 PWA workflow。
+- PR #351 已合併，merge commit `498c5d4676b20cb2db6d75660924995923f78fc4`。
+
 ### 怎麼驗證的
+
+- 正式資料庫確認公告表 RLS 已啟用；anon 無 SELECT 權限，authenticated 無 INSERT／UPDATE／DELETE 權限。
+- 正式資料庫確認 anon 不可執行公告 RPC、authenticated 可執行；private RPC 不授權 authenticated 直接呼叫；SECURITY DEFINER 固定空 search_path。
+- 交易內 RPC 測試：200 字公告可發布並由 `guild_get_my_guild` 讀回，201 字遭拒，空白內容成功清除，非會長／副會長遭拒；測試交易已 rollback。
+- PR head `005f06d41278003f5f0ceebd91a5b66954ccbc86` 的 17 個 GitHub Actions workflows 全數 success，PWA display regression tests success。
+- GitHub Pages run `45625769416`：build、deploy、report-build-status 全部 success。
+- 公告資料沒有增加獨立讀取請求、輪詢或 Realtime。
 
 ### 沒做／做不到的
 
+- 未使用真實玩家帳號進行手機與桌面實機操作；已完成自動化及正式資料庫交易測試，仍待棒子驗收。
+- 本版本不保存公告歷史，編輯後會覆蓋目前公告。
+
 ### 衍生任務／影響任務
+
+- 後續成員管理、職位管理、會長轉讓與解散公會將另開任務，依序實作。
