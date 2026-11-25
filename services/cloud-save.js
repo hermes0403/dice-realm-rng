@@ -520,6 +520,7 @@ export function createCloudSaveService(dependencies) {
             conflictBaseVersion,
             conflictLocalSnapshot
           });
+          if (!isCurrentSync()) return false;
           cloudSyncPending = true;
           toast('已重新比對其他分頁／裝置的存檔差異，正在保留可安全合併的進度並重新同步。');
           return false;
@@ -554,14 +555,16 @@ export function createCloudSaveService(dependencies) {
       document.getElementById('saveStatus').textContent = '雲端已同步';
       return true;
     } catch (e) {
+      if (!isCurrentSync()) return false;
       console.error('Cloud sync failed', e);
-      cloudSyncPending = getCurrentUser()?.id === syncingUserId;
+      cloudSyncPending = true;
       document.getElementById('saveStatus').textContent = '雲端同步失敗';
       return false;
     } finally {
       cloudSyncBusy = false;
-      if (syncingGeneration === accountSessionGeneration && cloudSyncPending) scheduleCloudSync();
-      if (syncingGeneration === accountSessionGeneration && resumeRefreshPending) {
+      const activeUser = getCurrentUser();
+      if (cloudSyncPending && activeUser && cloudLoadReadyUserId === activeUser.id) scheduleCloudSync();
+      if (resumeRefreshPending && activeUser && cloudLoadReadyUserId === activeUser.id) {
         resumeRefreshPending = false;
         void refreshCloudSaveOnResume('sync-complete');
       }
