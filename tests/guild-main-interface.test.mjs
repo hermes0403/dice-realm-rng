@@ -5,14 +5,14 @@ import { readFile } from 'node:fs/promises';
 const source = await readFile(new URL('../ui/guild.js', import.meta.url), 'utf8');
 const styles = await readFile(new URL('../guild.css', import.meta.url), 'utf8');
 
-test('公會主導覽包含示意圖的五個彩色功能卡片', () => {
-  for (const label of ['返回主頁', '今日任務', '公會排行榜', '尋找公會', '公會設定']) {
+test('公會主導覽包含四個彩色功能卡片', () => {
+  for (const label of ['今日任務', '公會排行榜', '尋找公會', '公會設定']) {
     assert.ok(source.includes(label), '缺少導覽項目：' + label);
   }
   assert.match(source, /guild-nav-grid/);
+  assert.doesNotMatch(source, /label: '返回主頁'/);
   assert.match(source, /guild-nav-card/);
-  assert.match(source, /go: 'roll'/);
-  for (const tone of ['blue', 'green', 'gold', 'teal', 'purple']) {
+  for (const tone of ['green', 'gold', 'teal', 'purple']) {
     assert.ok(source.includes("tone: '" + tone + "'"), '缺少卡片色系：' + tone);
   }
 });

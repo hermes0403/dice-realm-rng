@@ -26,6 +26,7 @@ on:
       - 'docs/migrations/20261125093419_guild_daily_quests_xp.sql'
       - 'docs/migrations/20261125093530_guild_daily_quests_xp_hardening.sql'
       - 'docs/migrations/20261125094852_guild_daily_quests_membership_boundary.sql'
+      - 'docs/migrations/20261125101918_guild_repeatable_daily_quests.sql'
       - 'tests/pwa-display-controls.test.mjs'
       - '.github/workflows/pwa-display-tests.yml'
 
