@@ -19,6 +19,9 @@ on:
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'ui/display-controls.js'
+      - 'ui/guild.js'
+      - 'guild.css'
+      - 'tests/guild-main-interface.test.mjs'
       - 'tests/pwa-display-controls.test.mjs'
       - '.github/workflows/pwa-display-tests.yml'
 
@@ -35,7 +38,7 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js
+        run: node --test tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs
       - name: Check JavaScript syntax
         run: |
           node --check script.js
@@ -43,6 +46,7 @@ jobs:
           node --check systems/pet-skills.js
           node --check systems/dice.js
           node --check ui/display-controls.js
+          node --check ui/guild.js
           node --check sw.js
       - name: Check patch whitespace
         run: |
