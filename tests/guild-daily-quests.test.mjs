@@ -62,12 +62,13 @@ test('公會成員上限維持 4，且新進度表不可被客戶端直接讀寫
 });
 
 test('公會任務資產版本與 Service Worker 快取一致', () => {
-  const version = '20261125-t0136-guild-member-management';
-  assert.ok(html.includes('guild.css?v=' + version));
-  assert.ok(html.includes('script.js?v=' + version));
-  assert.ok(sw.includes('ui/guild.js?v=' + version));
-  assert.ok(sw.includes('guild.css?v=' + version));
-  assert.ok(sw.includes('dice-realm-shell-v2.26'));
+  const guildVersion = '20261125-t0136-guild-member-management';
+  const scriptVersion = '20261125-t0138-global-boost-homepage';
+  assert.ok(html.includes('guild.css?v=' + guildVersion));
+  assert.ok(html.includes('script.js?v=' + scriptVersion));
+  assert.ok(sw.includes('ui/guild.js?v=' + guildVersion));
+  assert.ok(sw.includes('guild.css?v=' + guildVersion));
+  assert.ok(sw.includes('dice-realm-shell-v2.27'));
   assert.ok(css.includes('.guild-task-card'));
 });
 
