@@ -52,8 +52,8 @@ test('設定頁只有會長與副會長可編輯公告', () => {
   assert.match(ui, /const canEditAnnouncement = \['leader', 'vice_leader'\]\.includes\(role\)/);
   assert.match(ui, /id="guildAnnouncementForm"/);
   assert.match(ui, /maxlength="200"/);
-  assert.match(ui, /只有會長與副會長可發布、修改或清除公告/);
-  assert.match(ui, /只有會長與副會長可以修改公會公告/);
+  assert.match(ui, /只有隊長與副隊長可發布、修改或清除公告/);
+  assert.match(ui, /只有隊長與副隊長可以修改公會公告/);
   assert.match(ui, /rpc\('guild_update_announcement'/);
   assert.match(ui, /await load\(\);\s*toast\('公會公告已更新'\)/);
 });

@@ -10,7 +10,7 @@ test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 �
   assert.match(ui, /hasUnlock\('name_color'\)/);
   assert.match(ui, /hasUnlock\('badge_effect'\)/);
   assert.match(ui, /hasUnlock\('guild_background'\)/);
-  assert.match(ui, /'badge_effect', 15/);
+  assert.match(ui, /cosmeticControl\\('badge_effect','公會徽章特效'.*'badge_effect',15\\)/);
   assert.match(ui, /'name_color', 9/);
   assert.match(ui, /'guild_background', 19/);
 });
@@ -22,7 +22,7 @@ test('公會外觀提供固定白名單選項，並由會長與副會長修改',
   assert.match(ui, /const canEditCosmetics = \['leader', 'vice_leader'\]\.includes\(role\)/);
   assert.match(ui, /guildCosmeticsForm/);
   assert.match(ui, /rpc\('guild_update_cosmetics'/);
-  assert.match(ui, /只有會長與副會長可以更換公會外觀/);
+  assert.match(ui, /只有隊長與副隊長可以更換公會外觀/);
 });
 
 test('未解鎖的外觀選單保持鎖定，且顯示所需公會等級', () => {
