@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { setupDisplayControls } from '../ui/display-controls.js';
 
 function createFixture({ requestFullscreen, exitFullscreen, pwaFullscreen = false, secure = true, serviceWorker = true } = {}) {
@@ -301,6 +303,7 @@ test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯�
 test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const dice = await readFile(new URL('../systems/dice.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
@@ -312,7 +315,10 @@ test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', a
   assert.match(dice, /revealAwaitingDismiss/);
   assert.match(css, /\.rarity-reveal-continue/);
   assert.match(worker, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
-  assert.match(worker, /systems\/dice\.js\?v=20261121-t0121-heaven-mode-persistence/);
+  const diceModuleVersion = script.match(/from\s+['"]\.\/systems\/dice\.js\?v=([^'"]+)['"]/)?.[1];
+  const workerDiceModuleVersion = worker.match(/\.\/systems\/dice\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(diceModuleVersion);
+  assert.equal(workerDiceModuleVersion, diceModuleVersion);
 });
 
 
@@ -358,6 +364,42 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(worker, /guild\.css\?v=20261126-t0142-guild-search-modal/);
   assert.match(script, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
-  assert.match(worker, /ui\/display-controls\.js\?v=20261126-t0142-guild-search-modal/);
-  assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
+  const displayControlsVersion = script.match(/from\s+['"]\.\/ui\/display-controls\.js\?v=([^'"]+)['"]/)?.[1];
+  const workerDisplayControlsVersion = worker.match(/\.\/ui\/display-controls\.js\?v=([^'"]+)/)?.[1];
+  const navigationVersion = script.match(/from\s+['"]\.\/ui\/navigation\.js\?v=([^'"]+)['"]/)?.[1];
+  const workerNavigationVersion = worker.match(/\.\/ui\/navigation\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(displayControlsVersion);
+  assert.equal(workerDisplayControlsVersion, displayControlsVersion);
+  assert.ok(navigationVersion);
+  assert.equal(workerNavigationVersion, navigationVersion);
+});
+
+
+test('Service Worker 預先快取所有遊戲模組的完整相對匯入依賴', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const sourceFiles = [];
+  async function collect(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await collect(path);
+      else if (/\.m?js$/.test(entry.name)) sourceFiles.push(path);
+    }
+  }
+  for (const directory of ['admin', 'core', 'data', 'services', 'systems', 'ui']) {
+    await collect(join(root, directory));
+  }
+  sourceFiles.push(join(root, 'script.js'), join(root, 'config.js'));
+  const worker = await readFile(join(root, 'sw.js'), 'utf8');
+  const appShell = worker.match(/const APP_SHELL = \[([\s\S]*?)\n\];/)?.[1] || '';
+  const cachedUrls = new Set([...appShell.matchAll(/['"](\.\/[^'"]+)['"]/g)].map(match => match[1]));
+  for (const file of sourceFiles) {
+    const relativeFile = file.slice(root.length).replaceAll('\\', '/');
+    const source = await readFile(file, 'utf8');
+    const imports = [...source.matchAll(/(?:\bfrom\s+|\bimport\s*\()\s*['"]((?:\.\/|\.\.\/)[^'"]+)['"]/g)].map(match => match[1]);
+    for (const specifier of imports) {
+      const resolved = new URL(specifier, 'https://dice-realm.local/' + relativeFile);
+      const expectedUrl = './' + resolved.pathname.slice(1) + resolved.search;
+      assert.ok(cachedUrls.has(expectedUrl), relativeFile + ' dependency missing from APP_SHELL: ' + expectedUrl);
+    }
+  }
 });
