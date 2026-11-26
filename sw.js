@@ -1,14 +1,14 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.37';
+const CACHE_NAME = 'dice-realm-shell-v2.38';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
-  './script.js?v=20261126-t0148-guild-recovery',
+  './script.js?v=20261126-t0149-guild-module-refresh',
   './ui/navigation.js?v=20261123-daily-shop-prices-d14-v1',
-  './ui/guild.js?v=20261126-t0142-guild-search-modal',
+  './ui/guild.js?v=20261126-t0149-guild-module-refresh',
   './ui/inventory.js?v=20261126-t0142-inventory-selection',
   './services/auth.js?v=20261126-t0139-account-isolation',
   './services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox',
