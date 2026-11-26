@@ -40,3 +40,9 @@ test('移除成員也只保留三階級權限', () => {
 test('手機版晉升清單維持可操作', () => {
  assert.match(css,/guild-promotion-row/); assert.match(css,/@media\(max-width:520px\)[\s\S]*?guild-promotion-row/);
 });
+
+test('private promotion implementation is not directly executable by clients; public wrapper is SECURITY DEFINER', () => {
+  assert.match(sql, /revoke all on function private\\.guild_update_member_role\\(uuid,text\\) from public, anon, authenticated/);
+  assert.match(sql, /create or replace function public\\.guild_update_member_role[\\s\\S]*?security definer/);
+  assert.match(sql, /grant execute on function public\\.guild_update_member_role\\(uuid,text\\) to authenticated/);
+});
