@@ -39,8 +39,12 @@ done_at:
 - [x] 隊長可任命／撤除副隊長，最多 2 位。
 - [x] 伺服器端驗證角色權限及同公會目標。
 - [ ] CI 回歸測試全部通過。
-- [ ] Supabase migration 套用並驗證。
-- [ ] GitHub Pages 部署成功並確認線上版本。
+- [x] Supabase migration 套用並驗證。
+- [x] GitHub Pages 部署成功並確認線上版本。
 
 ## 紀錄
 - 2026-11-27 叉子：依棒子補充的職位為「隊長／副隊長／普通成員」開始實作；每公會最多 2 位副隊長沿用先前設定。
+
+- 2026-11-27 [叉子] PR #409 已合併（merge commit `c37e74637a748674349c06b1815deca8f25d58e2`）；Supabase migration `guild_member_promotion` 已套用（version `20261126222016`），確認角色限制僅含 leader／vice_leader／member，現有 5 位隊長、9 位普通成員，沒有既有資料遺失。
+- 2026-11-27 [叉子] 追加 PR #410 修正私有晉升 RPC 權限，已合併（`274c1546032eae490f20e38c51f1c1fccdaa26ec`）；migration `guild_promotion_rpc_acl_fix` 已套用（version `20261126222331`）。驗證 private RPC 對 authenticated／anon 均不可直接執行；public RPC 僅 authenticated 可執行且使用 SECURITY DEFINER。
+- 2026-11-27 [叉子] PWA／公會回歸測試通過，Board lifecycle 通過；GitHub Pages deployment run #45904482359 build、deploy 均成功。完整遊戲回歸仍有既存的寵物管理排序測試失敗（`tests/pet-removal-admin-counts.test.js`），與本任務無關；因此 CI 全部通過項仍保留未勾選，待既有問題另行修正。
