@@ -10,7 +10,7 @@ reviewer: 棒子
 priority: P2
 created: 2026-11-26
 updated: 2026-11-26
-depends_on: [T-0141]
+depends_on: []
 branch: task/T-0142-guild-search-and-inventory-selection
 done_by:
 done_at:
