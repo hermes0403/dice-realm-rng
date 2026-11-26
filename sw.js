@@ -8,6 +8,7 @@ const APP_SHELL = [
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/equipment.js?v=20261121-t0123-money-potions',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
+  './data/pets.js',
   './data/eternal-update.js?v=20261122-eternal-income-v1',
   './data/progression.js',
   './config.js?v=20261123-daily-shop-v1',
