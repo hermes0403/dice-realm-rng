@@ -105,6 +105,9 @@ test('PWA asset URLs and service worker shell cache use the T-0141 version', () 
   assert.equal(workerScriptVersion, htmlScriptVersion);
   assert.ok(guildModuleVersion);
   assert.equal(workerGuildModuleVersion, guildModuleVersion);
-  assert.ok(sw.includes('services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox'));
+  const cloudSaveVersion = script.match(/import\(['"]\.\/services\/cloud-save\.js\?v=([^'"]+)['"]\)/)?.[1];
+  const workerCloudSaveVersion = sw.match(/\.\/services\/cloud-save\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(cloudSaveVersion);
+  assert.equal(workerCloudSaveVersion, cloudSaveVersion);
   assert.match(sw, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
 });
