@@ -180,3 +180,29 @@
 .guild-find-dialog .guild-result-row button{cursor:pointer}
 .guild-find-error{margin:0;padding:12px;border:1px solid rgba(255,112,132,.35);border-radius:10px;background:rgba(145,42,67,.16);color:#ffb4c1;font-size:13px}
 @media(max-width:520px){.guild-find-overlay{padding:8px;place-items:center}.guild-find-dialog{width:100%;max-height:92dvh;padding:14px;border-radius:16px;gap:13px}.guild-find-dialog .guild-search{align-items:stretch}.guild-find-dialog .guild-search button{min-width:68px;padding:8px 10px}}
+
+
+/* T-0147: unlocked guild cosmetics; restrained effects keep rendering inexpensive. */
+.guild-cosmetics-panel{display:grid;gap:11px}
+.guild-cosmetics-panel h3{margin:0;color:#e1d9f5;font-size:17px}
+.guild-cosmetics-note{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-cosmetic-control{display:grid;gap:7px}
+.guild-cosmetic-control select{width:100%;min-width:0;padding:10px 11px;border:1px solid #41475f;border-radius:10px;background:#151a2b;color:#e0e3ef;font:inherit}
+.guild-cosmetic-control select:disabled{opacity:.68;cursor:not-allowed}
+.guild-cosmetic-control small{color:#969db3;font-size:11px;line-height:1.5}
+.guild-name-color-nebula{background:linear-gradient(90deg,#d6b8ff,#8ca8ff,#d6b8ff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-name-color-ice{background:linear-gradient(90deg,#c7f2ff,#6db8ef,#d8f8ff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-name-color-ember{background:linear-gradient(90deg,#ffc1a8,#ed6e79,#ffd28c);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-name-color-emerald{background:linear-gradient(90deg,#b8f2c5,#61c9a2,#d0f5a9);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-name-color-solar{background:linear-gradient(90deg,#fff0a6,#e9b85f,#fff0c2);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-banner.guild-bg-nebula{background:radial-gradient(ellipse at 84% 8%,rgba(128,100,219,.38),transparent 48%),linear-gradient(125deg,#171c35,#29213f 55%,#14283d)!important;border-color:rgba(158,135,235,.42)!important}
+.guild-banner.guild-bg-aurora{background:radial-gradient(ellipse at 12% 0%,rgba(64,180,165,.3),transparent 48%),radial-gradient(ellipse at 90% 100%,rgba(100,119,218,.26),transparent 50%),linear-gradient(125deg,#142a32,#1c2940 60%,#20203a)!important;border-color:rgba(105,185,175,.38)!important}
+.guild-banner.guild-bg-eclipse{background:radial-gradient(circle at 84% 18%,rgba(173,143,110,.22),transparent 34%),linear-gradient(125deg,#151820,#242638 58%,#111827)!important;border-color:rgba(164,154,134,.34)!important}
+.guild-banner.guild-bg-crimson{background:radial-gradient(ellipse at 88% 10%,rgba(191,75,99,.28),transparent 48%),linear-gradient(125deg,#2b1b2c,#31202e 58%,#1d2438)!important;border-color:rgba(192,105,128,.38)!important}
+.guild-banner-emblem{position:relative}
+.guild-banner-emblem.guild-badge-effect-pulse{animation:guildCosmeticPulse 3.4s ease-in-out infinite}
+.guild-banner-emblem.guild-badge-effect-orbit::after{content:"";position:absolute;inset:-9px;border:1px solid rgba(180,163,255,.68);border-radius:36%;transform:rotate(35deg);box-shadow:0 0 12px rgba(166,145,255,.3);pointer-events:none}
+.guild-banner-emblem.guild-badge-effect-radiant{filter:drop-shadow(0 0 7px rgba(191,169,255,.62))}
+@keyframes guildCosmeticPulse{0%,100%{filter:drop-shadow(0 0 3px rgba(159,128,255,.24))}50%{filter:drop-shadow(0 0 10px rgba(191,157,255,.7))}}
+@media(prefers-reduced-motion:reduce){.guild-banner-emblem.guild-badge-effect-pulse{animation:none}}
+@media(max-width:520px){.guild-cosmetics-panel{padding:14px}.guild-cosmetic-control select{font-size:13px}}
