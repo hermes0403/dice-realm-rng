@@ -26,6 +26,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   let mailboxRows = [];
   let mailboxLoading = false;
   let mailboxError = '';
+  let findOpen = false;
+  let findQuery = '';
+  let findLoading = false;
+  let findError = '';
+  let searchPerformed = false;
 
   async function rpc(name, params = {}) {
     if (!supabaseClient) throw new Error('雲端服務暫時無法使用');
@@ -47,7 +52,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const unreadCount = Math.max(0, Number(currentData?.mail_unread_count) || 0);
     return '<div class="guild-nav-grid" aria-label="公會功能導覽">' +
       NAV_ITEMS.map(item => {
-        const active = item.key === 'mailbox' ? mailboxOpen : item.key !== 'home' && activeView === item.key;
+        const active = item.key === 'mailbox' ? mailboxOpen : item.key === 'find' ? findOpen : item.key !== 'home' && activeView === item.key;
         const action = item.go ? ' data-go="' + item.go + '"' : ' data-guild-view="' + item.key + '"';
         const label = item.key === 'mailbox' && unreadCount ? item.label + ' (' + unreadCount + ')' : item.label;
         const description = item.key === 'mailbox' && unreadCount ? '未讀 ' + unreadCount + ' 封升級通知' : item.description;
@@ -86,7 +91,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   function renderNoGuild() {
     if (activeView === 'home') activeView = 'find';
     if (activeView === 'find') {
-      root().innerHTML = navMarkup() + renderBackButton() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>' + renderMailboxOverlay();
+      root().innerHTML = navMarkup() + '<div class="guild-empty-state">' + renderCreatePanel() + '</div>' + renderMailboxOverlay() + renderFindOverlay();
       return;
     }
     if (activeView === 'ranking') { loadRanking(); return; }
@@ -419,22 +424,14 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           escapeHTML(a.username || '未知玩家') + '</b><p>' + escapeHTML(a.message || '沒有附加訊息') +
           '</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="' +
           escapeHTML(a.id) + '">核准</button><button class="quiet" type="button" data-guild-review="reject" data-app-id="' +
-          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') + renderMailboxOverlay();
+          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') + renderMailboxOverlay() + renderFindOverlay();
   }
 
   function render() {
     if (!root()) return;
     if (!getCurrentUser()) { renderGuest(); return; }
     if (!currentData?.guild) { renderNoGuild(); return; }
-    if (activeView === 'find') {
-      root().innerHTML = navMarkup() + renderBackButton() + '<section class="card guild-find-existing"><div class="eyebrow">FIND GUILD</div>' +
-        '<h2>尋找公會</h2><p class="muted">你目前已加入「' + escapeHTML(currentData.guild.name) +
-        '」。你可以瀏覽公開公會，但需先退出目前公會才能加入其他公會。</p>' +
-        '<div class="guild-search"><input id="guildSearchInput" maxlength="16" placeholder="輸入公會名稱" aria-label="輸入公會名稱">' +
-        '<button type="button" id="guildSearchBtn">搜尋</button></div><div id="guildSearchResults" class="guild-results">' +
-        '<p class="muted">輸入名稱後搜尋公開公會。</p></div></section>';
-      return;
-    }
+    if (activeView === 'find') activeView = 'home';
     if (activeView === 'tasks') { loadTasks(); return; }
     if (activeView === 'ranking') { loadRanking(); return; }
     if (activeView === 'settings') { renderSettings(); return; }
@@ -443,17 +440,43 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     renderHome();
   }
 
-  function renderSearchResults(rows) {
-    searchResults = Array.isArray(rows) ? rows : [];
-    const el = documentRef.getElementById('guildSearchResults');
-    if (!el) return;
-    if (!searchResults.length) { el.innerHTML = '<p class="muted">沒有找到符合的公開公會。</p>'; return; }
+  function renderFindResultsMarkup() {
+    if (findLoading) return '<p class="muted guild-mailbox-empty">正在搜尋公開公會…</p>';
+    if (findError) return '<p class="guild-find-error" role="alert">' + escapeHTML(findError) + '</p>';
+    if (!searchPerformed) return '<p class="muted guild-mailbox-empty">輸入公會名稱後搜尋；留空可瀏覽公開公會。</p>';
+    if (!searchResults.length) return '<p class="muted guild-mailbox-empty">沒有找到符合的公開公會。</p>';
     const alreadyJoined = Boolean(currentData?.guild);
-    el.innerHTML = searchResults.map(g => '<article class="guild-result-row"><div><b>' + escapeHTML(g.name) +
+    return searchResults.map(g => '<article class="guild-result-row"><div><b>' + escapeHTML(g.name) +
       '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>會長：' +
       escapeHTML(g.leader_name || '未知玩家') + ' · ' + (Number(g.member_count) || 0) + ' 人</small></div>' +
-      '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '" ' + (alreadyJoined ? 'disabled' : '') + '>' +
-      (alreadyJoined ? '已加入其他公會' : (g.join_mode === 'open' ? '直接加入' : '申請加入')) + '</button></article>').join('');
+      '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '"' +
+      (alreadyJoined ? ' aria-label="目前已有公會，無法加入"' : '') + '>' +
+      (alreadyJoined ? '目前已有公會' : (g.join_mode === 'open' ? '直接加入' : '申請加入')) + '</button></article>').join('');
+  }
+
+  function renderFindOverlay() {
+    if (!findOpen) return '';
+    return '<div class="guild-find-overlay" data-guild-find-overlay>' +
+      '<section class="card guild-find-dialog" role="dialog" aria-modal="true" aria-labelledby="guildFindTitle">' +
+      '<header class="guild-mailbox-header"><div><div class="eyebrow">FIND GUILD NETWORK</div><h2 id="guildFindTitle">尋找公會</h2>' +
+      '<p>' + (currentData?.guild
+        ? '你目前已加入「' + escapeHTML(currentData.guild.name) + '」，仍可瀏覽其他公開公會。'
+        : '搜尋並瀏覽目前開放的公開公會。') + '</p></div>' +
+      '<button type="button" class="guild-mailbox-close" data-guild-find-close aria-label="關閉尋找公會">✕</button></header>' +
+      '<div class="guild-search"><input id="guildSearchInput" maxlength="16" value="' + escapeHTML(findQuery) +
+      '" placeholder="輸入公會名稱（留空瀏覽全部）" aria-label="輸入公會名稱">' +
+      '<button type="button" id="guildSearchBtn"' + (findLoading ? ' disabled' : '') + '>搜尋</button></div>' +
+      '<div id="guildSearchResults" class="guild-results" aria-live="polite">' + renderFindResultsMarkup() + '</div>' +
+      '</section></div>';
+  }
+
+  function renderSearchResults(rows) {
+    searchResults = Array.isArray(rows) ? rows : [];
+    searchPerformed = true;
+    findLoading = false;
+    findError = '';
+    const el = documentRef.getElementById('guildSearchResults');
+    if (el) el.innerHTML = renderFindResultsMarkup();
   }
 
   async function load() {
@@ -545,6 +568,12 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   });
 
   documentRef.addEventListener('click', event => {
+    const findOverlay = event.target.closest('[data-guild-find-overlay]');
+    if (findOverlay && event.target === findOverlay) {
+      findOpen = false;
+      render();
+      return;
+    }
     const mailboxOverlay = event.target.closest('[data-guild-mailbox-overlay]');
     if (mailboxOverlay && event.target === mailboxOverlay) {
       mailboxOpen = false;
@@ -553,6 +582,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     const button = event.target.closest('button');
     if (!button) return;
+    if (button.matches('[data-guild-find-close]')) {
+      findOpen = false;
+      render();
+      return;
+    }
     if (button.matches('[data-guild-mailbox-close]')) {
       mailboxOpen = false;
       render();
@@ -569,6 +603,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       if (button.dataset.guildView === 'mailbox') {
         activeView = currentData?.guild ? 'home' : 'find';
         loadMailbox();
+        return;
+      }
+      if (button.dataset.guildView === 'find') {
+        if (!getCurrentUser()) { documentRef.getElementById('authOpenBtn')?.click(); return; }
+        findOpen = true;
+        activeView = currentData?.guild ? 'home' : 'find';
+        render();
         return;
       }
       activeView = button.dataset.guildView;
@@ -609,14 +650,29 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (button.matches('[data-guild-login]')) { documentRef.getElementById('authOpenBtn')?.click(); return; }
     if (button.id === 'guildRetryBtn') { load(); return; }
     if (button.id === 'guildSearchBtn') {
-      run(async () => {
-        const query = documentRef.getElementById('guildSearchInput')?.value?.trim() || '';
-        const rows = await rpc('guild_search', { p_query: query, p_limit: 20 });
+      if (findLoading) return;
+      findQuery = documentRef.getElementById('guildSearchInput')?.value?.trim() || '';
+      findLoading = true;
+      findError = '';
+      searchPerformed = true;
+      render();
+      try {
+        const rows = await rpc('guild_search', { p_query: findQuery, p_limit: 20 });
         renderSearchResults(rows);
-      });
+      } catch (error) {
+        findLoading = false;
+        findError = error.message || '搜尋失敗，請稍後重試。';
+        render();
+      }
       return;
     }
     if (button.dataset.guildApply) {
+      if (currentData?.guild) {
+        const notice = '你目前已加入「' + currentData.guild.name + '」，請先退出目前公會後再加入。';
+        toast(notice);
+        message(notice, 'error');
+        return;
+      }
       run(async () => {
         const result = await rpc('guild_apply', { p_guild_id: button.dataset.guildApply, p_message: '' });
         toast(result?.joined ? '已加入公會' : '已送出加入申請');
@@ -668,8 +724,9 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   });
 
   documentRef.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && mailboxOpen) {
+    if (event.key === 'Escape' && (mailboxOpen || findOpen)) {
       mailboxOpen = false;
+      findOpen = false;
       render();
     }
   });
