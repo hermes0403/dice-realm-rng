@@ -34,7 +34,8 @@ test('sending requires leader role, guild recipients and an atomic locked invent
   assert.match(migration, /v_balance < v_total/);
   assert.match(migration, /update public\.game_saves[\s\S]*?set save_data = v_save_data, updated_at = clock_timestamp\(\)/);
   assert.match(migration, /with inserted as \([\s\S]*?insert into public\.guild_potion_gift_mail/);
-  assert.match(migration, /pg_advisory_xact_lock\(hashtextextended\(v_uid::text \|\| ':' \|\| p_request_id::text, 0\)\)/);\n  assert.match(migration, /guild_potion_gift_request_conflict/);
+  assert.match(migration, /pg_advisory_xact_lock\(hashtextextended\(v_uid::text \|\| ':' \|\| p_request_id::text, 0\)\)/);
+  assert.match(migration, /guild_potion_gift_request_conflict/);
   assert.match(migration, /already_sent/);
 });
 

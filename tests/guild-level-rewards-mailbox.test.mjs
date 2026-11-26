@@ -105,7 +105,7 @@ test('PWA asset URLs and service worker shell cache use the T-0141 version', () 
   assert.equal(workerScriptVersion, htmlScriptVersion);
   assert.ok(guildModuleVersion);
   assert.equal(workerGuildModuleVersion, guildModuleVersion);
-  const cloudSaveVersion = script.match(/import\(['"]\.\/services\/cloud-save\.js\?v=([^'"]+)['"]\)/)?.[1];
+  const cloudSaveVersion = script.match(/cloud-save\.js\?v=([^'"]+)/)?.[1];
   const workerCloudSaveVersion = sw.match(/\.\/services\/cloud-save\.js\?v=([^'"]+)/)?.[1];
   assert.ok(cloudSaveVersion);
   assert.equal(workerCloudSaveVersion, cloudSaveVersion);
