@@ -567,7 +567,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     });
   });
 
-  documentRef.addEventListener('click', event => {
+  documentRef.addEventListener('click', async event => {
     const findOverlay = event.target.closest('[data-guild-find-overlay]');
     if (findOverlay && event.target === findOverlay) {
       findOpen = false;
