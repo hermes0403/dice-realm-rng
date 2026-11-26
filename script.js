@@ -233,7 +233,7 @@ async function loadGuildPage(){
   guildRoot.innerHTML='<div class="card"><p class="muted">正在啟動公會功能…</p></div>';
   try{
     if(!guildSystem){
-      const { createGuildSystem } = await import('./ui/guild.js?v=20261126-t0151-pages-redeploy');
+      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0147-guild-cosmetics');
       guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,documentRef:document,toast});
     }
     return await guildSystem.load();
