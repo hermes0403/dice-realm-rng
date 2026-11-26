@@ -1,7 +1,7 @@
 ---
 id: T-0141
 title: 更新公會升級門檻、等級獎勵與公會郵箱
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -88,6 +88,8 @@ Lv.3、Lv.7 的原成員上限 +1 改為幸運藥水 III ×1；Lv.17 的原成�
 
 ## 紀錄
 
+- 2026-11-26 [叉子] 狀態轉換：in_progress → review。PR #376 已合併至 main，merge commit `c3c3efd0b58fef11aa27a680b85c2df4b606cfdd`；正式 Supabase migration `guild_level_rewards_mailbox` 已套用；PR 的 17 項 GitHub Actions 檢查全數成功，main 的 Board、PWA、Cloud Save、Dice Roll Save、Weather/Announcement workflows 全數成功；GitHub Pages deployment run `45726605762` build、deploy、report-build-status 全部 success，版本 V1.59。等待棒子實機驗收。
+
 - 2026-11-26 [叉子] 狀態轉換：open → in_progress。依最新 main `86d33b60a61b42277a673aa9e9a24136e2dd7ddc` 盤點 owner_side 有效 in_progress／review 任務為 0/5；Communicate 優先搜尋未發現有效任務。兩道啟動閘門均未阻擋，開始 T-0141 實作。
 
 - 2026-11-26 [叉子] 新需求開單。T-0130 已結案；本任務承接其 XP 系統，只調整最新門檻並增加等級獎勵與個人公會郵件。開工前須重新檢查五單容量及 Communicate 優先閘門。
@@ -96,8 +98,24 @@ Lv.3、Lv.7 的原成員上限 +1 改為幸運藥水 III ×1；Lv.17 的原成�
 
 ### 改了什麼
 
+- 更新伺服器公會升級 XP 門檻為棒子確認的 Lv.2～Lv.20 單級數值。
+- 新增 19 級獎勵：藥水透過既有 `player_grants` 待領取同步；徽章框、名稱顏色、稱號、徽章特效、背景及公會 XP +5% 會保存為公會解鎖。
+- 新增升級事件帳本及個人公會郵箱。每次升級鎖定公會資料列，逐級建立唯一事件，對升級當下每位成員各寄一封信；郵件和藥水發放在同一交易，重試不會重複發放。
+- 郵箱提供未讀數、郵件內容及標記已讀；只在開啟郵箱時讀取，沒有新增輪詢或 Realtime。
+- 現有公會已達等級標記為 legacy，不追溯寄送舊獎勵；公會人數上限維持 4。
+- 新增 migration `docs/migrations/20261126120000_guild_level_rewards_mailbox.sql`，擴充速度及金錢藥水待領取欄位。
+
 ### 怎麼驗證的
+
+- migration 在正式資料庫套用前以 BEGIN/ROLLBACK 完整試跑，覆蓋多級升到 Lv.20、19 個等級事件、成員郵件數、重複呼叫、標記已讀、郵箱 RPC、外觀解鎖 payload、XP +5% 及權限；交易已 rollback。
+- migration 正式套用後，再以正式資料庫交易重跑上述整合測試並 rollback，沒有留下測試獎勵或郵件。
+- 正式資料庫確認郵箱表 RLS 啟用、anon/authenticated 無直接 SELECT 權限、anon 無 RPC 執行權限、authenticated 可呼叫公開郵箱 RPC；速度及金錢藥水 grant 欄位存在。
+- PR #376 的 17 項 GitHub Actions 檢查全數成功；新增公會獎勵郵箱測試及 PWA／Cloud Save 回歸測試通過。
+- Pages run `45726605762` 的 build、deploy、report-build-status 全部 success；正式頁面部署版本 V1.59。
 
 ### 沒做／做不到的
 
+- 尚未以多個真實玩家帳號在手機瀏覽器人工驗收升級後的藥水背包、不同成員各自收到的郵件，以及已讀狀態；交由棒子實機驗收。
+
 ### 衍生任務／影響任務
+- 無
