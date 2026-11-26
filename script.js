@@ -105,6 +105,48 @@ let S;
 const gameStateService = createGameStateService({ KEY, D, G, POTIONS, ensurePetData, getCurrentUser: () => currentUser, getState: () => S, localStorageRef: localStorage });
 const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, restoreAutoSellPrefs } = gameStateService;
 S=load();
+
+// T-0145: bootstrap authentication before optional game UI modules.
+// Late dependencies are wrapped so the auth controls remain usable even if a
+// later page/widget initializer throws during startup.
+authService=createAuthService({
+  supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
+  getCurrentUser:()=>currentUser,
+  setCurrentUser:value=>{currentUser=value; if(value){try{weeklyRealmEvent.refresh()}catch(error){console.warn('Weekly event refresh deferred',error)}}},
+  getState:()=>S,
+  releaseDeviceLock:(...args)=>{try{return releaseDeviceLock(...args)}catch(error){console.warn('Device lock service not ready',error)}},
+  recordGameVisit:(...args)=>{try{return recordGameVisit(...args)}catch(error){console.warn('Visit tracking not ready',error)}},
+  setupPlayerWeatherSubscription:(...args)=>{try{return setupPlayerWeatherSubscription(...args)}catch(error){console.warn('Weather subscription not ready',error)}},
+  updateAdminVisibility:(...args)=>{try{return updateAdminVisibility(...args)}catch(error){console.warn('Admin visibility not ready',error)}},
+  toast,
+  loadCloudSave:async (...args)=>{const result=await loadCloudSave(...args); try{renderDailyShop()}catch{} return result},
+  loadPetFusionOdds,
+  heartbeat,
+  refreshLeaderboards,
+  loadWeatherSummonData:(...args)=>{try{return loadWeatherSummonData(...args)}catch(error){console.warn('Weather data not ready',error)}},
+  applyPetLoginSkill:(...args)=>{try{return applyPetLoginSkill(...args)}catch(error){console.warn('Pet login skill not ready',error);return 0}},
+  isCloudSaveReady:userId=>{try{return !!cloudSaveService?.isLoadedFor(userId)}catch{return false}},
+  getCloudLoadError:()=>{try{return cloudSaveService?.getLastCloudLoadError?.()||null}catch{return null}},
+  resetAccountSession:(...args)=>{try{return cloudSaveService?.resetAccountSession(...args)??gameStateService.load()}catch(error){console.warn('Cloud session reset not ready',error)}},
+  onboardingMaybeShow:()=>{try{return onboardingUI?.maybeShowForCurrentUser()||false}catch{return false}},
+  timerManager
+});
+const bindAuthClick=(id,handler)=>document.getElementById(id)?.addEventListener('click',event=>{
+  event.preventDefault();
+  try{handler()}catch(error){console.error('Authentication control failed:',id,error);const message=document.getElementById('authMessage');if(message)message.textContent='登入介面發生錯誤，請稍後再試。'}
+});
+bindAuthClick('authOpenBtn',openAuth);
+bindAuthClick('authCloseBtn',closeAuth);
+bindAuthClick('authLoginBtn',()=>authAction('login'));
+bindAuthClick('authSignupBtn',()=>authService?.openUsernameSignup());
+bindAuthClick('authUsernameSignupSubmitBtn',()=>authAction('usernameSignup'));
+bindAuthClick('authUsernameSignupCancelBtn',()=>authService?.closeUsernameSignup());
+bindAuthClick('authResendBtn',()=>authAction('resend'));
+bindAuthClick('authResetBtn',()=>authAction('reset'));
+bindAuthClick('authPasswordUpdateBtn',()=>authService?.updateRecoveredPassword());
+bindAuthClick('authPasswordCancelBtn',()=>authService?.cancelPasswordRecovery());
+bindAuthClick('authRetryCloudBtn',()=>authService?.retryCloudLoad());
+authService.registerAuthStateListener();
 const weeklyRealmEvent = createWeeklyRealmEvent({ supabaseClient, getCurrentUser: () => currentUser, documentRef: document, toast, onRewardClaimed: async () => { await loadCloudSave(); render(); } });
 activityLogService = createActivityLogService({ supabaseClient, getCurrentUser: () => currentUser, getState: () => S });
 const { coinEarningMultiplier, refreshCoinBoosts, activeGlobalCoinBoost } = createCoinBoostService({ getCurrentUser: () => currentUser, getMoneyPotionMultiplier: () => activePotion('money')?.multiplier || 1, supabaseClient, SUPABASE_URL, SUPABASE_KEY });
@@ -249,15 +291,7 @@ const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   loadGuildPage: () => guildSystem.load(), refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
-authService=createAuthService({
- supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
- getCurrentUser:()=>currentUser, setCurrentUser:value=>{currentUser=value;if(value){weeklyRealmEvent.refresh()}}, getState:()=>S,
- releaseDeviceLock, recordGameVisit, setupPlayerWeatherSubscription, updateAdminVisibility,
- toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
- applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), resetAccountSession:userId=>cloudSaveService.resetAccountSession(userId,userId?null:gameStateService.load()), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
-});
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authService?.openUsernameSignup();document.getElementById('authUsernameSignupSubmitBtn').onclick=()=>authAction('usernameSignup');document.getElementById('authUsernameSignupCancelBtn').onclick=()=>authService?.closeUsernameSignup();document.getElementById('authResendBtn')?.addEventListener('click', ()=>authAction('resend'));document.getElementById('authResetBtn')?.addEventListener('click', ()=>authAction('reset'));document.getElementById('authPasswordUpdateBtn').onclick=()=>authService?.updateRecoveredPassword();document.getElementById('authPasswordCancelBtn').onclick=()=>authService?.cancelPasswordRecovery();document.getElementById('authRetryCloudBtn').onclick=()=>authService?.retryCloudLoad();
-authService.registerAuthStateListener();
+// Authentication is bootstrapped above, before optional game UI initialization.
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
 codexUI = createCodexUI({
   D, getState: () => S, format, chanceText, renderPetCodex,
