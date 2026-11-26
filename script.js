@@ -256,6 +256,7 @@ authService=createAuthService({
  toast, loadCloudSave: async (...args) => { const result = await loadCloudSave(...args); renderDailyShop(); return result; }, loadPetFusionOdds, heartbeat, refreshLeaderboards, loadWeatherSummonData,
  applyPetLoginSkill, isCloudSaveReady:userId=>cloudSaveService.isLoadedFor(userId), getCloudLoadError:()=>cloudSaveService.getLastCloudLoadError(), resetAccountSession:userId=>cloudSaveService.resetAccountSession(userId,userId?null:gameStateService.load()), onboardingMaybeShow: () => onboardingUI.maybeShowForCurrentUser(), timerManager
 });
+document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authService?.openUsernameSignup();document.getElementById('authUsernameSignupSubmitBtn').onclick=()=>authAction('usernameSignup');document.getElementById('authUsernameSignupCancelBtn').onclick=()=>authService?.closeUsernameSignup();document.getElementById('authResendBtn')?.addEventListener('click', ()=>authAction('resend'));document.getElementById('authResetBtn')?.addEventListener('click', ()=>authAction('reset'));document.getElementById('authPasswordUpdateBtn').onclick=()=>authService?.updateRecoveredPassword();document.getElementById('authPasswordCancelBtn').onclick=()=>authService?.cancelPasswordRecovery();document.getElementById('authRetryCloudBtn').onclick=()=>authService?.retryCloudLoad();
 authService.registerAuthStateListener();
 timerManager.setInterval(heartbeat,60000,'presence-heartbeat');
 codexUI = createCodexUI({
@@ -340,7 +341,7 @@ function analyzeSuspiciousRolls(){return adminPlayerManagement?.analyzeSuspiciou
 
 document.getElementById('upgradeBagBtn').onclick=()=>{const cap=Number(S.bagCapacity)||35;if(cap>=200){toast('背包已達目前上限 200 顆');return}const cost=bagUpgradeCost(cap);if((Number(S.coins)||0)<cost){toast(`$ 不足，擴充需要 ${format(cost)}$`);return}S.coins-=cost;S.bagCapacity=cap+1;save();render();toast(`背包容量已擴充至 ${S.bagCapacity} 顆`)};
 document.getElementById('rollBtn').onclick=doRoll;
-document.getElementById('authOpenBtn').onclick=openAuth;document.getElementById('authCloseBtn').onclick=closeAuth;document.getElementById('authLoginBtn').onclick=()=>authAction('login');document.getElementById('authSignupBtn').onclick=()=>authService?.openUsernameSignup();document.getElementById('authUsernameSignupSubmitBtn').onclick=()=>authAction('usernameSignup');document.getElementById('authUsernameSignupCancelBtn').onclick=()=>authService?.closeUsernameSignup();document.getElementById('authResendBtn')?.addEventListener('click', ()=>authAction('resend'));document.getElementById('authResetBtn')?.addEventListener('click', ()=>authAction('reset'));document.getElementById('authPasswordUpdateBtn').onclick=()=>authService?.updateRecoveredPassword();document.getElementById('authPasswordCancelBtn').onclick=()=>authService?.cancelPasswordRecovery();document.getElementById('authRetryCloudBtn').onclick=()=>authService?.retryCloudLoad();document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
+document.getElementById('refreshLeaderboardBtn').onclick=refreshLeaderboards;
 
 function loadAdminOnlineCurve(){return adminMonitoringSystem?.loadAdminOnlineCurve()}
 
