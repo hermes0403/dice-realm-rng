@@ -206,3 +206,5 @@
 @keyframes guildCosmeticPulse{0%,100%{filter:drop-shadow(0 0 3px rgba(159,128,255,.24))}50%{filter:drop-shadow(0 0 10px rgba(191,157,255,.7))}}
 @media(prefers-reduced-motion:reduce){.guild-banner-emblem.guild-badge-effect-pulse{animation:none}}
 @media(max-width:520px){.guild-cosmetics-panel{padding:14px}.guild-cosmetic-control select{font-size:13px}}
+
+.guild-banner-emblem.guild-badge-effect-orbit,.guild-banner-emblem.guild-badge-effect-radiant{animation:none}
