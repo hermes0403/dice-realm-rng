@@ -110,6 +110,7 @@ S=load();
 // Regression contract: authentication bindings must precede optional UI initialization.
 // Late dependencies are wrapped so the auth controls remain usable even if a
 // later page/widget initializer throws during startup.
+let authService=null;
 authService=createAuthService({
   supabaseClient, DEVICE_ACCOUNT_LIMIT, KEY,
   getCurrentUser:()=>currentUser,
@@ -123,7 +124,7 @@ authService=createAuthService({
   loadCloudSave:async (...args)=>{const result=await loadCloudSave(...args); try{renderDailyShop()}catch{} return result},
   loadPetFusionOdds,
   heartbeat,
-  refreshLeaderboards,
+  refreshLeaderboards:(...args)=>{try{return refreshLeaderboards(...args)}catch(error){console.warn('Leaderboard service not ready',error)}},
   loadWeatherSummonData:(...args)=>{try{return loadWeatherSummonData(...args)}catch(error){console.warn('Weather data not ready',error)}},
   applyPetLoginSkill:(...args)=>{try{return applyPetLoginSkill(...args)}catch(error){console.warn('Pet login skill not ready',error);return 0}},
   isCloudSaveReady:userId=>{try{return !!cloudSaveService?.isLoadedFor(userId)}catch{return false}},
@@ -203,7 +204,7 @@ function achievementStats(){return cloudSaveService.achievementStats()}
 function applyPendingGrants(){return cloudSaveService.applyPendingGrants()}
 function syncCloudSave(){return cloudSaveService.syncCloudSave()}
 function loadCloudSave(){return cloudSaveService.loadCloudSave()}
-let authService=null;
+
 function showAuthMessage(message){return authService?.showAuthMessage(message)}
 function openAuth(){return authService?.openAuth()}
 function closeAuth(){return authService?.closeAuth()}
