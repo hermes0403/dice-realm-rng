@@ -95,7 +95,7 @@ test('僅在安全來源註冊 Service Worker，並使用專案根目錄 scope',
   const controls = setupDisplayControls(fixture);
   await controls.serviceWorkerReady;
   assert.equal(fixture.registrations.length, 1);
-  assert.ok(fixture.registrations[0].url.includes('/sw.js?v=20261126-t0142-guild-search-modal'));
+  assert.ok(fixture.registrations[0].url.includes('/sw.js?v=20261127-t0147-guild-cosmetics'));
   assert.ok(fixture.registrations[0].options.scope.endsWith('/'));
   const insecure = createFixture({ secure: false });
   const blocked = setupDisplayControls(insecure);
@@ -361,7 +361,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.equal(workerScriptVersion, htmlScriptVersion);
   assert.ok(guildModuleVersion);
   assert.equal(workerGuildModuleVersion, guildModuleVersion);
-  assert.match(worker, /guild\.css\?v=20261126-t0142-guild-search-modal/);
+  assert.match(worker, /guild\.css\?v=20261127-t0147-guild-cosmetics/);
   assert.match(script, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   const displayControlsVersion = script.match(/from\s+['"]\.\/ui\/display-controls\.js\?v=([^'"]+)['"]/)?.[1];

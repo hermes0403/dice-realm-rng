@@ -1,6 +1,33 @@
 import { escapeHTML } from '../core/format.js';
 
 const ROLE_LABELS = { leader: '會長', vice_leader: '副會長', officer: '幹部', member: '一般成員' };
+const NAME_COLOR_OPTIONS = [
+  { value: 'default', label: '預設紫藍' },
+  { value: 'nebula', label: '星雲紫' },
+  { value: 'ice', label: '冰晶藍' },
+  { value: 'ember', label: '熾焰紅' },
+  { value: 'emerald', label: '翡翠綠' },
+  { value: 'solar', label: '日耀金' }
+];
+const BADGE_EFFECT_OPTIONS = [
+  { value: 'none', label: '無特效' },
+  { value: 'pulse', label: '脈衝光暈' },
+  { value: 'orbit', label: '星環環繞' },
+  { value: 'radiant', label: '星芒輻射' }
+];
+const BACKGROUND_OPTIONS = [
+  { value: 'default', label: '預設星空' },
+  { value: 'nebula', label: '深空星雲' },
+  { value: 'aurora', label: '極光幻境' },
+  { value: 'eclipse', label: '日蝕暗影' },
+  { value: 'crimson', label: '赤紅星域' }
+];
+const NAME_COLOR_IDS = new Set(NAME_COLOR_OPTIONS.map(option => option.value));
+const BADGE_EFFECT_IDS = new Set(BADGE_EFFECT_OPTIONS.map(option => option.value));
+const BACKGROUND_IDS = new Set(BACKGROUND_OPTIONS.map(option => option.value));
+function safeCosmetic(value, allowed, fallback) {
+  return typeof value === 'string' && allowed.has(value) ? value : fallback;
+}
 const NAV_ITEMS = [
   { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
   { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
@@ -47,6 +74,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   function roleLabel(role) { return ROLE_LABELS[role] || '一般成員'; }
+  function guildNameStyle(guild) {
+    const value = safeCosmetic(guild?.name_color, NAME_COLOR_IDS, 'default');
+    return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + '"';
+  }
+
 
   function navMarkup() {
     const unreadCount = Math.max(0, Number(currentData?.mail_unread_count) || 0);
@@ -266,7 +298,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       const members = Math.max(0, Number(guild.member_count) || 0);
       return '<article class="guild-ranking-row">' +
         '<span class="guild-ranking-rank">#' + rank + '</span>' +
-        '<span class="guild-ranking-main"><b>' + escapeHTML(guild.name || '未命名公會') + '</b>' +
+        '<span class="guild-ranking-main"><b' + guildNameStyle(guild) + '>' + escapeHTML(guild.name || '未命名公會') + '</b>' +
         '<small>Lv.' + level + '</small></span>' +
         '<span class="guild-ranking-stats"><b>' + xp.toLocaleString('en-US') + ' XP</b>' +
         '<small>' + members + ' 位成員</small></span></article>';
@@ -325,6 +357,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const isOrdinaryMember = role === 'member';
     const canEdit = role === 'leader';
     const canEditAnnouncement = ['leader', 'vice_leader'].includes(role);
+    const canEditCosmetics = ['leader', 'vice_leader'].includes(role);
     const announcementDisabled = canEditAnnouncement ? '' : ' disabled';
     const announcementMessage = typeof guild.announcement?.message === 'string' ? guild.announcement.message : '';
     const disabled = canEdit ? '' : ' disabled';
@@ -343,6 +376,31 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       (canEdit ? '<button class="primary" type="submit">儲存設定</button>' :
         '<p class="guild-settings-readonly">只有會長可以修改公會設定；目前為檢視模式。</p>') +
       '</form></section>';
+    const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
+    const hasUnlock = key => unlocks.some(item => item.reward_key === key);
+    const cosmeticControl = (field, label, options, allowed, fallback, rewardKey, requiredLevel) => {
+      const unlocked = hasUnlock(rewardKey);
+      const value = safeCosmetic(guild[field], allowed, fallback);
+      const optionRows = (unlocked ? options : options.slice(0, 1)).map(option =>
+        '<option value="' + option.value + '"' + (value === option.value ? ' selected' : '') + '>' +
+        escapeHTML(option.label) + '</option>').join('');
+      const selectDisabled = !canEditCosmetics || !unlocked ? ' disabled' : '';
+      const note = unlocked
+        ? (canEditCosmetics ? '已解鎖，會長與副會長可以更換。' : '已解鎖；目前設定僅供檢視。')
+        : '尚未解鎖，公會達到 Lv.' + requiredLevel + ' 後即可使用。';
+      return '<label class="guild-cosmetic-control">' + escapeHTML(label) +
+        '<select name="' + field + '"' + selectDisabled + '>' + optionRows + '</select>' +
+        '<small>' + note + '</small></label>';
+    };
+    const cosmeticPanel = '<section class="card guild-settings-panel guild-cosmetics-panel"><div class="eyebrow">GUILD APPEARANCE</div>' +
+      '<h3>公會專屬外觀</h3><p class="guild-cosmetics-note">外觀由公會升級解鎖，所有成員都會看到相同設定。</p>' +
+      '<form id="guildCosmeticsForm" class="guild-settings-form">' +
+      cosmeticControl('name_color', '公會名稱顏色', NAME_COLOR_OPTIONS, NAME_COLOR_IDS, 'default', 'name_color', 9) +
+      cosmeticControl('badge_effect', '公會徽章特效', BADGE_EFFECT_OPTIONS, BADGE_EFFECT_IDS, 'none', 'badge_effect', 15) +
+      cosmeticControl('background_theme', '公會專屬背景', BACKGROUND_OPTIONS, BACKGROUND_IDS, 'default', 'guild_background', 19) +
+      (canEditCosmetics ? '<button class="primary" type="submit">儲存外觀</button>' :
+        '<p class="guild-settings-readonly">只有會長與副會長可以更換外觀；目前為檢視模式。</p>') +
+      '</form></section>';
     const announcementPanel = isOrdinaryMember ? '' :
       '<section class="card guild-settings-panel guild-announcement-settings"><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
       '<h3>公會公告</h3><form id="guildAnnouncementForm" class="guild-settings-form">' +
@@ -357,7 +415,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       (isLeader ? '會長需先完成會長轉讓或解散程序，才能退出公會。' : '退出前會再次確認，避免誤觸。') +
       '</p><button type="button" class="guild-leave-button" id="guildLeaveBtn" ' + (isLeader ? 'disabled' : '') +
       '>退出公會</button></section>';
-    root().innerHTML = renderBackButton() + settingsPanel + announcementPanel + leavePanel + renderLeaveConfirmation();
+    root().innerHTML = renderBackButton() + settingsPanel + cosmeticPanel + announcementPanel + leavePanel + renderLeaveConfirmation();
   }
 
   function renderMembers(members) {
@@ -400,9 +458,14 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const count = Number(guild.member_count) || members.length;
     const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
     const hasUnlock = key => unlocks.some(item => item.reward_key === key);
-    const bannerClass = 'guild-banner card' + (hasUnlock('guild_background') ? ' has-reward-background' : '');
-    const emblemClass = 'guild-banner-emblem' + (hasUnlock('badge_frame') ? ' has-reward-frame' : '') + (hasUnlock('badge_effect') ? ' has-reward-effect' : '');
-    const nameClass = hasUnlock('name_color') ? ' class="guild-name-color-unlocked"' : '';
+    const nameColor = hasUnlock('name_color') ? safeCosmetic(guild.name_color, NAME_COLOR_IDS, 'default') : 'default';
+    const badgeEffect = hasUnlock('badge_effect') ? safeCosmetic(guild.badge_effect, BADGE_EFFECT_IDS, 'none') : 'none';
+    const backgroundTheme = hasUnlock('guild_background') ? safeCosmetic(guild.background_theme, BACKGROUND_IDS, 'default') : 'default';
+    const bannerClass = 'guild-banner card' + (hasUnlock('guild_background') ? ' has-reward-background' : '') +
+      (backgroundTheme !== 'default' ? ' guild-bg-' + backgroundTheme : '');
+    const emblemClass = 'guild-banner-emblem' + (hasUnlock('badge_frame') ? ' has-reward-frame' : '') +
+      (badgeEffect !== 'none' ? ' has-reward-effect guild-badge-effect-' + badgeEffect : '');
+    const nameClass = nameColor !== 'default' ? ' class="guild-name-color-unlocked guild-name-color-' + nameColor + '"' : '';
     const guildTitle = hasUnlock('guild_title') ? '<span class="guild-exclusive-title">星域公會</span>' : '';
     const rewardUnlockMarkup = unlocks.length ? '<section class="card guild-panel guild-reward-unlocks"><div class="eyebrow">GUILD REWARDS</div><h3>已解鎖公會獎勵</h3><div class="guild-reward-chip-list">' +
       unlocks.map(item => '<span class="guild-reward-chip">Lv.' + Math.max(1, Number(item.level) || 1) + ' · ' + escapeHTML(item.reward_text || '') + '</span>').join('') +
@@ -446,7 +509,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (!searchPerformed) return '<p class="muted guild-mailbox-empty">輸入公會名稱後搜尋；留空可瀏覽公開公會。</p>';
     if (!searchResults.length) return '<p class="muted guild-mailbox-empty">沒有找到符合的公開公會。</p>';
     const alreadyJoined = Boolean(currentData?.guild);
-    return searchResults.map(g => '<article class="guild-result-row"><div><b>' + escapeHTML(g.name) +
+    return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + escapeHTML(g.name) +
       '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>會長：' +
       escapeHTML(g.leader_name || '未知玩家') + ' · ' + (Number(g.member_count) || 0) + ' 人</small></div>' +
       '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '"' +
@@ -522,6 +585,25 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
         await load();
         toast('公會公告已更新');
         message('公會公告已更新。', 'success');
+      });
+      return;
+    }
+    if (event.target?.id === 'guildCosmeticsForm') {
+      event.preventDefault();
+      if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
+        message('只有會長與副會長可以更換公會外觀。', 'error');
+        return;
+      }
+      const form = new FormData(event.target);
+      run(async () => {
+        await rpc('guild_update_cosmetics', {
+          p_name_color: String(form.get('name_color') || 'default'),
+          p_badge_effect: String(form.get('badge_effect') || 'none'),
+          p_background_theme: String(form.get('background_theme') || 'default')
+        });
+        await load();
+        toast('公會外觀已更新');
+        message('公會外觀已更新。', 'success');
       });
       return;
     }
