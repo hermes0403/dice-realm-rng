@@ -524,11 +524,11 @@ export function createPetSystem({
             'pet-mutation-weather-snow': '#fff4e8',
             'pet-mutation-weather-rain': '#72baff'
           };
-          return `<div class="pet-card ${locked ? 'pet-is-locked' : ''}">${locked ? `<button type="button" class="pet-lock-star is-locked" data-pet-lock-toggle="${escapeHTML(pet.uid)}" aria-label="解除寵物鎖定" aria-pressed="true">★</button>` : ''}<div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${skillDescription}${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => {
+          return `<div class="pet-card ${locked ? 'pet-is-locked' : ''}">${locked ? `<button type="button" class="pet-lock-star is-locked" data-pet-lock-toggle="${escapeHTML(pet.uid)}" aria-label="解除寵物鎖定" aria-pressed="true">★</button>` : ''}<div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${skillDescription}<div class="pet-mutations${mutationTags.length ? '' : ' is-empty'}">${mutationTags.map(tag => {
             const color = mutationColors[tag.className] || '#ffffff';
             const rainbowStyle = color === 'rainbow' ? 'color:transparent!important;background:linear-gradient(90deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1);background-clip:text;-webkit-background-clip:text;' : `color:${color}!important;`;
             return `<span class="pet-mutation-tag ${tag.className}" style="${rainbowStyle}border-color:${color === 'rainbow' ? '#c69bff' : color}!important;text-shadow:0 0 7px ${color === 'rainbow' ? '#c69bff88' : color + '88'}">${escapeHTML(tag.label)}</span>`;
-          }).join('')}</div>` : ''}<button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button>${skillButton}</div>`;
+          }).join('')}</div><button type="button" class="${equipped ? 'quiet' : 'primary'}" data-pet-equip="${escapeHTML(pet.uid)}">${equipped ? '卸下' : '裝備'}</button>${skillButton}</div>`;
         }).join('');
       }
     }
