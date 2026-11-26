@@ -226,7 +226,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const ownConfirmed = ownIsA ? session.confirmed_a : session.confirmed_b;
     const otherConfirmed = ownIsA ? session.confirmed_b : session.confirmed_a;
     const revision = Number(session.revision) || 0;
-    const pets = Array.isArray(getState()?.pets) ? getState().pets.filter(item => item?.uid && petById(item.id)) : [];
+    const pets = Array.isArray(getState()?.pets) ? getState().pets.filter(item => item?.uid && item?.locked !== true && petById(item.id)) : [];
     let draft = offerDrafts.get(session.id);
     if (!draft || draft.revision !== revision) {
       draft = { revision, uids: [...ownOffer] };
@@ -460,6 +460,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       for (const item of visible) {
         const card = makePetCard(item, true, false);
         card.addEventListener('click', () => {
+          const latestPet = (getState()?.pets || []).find(pet => String(pet.uid) === String(item.uid));
+          if (!latestPet || latestPet.locked === true) { toast('這隻寵物已鎖定，無法交易'); renderPicker(); return; }
           const uid = String(item.uid);
           if (pickerMode === 'replace' && Number.isInteger(editingSlotIndex)) {
             draftOffer = draftOffer.map((value, index) => index === editingSlotIndex ? uid : value);
