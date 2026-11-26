@@ -524,7 +524,7 @@ export function createPetSystem({
             'pet-mutation-weather-snow': '#fff4e8',
             'pet-mutation-weather-rain': '#72baff'
           };
-          return `<div class="pet-card ${locked ? 'pet-is-locked' : ''}"><button type="button" class="pet-lock-star ${locked ? 'is-locked' : ''}" data-pet-lock-toggle="${escapeHTML(pet.uid)}" aria-label="${locked ? '已鎖定寵物' : '未鎖定寵物'}" aria-pressed="${locked}">${locked ? '★' : '☆'}</button><div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${skillDescription}${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => {
+          return `<div class="pet-card ${locked ? 'pet-is-locked' : ''}">${locked ? `<button type="button" class="pet-lock-star is-locked" data-pet-lock-toggle="${escapeHTML(pet.uid)}" aria-label="解除寵物鎖定" aria-pressed="true">★</button>` : ''}<div class="pet-art">${petArt(definition, true)}</div><div class="pet-name ${rarity.cls}">${escapeHTML(definition.name)}</div><div class="pet-meta">${rarity.name} · ${Math.round(Number(pet.kg) || 0)} kg · ${format(income)}$/秒</div>${skillDescription}${mutationTags.length ? `<div class="pet-mutations">${mutationTags.map(tag => {
             const color = mutationColors[tag.className] || '#ffffff';
             const rainbowStyle = color === 'rainbow' ? 'color:transparent!important;background:linear-gradient(90deg,#ff6b6b,#ffd166,#7ee787,#70c7ff,#c69bff,#ff8bd1);background-clip:text;-webkit-background-clip:text;' : `color:${color}!important;`;
             return `<span class="pet-mutation-tag ${tag.className}" style="${rainbowStyle}border-color:${color === 'rainbow' ? '#c69bff' : color}!important;text-shadow:0 0 7px ${color === 'rainbow' ? '#c69bff88' : color + '88'}">${escapeHTML(tag.label)}</span>`;
@@ -731,7 +731,7 @@ export function createPetSystem({
         button.classList.toggle('active', petLockMode);
         button.setAttribute('aria-pressed', String(petLockMode));
       }
-      toast(petLockMode ? '已開啟寵物鎖定模式，點擊星號切換鎖定' : '已關閉寵物鎖定模式');
+      toast(petLockMode ? '已開啟寵物鎖定模式，點擊寵物卡片切換鎖定' : '已關閉寵物鎖定模式');
     });
     documentRef.getElementById('petSortMode')?.addEventListener('change', event => {
       petSortMode = event.target.value;
@@ -759,6 +759,18 @@ export function createPetSystem({
         if (!petLockMode) { toast('請先開啟鎖定模式'); return; }
         const S = getState();
         const pet = (S.pets || []).find(item => String(item.uid) === String(lockButton.dataset.petLockToggle));
+        if (!pet) return;
+        pet.locked = pet.locked !== true;
+        save();
+        renderPetsPage();
+        toast(pet.locked ? '寵物已鎖定，無法出售或交易' : '已解除寵物鎖定');
+        return;
+      }
+      const petCard = event.target.closest('.pet-card');
+      if (petLockMode && petCard && !event.target.closest('button')) {
+        const S = getState();
+        const uid = petCard.querySelector('[data-pet-equip]')?.dataset.petEquip;
+        const pet = (S.pets || []).find(item => String(item.uid) === String(uid));
         if (!pet) return;
         pet.locked = pet.locked !== true;
         save();
