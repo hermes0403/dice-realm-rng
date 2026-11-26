@@ -26,9 +26,9 @@ test('公會外觀提供固定白名單選項，並由會長與副會長修改',
 });
 
 test('未解鎖的外觀選單保持鎖定，且顯示所需公會等級', () => {
-  assert.match(ui, /const selectDisabled = !canEditCosmetics \|\| !unlocked \? ' disabled' : ''/);
+  assert.ok(ui.includes("const selectDisabled=!canEditCosmetics||!unlocked?' disabled':'';"));
   assert.match(ui, /尚未解鎖，公會達到 Lv\.'/);
-  assert.match(ui, /options\.slice\(0, 1\)/);
+  assert.ok(ui.includes('options.slice(0,1)'));
 });
 
 test('公會主頁、搜尋結果與排行榜都會套用已保存的名稱顏色', () => {
