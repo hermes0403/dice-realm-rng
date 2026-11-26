@@ -193,9 +193,17 @@ test('authentication controls bootstrap before optional game UI and use the same
   const workerVersion = serviceWorker.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
   assert.ok(htmlVersion, 'index.html should declare the script version');
   assert.equal(workerVersion, htmlVersion, 'service worker must precache the same script URL');
-  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.35'/);
+  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.36'/);
 });
 
+
+test('optional guild module is dynamically loaded and cannot block core authentication bootstrap', async () => {
+  const { readFileSync } = await import('node:fs');
+  const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(script, /^import\s+\{\s*createGuildSystem\s*\}\s+from\s+['"]\.\/ui\/guild\.js/m);
+  assert.match(script, /await import\(['"]\.\/ui\/guild\.js\?v=20261126-t0142-guild-search-modal['"]\)/);
+  assert.match(script, /loadGuildPage, refreshWeeklyEvent:/);
+});
 
 test('auth service declaration and deferred dependencies are initialized without temporal-dead-zone access', async () => {
   const { readFileSync } = await import('node:fs');
