@@ -52,8 +52,8 @@ test('設定頁只有會長與副會長可編輯公告', () => {
   assert.match(ui, /const canEditAnnouncement = \['leader', 'vice_leader'\]\.includes\(role\)/);
   assert.match(ui, /id="guildAnnouncementForm"/);
   assert.match(ui, /maxlength="200"/);
-  assert.match(ui, /只有會長與副會長可發布、修改或清除公告/);
-  assert.match(ui, /只有會長與副會長可以修改公會公告/);
+  assert.match(ui, /只有隊長與副隊長可發布、修改或清除公告/);
+  assert.match(ui, /只有隊長與副隊長可以修改公會公告/);
   assert.match(ui, /rpc\('guild_update_announcement'/);
   assert.match(ui, /await load\(\);\s*toast\('公會公告已更新'\)/);
 });
@@ -73,8 +73,9 @@ test('公告面板支援換行與手機版寬度', () => {
 });
 
 
-test('一般成員隱藏公告管理面板，但郵箱公告仍對所有成員顯示', () => {
-  assert.match(ui, /const announcementPanel = isOrdinaryMember \? ''/);
+test('一般成員看不到基本設定入口，郵箱公告仍對所有成員顯示', () => {
+  assert.match(ui, /isOrdinaryMember \? '' : '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="basic"/);
+  assert.match(ui, /const announcementPanel = '<section/);
   const mailbox = ui.slice(ui.indexOf('function renderMailboxOverlay()'), ui.indexOf('function renderRanking(rows)'));
   assert.match(mailbox, /guild-mailbox-announcement/);
   assert.match(mailbox, /escapeHTML\(announcementMessage\)/);

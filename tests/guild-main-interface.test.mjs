@@ -69,7 +69,7 @@ test('退出公會只在設定頁出現，並且必須完成兩階段確認', ()
   assert.match(source, /leaveConfirmStep !== 2/);
   assert.match(source, /confirmButton\.disabled = true/);
   assert.match(source, /await rpc\('guild_leave'\)/);
-  assert.match(source, /會長需先完成會長轉讓或解散程序/);
+  assert.match(source, /隊長需先完成隊長轉讓或解散程序/);
   assert.match(styles, /guild-leave-overlay/);
 });
 

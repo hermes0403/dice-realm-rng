@@ -1,6 +1,6 @@
 import { escapeHTML } from '../core/format.js';
 
-const ROLE_LABELS = { leader: '會長', vice_leader: '副會長', officer: '幹部', member: '一般成員' };
+const ROLE_LABELS = { leader: '隊長', vice_leader: '副隊長', member: '普通成員' };
 const NAME_COLOR_OPTIONS = [
   { value: 'default', label: '預設紫藍' },
   { value: 'nebula', label: '星雲紫' },
@@ -46,6 +46,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   let busy = false;
   let currentData = null;
   let activeView = 'home';
+  let activeSettingsSection = 'menu';
   let showAllMembers = false;
   let searchResults = [];
   let leaveConfirmStep = 0;
@@ -73,7 +74,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     el.dataset.kind = kind;
   }
 
-  function roleLabel(role) { return ROLE_LABELS[role] || '一般成員'; }
+  function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
   function guildNameStyle(guild) {
     const value = safeCosmetic(guild?.name_color, NAME_COLOR_IDS, 'default');
     return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + '"';
@@ -110,7 +111,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<label>公會名稱<input name="name" minlength="2" maxlength="16" required placeholder="2～16 個字"></label>' +
       '<label>公會介紹<textarea name="description" maxlength="160" rows="3" placeholder="最多 160 字"></textarea></label>' +
       '<button class="primary" type="submit">建立公會</button></form>' +
-      '<p class="mini">建立者會自動成為會長；每位玩家同一時間只能加入一個公會。</p></section>';
+      '<p class="mini">建立者會自動成為隊長；每位玩家同一時間只能加入一個公會。</p></section>';
   }
 
   function renderFindPanel() {
@@ -355,67 +356,76 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (!guild) { renderFeatureView('settings'); return; }
     const role = currentData.my_role;
     const isOrdinaryMember = role === 'member';
-    const canEdit = role === 'leader';
+    const isLeader = role === 'leader';
+    const canEdit = isLeader;
     const canEditAnnouncement = ['leader', 'vice_leader'].includes(role);
     const canEditCosmetics = ['leader', 'vice_leader'].includes(role);
     const announcementDisabled = canEditAnnouncement ? '' : ' disabled';
     const announcementMessage = typeof guild.announcement?.message === 'string' ? guild.announcement.message : '';
     const disabled = canEdit ? '' : ' disabled';
     const joinMode = guild.join_mode === 'open' ? 'open' : 'application';
-    const settingsPanel = isOrdinaryMember ? '' :
-      '<section class="card guild-settings-panel"><div class="eyebrow">GUILD SETTINGS</div>' +
-      '<h2>公會設定</h2><form id="guildSettingsForm" class="guild-settings-form">' +
-      '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="16" required value="' +
-      escapeHTML(guild.name || '') + '"' + disabled + '><small>2～16 個字</small></label>' +
-      '<label>公會介紹<textarea name="description" maxlength="160" rows="4"' + disabled + '>' +
-      escapeHTML(guild.description || '') + '</textarea><small>最多 160 字</small></label>' +
-      '<label>加入方式<select name="join_mode"' + disabled + '>' +
-      '<option value="application"' + (joinMode === 'application' ? ' selected' : '') + '>需審核申請</option>' +
-      '<option value="open"' + (joinMode === 'open' ? ' selected' : '') + '>公開直接加入</option>' +
-      '</select><small>選擇玩家加入公會時，是否需要幹部審核</small></label>' +
-      (canEdit ? '<button class="primary" type="submit">儲存設定</button>' :
-        '<p class="guild-settings-readonly">只有會長可以修改公會設定；目前為檢視模式。</p>') +
-      '</form></section>';
-    const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
-    const hasUnlock = key => unlocks.some(item => item.reward_key === key);
-    const cosmeticControl = (field, label, options, allowed, fallback, rewardKey, requiredLevel) => {
-      const unlocked = hasUnlock(rewardKey);
-      const value = safeCosmetic(guild[field], allowed, fallback);
-      const optionRows = (unlocked ? options : options.slice(0, 1)).map(option =>
-        '<option value="' + option.value + '"' + (value === option.value ? ' selected' : '') + '>' +
-        escapeHTML(option.label) + '</option>').join('');
-      const selectDisabled = !canEditCosmetics || !unlocked ? ' disabled' : '';
-      const note = unlocked
-        ? (canEditCosmetics ? '已解鎖，會長與副會長可以更換。' : '已解鎖；目前設定僅供檢視。')
-        : '尚未解鎖，公會達到 Lv.' + requiredLevel + ' 後即可使用。';
-      return '<label class="guild-cosmetic-control">' + escapeHTML(label) +
-        '<select name="' + field + '"' + selectDisabled + '>' + optionRows + '</select>' +
-        '<small>' + note + '</small></label>';
-    };
-    const cosmeticPanel = '<section class="card guild-settings-panel guild-cosmetics-panel"><div class="eyebrow">GUILD APPEARANCE</div>' +
-      '<h3>公會專屬外觀</h3><p class="guild-cosmetics-note">外觀由公會升級解鎖，所有成員都會看到相同設定。</p>' +
-      '<form id="guildCosmeticsForm" class="guild-settings-form">' +
-      cosmeticControl('name_color', '公會名稱顏色', NAME_COLOR_OPTIONS, NAME_COLOR_IDS, 'default', 'name_color', 9) +
-      cosmeticControl('badge_effect', '公會徽章特效', BADGE_EFFECT_OPTIONS, BADGE_EFFECT_IDS, 'none', 'badge_effect', 15) +
-      cosmeticControl('background_theme', '公會專屬背景', BACKGROUND_OPTIONS, BACKGROUND_IDS, 'default', 'guild_background', 19) +
-      (canEditCosmetics ? '<button class="primary" type="submit">儲存外觀</button>' :
-        '<p class="guild-settings-readonly">只有會長與副會長可以更換外觀；目前為檢視模式。</p>') +
-      '</form></section>';
-    const announcementPanel = isOrdinaryMember ? '' :
-      '<section class="card guild-settings-panel guild-announcement-settings"><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
-      '<h3>公會公告</h3><form id="guildAnnouncementForm" class="guild-settings-form">' +
-      '<label>公告內容<textarea name="message" maxlength="200" rows="4"' + announcementDisabled + '>' +
-      escapeHTML(announcementMessage) + '</textarea><small>最多 200 字；留空可清除公告</small></label>' +
-      (canEditAnnouncement ? '<button class="primary" type="submit">發布公告</button>' :
-        '<p class="guild-settings-readonly">只有會長與副會長可發布、修改或清除公告。</p>') +
-      '</form></section>';
-    const isLeader = role === 'leader';
     const leavePanel = '<section class="card guild-settings-panel guild-leave-panel"><div class="eyebrow">GUILD MEMBERSHIP</div>' +
       '<h3>退出公會</h3><p class="guild-leave-description">' +
-      (isLeader ? '會長需先完成會長轉讓或解散程序，才能退出公會。' : '退出前會再次確認，避免誤觸。') +
-      '</p><button type="button" class="guild-leave-button" id="guildLeaveBtn" ' + (isLeader ? 'disabled' : '') +
-      '>退出公會</button></section>';
-    root().innerHTML = renderBackButton() + settingsPanel + cosmeticPanel + announcementPanel + leavePanel + renderLeaveConfirmation();
+      (isLeader ? '隊長需先完成隊長轉讓或解散程序，才能退出公會。' : '退出前會再次確認，避免誤觸。') +
+      '</p><button type="button" class="guild-leave-button" id="guildLeaveBtn" ' + (isLeader ? 'disabled' : '') + '>退出公會</button></section>';
+    if (activeSettingsSection === 'menu') {
+      const menu = '<section class="card guild-settings-menu"><div class="eyebrow">GUILD CONTROL</div><h2>公會設定</h2><div class="guild-settings-menu-grid">' +
+        (isOrdinaryMember ? '' : '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="basic"><b>公會基本設定</b><small>公會名稱、介紹、加入方式與公告</small><span>›</span></button>') +
+        (isLeader ? '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="promotion"><b>公會晉升成員</b><small>任命或撤除副隊長職位</small><span>›</span></button>' : '') +
+        '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="cosmetics"><b>公會專屬外觀</b><small>名稱顏色、徽章特效與專屬背景</small><span>›</span></button>' +
+        '</div></section>';
+      root().innerHTML = renderBackButton() + menu + leavePanel + renderLeaveConfirmation(); return;
+    }
+    const back = '<button type="button" class="guild-settings-back" data-guild-settings-back>‹ 返回公會設定</button>';
+    if (activeSettingsSection === 'basic') {
+      const basicPanel = '<section class="card guild-settings-panel"><div class="eyebrow">GUILD BASIC SETTINGS</div><h2>公會基本設定</h2>' +
+        '<form id="guildSettingsForm" class="guild-settings-form">' +
+        '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="16" required value="' + escapeHTML(guild.name || '') + '"' + disabled + '><small>2～16 個字</small></label>' +
+        '<label>公會介紹<textarea name="description" maxlength="160" rows="4"' + disabled + '>' + escapeHTML(guild.description || '') + '</textarea><small>最多 160 字</small></label>' +
+        '<label>加入方式<select name="join_mode"' + disabled + '><option value="application"' + (joinMode === 'application' ? ' selected' : '') + '>需審核申請</option><option value="open"' + (joinMode === 'open' ? ' selected' : '') + '>公開直接加入</option></select><small>選擇玩家加入公會時，是否需要隊長或副隊長審核</small></label>' +
+        (canEdit ? '<button class="primary" type="submit">儲存基本設定</button>' : '<p class="guild-settings-readonly">只有隊長可以修改公會名稱、介紹與加入方式。</p>') +
+        '</form></section>';
+      const announcementPanel = '<section class="card guild-settings-panel guild-announcement-settings"><div class="eyebrow">GUILD ANNOUNCEMENT</div><h3>公會公告</h3>' +
+        '<form id="guildAnnouncementForm" class="guild-settings-form"><label>公告內容<textarea name="message" maxlength="200" rows="4"' + announcementDisabled + '>' + escapeHTML(announcementMessage) +
+        '</textarea><small>最多 200 字；留空可清除公告</small></label>' +
+        (canEditAnnouncement ? '<button class="primary" type="submit">發布公告</button>' : '<p class="guild-settings-readonly">只有隊長與副隊長可發布、修改或清除公告。</p>') +
+        '</form></section>';
+      root().innerHTML = back + basicPanel + announcementPanel + renderLeaveConfirmation(); return;
+    }
+    if (activeSettingsSection === 'cosmetics') {
+      const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
+      const hasUnlock = key => unlocks.some(item => item.reward_key === key);
+      const cosmeticControl = (field,label,options,allowed,fallback,rewardKey,requiredLevel) => {
+        const unlocked=hasUnlock(rewardKey), value=safeCosmetic(guild[field],allowed,fallback);
+        const optionRows=(unlocked?options:options.slice(0,1)).map(option=>'<option value="'+option.value+'"'+(value===option.value?' selected':'')+'>'+escapeHTML(option.label)+'</option>').join('');
+        const selectDisabled=!canEditCosmetics||!unlocked?' disabled':'';
+        const note=unlocked?(canEditCosmetics?'已解鎖，隊長與副隊長可以更換。':'已解鎖；目前設定僅供檢視。'):'尚未解鎖，公會達到 Lv.'+requiredLevel+' 後即可使用。';
+        return '<label class="guild-cosmetic-control">'+escapeHTML(label)+'<select name="'+field+'"'+selectDisabled+'>'+optionRows+'</select><small>'+note+'</small></label>';
+      };
+      const panel='<section class="card guild-settings-panel guild-cosmetics-panel"><div class="eyebrow">GUILD APPEARANCE</div><h2>公會專屬外觀</h2><p class="guild-cosmetics-note">外觀由公會升級解鎖，所有成員都會看到相同設定。</p>' +
+        '<form id="guildCosmeticsForm" class="guild-settings-form">'+
+        cosmeticControl('name_color','公會名稱顏色',NAME_COLOR_OPTIONS,NAME_COLOR_IDS,'default','name_color',9)+
+        cosmeticControl('badge_effect','公會徽章特效',BADGE_EFFECT_OPTIONS,BADGE_EFFECT_IDS,'none','badge_effect',15)+
+        cosmeticControl('background_theme','公會專屬背景',BACKGROUND_OPTIONS,BACKGROUND_IDS,'default','guild_background',19)+
+        (canEditCosmetics?'<button class="primary" type="submit">儲存外觀</button>':'<p class="guild-settings-readonly">只有隊長與副隊長可以更換外觀；目前為檢視模式。</p>')+
+        '</form></section>';
+      root().innerHTML=back+panel+renderLeaveConfirmation(); return;
+    }
+    if (activeSettingsSection === 'promotion' && isLeader) {
+      const members=Array.isArray(currentData.members)?currentData.members:[];
+      const viceCount=members.filter(member=>member.role==='vice_leader').length;
+      const rows=members.filter(member=>member.role!=='leader').map(member=>{
+        const isVice=member.role==='vice_leader', cannotPromote=!isVice&&viceCount>=2;
+        const action=isVice
+          ? '<button type="button" class="guild-promotion-demote" data-guild-member-role="member" data-guild-member-id="'+escapeHTML(member.user_id||'')+'" data-guild-member-name="'+escapeHTML(member.username||'未知玩家')+'">撤除副隊長</button>'
+          : '<button type="button" class="guild-promotion-promote" data-guild-member-role="vice_leader" data-guild-member-id="'+escapeHTML(member.user_id||'')+'" data-guild-member-name="'+escapeHTML(member.username||'未知玩家')+'"'+(cannotPromote?' disabled':'')+'>晉升副隊長</button>';
+        return '<div class="guild-promotion-row"><div><b>'+escapeHTML(member.username||'未知玩家')+'</b><small>'+(isVice?'目前職位：副隊長':'目前職位：普通成員')+'</small></div>'+action+'</div>';
+      }).join('');
+      const panel='<section class="card guild-settings-panel guild-promotion-panel"><div class="eyebrow">GUILD MEMBER PROMOTION</div><h2>公會晉升成員</h2><p class="guild-cosmetics-note">隊長可任命或撤除副隊長。每個公會最多 2 位副隊長。</p>' +
+        '<div class="guild-promotion-list">'+(rows||'<p class="muted">目前沒有可調整職位的成員。</p>')+'</div><small class="guild-promotion-count">副隊長名額：'+viceCount+' / 2</small></section>';
+      root().innerHTML=back+panel+renderLeaveConfirmation(); return;
+    }
+    activeSettingsSection='menu'; renderSettings();
   }
 
   function renderMembers(members) {
@@ -427,11 +437,11 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       const initial = escapeHTML(username.slice(0, 1) || '?');
       const level = Number(member.level);
       const levelLabel = Number.isFinite(level) && level > 0 ? '<span class="guild-member-level">Lv.' + level + '</span>' : '';
-      const crown = role === 'leader' ? '<span class="guild-member-crown" aria-label="會長">♛</span>' : '';
+      const crown = role === 'leader' ? '<span class="guild-member-crown" aria-label="隊長">♛</span>' : '';
       const actorRole = currentData?.my_role;
       const canRemoveTarget = Boolean(member.user_id) && (
-        (actorRole === 'leader' && ['vice_leader', 'officer', 'member'].includes(role)) ||
-        (actorRole === 'vice_leader' && ['officer', 'member'].includes(role))
+        (actorRole === 'leader' && ['vice_leader', 'member'].includes(role)) ||
+        (actorRole === 'vice_leader' && role === 'member')
       );
       const removeAction = canRemoveTarget
         ? '<button type="button" class="guild-member-remove" data-guild-remove-member="' + escapeHTML(member.user_id) +
@@ -454,7 +464,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const guild = data.guild;
     const members = Array.isArray(data.members) ? data.members : [];
     const apps = Array.isArray(data.applications) ? data.applications : [];
-    const canManage = ['leader', 'vice_leader', 'officer'].includes(data.my_role);
+    const canManage = ['leader', 'vice_leader'].includes(data.my_role);
     const count = Number(guild.member_count) || members.length;
     const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
     const hasUnlock = key => unlocks.some(item => item.reward_key === key);
@@ -510,7 +520,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (!searchResults.length) return '<p class="muted guild-mailbox-empty">沒有找到符合的公開公會。</p>';
     const alreadyJoined = Boolean(currentData?.guild);
     return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + escapeHTML(g.name) +
-      '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>會長：' +
+      '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>隊長：' +
       escapeHTML(g.leader_name || '未知玩家') + ' · ' + (Number(g.member_count) || 0) + ' 人</small></div>' +
       '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '"' +
       (alreadyJoined ? ' aria-label="目前已有公會，無法加入"' : '') + '>' +
@@ -571,7 +581,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id === 'guildAnnouncementForm') {
       event.preventDefault();
       if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
-        message('只有會長與副會長可以修改公會公告。', 'error');
+        message('只有隊長與副隊長可以修改公會公告。', 'error');
         return;
       }
       const form = new FormData(event.target);
@@ -591,7 +601,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id === 'guildCosmeticsForm') {
       event.preventDefault();
       if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
-        message('只有會長與副會長可以更換公會外觀。', 'error');
+        message('只有隊長與副隊長可以更換公會外觀。', 'error');
         return;
       }
       const form = new FormData(event.target);
@@ -610,7 +620,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id === 'guildSettingsForm') {
       event.preventDefault();
       if (currentData?.my_role !== 'leader') {
-        message('只有會長可以修改公會設定。', 'error');
+        message('只有隊長可以修改公會設定。', 'error');
         return;
       }
       const form = new FormData(event.target);
@@ -695,8 +705,19 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
         return;
       }
       activeView = button.dataset.guildView;
+      if (activeView === 'settings') activeSettingsSection = 'menu';
       if (activeView === 'tasks') loadTasks();
       else render();
+      return;
+    }
+    if (button.dataset.guildSettingsSection) { activeSettingsSection=button.dataset.guildSettingsSection; renderSettings(); return; }
+    if (button.matches('[data-guild-settings-back]')) { activeSettingsSection='menu'; renderSettings(); return; }
+    if (button.matches('[data-guild-member-role]')) {
+      if (currentData?.my_role!=='leader') { message('只有隊長可以晉升或撤除副隊長。','error'); return; }
+      const targetId=button.dataset.guildMemberId, targetName=button.dataset.guildMemberName||'這位成員', nextRole=button.dataset.guildMemberRole;
+      const actionText=nextRole==='vice_leader'?'晉升為副隊長':'撤除副隊長職位並降為普通成員';
+      if (!targetId || !window.confirm('確定要將「'+targetName+'」'+actionText+'嗎？')) return;
+      run(async()=>{ await rpc('guild_update_member_role',{p_user_id:targetId,p_role:nextRole}); await load(); activeSettingsSection='promotion'; renderSettings(); toast(nextRole==='vice_leader'?'已晉升為副隊長':'已撤除副隊長職位'); message('「'+targetName+'」的公會職位已更新。','success'); });
       return;
     }
     if (button.matches('[data-guild-ranking-refresh]')) { loadRanking(); return; }

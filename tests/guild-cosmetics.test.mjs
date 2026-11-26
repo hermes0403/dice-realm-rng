@@ -10,9 +10,9 @@ test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 �
   assert.match(ui, /hasUnlock\('name_color'\)/);
   assert.match(ui, /hasUnlock\('badge_effect'\)/);
   assert.match(ui, /hasUnlock\('guild_background'\)/);
-  assert.match(ui, /'badge_effect', 15/);
-  assert.match(ui, /'name_color', 9/);
-  assert.match(ui, /'guild_background', 19/);
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',BADGE_EFFECT_OPTIONS,BADGE_EFFECT_IDS,'none','badge_effect',15)"));
+  assert.ok(ui.includes("cosmeticControl('name_color','公會名稱顏色',NAME_COLOR_OPTIONS,NAME_COLOR_IDS,'default','name_color',9)"));
+  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',BACKGROUND_OPTIONS,BACKGROUND_IDS,'default','guild_background',19)"));
 });
 
 test('公會外觀提供固定白名單選項，並由會長與副會長修改', () => {
@@ -22,13 +22,13 @@ test('公會外觀提供固定白名單選項，並由會長與副會長修改',
   assert.match(ui, /const canEditCosmetics = \['leader', 'vice_leader'\]\.includes\(role\)/);
   assert.match(ui, /guildCosmeticsForm/);
   assert.match(ui, /rpc\('guild_update_cosmetics'/);
-  assert.match(ui, /只有會長與副會長可以更換公會外觀/);
+  assert.match(ui, /只有隊長與副隊長可以更換公會外觀/);
 });
 
 test('未解鎖的外觀選單保持鎖定，且顯示所需公會等級', () => {
-  assert.match(ui, /const selectDisabled = !canEditCosmetics \|\| !unlocked \? ' disabled' : ''/);
+  assert.ok(ui.includes("const selectDisabled=!canEditCosmetics||!unlocked?' disabled':'';"));
   assert.match(ui, /尚未解鎖，公會達到 Lv\.'/);
-  assert.match(ui, /options\.slice\(0, 1\)/);
+  assert.ok(ui.includes('options.slice(0,1)'));
 });
 
 test('公會主頁、搜尋結果與排行榜都會套用已保存的名稱顏色', () => {
