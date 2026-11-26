@@ -33,6 +33,7 @@ as $function$
 declare
   v_guild public.guilds%rowtype;
   v_effective_amount bigint;
+  v_bonus_count integer := 0;
   v_new_xp bigint;
   v_new_level integer;
   v_level integer;
@@ -57,13 +58,15 @@ begin
     raise exception 'guild_not_found' using errcode = 'P0002';
   end if;
 
-  v_effective_amount := p_amount;
-  if exists (
-    select 1 from public.guild_level_reward_events
-     where guild_id = p_guild_id and reward_key = 'guild_xp_bonus_5' and reward_type = 'bonus'
-  ) then
-    v_effective_amount := greatest(1, round(p_amount::numeric * 1.05)::bigint);
-  end if;
+  select count(*)::integer into v_bonus_count
+    from public.guild_level_reward_events
+   where guild_id = p_guild_id
+     and reward_key = 'guild_xp_bonus_5'
+     and reward_type = 'bonus';
+  v_effective_amount := greatest(
+    1,
+    round(p_amount::numeric * (1 + v_bonus_count * 0.05))::bigint
+  );
 
   v_new_xp := v_guild.xp_total + v_effective_amount;
   v_new_level := private.guild_level_for_xp(v_new_xp);
