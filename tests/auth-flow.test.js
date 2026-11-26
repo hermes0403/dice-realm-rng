@@ -169,3 +169,29 @@ test('already-loaded account reuses its session without reopening login or reloa
   }), false);
   assert.equal(readinessChecks, 1);
 });
+
+
+test('authentication controls bootstrap before optional game UI and use the same service-worker script version', async () => {
+  const { readFileSync } = await import('node:fs');
+  const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const serviceWorker = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+
+  const authBootstrap = script.indexOf('authService=createAuthService({');
+  const authListener = script.indexOf('authService.registerAuthStateListener();');
+  const optionalUiSetup = script.indexOf('setupGlobalAnnouncements();weatherSystem.setupServerWeatherSubscription();loadWeatherSummonData(false);');
+
+  assert.notEqual(authBootstrap, -1, 'auth service should be created');
+  assert.notEqual(authListener, -1, 'auth state listener should be registered');
+  assert.notEqual(optionalUiSetup, -1, 'optional UI setup marker should exist');
+  assert.ok(authBootstrap < optionalUiSetup, 'auth service must initialize before optional UI setup');
+  assert.ok(authListener < optionalUiSetup, 'auth state listener must register before optional UI setup');
+  assert.match(script, /bindAuthClick\('authLoginBtn'/, 'login button should be bound during auth bootstrap');
+  assert.doesNotMatch(script, /document\.getElementById\('authLoginBtn'\)\.onclick/, 'legacy late binding should be removed');
+
+  const htmlVersion = html.match(/script\.js\?v=([^'"]+)/)?.[1];
+  const workerVersion = serviceWorker.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(htmlVersion, 'index.html should declare the script version');
+  assert.equal(workerVersion, htmlVersion, 'service worker must precache the same script URL');
+  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.34'/);
+});
