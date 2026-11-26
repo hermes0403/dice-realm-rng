@@ -3090,3 +3090,19 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #petLockModeBtn.active{border-color:#ffe08a;color:#ffe08a;background:#3c321d}
 .pet-sell-controls #petLockModeBtn,.pet-sell-controls #petSellBtn,.pet-sell-controls #petAutoSellBtn{flex:0 0 auto}
 @media(max-width:520px){.pet-sell-controls{gap:6px!important}.pet-sell-controls #petLockModeBtn,.pet-sell-controls #petSellBtn,.pet-sell-controls #petAutoSellBtn{padding:8px 10px;font-size:12px}}
+
+/* T-0156: pet controls use two fixed rows with equal-sized controls. */
+.pet-sell-controls{display:flex!important;flex-direction:column;gap:8px!important;align-items:stretch!important;margin:0 0 12px!important}
+.pet-controls-row{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+.pet-controls-row-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pet-controls-row>button,.pet-controls-row .pet-sort-control,.pet-controls-row .pet-sort-control select{width:100%;min-width:0;height:40px;min-height:40px;box-sizing:border-box}
+.pet-controls-row>button{padding:7px 8px;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-size:13px}
+.pet-controls-row .pet-sort-control{display:block}
+.pet-controls-row .pet-sort-control select{display:block;margin:0;padding:7px 8px;text-align:center;text-align-last:center;font-size:13px;white-space:nowrap;background:#111629;color:var(--text);border:1px solid var(--line);border-radius:12px}
+#petInventoryGrid .pet-lock-star{display:grid;place-items:center;font-size:19px;font-weight:900}
+#petInventoryGrid .pet-lock-star:not(.is-locked){color:#aab3cc}
+@media(max-width:520px){
+ .pet-controls-row{gap:6px}
+ .pet-controls-row>button,.pet-controls-row .pet-sort-control,.pet-controls-row .pet-sort-control select{height:38px;min-height:38px}
+ .pet-controls-row>button,.pet-controls-row .pet-sort-control select{font-size:12px;padding:6px 4px}
+}
