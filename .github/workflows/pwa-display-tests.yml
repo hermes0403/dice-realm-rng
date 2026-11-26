@@ -45,6 +45,7 @@ on:
       - 'tests/guild-cosmetics.test.mjs'
       - 'tests/guild-promotion.test.mjs'
       - 'docs/migrations/20261127010000_guild_member_promotion.sql'
+      - 'docs/migrations/20261127020000_guild_promotion_rpc_acl_fix.sql'
       - 'docs/migrations/20261127000000_guild_cosmetics.sql'
       - 'tests/guild-search-visibility.test.mjs'
       - 'tests/inventory-selection-visual.test.mjs'
