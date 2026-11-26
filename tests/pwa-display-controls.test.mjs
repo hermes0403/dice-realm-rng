@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261126-t0145-auth-bootstrap/);
+  assert.match(html, /script\.js\?v=20261126-t0146-auth-tdz-fix/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -193,7 +193,7 @@ test('V1.61 PWA 快取殼同步更新', async () => {
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   assert.match(html, /V1.61/);
-  assert.match(html, /script\.js\?v=20261126-t0145-auth-bootstrap/);
+  assert.match(html, /script\.js\?v=20261126-t0146-auth-tdz-fix/);
   assert.match(worker, /dice-realm-shell-v2\.34/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261122-secret-skill-swap-v1/);
@@ -340,7 +340,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /dice-realm-shell-v2\.34/);
   assert.match(worker, /style\.css\?v=20261126-t0142-inventory-selection/);
-  assert.match(worker, /script\.js\?v=20261126-t0145-auth-bootstrap/);
+  assert.match(worker, /script\.js\?v=20261126-t0146-auth-tdz-fix/);
   assert.match(worker, /ui\/guild\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /guild\.css\?v=20261126-t0142-guild-search-modal/);
   assert.match(script, /ui\/guild\.js\?v=20261126-t0142-guild-search-modal/);
