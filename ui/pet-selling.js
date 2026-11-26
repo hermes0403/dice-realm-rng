@@ -73,7 +73,7 @@ export function setupPetSellingUI({
 
     const listPets = () => {
       const pets = getState().pets;
-      return Array.isArray(pets) ? pets : [];
+      return Array.isArray(pets) ? pets.filter(item => item?.locked !== true) : [];
     };
     const rarityOf = item => petById(item && item.id)?.rarity || 'common';
 
@@ -219,7 +219,7 @@ export function setupPetSellingUI({
           toast('寵物識別資料重複，已取消出售；背包沒有變更。');
           return;
         }
-        const chosen = listPets().filter(item => ids.includes(String(item.uid)));
+        const chosen = listPets().filter(item => ids.includes(String(item.uid)) && item?.locked !== true);
         if (chosen.length !== ids.length) {
           toast('背包資料不一致，已取消出售；寵物沒有被刪除。');
           return;
@@ -244,7 +244,7 @@ export function setupPetSellingUI({
             }
             S = getState();
             const latestPets = listPets();
-            const latestChosen = latestPets.filter(item => ids.includes(String(item.uid)));
+            const latestChosen = latestPets.filter(item => ids.includes(String(item.uid)) && item?.locked !== true);
             if (latestChosen.length !== ids.length) {
               throw new Error('雲端背包與目前畫面不同步，未出售任何寵物；背包資料已保留。');
             }

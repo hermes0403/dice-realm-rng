@@ -10,6 +10,8 @@ const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url),
 const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+const petSystem = readFileSync(new URL('../systems/pets.js', import.meta.url), 'utf8');
+const petSelling = readFileSync(new URL('../ui/pet-selling.js', import.meta.url), 'utf8');
 const migration = readFileSync(new URL('../docs/database/pet-trading-multi-offer.sql', import.meta.url), 'utf8');
 const expiredSessionMigration = readFileSync(new URL('../supabase/migrations/20261122000100_expire_stale_pet_trade_sessions.sql', import.meta.url), 'utf8');
 
@@ -261,4 +263,22 @@ test('trade completion refreshes cloud state and redraws pet pages without a ful
   assert.match(script, /onTradeCompleted: async \(\) => \{\s*await loadCloudSave\(\{ renderAfterLoad: false \}\);\s*renderPetsPage\(\);\s*renderPetCodex\(\);/);
   assert.match(cloudSave, /renderAfterLoad = true/);
   assert.match(cloudSave, /if \(renderAfterLoad\) render\(\)/);
+});
+
+
+test('pet lock mode persists a star state and locked pets cannot be sold', () => {
+  assert.match(index, /id="petLockModeBtn"/);
+  assert.match(petSystem, /const locked = pet\.locked === true/);
+  assert.match(petSystem, /data-pet-lock-toggle=/);
+  assert.match(petSystem, /pet\.locked = pet\.locked !== true/);
+  assert.match(petSelling, /pets\.filter\(item => item\?\.locked !== true\)/);
+  assert.match(petSelling, /latestChosen = latestPets\.filter\(item => ids\.includes\(String\(item\.uid\)\) && item\?\.locked !== true\)/);
+  assert.match(styles, /\.pet-lock-star\.is-locked/);
+});
+
+test('locked pets cannot enter a trade picker or confirm an already-open offer', () => {
+  assert.match(service, /item\?\.locked !== true && petById\(item\.id\)/);
+  assert.match(service, /latestPet\.locked === true/);
+  assert.match(service, /hasLockedOfferedPet/);
+  assert.match(service, /已鎖定或不在背包中的寵物/);
 });

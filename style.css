@@ -3080,3 +3080,13 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 /* T-0142: make each selected die unmistakable during multi-sell selection. */
 #inventoryGrid.sell-select-mode .inventory-tile.is-sell-selected{border:2px solid #ffe08a!important;border-left:2px solid #ffe08a!important;background:linear-gradient(145deg,#514525,#28223a)!important;box-shadow:0 0 0 2px rgba(255,220,125,.38),0 0 18px rgba(255,210,100,.48)!important;transform:translateY(-1px)}
 #inventoryGrid.sell-select-mode .inventory-tile.is-sell-selected::after{content:"✓";position:absolute;left:5px;top:5px;z-index:2;width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:#ffe08a;color:#181322;font-size:13px;font-weight:1000;box-shadow:0 0 12px #ffe08a99}
+
+
+/* T-0155: pet lock mode mirrors the dice-star protection affordance. */
+#petInventoryGrid .pet-card{position:relative}
+#petInventoryGrid .pet-lock-star{position:absolute;top:7px;right:7px;z-index:3;width:30px;height:30px;padding:0;border:1px solid #69708a;border-radius:9px;background:#111827;color:#aab3cc;font-size:19px;line-height:1;cursor:pointer}
+#petInventoryGrid .pet-lock-star.is-locked{color:#ffe08a;border-color:#ffe08a;background:#3c321d;box-shadow:0 0 12px #ffe08a55}
+#petInventoryGrid .pet-card.pet-is-locked{border-color:#d7b85c;box-shadow:inset 0 0 0 1px #d7b85c55,0 0 14px #d7b85c22}
+#petLockModeBtn.active{border-color:#ffe08a;color:#ffe08a;background:#3c321d}
+.pet-sell-controls #petLockModeBtn,.pet-sell-controls #petSellBtn,.pet-sell-controls #petAutoSellBtn{flex:0 0 auto}
+@media(max-width:520px){.pet-sell-controls{gap:6px!important}.pet-sell-controls #petLockModeBtn,.pet-sell-controls #petSellBtn,.pet-sell-controls #petAutoSellBtn{padding:8px 10px;font-size:12px}}

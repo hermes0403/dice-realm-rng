@@ -226,13 +226,17 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const ownConfirmed = ownIsA ? session.confirmed_a : session.confirmed_b;
     const otherConfirmed = ownIsA ? session.confirmed_b : session.confirmed_a;
     const revision = Number(session.revision) || 0;
-    const pets = Array.isArray(getState()?.pets) ? getState().pets.filter(item => item?.uid && petById(item.id)) : [];
+    const pets = Array.isArray(getState()?.pets) ? getState().pets.filter(item => item?.uid && item?.locked !== true && petById(item.id)) : [];
     let draft = offerDrafts.get(session.id);
     if (!draft || draft.revision !== revision) {
       draft = { revision, uids: [...ownOffer] };
       offerDrafts.set(session.id, draft);
     }
     let draftOffer = [...draft.uids];
+    const hasLockedOfferedPet = () => ownOffer.some(uid => {
+      const owned = (getState()?.pets || []).find(item => String(item.uid) === String(uid));
+      return !owned || owned.locked === true;
+    });
 
     const heading = doc.createElement('div');
     heading.className = 'pet-trade-room-heading';
@@ -370,7 +374,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     confirm.className = 'primary pet-trade-confirm-button';
     confirm.dataset.tradeConfirmButton = 'true';
     confirm.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
-    confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
+    confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || hasLockedOfferedPet() || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
     const hint = doc.createElement('small');
     hint.className = 'pet-trade-room-hint';
     hint.textContent = '確認前請再次檢查雙方提供的寵物；按下「準備完成」後，仍可在對方確認前取消房間。';
@@ -380,7 +384,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       saveOffer.disabled = JSON.stringify(draftOffer) === JSON.stringify(ownOffer);
       saveOffer.textContent = saveOffer.disabled ? '交易內容已送出' : '送出交易內容（' + draftOffer.length + ' 隻）';
       confirm.dataset.draftMatchesOffer = String(JSON.stringify(draftOffer) === JSON.stringify(ownOffer));
-      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || confirm.dataset.draftMatchesOffer !== 'true';
+      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || hasLockedOfferedPet() || confirm.dataset.draftMatchesOffer !== 'true';
       if (JSON.stringify(draftOffer) !== JSON.stringify(ownOffer)) {
         hint.textContent = '你有尚未送出的選擇，送出後雙方確認狀態會重置。';
       } else {
@@ -460,6 +464,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       for (const item of visible) {
         const card = makePetCard(item, true, false);
         card.addEventListener('click', () => {
+          const latestPet = (getState()?.pets || []).find(pet => String(pet.uid) === String(item.uid));
+          if (!latestPet || latestPet.locked === true) { toast('這隻寵物已鎖定，無法交易'); renderPicker(); return; }
           const uid = String(item.uid);
           if (pickerMode === 'replace' && Number.isInteger(editingSlotIndex)) {
             draftOffer = draftOffer.map((value, index) => index === editingSlotIndex ? uid : value);
@@ -530,6 +536,12 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     });
 
     confirm.addEventListener('click', async () => {
+      if (hasLockedOfferedPet()) {
+        hint.textContent = '交易內容包含已鎖定或不在背包中的寵物，請取消房間後重新選擇。';
+        confirm.disabled = true;
+        toast('已鎖定的寵物不能完成交易');
+        return;
+      }
       confirm.disabled = true;
       try {
         const { data, error } = await supabaseClient.rpc('confirm_pet_trade', {
