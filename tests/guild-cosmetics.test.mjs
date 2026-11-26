@@ -10,7 +10,7 @@ test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 �
   assert.match(ui, /hasUnlock\('name_color'\)/);
   assert.match(ui, /hasUnlock\('badge_effect'\)/);
   assert.match(ui, /hasUnlock\('guild_background'\)/);
-  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效'"));
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',BADGE_EFFECT_OPTIONS,BADGE_EFFECT_IDS,'none','badge_effect',15)"));
   assert.ok(ui.includes("cosmeticControl('name_color','公會名稱顏色',NAME_COLOR_OPTIONS,NAME_COLOR_IDS,'default','name_color',9)"));
   assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',BACKGROUND_OPTIONS,BACKGROUND_IDS,'default','guild_background',19)"));
 });
