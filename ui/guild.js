@@ -56,6 +56,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   let mailboxError = '';
   let potionGiftOpen = false;
   let potionGiftRequestId = null;
+  let potionGiftRequestUserId = null;
   let findOpen = false;
   let findQuery = '';
   let findLoading = false;
@@ -285,6 +286,44 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     const amount = Math.max(0, Math.floor(Number(form.elements.namedItem('amount')?.value) || 0));
     const preview = documentRef.getElementById('guildPotionGiftTotal');
     if (preview) preview.textContent = (recipientCount * amount).toLocaleString('en-US') + ' 瓶 · ' + recipientCount + ' 位成員';
+  }
+
+  function ensurePotionGiftRequestId() {
+    const userId = String(getCurrentUser()?.id || '');
+    if (!userId) return null;
+    if (potionGiftRequestUserId !== userId) {
+      potionGiftRequestId = null;
+      potionGiftRequestUserId = userId;
+    }
+    const storageKey = 'diceRealmGuildPotionGiftRequest:' + userId;
+    let storage = null;
+    try { storage = documentRef.defaultView?.localStorage || globalThis.localStorage || null; } catch {}
+    if (!potionGiftRequestId) {
+      try {
+        const saved = storage?.getItem(storageKey);
+        if (saved && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved)) {
+          potionGiftRequestId = saved;
+        }
+      } catch {}
+    }
+    if (!potionGiftRequestId) {
+      const cryptoRef = documentRef.defaultView?.crypto || globalThis.crypto;
+      if (!cryptoRef?.randomUUID) return null;
+      potionGiftRequestId = cryptoRef.randomUUID();
+      try { storage?.setItem(storageKey, potionGiftRequestId); } catch {}
+    }
+    return potionGiftRequestId;
+  }
+
+  function clearPotionGiftRequestId() {
+    const userId = String(getCurrentUser()?.id || potionGiftRequestUserId || '');
+    if (userId) {
+      try {
+        const storage = documentRef.defaultView?.localStorage || globalThis.localStorage || null;
+        storage?.removeItem('diceRealmGuildPotionGiftRequest:' + userId);
+      } catch {}
+    }
+    potionGiftRequestId = null;
   }
 
   function renderPotionGiftOverlay() {
@@ -661,11 +700,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       if (!recipientIds.length || recipientIds.length > 30) {
         message('請選擇至少一位、最多 30 位收件成員。', 'error'); return;
       }
-      if (!potionGiftRequestId) {
-        const cryptoRef = documentRef.defaultView?.crypto || globalThis.crypto;
-        if (!cryptoRef?.randomUUID) { message('目前瀏覽器無法建立安全的贈送識別碼，請更新瀏覽器後再試。', 'error'); return; }
-        potionGiftRequestId = cryptoRef.randomUUID();
-      }
+      if (!ensurePotionGiftRequestId()) { message('目前瀏覽器無法建立安全的贈送識別碼，請更新瀏覽器後再試。', 'error'); return; }
       const submitButton = formElement.querySelector('button[type="submit"]');
       if (submitButton) { submitButton.disabled = true; submitButton.textContent = '送出中…'; }
       void run(async () => {
@@ -678,7 +713,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
         if (!result?.ok || !result.inventory || !result.updated_at) throw new Error('贈送結果尚未確認，請重新整理郵箱與存檔。');
         const adopted = adoptServerPotions(result.inventory, result.updated_at);
         potionGiftOpen = false;
-        potionGiftRequestId = null;
+        clearPotionGiftRequestId();
         render();
         if (!adopted) message('贈禮已送出，雲端庫存已更新；請重新載入遊戲以同步本機顯示。', 'info');
         else {
@@ -792,11 +827,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     if (!button) return;
     if (button.matches('[data-guild-potion-gift-open]')) {
       if (currentData?.my_role !== 'leader') { message('只有公會隊長可以發放藥水。', 'error'); return; }
-      if (!potionGiftRequestId) {
-        const cryptoRef = documentRef.defaultView?.crypto || globalThis.crypto;
-        if (!cryptoRef?.randomUUID) { message('目前瀏覽器無法建立安全的贈送識別碼。', 'error'); return; }
-        potionGiftRequestId = cryptoRef.randomUUID();
-      }
+      if (!ensurePotionGiftRequestId()) { message('目前瀏覽器無法建立安全的贈送識別碼。', 'error'); return; }
       potionGiftOpen = true;
       render();
       updatePotionGiftPreview(documentRef.getElementById('guildPotionGiftForm'));

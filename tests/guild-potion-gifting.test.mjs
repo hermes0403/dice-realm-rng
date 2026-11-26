@@ -52,6 +52,8 @@ test('only leaders see gifting; mail remains available to recipients without a c
   assert.match(guild, /你的會長贈予你/);
   assert.match(guild, /flushCloudSave\(\)/);
   assert.match(guild, /adoptServerPotions\(/);
+  assert.match(guild, /ensurePotionGiftRequestId\(\)/);
+  assert.match(guild, /diceRealmGuildPotionGiftRequest:/);
   assert.match(css, /\.guild-potion-gift-overlay/);
   assert.match(css, /@media\(max-width:520px\)[\s\S]*?guild-potion-gift-recipient-list/);
 });
