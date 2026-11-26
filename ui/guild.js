@@ -566,8 +566,12 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (button.dataset.guildView) {
       leaveConfirmStep = 0;
+      if (button.dataset.guildView === 'mailbox') {
+        activeView = currentData?.guild ? 'home' : 'find';
+        loadMailbox();
+        return;
+      }
       activeView = button.dataset.guildView;
-      if (activeView === 'mailbox') { loadMailbox(); return; }
       if (activeView === 'tasks') loadTasks();
       else render();
       return;
