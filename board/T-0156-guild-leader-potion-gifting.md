@@ -66,3 +66,5 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-27 07:22 [叉子] 已完成第一輪程式與資料庫實作：新增隊長贈送面板、成員多選／全選、每位成員數量預覽、獨立郵件與一次性領取；新增交易 RPC、庫存鎖定扣除／增加、請求冪等鍵及雲端存檔基準同步。修改 ui/guild.js、services/cloud-save.js、guild.css、script.js、index.html、sw.js，新增 migration docs/migrations/20261127071700_guild_leader_potion_gifting.sql 與 tests/guild-potion-gifting.test.mjs。最新程式提交：09967ee71ebd649438297a5cce402417dd765987。Supabase migration 尚未套用；GitHub Actions 與正式資料庫交易測試待執行。
