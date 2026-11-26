@@ -11,8 +11,9 @@ const html = read('../index.html');
 const sw = read('../sw.js');
 
 test('T-0141 uses the complete owner-confirmed per-level XP thresholds', () => {
-  const costs = '100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500';
-  assert.ok(migration.includes(costs));
+  for (const threshold of [100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500]) {
+    assert.match(migration, new RegExp('\\\\b' + threshold + '\\\\b'));
+  }
   assert.match(migration, /create or replace function private\.guild_level_for_xp\(p_xp bigint\)/);
   assert.match(migration, /v_costs bigint\[\] := array\[/);
 });
