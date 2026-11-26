@@ -233,7 +233,7 @@ async function loadGuildPage(){
   guildRoot.innerHTML='<div class="card"><p class="muted">正在啟動公會功能…</p></div>';
   try{
     if(!guildSystem){
-      const { createGuildSystem } = await import('./ui/guild.js?v=20261126-t0142-guild-search-modal');
+      const { createGuildSystem } = await import('./ui/guild.js?v=20261126-t0150-guild-import-cache');
       guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,documentRef:document,toast});
     }
     return await guildSystem.load();
