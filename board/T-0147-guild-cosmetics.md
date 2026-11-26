@@ -1,7 +1,7 @@
 ---
 id: T-0147
 title: 實作公會名稱顏色、徽章特效與專屬背景
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -62,3 +62,5 @@ T-0141 已將這三項設為對應等級的 cosmetic 獎勵；本任務補上解
 ## 紀錄
 
 - 2026-11-27 05:37 [叉子] 開單：依棒子要求，將三項公會外觀獎勵建立為獨立開發任務。確認目前 owner_side 有效 in_progress 任務為 T-0142、T-0146，共 2/5；T-0002（barry）及 T-0038（老查）不計入本方容量。已讀取 Board 最新 main（aa644f722d65d281f81e79df0c86e31a4177ca88）；尚待完成開單 PR、開工 PR 及再次確認兩道啟動閘門後，才能進入實作。
+
+- 2026-11-27 05:43 [叉子] 開單 PR #405 已合併至 main（merge commit 443749ced158e64b896faf10a5d6d16774ebb400）；任務分支已以非強制快轉方式同步 main。重新檢查最新 main：owner_side in_progress 任務 T-0142、T-0146 共 2/5；檢查所有 open 任務未發現有效 communicate task，兩道啟動閘門未阻擋。狀態轉換：open → in_progress，開始實作。
