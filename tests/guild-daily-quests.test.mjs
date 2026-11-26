@@ -13,6 +13,7 @@ const repeatable = read('../docs/migrations/20261125101918_guild_repeatable_dail
 const loginThreshold = read('../docs/migrations/20261125111428_guild_daily_login_threshold.sql');
 const sw = read('../sw.js');
 const html = read('../index.html');
+const script = read('../script.js');
 
 test('T-0130 今日任務頁透過伺服器 RPC 載入，並提供明確手動重新整理', () => {
   assert.match(ui, /rpc\('guild_get_daily_tasks'\)/);
@@ -63,13 +64,19 @@ test('公會成員上限維持 4，且新進度表不可被客戶端直接讀寫
 });
 
 test('公會任務資產版本與 Service Worker 快取一致', () => {
-  const guildVersion = '20261126-t0142-guild-search-modal';
-  const scriptVersion = '20261126-t0146-auth-tdz-fix';
-  assert.ok(html.includes('guild.css?v=' + guildVersion));
-  assert.ok(html.includes('script.js?v=' + scriptVersion));
-  assert.ok(sw.includes('ui/guild.js?v=' + guildVersion));
-  assert.ok(sw.includes('guild.css?v=' + guildVersion));
-  assert.ok(sw.includes('dice-realm-shell-v2.35'));
+  const htmlGuildCssVersion = html.match(/guild\.css\?v=([^'"]+)/)?.[1];
+  const workerGuildCssVersion = sw.match(/\.\/guild\.css\?v=([^'"]+)/)?.[1];
+  const htmlScriptVersion = html.match(/script\.js\?v=([^'"]+)/)?.[1];
+  const workerScriptVersion = sw.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
+  const guildModuleVersion = script.match(/await import\(['"]\.\/ui\/guild\.js\?v=([^'"]+)['"]\)/)?.[1];
+  const workerGuildModuleVersion = sw.match(/\.\/ui\/guild\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(htmlGuildCssVersion);
+  assert.equal(workerGuildCssVersion, htmlGuildCssVersion);
+  assert.ok(htmlScriptVersion);
+  assert.equal(workerScriptVersion, htmlScriptVersion);
+  assert.ok(guildModuleVersion);
+  assert.equal(workerGuildModuleVersion, guildModuleVersion);
+  assert.match(sw, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
   assert.ok(css.includes('.guild-task-card'));
 });
 

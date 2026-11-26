@@ -1,0 +1,44 @@
+name: Full game regression audit
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'script.js'
+      - 'config.js'
+      - 'core/**'
+      - 'systems/**'
+      - 'services/**'
+      - 'ui/**'
+      - 'admin/**'
+      - 'tests/**'
+      - 'guild.css'
+      - 'style.css'
+      - '.github/workflows/full-game-regression-audit.yml'
+
+jobs:
+  full-game-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run all JavaScript regression tests
+        run: node --test tests/*.test.js tests/*.test.mjs
+      - name: Check all JavaScript syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './.git/*' -print0)
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
