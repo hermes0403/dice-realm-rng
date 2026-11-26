@@ -193,7 +193,7 @@ test('authentication controls bootstrap before optional game UI and use the same
   const workerVersion = serviceWorker.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
   assert.ok(htmlVersion, 'index.html should declare the script version');
   assert.equal(workerVersion, htmlVersion, 'service worker must precache the same script URL');
-  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.34'/);
+  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.35'/);
 });
 
 
