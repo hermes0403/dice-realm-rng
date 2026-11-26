@@ -195,7 +195,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           '<button type="button" class="guild-mail-read-button" data-guild-mail-read="' + escapeHTML(mail.id || '') + '">標記已讀</button>') +
         '</article>';
     }).join('');
-    root().innerHTML = renderBackButton() +
+    root().innerHTML = navMarkup() + renderBackButton() +
       '<section class="card guild-mailbox-panel"><div class="section-head"><div><div class="eyebrow">GUILD MAILBOX</div>' +
       '<h3>公會郵箱</h3></div><span class="guild-roster-total">' + mails.filter(mail => !mail.is_read).length + ' UNREAD</span></div>' +
       '<p class="guild-mailbox-note">公會升級時，當下的每位成員都會收到個人獎勵通知。</p>' +
@@ -204,7 +204,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
 
   async function loadMailbox() {
     activeView = 'mailbox';
-    root().innerHTML = renderBackButton() +
+    root().innerHTML = navMarkup() + renderBackButton() +
       '<section class="card guild-mailbox-panel"><p class="muted">正在載入公會郵件…</p></section>';
     try {
       const rows = await rpc('guild_get_mailbox', { p_limit: 50 });
@@ -212,7 +212,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       renderMailbox(rows);
     } catch (error) {
       if (activeView !== 'mailbox') return;
-      root().innerHTML = renderBackButton() +
+      root().innerHTML = navMarkup() + renderBackButton() +
         '<section class="card guild-mailbox-panel"><h3>郵件載入失敗</h3><p>無法取得公會郵件，請稍後重試。</p>' +
         '<button type="button" data-guild-mail-refresh>重新載入</button></section>';
       message(error.message || '郵件載入失敗', 'error');
