@@ -191,6 +191,7 @@ test('翡翠綠主題說明面板保留區塊配色，主頁骰子底框降低�
 test('V1.61 PWA 快取殼同步更新', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   assert.match(html, /V1.61/);
   assert.match(html, /script\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /dice-realm-shell-v2\.32/);
@@ -341,5 +342,9 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(worker, /script\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /ui\/guild\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /guild\.css\?v=20261126-t0142-guild-search-modal/);
+  assert.match(script, /ui\/guild\.js\?v=20261126-t0142-guild-search-modal/);
+  assert.match(script, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
+  assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
+  assert.match(worker, /ui\/display-controls\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
 });
