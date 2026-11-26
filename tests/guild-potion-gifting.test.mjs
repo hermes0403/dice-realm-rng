@@ -9,6 +9,7 @@ const script = read('../script.js');
 const index = read('../index.html');
 const sw = read('../sw.js');
 const css = read('../guild.css');
+const equipment = read('../data/equipment.js');
 
 test('gift mail is private, indexed and has a bounded potion allowlist', () => {
   assert.match(migration, /create table public\.guild_potion_gift_mail/);
@@ -16,6 +17,14 @@ test('gift mail is private, indexed and has a bounded potion allowlist', () => {
   assert.match(migration, /revoke all on table public\.guild_potion_gift_mail from public, anon, authenticated/);
   assert.match(migration, /unique \(sender_id, request_id, recipient_id\)/);
   for (const id of ['luck1','luck2','luck3','speed1','speed2','money1','money2','angel1','angel2']) assert.ok(migration.includes("'" + id + "'"));
+});
+
+test('mail potion labels stay aligned with the game potion definitions', () => {
+  const allowed = new Set(['luck1','luck2','luck3','speed1','speed2','money1','money2','angel1','angel2']);
+  const definitions = [...equipment.matchAll(/id:'([^']+)',name:'([^']+)'/g)]
+    .filter(match => allowed.has(match[1]));
+  assert.equal(definitions.length, allowed.size);
+  for (const [, id, name] of definitions) assert.ok(migration.includes("when '" + id + "' then '" + name + "'"), id);
 });
 
 test('sending requires leader role, guild recipients and an atomic locked inventory deduction', () => {

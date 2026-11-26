@@ -315,15 +315,18 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     return potionGiftRequestId;
   }
 
-  function clearPotionGiftRequestId() {
-    const userId = String(getCurrentUser()?.id || potionGiftRequestUserId || '');
+  function clearPotionGiftRequestId(userIdOverride) {
+    const userId = String(userIdOverride || potionGiftRequestUserId || getCurrentUser()?.id || '');
     if (userId) {
       try {
         const storage = documentRef.defaultView?.localStorage || globalThis.localStorage || null;
         storage?.removeItem('diceRealmGuildPotionGiftRequest:' + userId);
       } catch {}
     }
-    potionGiftRequestId = null;
+    if (!userIdOverride || potionGiftRequestUserId === userId) {
+      potionGiftRequestId = null;
+      potionGiftRequestUserId = null;
+    }
   }
 
   function renderPotionGiftOverlay() {
@@ -701,11 +704,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
         message('請選擇至少一位、最多 30 位收件成員。', 'error'); return;
       }
       if (!ensurePotionGiftRequestId()) { message('目前瀏覽器無法建立安全的贈送識別碼，請更新瀏覽器後再試。', 'error'); return; }
+      const requestUserId = String(getCurrentUser()?.id || '');
       const submitButton = formElement.querySelector('button[type="submit"]');
       if (submitButton) { submitButton.disabled = true; submitButton.textContent = '送出中…'; }
       void run(async () => {
         const flushed = await flushCloudSave();
         if (flushed !== true) throw new Error('雲端存檔尚未完成同步，請稍後再試。');
+        if (String(getCurrentUser()?.id || '') !== requestUserId) throw new Error('登入帳號已切換，請重新開啟公會頁面後再送出。');
         const result = await rpc('guild_send_potion_gift', {
           p_request_id: potionGiftRequestId, p_potion_id: potionId,
           p_amount: amount, p_recipient_ids: recipientIds
@@ -713,7 +718,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
         if (!result?.ok || !result.inventory || !result.updated_at) throw new Error('贈送結果尚未確認，請重新整理郵箱與存檔。');
         const adopted = adoptServerPotions(result.inventory, result.updated_at);
         potionGiftOpen = false;
-        clearPotionGiftRequestId();
+        clearPotionGiftRequestId(requestUserId);
         render();
         if (!adopted) message('贈禮已送出，雲端庫存已更新；請重新載入遊戲以同步本機顯示。', 'info');
         else {
@@ -850,10 +855,12 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     if (button.matches('[data-guild-potion-gift-claim]')) {
       const giftId = button.dataset.guildPotionGiftClaim;
       if (!giftId || button.disabled) return;
+      const claimUserId = String(getCurrentUser()?.id || '');
       button.disabled = true;
       void run(async () => {
         const flushed = await flushCloudSave();
         if (flushed !== true) throw new Error('雲端存檔尚未完成同步，請稍後再試。');
+        if (String(getCurrentUser()?.id || '') !== claimUserId) throw new Error('登入帳號已切換，請重新開啟公會郵箱後再領取。');
         const result = await rpc('guild_claim_potion_gift', { p_gift_id: giftId });
         if (!result?.ok || !result.inventory || !result.updated_at) throw new Error('領取結果尚未確認，請重新整理郵箱與存檔。');
         const adopted = adoptServerPotions(result.inventory, result.updated_at);
