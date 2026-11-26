@@ -7,7 +7,6 @@ import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, p
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
 import { createNavigationUI } from './ui/navigation.js?v=20261123-daily-shop-v1';
-import { createGuildSystem } from './ui/guild.js?v=20261126-t0142-guild-search-modal';
 import { createInventoryUI } from './ui/inventory.js?v=20261126-t0142-inventory-selection';
 import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
@@ -224,6 +223,17 @@ function effectiveDen(d){const den=Number(d?.den)||0;if(!d||den<1000000||den>100
 function chanceText(d){return d.id==='d1'?'1/2':'1/'+format(effectiveDen(d))}
 // 天堂藥水 I／II 機率表僅用於內部抽選，不顯示於玩家介面。
 function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');timerManager.clearTimeout(e._t);const timer=timerManager.setTimeout(()=>{e.classList.remove('show');if(e._t===timer)e._t=null},2100,'toast-hide');e._t=timer}
+
+// Keep the optional guild module outside the core app's static import graph.
+// A guild asset failure must not stop authentication controls from booting.
+let guildSystem=null;
+async function loadGuildPage(){
+  if(!guildSystem){
+    const { createGuildSystem } = await import('./ui/guild.js?v=20261126-t0142-guild-search-modal');
+    guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,documentRef:document,toast});
+  }
+  return guildSystem.load();
+}
 function isAdmin(){return (currentUser?.email||'').toLowerCase()==='toby110403@gmail.com'}
 realmSocialSystem.setupRealmSocialUI();
 const { itemHTML, renderAutoSellOptions, renderAutoDepositOptions, updateInventorySelectedCount, renderInventory, sellMany, bagUpgradeCost } = createInventoryUI({
@@ -287,10 +297,9 @@ const petTradingSearch = createPetTradingSearch({
   flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast
 });
 petTradingSearch.setup();
-const guildSystem = createGuildSystem({ supabaseClient, getCurrentUser: () => currentUser, documentRef: document, toast });
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop,
-  loadGuildPage: () => guildSystem.load(), refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  loadGuildPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 // Authentication is bootstrapped above, before optional game UI initialization.
