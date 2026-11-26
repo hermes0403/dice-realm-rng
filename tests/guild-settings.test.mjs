@@ -83,5 +83,5 @@ test('一般成員的設定頁完全隱藏設定與公告管理面板', () => {
   assert.match(ui, /const settingsPanel = isOrdinaryMember \? ''/);
   assert.match(ui, /const announcementPanel = isOrdinaryMember \? ''/);
   assert.match(ui, /const leavePanel =/);
-  assert.match(ui, /root\(\)\.innerHTML = renderBackButton\(\) \+ settingsPanel \+ announcementPanel \+ leavePanel/);
+  assert.match(ui, /root\(\)\.innerHTML = renderBackButton\(\) \+ settingsPanel \+ cosmeticPanel \+ announcementPanel \+ leavePanel/);
 });
