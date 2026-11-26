@@ -11,6 +11,7 @@ const APP_SHELL = [
   './data/eternal-update.js?v=20261122-eternal-income-v1',
   './data/progression.js',
   './config.js?v=20261123-daily-shop-v1',
+  './config.js',
   './services/supabase.js',
   './core/format.js',
   './ui/navigation.js?v=20261123-daily-shop-v1',
