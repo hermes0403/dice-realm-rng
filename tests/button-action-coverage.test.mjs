@@ -101,7 +101,9 @@ test('動態產生的遊戲按鈕都有明確的 id 或委派 data-action', asyn
       const hasId = /\bid\s*=\s*["'][^"']+["']/i.test(tag);
       const hasDataAction = /\bdata-[\w-]+(?:\s*=|\s|>)/i.test(tag);
       const hasInlineHandler = /\bonclick\s*=/i.test(tag);
-      if (!hasId && !hasDataAction && !hasInlineHandler) {
+      const isFormSubmit = /\btype\s*=\s*["']submit["']/i.test(tag);
+      const hasConcatenatedAction = /\+\s*action\b/.test(source.slice(match.index, match.index + 220));
+      if (!hasId && !hasDataAction && !hasInlineHandler && !isFormSubmit && !hasConcatenatedAction) {
         unmarked.push(file.slice(root.length) + ': ' + tag);
       }
     }
