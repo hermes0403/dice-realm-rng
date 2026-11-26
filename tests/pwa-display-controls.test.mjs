@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { setupDisplayControls } from '../ui/display-controls.js';
 
 function createFixture({ requestFullscreen, exitFullscreen, pwaFullscreen = false, secure = true, serviceWorker = true } = {}) {
@@ -360,4 +362,34 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   assert.match(worker, /ui\/display-controls\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
+});
+
+
+test('Service Worker 預先快取所有遊戲模組的完整相對匯入依賴', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const sourceFiles = [];
+  async function collect(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await collect(path);
+      else if (/\.m?js$/.test(entry.name)) sourceFiles.push(path);
+    }
+  }
+  for (const directory of ['admin', 'core', 'data', 'services', 'systems', 'ui']) {
+    await collect(join(root, directory));
+  }
+  sourceFiles.push(join(root, 'script.js'), join(root, 'config.js'));
+  const worker = await readFile(join(root, 'sw.js'), 'utf8');
+  const appShell = worker.match(/const APP_SHELL = \[([\s\S]*?)\n\];/)?.[1] || '';
+  const cachedUrls = new Set([...appShell.matchAll(/['"](\.\/[^'"]+)['"]/g)].map(match => match[1]));
+  for (const file of sourceFiles) {
+    const relativeFile = file.slice(root.length).replaceAll('\\', '/');
+    const source = await readFile(file, 'utf8');
+    const imports = [...source.matchAll(/(?:\bfrom\s+|\bimport\s*\()\s*['"]((?:\.\/|\.\.\/)[^'"]+)['"]/g)].map(match => match[1]);
+    for (const specifier of imports) {
+      const resolved = new URL(specifier, 'https://dice-realm.local/' + relativeFile);
+      const expectedUrl = './' + resolved.pathname.slice(1) + resolved.search;
+      assert.ok(cachedUrls.has(expectedUrl), relativeFile + ' dependency missing from APP_SHELL: ' + expectedUrl);
+    }
+  }
 });
