@@ -221,3 +221,20 @@ test('auth service declaration and deferred dependencies are initialized without
   assert.ok(script.includes("refreshLeaderboards:(...args)=>{try{return refreshLeaderboards(...args)}"), 'leaderboard dependency must be deferred until it is initialized');
   assert.ok(listener < leaderboardInitialization, 'auth listener is installed before later game services initialize');
 });
+
+
+test('guild page shows loading and a working retry when its optional module fails, without changing auth button bootstrap', async () => {
+  const { readFileSync } = await import('node:fs');
+  const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
+  const start = script.indexOf('async function loadGuildPage(){');
+  const end = script.indexOf('\nfunction isAdmin()', start);
+  assert.notEqual(start, -1, 'guild page loader should exist');
+  assert.ok(end > start, 'guild page loader should end before admin check');
+  const loader = script.slice(start, end);
+  assert.ok(loader.indexOf("正在啟動公會功能") < loader.indexOf("await import('./ui/guild.js"), 'loading state must appear before importing guild module');
+  assert.match(loader, /catch\(error\)/, 'module startup failures must be caught');
+  assert.match(loader, /guildBootRetryBtn/, 'startup failure must provide a retry button');
+  assert.match(loader, /void loadGuildPage\(\)/, 'retry button must invoke the loader again');
+  assert.match(script, /bindAuthClick\('authLoginBtn'/, 'login button binding must remain intact');
+  assert.match(script, /bindAuthClick\('authSignupBtn'/, 'signup button binding must remain intact');
+});
