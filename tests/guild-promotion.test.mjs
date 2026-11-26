@@ -42,7 +42,7 @@ test('手機版晉升清單維持可操作', () => {
 });
 
 test('private promotion implementation is not directly executable by clients; public wrapper is SECURITY DEFINER', () => {
-  assert.match(sql, /revoke all on function private\\.guild_update_member_role\\(uuid,text\\) from public, anon, authenticated/);
-  assert.match(sql, /create or replace function public\\.guild_update_member_role[\\s\\S]*?security definer/);
-  assert.match(sql, /grant execute on function public\\.guild_update_member_role\\(uuid,text\\) to authenticated/);
+  assert.match(aclMigration, /revoke all on function private\\.guild_update_member_role\\(uuid,text\\) from public, anon, authenticated/);
+  assert.match(aclMigration, /create or replace function public\\.guild_update_member_role[\\s\\S]*?security definer/);
+  assert.match(aclMigration, /grant execute on function public\\.guild_update_member_role\\(uuid,text\\) to authenticated/);
 });
