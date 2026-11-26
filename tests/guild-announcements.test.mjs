@@ -79,5 +79,5 @@ test('一般成員隱藏公告管理面板，但郵箱公告仍對所有成員�
   assert.match(mailbox, /guild-mailbox-announcement/);
   assert.match(mailbox, /escapeHTML\(announcementMessage\)/);
   assert.match(ui, /data-guild-mailbox-close/);
-  assert.match(ui, /event\.key === 'Escape' && mailboxOpen/);
+  assert.match(ui, /event\.key === 'Escape' && (mailboxOpen || findOpen)/);
 });
