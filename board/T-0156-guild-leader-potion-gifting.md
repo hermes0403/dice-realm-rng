@@ -68,3 +68,7 @@ done_at:
 ### 衍生任務／影響任務
 
 - 2026-11-27 07:22 [叉子] 已完成第一輪程式與資料庫實作：新增隊長贈送面板、成員多選／全選、每位成員數量預覽、獨立郵件與一次性領取；新增交易 RPC、庫存鎖定扣除／增加、請求冪等鍵及雲端存檔基準同步。修改 ui/guild.js、services/cloud-save.js、guild.css、script.js、index.html、sw.js，新增 migration docs/migrations/20261127071700_guild_leader_potion_gifting.sql 與 tests/guild-potion-gifting.test.mjs。最新程式提交：09967ee71ebd649438297a5cce402417dd765987。Supabase migration 尚未套用；GitHub Actions 與正式資料庫交易測試待執行。
+
+- 2026-11-27 07:36 [叉子] 補完成 Board 開工閘門查核（基準：最新 main Board）：owner_side 的有效 in_progress 共 4 張，分別為 T-0142（from 棒子）、T-0146、T-0147、T-0148（from 叉子），未達 5 張容量上限；main 的完整 board/ 任務檔清單未見 communicate task 或「委派資訊」任務，因此 Communicate 優先閘門未觸發。先前 07:11 紀錄的 Communicate UNKNOWN 由本次完整查核更新；保留原紀錄，不回溯改寫。
+- 2026-11-27 07:36 [叉子] Supabase migration 已套用至正式專案 dice-rng（project pkdctcfifauygnjipmab），migration history version 20261126233352。正式查核：guild_potion_gift_mail 已建立並啟用 RLS；authenticated／anon 均無直接 SELECT／INSERT 權限；新公開 RPC 僅 authenticated 可執行，anon 無執行權限；SECURITY DEFINER 函式固定 search_path。使用模擬無公會帳號驗證送出被拒絕、未知贈禮領取被拒絕，並確認無公會帳號可讀取空郵箱；未修改任何真實玩家庫存。
+- 2026-11-27 07:36 [叉子] PR #412（https://github.com/hermes0403/dice-realm-rng/pull/412）已建立。T-0156 專屬 CI（贈禮／既有公會郵箱／Escape 關閉／PWA 版本測試、三個 JS 檔語法檢查、diff whitespace）通過；Cloud Save 與 PWA 回歸測試通過。全站 regression 仍有既有 pet-removal-admin-counts.test.js「sort labels should appear in the requested order」失敗，該測試及寵物排序程式不在本任務修改範圍；其餘已完成的相關工作流程通過。
