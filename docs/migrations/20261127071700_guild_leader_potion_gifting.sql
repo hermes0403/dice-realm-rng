@@ -84,6 +84,10 @@ begin
     raise exception 'guild_potion_gift_duplicate_recipient' using errcode = '22023';
   end if;
 
+  -- Serialize retries with the same sender/request key before checking existing mail.
+  -- This closes the race where two identical requests both pass the initial lookup.
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text || ':' || p_request_id::text, 0));
+
   -- Repeating the same request after a network timeout must not deduct twice.
   select count(*)::integer, array_agg(g.recipient_id order by g.recipient_id)
     into v_existing_count, v_existing_recipients
