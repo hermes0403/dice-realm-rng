@@ -120,3 +120,32 @@
 .guild-leave-next{border-color:rgba(155,139,201,.32);background:#302b47;color:#d1c5f1}
 .guild-leave-confirm{border-color:rgba(190,100,125,.42);background:#482631;color:#ffd1d9}
 @media(max-width:520px){.guild-leave-panel{padding:14px}.guild-leave-button{width:100%}.guild-leave-dialog{padding:17px}.guild-leave-dialog-actions>*{flex:1}}
+
+
+/* T-0141: guild level reward unlocks and personal mailbox */
+.guild-banner.has-reward-background{background:radial-gradient(ellipse at 90% 10%,rgba(143,104,224,.25),transparent 48%),linear-gradient(135deg,#1b2038,#22213b 58%,#17283a);border-color:rgba(167,139,250,.38)}
+.guild-banner-emblem.has-reward-frame{border:2px solid #d5c1ff;box-shadow:0 0 0 4px rgba(148,110,224,.16),0 0 24px rgba(164,130,255,.32)}
+.guild-banner-emblem.has-reward-effect{animation:guildBadgeGlow 2.8s ease-in-out infinite}
+@keyframes guildBadgeGlow{0%,100%{filter:drop-shadow(0 0 3px rgba(159,128,255,.25))}50%{filter:drop-shadow(0 0 12px rgba(191,157,255,.85))}}
+.guild-name-color-unlocked{background:linear-gradient(90deg,#d9c5ff,#83d9ff,#d9c5ff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-level-pill{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid rgba(170,143,238,.35);border-radius:999px;background:rgba(87,69,135,.22);color:#d8c8ff;font-size:11px;font-weight:800}
+.guild-exclusive-title{display:inline-flex;margin:7px 0 0;padding:4px 9px;border:1px solid rgba(162,137,227,.3);border-radius:8px;background:rgba(103,78,157,.2);color:#d8c6ff;font-size:11px;font-weight:800;letter-spacing:.04em}
+.guild-reward-unlocks{display:grid;gap:10px}
+.guild-reward-unlocks h3{margin:0;color:#d9dbea;font-size:15px}
+.guild-reward-chip-list{display:flex;flex-wrap:wrap;gap:7px}
+.guild-reward-chip{padding:6px 9px;border:1px solid rgba(155,139,201,.24);border-radius:9px;background:#22243a;color:#d3c8f0;font-size:11px;line-height:1.45}
+.guild-mailbox-panel{display:grid;gap:12px}
+.guild-mailbox-panel .section-head{margin:0}
+.guild-mailbox-note{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-mail-list{display:grid;gap:10px}
+.guild-mail-card{display:grid;gap:9px;padding:14px;border:1px solid rgba(140,149,184,.2);border-radius:13px;background:#1a2032}
+.guild-mail-card.is-unread{border-color:rgba(164,135,231,.55);background:linear-gradient(135deg,rgba(85,65,128,.22),#1a2032 65%)}
+.guild-mail-card h3{margin:0;color:#e1def0;font-size:15px}
+.guild-mail-card p{margin:0;color:#c1c6d7;font-size:13px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
+.guild-mail-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#c4b2ef;font-size:11px;font-weight:800}
+.guild-mail-top small{color:#8f97ae;font-weight:400}
+.guild-mail-reward{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 10px;border-radius:9px;background:rgba(87,69,135,.18);color:#d7cafa;font-size:12px}
+.guild-mail-reward span{color:#eee6ff;font-weight:800}
+.guild-mail-read-button{justify-self:start;padding:7px 11px;border:1px solid rgba(162,137,227,.35);border-radius:9px;background:#302b47;color:#ded3ff;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.guild-mail-read-label{justify-self:start;color:#8992aa;font-size:11px}
+@media(max-width:520px){.guild-mail-card{padding:12px}.guild-mail-top{align-items:flex-start;flex-direction:column;gap:3px}.guild-mail-read-button{width:100%}.guild-reward-chip{font-size:10px}}

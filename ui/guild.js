@@ -4,6 +4,7 @@ const ROLE_LABELS = { leader: '會長', vice_leader: '副會長', officer: '幹�
 const NAV_ITEMS = [
   { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
   { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
+  { key: 'mailbox', label: '公會郵箱', description: '查看公會升級獎勵郵件', icon: '✉', tone: 'blue' },
   { key: 'find', label: '尋找公會', description: '搜尋並加入其他公會', icon: '⌕', tone: 'teal' },
   { key: 'settings', label: '公會設定', description: '查看設定與退出公會', icon: '⚙', tone: 'purple' }
 ];
@@ -39,14 +40,17 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   function roleLabel(role) { return ROLE_LABELS[role] || '一般成員'; }
 
   function navMarkup() {
+    const unreadCount = Math.max(0, Number(currentData?.mail_unread_count) || 0);
     return '<div class="guild-nav-grid" aria-label="公會功能導覽">' +
       NAV_ITEMS.map(item => {
         const active = item.key !== 'home' && activeView === item.key;
         const action = item.go ? ' data-go="' + item.go + '"' : ' data-guild-view="' + item.key + '"';
+        const label = item.key === 'mailbox' && unreadCount ? item.label + ' (' + unreadCount + ')' : item.label;
+        const description = item.key === 'mailbox' && unreadCount ? '未讀 ' + unreadCount + ' 封升級通知' : item.description;
         return '<button type="button" class="guild-nav-card tone-' + item.tone + (active ? ' is-active' : '') + '"' +
           action + (active ? ' aria-current="page"' : '') + '>' +
           '<span class="guild-nav-icon" aria-hidden="true">' + item.icon + '</span>' +
-          '<span class="guild-nav-copy"><b>' + item.label + '</b><small>' + item.description + '</small></span>' +
+          '<span class="guild-nav-copy"><b>' + label + '</b><small>' + description + '</small></span>' +
           '<span class="guild-nav-arrow" aria-hidden="true">›</span></button>';
       }).join('') + '</div>';
   }
@@ -76,6 +80,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   function renderNoGuild() {
+    if (activeView === 'mailbox') { loadMailbox(); return; }
     if (activeView === 'home') activeView = 'find';
     if (activeView === 'find') {
       root().innerHTML = navMarkup() + renderBackButton() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>';
@@ -174,6 +179,45 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
   }
 
+
+  function renderMailbox(rows) {
+    const mails = Array.isArray(rows) ? rows : [];
+    const items = mails.map(mail => {
+      const date = mail.created_at ? new Date(mail.created_at).toLocaleString('zh-TW', { hour12: false }) : '時間未知';
+      const level = Math.max(1, Number(mail.guild_level) || 1);
+      const read = Boolean(mail.is_read);
+      return '<article class="guild-mail-card' + (read ? ' is-read' : ' is-unread') + '">' +
+        '<div class="guild-mail-top"><span>GUILD MAIL · Lv.' + level + '</span><small>' + escapeHTML(date) + '</small></div>' +
+        '<h3>' + escapeHTML(mail.subject || '公會升級通知') + '</h3>' +
+        '<p>' + escapeHTML(mail.body || '') + '</p>' +
+        '<div class="guild-mail-reward"><b>獲得獎勵</b><span>' + escapeHTML(mail.reward_text || '公會升級獎勵') + '</span></div>' +
+        (read ? '<span class="guild-mail-read-label">已讀</span>' :
+          '<button type="button" class="guild-mail-read-button" data-guild-mail-read="' + escapeHTML(mail.id || '') + '">標記已讀</button>') +
+        '</article>';
+    }).join('');
+    root().innerHTML = navMarkup() + renderBackButton() +
+      '<section class="card guild-mailbox-panel"><div class="section-head"><div><div class="eyebrow">GUILD MAILBOX</div>' +
+      '<h3>公會郵箱</h3></div><span class="guild-roster-total">' + mails.filter(mail => !mail.is_read).length + ' UNREAD</span></div>' +
+      '<p class="guild-mailbox-note">公會升級時，當下的每位成員都會收到個人獎勵通知。</p>' +
+      '<div class="guild-mail-list">' + (items || '<p class="muted">目前沒有公會郵件。</p>') + '</div></section>';
+  }
+
+  async function loadMailbox() {
+    activeView = 'mailbox';
+    root().innerHTML = navMarkup() + renderBackButton() +
+      '<section class="card guild-mailbox-panel"><p class="muted">正在載入公會郵件…</p></section>';
+    try {
+      const rows = await rpc('guild_get_mailbox', { p_limit: 50 });
+      if (activeView !== 'mailbox') return;
+      renderMailbox(rows);
+    } catch (error) {
+      if (activeView !== 'mailbox') return;
+      root().innerHTML = navMarkup() + renderBackButton() +
+        '<section class="card guild-mailbox-panel"><h3>郵件載入失敗</h3><p>無法取得公會郵件，請稍後重試。</p>' +
+        '<button type="button" data-guild-mail-refresh>重新載入</button></section>';
+      message(error.message || '郵件載入失敗', 'error');
+    }
+  }
 
   function renderRanking(rows) {
     const ranking = Array.isArray(rows) ? rows : [];
@@ -319,14 +363,23 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const announcementMessage = typeof announcement?.message === 'string' ? announcement.message : '';
     const announcementUpdatedAt = announcement?.updated_at ? new Date(announcement.updated_at).toLocaleString('zh-TW') : '';
     const count = Number(guild.member_count) || members.length;
+    const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
+    const hasUnlock = key => unlocks.some(item => item.reward_key === key);
+    const bannerClass = 'guild-banner card' + (hasUnlock('guild_background') ? ' has-reward-background' : '');
+    const emblemClass = 'guild-banner-emblem' + (hasUnlock('badge_frame') ? ' has-reward-frame' : '') + (hasUnlock('badge_effect') ? ' has-reward-effect' : '');
+    const nameClass = hasUnlock('name_color') ? ' class="guild-name-color-unlocked"' : '';
+    const guildTitle = hasUnlock('guild_title') ? '<span class="guild-exclusive-title">星域公會</span>' : '';
+    const rewardUnlockMarkup = unlocks.length ? '<section class="card guild-panel guild-reward-unlocks"><div class="eyebrow">GUILD REWARDS</div><h3>已解鎖公會獎勵</h3><div class="guild-reward-chip-list">' +
+      unlocks.map(item => '<span class="guild-reward-chip">Lv.' + Math.max(1, Number(item.level) || 1) + ' · ' + escapeHTML(item.reward_text || '') + '</span>').join('') +
+      '</div></section>' : '';
     root().innerHTML = navMarkup() +
-      '<section class="guild-banner card"><div class="guild-banner-emblem" aria-hidden="true"><span>✦</span></div>' +
+      '<section class="' + bannerClass + '"><div class="' + emblemClass + '" aria-hidden="true"><span>✦</span></div>' +
       '<div class="guild-banner-main"><div class="guild-banner-topline"><span class="eyebrow">GUILD PROFILE</span>' +
-      '<span class="guild-joined"><i></i> 已加入</span></div><h2>' + escapeHTML(guild.name) + '</h2>' +
+      '<span class="guild-joined"><i></i> 已加入</span><span class="guild-level-pill">Lv.' + Math.max(1, Number(guild.level) || 1) + '</span></div><h2' + nameClass + '>' + escapeHTML(guild.name) + '</h2>' + guildTitle +
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
       '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
-      '<section class="card guild-panel guild-announcement-panel"><div class="section-head"><div><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
+      rewardUnlockMarkup + '<section class="card guild-panel guild-announcement-panel"><div class="section-head"><div><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
       '<h3>公會公告</h3></div><span class="guild-roster-total">ANNOUNCEMENT</span></div>' +
       (announcementMessage ? '<p class="guild-announcement-message">' + escapeHTML(announcementMessage) + '</p>' +
         '<small class="guild-announcement-meta">發布者：' + escapeHTML(announcement.updated_by || '未知玩家') +
@@ -360,6 +413,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (activeView === 'tasks') { loadTasks(); return; }
     if (activeView === 'ranking') { loadRanking(); return; }
+    if (activeView === 'mailbox') { loadMailbox(); return; }
     if (activeView === 'settings') { renderSettings(); return; }
     if (VIEWS[activeView]) { renderFeatureView(activeView); return; }
     activeView = 'home';
@@ -480,10 +534,22 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       leaveConfirmStep = 0;
       activeView = button.dataset.guildView;
       if (activeView === 'tasks') loadTasks();
+      else if (activeView === 'mailbox') loadMailbox();
       else render();
       return;
     }
     if (button.matches('[data-guild-ranking-refresh]')) { loadRanking(); return; }
+    if (button.matches('[data-guild-mail-refresh]')) { loadMailbox(); return; }
+    if (button.matches('[data-guild-mail-read]')) {
+      const mailId = button.dataset.guildMailRead;
+      if (!mailId) return;
+      run(async () => {
+        const result = await rpc('guild_mark_mail_read', { p_mail_id: mailId });
+        if (result?.updated && currentData) currentData.mail_unread_count = Math.max(0, (Number(currentData.mail_unread_count) || 0) - 1);
+        await loadMailbox();
+      });
+      return;
+    }
     if (button.matches('[data-guild-refresh]')) { loadTasks(); return; }
     if (button.matches('[data-guild-remove-member]')) {
       const targetId = button.dataset.guildRemoveMember;

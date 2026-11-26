@@ -85,7 +85,7 @@ export function setupDisplayControls({
     if (!navigatorRef?.serviceWorker?.register || windowRef.isSecureContext !== true) {
       return Promise.resolve(null);
     }
-    const workerUrl = new URL('../sw.js?v=20261126-t0140-guild-role-panels-exit', import.meta.url);
+    const workerUrl = new URL('../sw.js?v=20261126-t0141-guild-rewards-mailbox', import.meta.url);
     const scopeUrl = new URL('../', import.meta.url);
     return navigatorRef.serviceWorker.register(workerUrl.href, { scope: scopeUrl.pathname })
       .catch(() => null);

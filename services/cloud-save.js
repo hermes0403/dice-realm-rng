@@ -404,17 +404,17 @@ export function createCloudSaveService(dependencies) {
     const S = getState();
     S.adminGrantApplied = S.adminGrantApplied || {};
     S.potions = S.potions || fresh().potions;
-    S.potions.inventory = Object.assign({ luck1: 0, luck2: 0, luck3: 0, speed1: 0, speed2: 0, angel1: 0, angel2: 0 }, S.potions.inventory || {});
+    S.potions.inventory = Object.assign({ luck1: 0, luck2: 0, luck3: 0, speed1: 0, speed2: 0, money1: 0, money2: 0, angel1: 0, angel2: 0 }, S.potions.inventory || {});
     try {
       const { data, error } = await supabaseClient.from('player_grants')
-        .select('coins_total,luck1_total,luck2_total,luck3_total,angel1_total,angel2_total,dice_grants')
+        .select('coins_total,luck1_total,luck2_total,luck3_total,speed1_total,speed2_total,money1_total,money2_total,angel1_total,angel2_total,dice_grants')
         .eq('user_id', user.id).maybeSingle();
       if (error) throw error;
       if (getCurrentUser()?.id !== user.id || grantGeneration !== accountSessionGeneration) return false;
       grantCheckAtByUser.set(user.id, Date.now());
       if (!data) return false;
       let changed = false;
-      for (const col of ['coins_total', 'luck1_total', 'luck2_total', 'luck3_total', 'angel1_total', 'angel2_total']) {
+      for (const col of ['coins_total', 'luck1_total', 'luck2_total', 'luck3_total', 'speed1_total', 'speed2_total', 'money1_total', 'money2_total', 'angel1_total', 'angel2_total']) {
         const total = Math.max(0, Number(data[col]) || 0);
         const applied = Math.max(0, Number(S.adminGrantApplied[col]) || 0);
         const delta = Math.max(0, total - applied);
