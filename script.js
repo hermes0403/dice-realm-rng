@@ -107,6 +107,7 @@ const { fresh, normalizeGloves, migrateCurrency, load, persistAutoSellPrefs, res
 S=load();
 
 // T-0145: bootstrap authentication before optional game UI modules.
+// Regression contract: authentication bindings must precede optional UI initialization.
 // Late dependencies are wrapped so the auth controls remain usable even if a
 // later page/widget initializer throws during startup.
 authService=createAuthService({
