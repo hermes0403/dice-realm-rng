@@ -149,3 +149,20 @@
 .guild-mail-read-button{justify-self:start;padding:7px 11px;border:1px solid rgba(162,137,227,.35);border-radius:9px;background:#302b47;color:#ded3ff;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
 .guild-mail-read-label{justify-self:start;color:#8992aa;font-size:11px}
 @media(max-width:520px){.guild-mail-card{padding:12px}.guild-mail-top{align-items:flex-start;flex-direction:column;gap:3px}.guild-mail-read-button{width:100%}.guild-reward-chip{font-size:10px}}
+
+/* T-0141: mailbox opens as a modal and contains the guild announcement */
+.guild-mailbox-overlay{position:fixed;inset:0;z-index:10060;display:grid;place-items:center;padding:clamp(10px,3vw,24px);background:rgba(4,7,16,.8);backdrop-filter:blur(7px)}
+.guild-mailbox-dialog{display:grid;gap:16px;width:min(100%,720px);max-height:min(88dvh,820px);overflow-y:auto;overscroll-behavior:contain;padding:20px;border:1px solid rgba(155,139,201,.32)!important;border-radius:20px;background:#171d31!important;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.guild-mailbox-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.guild-mailbox-header h2{margin:3px 0 0;color:#e1d9f5;font-size:22px}
+.guild-mailbox-header p{margin:6px 0 0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-mailbox-close{flex:0 0 38px;width:38px;height:38px;display:grid;place-items:center;border:1px solid rgba(155,139,201,.28);border-radius:12px;background:rgba(255,255,255,.06);color:#d8dcef;font-size:16px;cursor:pointer}
+.guild-mailbox-announcement{display:grid;gap:9px;padding:15px;border:1px solid rgba(155,139,201,.22);border-radius:15px;background:rgba(111,91,159,.1)}
+.guild-mailbox-announcement .section-head{margin:0}
+.guild-mailbox-announcement h3,.guild-mailbox-messages h3{margin:0;color:#e1d9f5;font-size:16px}
+.guild-mailbox-messages{display:grid;gap:12px}
+.guild-mailbox-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#aeb5ca;font-size:12px}
+.guild-mail-refresh{padding:6px 10px;border:1px solid rgba(155,139,201,.24);border-radius:9px;background:rgba(255,255,255,.05);color:#cdd2e3;font-size:12px;cursor:pointer}
+.guild-mailbox-empty{margin:0;padding:12px 2px;color:#9ca3b9;font-size:13px;line-height:1.65}
+.guild-mailbox-dialog .guild-mail-list{display:grid;gap:10px}
+@media(max-width:520px){.guild-mailbox-overlay{padding:8px;place-items:center}.guild-mailbox-dialog{width:100%;max-height:92dvh;padding:14px;border-radius:16px;gap:13px}.guild-mailbox-header h2{font-size:19px}.guild-mailbox-announcement{padding:12px}}
