@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const ui = read('../ui/guild.js');
 const css = read('../guild.css');
-const migration = read('../docs/migrations/20261125214100_guild_member_management.sql');
+const migration = read('../docs/migrations/20261127010000_guild_member_promotion.sql');
 
 test('管理者成員 payload 才會包含目標 user id', () => {
   assert.match(migration, /'user_id', case when v_role in \('leader', 'vice_leader'\) then m\.user_id else null end/);

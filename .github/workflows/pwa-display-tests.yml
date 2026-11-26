@@ -43,6 +43,8 @@ on:
       - 'docs/migrations/20261126120000_guild_level_rewards_mailbox.sql'
       - 'tests/guild-level-rewards-mailbox.test.mjs'
       - 'tests/guild-cosmetics.test.mjs'
+      - 'tests/guild-promotion.test.mjs'
+      - 'docs/migrations/20261127010000_guild_member_promotion.sql'
       - 'docs/migrations/20261127000000_guild_cosmetics.sql'
       - 'tests/guild-search-visibility.test.mjs'
       - 'tests/inventory-selection-visual.test.mjs'
@@ -66,7 +68,7 @@ jobs:
         with:
           node-version: 22
       - name: Run PWA display tests
-        run: node --test tests/global-boost-homepage-render.test.mjs tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs tests/guild-foundation-authorization.test.mjs tests/guild-settings.test.mjs tests/guild-announcements.test.mjs tests/guild-member-management.test.mjs tests/guild-level-rewards-mailbox.test.mjs tests/guild-search-visibility.test.mjs tests/guild-cosmetics.test.mjs tests/inventory-selection-visual.test.mjs
+        run: node --test tests/global-boost-homepage-render.test.mjs tests/pwa-display-controls.test.mjs tests/pet-income-mutation-multiplier.test.js tests/pet-info-page.test.js tests/guild-main-interface.test.mjs tests/guild-daily-quests.test.mjs tests/guild-foundation-authorization.test.mjs tests/guild-settings.test.mjs tests/guild-announcements.test.mjs tests/guild-member-management.test.mjs tests/guild-level-rewards-mailbox.test.mjs tests/guild-search-visibility.test.mjs tests/guild-cosmetics.test.mjs tests/guild-promotion.test.mjs tests/inventory-selection-visual.test.mjs
       - name: Check JavaScript syntax
         run: |
           node --check script.js
