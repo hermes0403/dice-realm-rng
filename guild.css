@@ -223,3 +223,39 @@
 .guild-promotion-promote,.guild-promotion-demote{flex:0 0 auto;min-height:34px;padding:7px 10px;border:1px solid rgba(147,132,211,.36);border-radius:9px;background:rgba(91,75,143,.25);color:#dcd2ff;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
 .guild-promotion-demote{border-color:rgba(188,124,135,.3);background:rgba(118,55,70,.2);color:#efc1ca}.guild-promotion-promote:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:520px){.guild-settings-menu-button{padding:13px 38px 13px 12px}.guild-promotion-row{align-items:flex-start;flex-direction:column}.guild-promotion-row>button{width:100%}}
+
+
+/* T-0156: leader potion gifting */
+.guild-potion-gift-panel{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;border:1px solid rgba(155,139,201,.26);background:linear-gradient(135deg,rgba(70,58,112,.18),rgba(24,31,51,.96))}
+.guild-potion-gift-panel h3{margin:3px 0 5px;color:#e1d9f5;font-size:16px}
+.guild-potion-gift-panel p{margin:0;color:#9ca3b9;font-size:12px;line-height:1.6}
+.guild-potion-gift-open,.guild-potion-gift-submit,.guild-mail-gift-claim{border:1px solid rgba(163,139,238,.42);border-radius:10px;background:linear-gradient(135deg,#514078,#35345f);color:#f0eaff;padding:10px 14px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.guild-potion-gift-open:hover,.guild-potion-gift-submit:hover,.guild-mail-gift-claim:hover{filter:brightness(1.12)}
+.guild-potion-gift-submit:disabled,.guild-potion-gift-open:disabled,.guild-mail-gift-claim:disabled{opacity:.55;cursor:wait}
+.guild-potion-gift-overlay{position:fixed;inset:0;z-index:10062;display:grid;place-items:center;padding:clamp(10px,3vw,24px);background:rgba(4,7,16,.82);backdrop-filter:blur(7px)}
+.guild-potion-gift-dialog{display:grid;gap:16px;width:min(100%,620px);max-height:min(88dvh,800px);overflow-y:auto;overscroll-behavior:contain;padding:20px;border:1px solid rgba(155,139,201,.34)!important;border-radius:20px;background:#171d31!important;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.guild-potion-gift-form{display:grid;gap:13px}
+.guild-potion-gift-form>label{display:grid;gap:7px;color:#d8dcef;font-size:12px;font-weight:700}
+.guild-potion-gift-form select,.guild-potion-gift-form input[type=number]{width:100%;min-height:42px;border:1px solid rgba(155,139,201,.28);border-radius:10px;background:#11182a;color:#e5e8f4;padding:9px 11px;font:inherit}
+.guild-potion-gift-recipient-head{display:flex;align-items:center;justify-content:space-between;color:#d8dcef;font-size:13px}
+.guild-potion-gift-recipient-head button{border:1px solid rgba(155,139,201,.28);border-radius:8px;background:rgba(255,255,255,.05);color:#cfc4ee;padding:6px 10px;font:inherit;font-size:11px;cursor:pointer}
+.guild-potion-gift-recipient-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:230px;overflow:auto;padding:2px}
+.guild-potion-gift-recipient{display:flex;align-items:center;gap:9px;min-width:0;padding:10px;border:1px solid rgba(155,139,201,.2);border-radius:10px;background:rgba(255,255,255,.035);cursor:pointer}
+.guild-potion-gift-recipient input{flex:0 0 auto;width:16px;height:16px;accent-color:#a78bfa}
+.guild-potion-gift-recipient span{display:grid;gap:3px;min-width:0}
+.guild-potion-gift-recipient b{overflow:hidden;color:#e2e5f2;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+.guild-potion-gift-recipient small{color:#929bb4;font-size:10px}
+.guild-potion-gift-preview{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid rgba(155,139,201,.22);border-radius:10px;background:rgba(94,74,143,.16);color:#b8bfd3;font-size:12px}
+.guild-potion-gift-preview b{color:#e3d8ff;font-size:13px}
+.guild-potion-gift-submit{width:100%;min-height:43px}
+.guild-mail-card.is-potion-gift{border-color:rgba(160,132,234,.48);background:linear-gradient(135deg,rgba(81,64,125,.24),#1a2032 70%)}
+.guild-mail-gift-claim{justify-self:start;min-width:100px}
+@media(max-width:520px){
+ .guild-potion-gift-panel{align-items:stretch;flex-direction:column}
+ .guild-potion-gift-open{width:100%}
+ .guild-potion-gift-overlay{padding:8px}
+ .guild-potion-gift-dialog{width:100%;max-height:92dvh;padding:14px;border-radius:16px;gap:13px}
+ .guild-potion-gift-recipient-list{grid-template-columns:1fr;max-height:200px}
+ .guild-potion-gift-preview{align-items:flex-start;flex-direction:column}
+ .guild-mail-gift-claim{width:100%}
+}

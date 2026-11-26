@@ -645,6 +645,35 @@ export function createCloudSaveService(dependencies) {
     return true;
   }
 
+  // Adopt a server-side potion transaction into the versioned cloud merge baseline.
+  function adoptServerPotions(inventory, updatedAt) {
+    const user = getCurrentUser();
+    if (!user || cloudLoadReadyUserId !== user.id || lastSyncedUserId !== user.id
+      || !lastSyncedPayload || !inventory || typeof inventory !== 'object'
+      || Array.isArray(inventory) || !updatedAt) return false;
+    const nextPayload = clonePayload(lastSyncedPayload);
+    nextPayload.potions = nextPayload.potions && typeof nextPayload.potions === 'object' ? nextPayload.potions : {};
+    nextPayload.potions.inventory = clonePayload(inventory);
+    lastSyncedPayload = nextPayload;
+    cloudSaveVersion = updatedAt;
+    writeCloudBase(user.id, nextPayload, updatedAt);
+    const state = getState();
+    state.potions = state.potions && typeof state.potions === 'object' ? state.potions : fresh().potions;
+    state.potions.inventory = clonePayload(inventory);
+    state._cloudBaseVersion = updatedAt;
+    persistLocalSnapshot(state, user.id);
+    try {
+      const savedAtKey = localSavedAtKey(user.id);
+      if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
+    } catch {}
+    document.getElementById('saveStatus').textContent = '藥水庫存已同步至雲端';
+    if (!valuesEqual(savePayload(), lastSyncedPayload)) {
+      cloudSyncPending = true;
+      scheduleCloudSync();
+    }
+    return true;
+  }
+
   async function flushCloudSave() {
     const user = getCurrentUser();
     if (!user || !supabaseClient || cloudLoadReadyUserId !== user.id) return false;
@@ -934,5 +963,5 @@ export function createCloudSaveService(dependencies) {
   function isLoadedFor(userId) { return !!userId && cloudLoadReadyUserId === userId; }
   function getLastCloudLoadError() { return lastCloudLoadError; }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, refreshCloudSaveOnResume, resetAccountSession, isLoadedFor, getLastCloudLoadError };
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, adoptServerPotions, scheduleSync, flushOnExit, refreshCloudSaveOnResume, resetAccountSession, isLoadedFor, getLastCloudLoadError };
 }

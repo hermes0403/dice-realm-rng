@@ -31,7 +31,7 @@ function safeCosmetic(value, allowed, fallback) {
 const NAV_ITEMS = [
   { key: 'tasks', label: '今日任務', description: '查看公會每日任務', icon: '✓', tone: 'green' },
   { key: 'ranking', label: '公會排行榜', description: '查看公會排名與獎勵', icon: '♜', tone: 'gold' },
-  { key: 'mailbox', label: '公會郵箱', description: '查看公會升級獎勵郵件', icon: '✉', tone: 'blue' },
+  { key: 'mailbox', label: '公會郵箱', description: '查看公會通知與會長贈禮', icon: '✉', tone: 'blue' },
   { key: 'find', label: '尋找公會', description: '搜尋並加入其他公會', icon: '⌕', tone: 'teal' },
   { key: 'settings', label: '公會設定', description: '查看設定與退出公會', icon: '⚙', tone: 'purple' }
 ];
@@ -41,7 +41,7 @@ const VIEWS = {
   settings: { title: '公會設定', description: '查看公會設定及退出選項。' }
 };
 
-export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef = document, toast = () => {} }) {
+export function createGuildSystem({ supabaseClient, getCurrentUser, getState = () => ({}), POTIONS = [], flushCloudSave = async () => false, adoptServerPotions = () => false, documentRef = document, toast = () => {} }) {
   const root = () => documentRef.getElementById('guildContent');
   let busy = false;
   let currentData = null;
@@ -54,6 +54,8 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   let mailboxRows = [];
   let mailboxLoading = false;
   let mailboxError = '';
+  let potionGiftOpen = false;
+  let potionGiftRequestId = null;
   let findOpen = false;
   let findQuery = '';
   let findLoading = false;
@@ -237,44 +239,105 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const mails = Array.isArray(mailboxRows) ? mailboxRows : [];
     const mailItems = mails.map(mail => {
       const date = mail.created_at ? new Date(mail.created_at).toLocaleString('zh-TW', { hour12: false }) : '時間未知';
-      const level = Math.max(1, Number(mail.guild_level) || 1);
+      const isGift = mail.mail_type === 'potion_gift';
+      const claimed = Boolean(mail.claimed_at);
       const read = Boolean(mail.is_read);
-      return '<article class="guild-mail-card' + (read ? ' is-read' : ' is-unread') + '">' +
-        '<div class="guild-mail-top"><span>GUILD MAIL · Lv.' + level + '</span><small>' + escapeHTML(date) + '</small></div>' +
-        '<h3>' + escapeHTML(mail.subject || '公會升級通知') + '</h3>' +
+      const topLabel = isGift
+        ? 'POTION GIFT · ' + escapeHTML(mail.sender_name || '公會長')
+        : 'GUILD MAIL · Lv.' + Math.max(1, Number(mail.guild_level) || 1);
+      const rewardLabel = isGift ? '贈禮內容' : '獲得獎勵';
+      const rewardText = mail.reward_text || (isGift ? '公會長贈禮' : '公會升級獎勵');
+      const action = isGift
+        ? (claimed
+          ? '<span class="guild-mail-read-label">已領取</span>'
+          : '<button type="button" class="guild-mail-gift-claim" data-guild-potion-gift-claim="' + escapeHTML(mail.id || '') + '">領取</button>')
+        : (read
+          ? '<span class="guild-mail-read-label">已讀</span>'
+          : '<button type="button" class="guild-mail-read-button" data-guild-mail-read="' + escapeHTML(mail.id || '') + '">標記已讀</button>');
+      return '<article class="guild-mail-card' + (read ? ' is-read' : ' is-unread') + (isGift ? ' is-potion-gift' : '') + '">' +
+        '<div class="guild-mail-top"><span>' + topLabel + '</span><small>' + escapeHTML(date) + '</small></div>' +
+        '<h3>' + escapeHTML(mail.subject || (isGift ? '你的會長贈予你' : '公會升級通知')) + '</h3>' +
         '<p>' + escapeHTML(mail.body || '') + '</p>' +
-        '<div class="guild-mail-reward"><b>獲得獎勵</b><span>' + escapeHTML(mail.reward_text || '公會升級獎勵') + '</span></div>' +
-        (read ? '<span class="guild-mail-read-label">已讀</span>' :
-          '<button type="button" class="guild-mail-read-button" data-guild-mail-read="' + escapeHTML(mail.id || '') + '">標記已讀</button>') +
-        '</article>';
+        '<div class="guild-mail-reward"><b>' + rewardLabel + '</b><span>' + escapeHTML(rewardText) + '</span></div>' +
+        action + '</article>';
     }).join('');
-    const content = !guild
-      ? '<p class="muted guild-mailbox-empty">加入公會後即可查看公會公告與升級獎勵郵件。</p>'
-      : mailboxLoading
-        ? '<p class="muted guild-mailbox-empty">正在載入公會郵件…</p>'
-        : mailboxError
-          ? '<p class="muted guild-mailbox-empty">無法取得公會郵件，請稍後重試。</p><button type="button" data-guild-mail-refresh>重新載入</button>'
-          : '<div class="guild-mailbox-list-head"><span>' + mails.filter(mail => !mail.is_read).length + ' 封未讀郵件</span>' +
-            '<button type="button" class="guild-mail-refresh" data-guild-mail-refresh>重新整理</button></div>' +
-            '<div class="guild-mail-list">' + (mailItems || '<p class="muted guild-mailbox-empty">目前沒有公會升級郵件。</p>') + '</div>';
+    const content = mailboxLoading
+      ? '<p class="muted guild-mailbox-empty">正在載入公會郵件…</p>'
+      : mailboxError
+        ? '<p class="muted guild-mailbox-empty">無法取得公會郵件，請稍後重試。</p><button type="button" data-guild-mail-refresh>重新載入</button>'
+        : '<div class="guild-mailbox-list-head"><span>' + mails.filter(mail => !mail.is_read).length + ' 封未讀郵件</span>' +
+          '<button type="button" class="guild-mail-refresh" data-guild-mail-refresh>重新整理</button></div>' +
+          '<div class="guild-mail-list">' + (mailItems || '<p class="muted guild-mailbox-empty">目前沒有公會郵件。</p>') + '</div>';
     return '<div class="guild-mailbox-overlay" data-guild-mailbox-overlay>' +
       '<section class="card guild-mailbox-dialog" role="dialog" aria-modal="true" aria-labelledby="guildMailboxTitle">' +
       '<header class="guild-mailbox-header"><div><div class="eyebrow">GUILD MAILBOX</div><h2 id="guildMailboxTitle">公會郵箱</h2>' +
-      '<p>公告與公會升級獎勵通知都會集中在這裡。</p></div>' +
+      '<p>公告、公會升級獎勵與會長贈禮都會集中在這裡。</p></div>' +
       '<button type="button" class="guild-mailbox-close" data-guild-mailbox-close aria-label="關閉公會郵箱">✕</button></header>' +
       announcementPanel + '<section class="guild-mailbox-messages"><div class="section-head"><div><div class="eyebrow">REWARD MESSAGES</div>' +
-      '<h3>升級獎勵郵件</h3></div><span class="guild-roster-total">' +
+      '<h3>公會郵件</h3></div><span class="guild-roster-total">' +
       (guild ? mails.filter(mail => !mail.is_read).length + ' UNREAD' : 'MAILBOX') + '</span></div>' +
       content + '</section></section></div>';
   }
 
+  function updatePotionGiftPreview(form) {
+    if (!form) return;
+    const recipientCount = form.querySelectorAll('input[name="recipientIds"]:checked').length;
+    const amount = Math.max(0, Math.floor(Number(form.elements.namedItem('amount')?.value) || 0));
+    const preview = documentRef.getElementById('guildPotionGiftTotal');
+    if (preview) preview.textContent = (recipientCount * amount).toLocaleString('en-US') + ' 瓶 · ' + recipientCount + ' 位成員';
+  }
+
+  function renderPotionGiftOverlay() {
+    if (!potionGiftOpen || currentData?.my_role !== 'leader') return '';
+    const inventory = getState()?.potions?.inventory || {};
+    const potionOptions = POTIONS.map(potion => {
+      const owned = Math.max(0, Number(inventory[potion.id]) || 0);
+      return '<option value="' + escapeHTML(potion.id) + '"' + (owned < 1 ? ' disabled' : '') + '>' +
+        escapeHTML(potion.name) + '（持有 ×' + owned.toLocaleString('en-US') + '）</option>';
+    }).join('');
+    const members = Array.isArray(currentData.members) ? currentData.members : [];
+    const recipients = members.filter(member => member.role !== 'leader' && member.user_id);
+    const recipientRows = recipients.map(member =>
+      '<label class="guild-potion-gift-recipient"><input type="checkbox" name="recipientIds" value="' +
+      escapeHTML(member.user_id) + '"><span><b>' + escapeHTML(member.username || '未知玩家') +
+      '</b><small>' + escapeHTML(roleLabel(member.role)) + '</small></span></label>'
+    ).join('');
+    return '<div class="guild-potion-gift-overlay" data-guild-potion-gift-overlay>' +
+      '<section class="card guild-potion-gift-dialog" role="dialog" aria-modal="true" aria-labelledby="guildPotionGiftTitle">' +
+      '<header class="guild-mailbox-header"><div><div class="eyebrow">GUILD LEADER GIFT</div>' +
+      '<h2 id="guildPotionGiftTitle">會長發放</h2><p>選擇自己的藥水、每位成員的數量與收件人。</p></div>' +
+      '<button type="button" class="guild-mailbox-close" data-guild-potion-gift-close aria-label="關閉會長發放">✕</button></header>' +
+      '<form id="guildPotionGiftForm" class="guild-potion-gift-form">' +
+      '<label>藥水種類<select name="potionId" required><option value="" disabled selected>選擇持有中的藥水</option>' +
+      potionOptions + '</select></label>' +
+      '<label>每位成員數量<input name="amount" type="number" min="1" max="1000000" step="1" value="1" required></label>' +
+      '<div class="guild-potion-gift-recipient-head"><b>收件成員</b><button type="button" data-guild-potion-gift-select-all>全選</button></div>' +
+      '<div class="guild-potion-gift-recipient-list">' +
+      (recipientRows || '<p class="muted">目前沒有可贈送的其他成員。</p>') + '</div>' +
+      '<div class="guild-potion-gift-preview"><span>預計總發送量</span><b id="guildPotionGiftTotal">0 瓶 · 0 位成員</b></div>' +
+      '<button type="submit" class="guild-potion-gift-submit"' + (recipients.length ? '' : ' disabled') + '>送出贈禮</button>' +
+      '</form></section></div>';
+  }
+
+  documentRef.addEventListener('input', event => {
+    if (event.target?.closest?.('#guildPotionGiftForm')) updatePotionGiftPreview(event.target.closest('#guildPotionGiftForm'));
+  });
+  documentRef.addEventListener('change', event => {
+    if (event.target?.closest?.('#guildPotionGiftForm')) updatePotionGiftPreview(event.target.closest('#guildPotionGiftForm'));
+  });
+
   async function loadMailbox() {
     mailboxOpen = true;
-    mailboxLoading = Boolean(currentData?.guild);
+    mailboxLoading = Boolean(getCurrentUser());
     mailboxError = '';
     mailboxRows = [];
     render();
-    if (!currentData?.guild) return;
+    if (!getCurrentUser()) {
+      mailboxLoading = false;
+      mailboxError = '請先登入後查看公會郵件。';
+      render();
+      return;
+    }
     try {
       const rows = await rpc('guild_get_mailbox', { p_limit: 50 });
       if (!mailboxOpen) return;
@@ -477,6 +540,10 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       (badgeEffect !== 'none' ? ' has-reward-effect guild-badge-effect-' + badgeEffect : '');
     const nameClass = nameColor !== 'default' ? ' class="guild-name-color-unlocked guild-name-color-' + nameColor + '"' : '';
     const guildTitle = hasUnlock('guild_title') ? '<span class="guild-exclusive-title">星域公會</span>' : '';
+    const potionGiftPanel = data.my_role === 'leader'
+      ? '<section class="card guild-panel guild-potion-gift-panel"><div><div class="eyebrow">GUILD LEADER GIFT</div><h3>會長發放</h3><p>把自己持有的藥水贈送給公會成員，對方可在公會郵箱領取。</p></div>' +
+        '<button type="button" class="guild-potion-gift-open" data-guild-potion-gift-open>選擇藥水並發放</button></section>'
+      : '';
     const rewardUnlockMarkup = unlocks.length ? '<section class="card guild-panel guild-reward-unlocks"><div class="eyebrow">GUILD REWARDS</div><h3>已解鎖公會獎勵</h3><div class="guild-reward-chip-list">' +
       unlocks.map(item => '<span class="guild-reward-chip">Lv.' + Math.max(1, Number(item.level) || 1) + ' · ' + escapeHTML(item.reward_text || '') + '</span>').join('') +
       '</div></section>' : '';
@@ -487,7 +554,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
       '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
-      rewardUnlockMarkup + '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
+      rewardUnlockMarkup + potionGiftPanel + '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
       '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div>' +
       '<span class="guild-roster-total">' + members.length + ' MEMBERS</span></div>' +
       '<div class="guild-member-list">' + renderMembers(members) + '</div></section>' +
@@ -497,7 +564,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           escapeHTML(a.username || '未知玩家') + '</b><p>' + escapeHTML(a.message || '沒有附加訊息') +
           '</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="' +
           escapeHTML(a.id) + '">核准</button><button class="quiet" type="button" data-guild-review="reject" data-app-id="' +
-          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') + renderMailboxOverlay() + renderFindOverlay();
+          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') + renderMailboxOverlay() + renderFindOverlay() + renderPotionGiftOverlay();
   }
 
   function render() {
@@ -578,6 +645,49 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   documentRef.addEventListener('submit', event => {
+    if (event.target?.id === 'guildPotionGiftForm') {
+      event.preventDefault();
+      if (currentData?.my_role !== 'leader') { message('只有公會隊長可以發放藥水。', 'error'); return; }
+      const formElement = event.target;
+      const form = new FormData(formElement);
+      const potionId = String(form.get('potionId') || '');
+      const amount = Number(form.get('amount'));
+      const recipientIds = Array.from(formElement.querySelectorAll('input[name="recipientIds"]:checked'))
+        .map(input => String(input.value || '')).filter(Boolean);
+      if (!POTIONS.some(potion => potion.id === potionId)) { message('請選擇有效的藥水。', 'error'); return; }
+      if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1000000) {
+        message('每位成員的數量必須是 1～1,000,000 的整數。', 'error'); return;
+      }
+      if (!recipientIds.length || recipientIds.length > 30) {
+        message('請選擇至少一位、最多 30 位收件成員。', 'error'); return;
+      }
+      if (!potionGiftRequestId) {
+        const cryptoRef = documentRef.defaultView?.crypto || globalThis.crypto;
+        if (!cryptoRef?.randomUUID) { message('目前瀏覽器無法建立安全的贈送識別碼，請更新瀏覽器後再試。', 'error'); return; }
+        potionGiftRequestId = cryptoRef.randomUUID();
+      }
+      const submitButton = formElement.querySelector('button[type="submit"]');
+      if (submitButton) { submitButton.disabled = true; submitButton.textContent = '送出中…'; }
+      void run(async () => {
+        const flushed = await flushCloudSave();
+        if (flushed !== true) throw new Error('雲端存檔尚未完成同步，請稍後再試。');
+        const result = await rpc('guild_send_potion_gift', {
+          p_request_id: potionGiftRequestId, p_potion_id: potionId,
+          p_amount: amount, p_recipient_ids: recipientIds
+        });
+        if (!result?.ok || !result.inventory || !result.updated_at) throw new Error('贈送結果尚未確認，請重新整理郵箱與存檔。');
+        const adopted = adoptServerPotions(result.inventory, result.updated_at);
+        potionGiftOpen = false;
+        potionGiftRequestId = null;
+        render();
+        if (!adopted) message('贈禮已送出，雲端庫存已更新；請重新載入遊戲以同步本機顯示。', 'info');
+        else {
+          toast('已贈送給 ' + result.gift_count + ' 位成員，共扣除 ' + result.total_amount + ' 瓶藥水');
+          message('會長贈禮已送出。', 'success');
+        }
+      }).finally(() => { if (submitButton?.isConnected) submitButton.disabled = false; });
+      return;
+    }
     if (event.target?.id === 'guildAnnouncementForm') {
       event.preventDefault();
       if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
@@ -666,6 +776,12 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       render();
       return;
     }
+    const potionGiftOverlay = event.target.closest('[data-guild-potion-gift-overlay]');
+    if (potionGiftOverlay && event.target === potionGiftOverlay) {
+      potionGiftOpen = false;
+      render();
+      return;
+    }
     const mailboxOverlay = event.target.closest('[data-guild-mailbox-overlay]');
     if (mailboxOverlay && event.target === mailboxOverlay) {
       mailboxOpen = false;
@@ -674,6 +790,49 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     const button = event.target.closest('button');
     if (!button) return;
+    if (button.matches('[data-guild-potion-gift-open]')) {
+      if (currentData?.my_role !== 'leader') { message('只有公會隊長可以發放藥水。', 'error'); return; }
+      if (!potionGiftRequestId) {
+        const cryptoRef = documentRef.defaultView?.crypto || globalThis.crypto;
+        if (!cryptoRef?.randomUUID) { message('目前瀏覽器無法建立安全的贈送識別碼。', 'error'); return; }
+        potionGiftRequestId = cryptoRef.randomUUID();
+      }
+      potionGiftOpen = true;
+      render();
+      updatePotionGiftPreview(documentRef.getElementById('guildPotionGiftForm'));
+      return;
+    }
+    if (button.matches('[data-guild-potion-gift-close]')) {
+      potionGiftOpen = false;
+      render();
+      return;
+    }
+    if (button.matches('[data-guild-potion-gift-select-all]')) {
+      const form = documentRef.getElementById('guildPotionGiftForm');
+      const inputs = Array.from(form?.querySelectorAll('input[name="recipientIds"]') || []);
+      const selectAll = !inputs.every(input => input.checked);
+      for (const input of inputs) input.checked = selectAll;
+      button.textContent = selectAll ? '取消全選' : '全選';
+      updatePotionGiftPreview(form);
+      return;
+    }
+    if (button.matches('[data-guild-potion-gift-claim]')) {
+      const giftId = button.dataset.guildPotionGiftClaim;
+      if (!giftId || button.disabled) return;
+      button.disabled = true;
+      void run(async () => {
+        const flushed = await flushCloudSave();
+        if (flushed !== true) throw new Error('雲端存檔尚未完成同步，請稍後再試。');
+        const result = await rpc('guild_claim_potion_gift', { p_gift_id: giftId });
+        if (!result?.ok || !result.inventory || !result.updated_at) throw new Error('領取結果尚未確認，請重新整理郵箱與存檔。');
+        const adopted = adoptServerPotions(result.inventory, result.updated_at);
+        await load();
+        await loadMailbox();
+        if (adopted) toast('已領取 ' + result.potion_name + ' × ' + result.potion_amount);
+        else message('贈禮已領取，請重新載入遊戲以同步本機庫存。', 'info');
+      }).finally(() => { if (button.isConnected) button.disabled = false; });
+      return;
+    }
     if (button.matches('[data-guild-find-close]')) {
       findOpen = false;
       render();
@@ -827,9 +986,10 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   });
 
   documentRef.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && (mailboxOpen || findOpen)) {
+    if (event.key === 'Escape' && (mailboxOpen || findOpen || potionGiftOpen)) {
       mailboxOpen = false;
       findOpen = false;
+      potionGiftOpen = false;
       render();
     }
   });
