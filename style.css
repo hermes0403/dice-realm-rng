@@ -3106,3 +3106,12 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
  .pet-controls-row>button,.pet-controls-row .pet-sort-control,.pet-controls-row .pet-sort-control select{height:38px;min-height:38px}
  .pet-controls-row>button,.pet-controls-row .pet-sort-control select{font-size:12px;padding:6px 4px}
 }
+
+
+/* T-0157: pet lock appearance matches individually locked dice; four pets per row on every screen. */
+#petInventoryGrid.pet-catalog-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;align-items:start!important}
+#petInventoryGrid .pet-card.pet-is-locked{outline:1px solid #f2d477!important;outline-offset:-2px;border-color:var(--line)!important;box-shadow:none!important}
+#petInventoryGrid .pet-lock-star{position:absolute!important;top:3px!important;left:4px!important;right:auto!important;z-index:3!important;width:10px!important;min-width:10px!important;height:10px!important;min-height:10px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#ffd700!important;text-shadow:0 0 4px #ffbf00aa!important;font-size:9px!important;line-height:10px!important;opacity:1!important;display:grid!important;place-items:center!important;cursor:pointer}
+#petInventoryGrid .pet-lock-star.is-locked{color:#ffd700!important}
+@media(max-width:600px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}}
+@media(max-width:420px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important}#petInventoryGrid .pet-card{padding:5px!important}#petInventoryGrid .pet-art{height:48px!important;min-height:48px!important;margin-bottom:4px!important}}
