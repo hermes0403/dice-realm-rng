@@ -9,6 +9,7 @@ const cloud = read('../services/cloud-save.js');
 const css = read('../guild.css');
 const html = read('../index.html');
 const sw = read('../sw.js');
+const script = read('../script.js');
 
 test('T-0141 uses the complete owner-confirmed per-level XP thresholds', () => {
   const expected = [100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500];
@@ -89,12 +90,18 @@ test('guild UI exposes mailbox, unread state and cosmetic reward unlocks', () =>
 });
 
 test('PWA asset URLs and service worker shell cache use the T-0141 version', () => {
-  const version = '20261126-t0142-guild-search-modal';
-  const scriptVersion = '20261126-t0146-auth-tdz-fix';
-  assert.ok(html.includes('guild.css?v=' + version));
-  assert.ok(html.includes('script.js?v=' + scriptVersion));
-  assert.ok(sw.includes('ui/guild.js?v=' + version));
+  const htmlGuildCssVersion = html.match(/guild\.css\?v=([^'"]+)/)?.[1];
+  const workerGuildCssVersion = sw.match(/\.\/guild\.css\?v=([^'"]+)/)?.[1];
+  const htmlScriptVersion = html.match(/script\.js\?v=([^'"]+)/)?.[1];
+  const workerScriptVersion = sw.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
+  const guildModuleVersion = script.match(/await import\(['"]\.\/ui\/guild\.js\?v=([^'"]+)['"]\)/)?.[1];
+  const workerGuildModuleVersion = sw.match(/\.\/ui\/guild\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(htmlGuildCssVersion);
+  assert.equal(workerGuildCssVersion, htmlGuildCssVersion);
+  assert.ok(htmlScriptVersion);
+  assert.equal(workerScriptVersion, htmlScriptVersion);
+  assert.ok(guildModuleVersion);
+  assert.equal(workerGuildModuleVersion, guildModuleVersion);
   assert.ok(sw.includes('services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox'));
-  assert.ok(sw.includes('guild.css?v=' + version));
-  assert.ok(sw.includes('dice-realm-shell-v2.35'));
+  assert.match(sw, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
 });
