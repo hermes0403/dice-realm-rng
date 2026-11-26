@@ -93,7 +93,7 @@ test('PWA asset URLs and service worker shell cache use the T-0141 version', () 
   assert.ok(html.includes('guild.css?v=' + version));
   assert.ok(html.includes('script.js?v=' + version));
   assert.ok(sw.includes('ui/guild.js?v=' + version));
-  assert.ok(sw.includes('services/cloud-save.js?v=' + version));
+  assert.ok(sw.includes('services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox'));
   assert.ok(sw.includes('guild.css?v=' + version));
   assert.ok(sw.includes('dice-realm-shell-v2.31'));
 });
