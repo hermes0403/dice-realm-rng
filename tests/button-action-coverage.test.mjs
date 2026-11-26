@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
 
@@ -46,4 +48,32 @@ test('交易按鈕在網路或伺服器失敗後會恢復可操作狀態', async
   assert.match(trade, /saveOffer\.disabled = false/);
   assert.match(trade, /confirm\.disabled = false/);
   assert.match(trade, /saveOffer\.textContent = '重試送出交易內容/);
+});
+
+
+test('所有靜態頁面按鈕都有可追蹤的程式事件入口', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const html = await read('index.html');
+  const sourceFiles = [];
+  async function collect(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await collect(path);
+      else if (/\.(?:js|mjs)$/.test(entry.name)) sourceFiles.push(path);
+    }
+  }
+  for (const directory of ['admin', 'core', 'data', 'services', 'systems', 'ui']) {
+    await collect(join(root, directory));
+  }
+  sourceFiles.push(join(root, 'script.js'), join(root, 'config.js'));
+  const sources = (await Promise.all(sourceFiles.map(path => readFile(path, 'utf8')))).join('\n');
+  const buttons = html.match(/<button\b[^>]*>/gi) || [];
+  assert.ok(buttons.length > 0, 'index.html should contain the game controls');
+  for (const button of buttons) {
+    const id = button.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1];
+    const dataActions = [...button.matchAll(/\b(data-[\w-]+)(?:\s*=\s*(?:["'][^"']*["']|[^\s>]+))?/gi)].map(match => match[1]);
+    assert.ok(id || dataActions.length, 'button must expose an id or delegated data-action: ' + button);
+    const reference = id || dataActions[0];
+    assert.ok(sources.includes(reference), 'button has no JavaScript reference: ' + reference);
+  }
 });
