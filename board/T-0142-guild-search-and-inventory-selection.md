@@ -1,7 +1,7 @@
 ---
 id: T-0142
 title: 公會搜尋彈窗與骰子出售選取狀態
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -53,4 +53,4 @@ done_at:
 
 ## 紀錄
 
-- 2026-11-26 12:36 [叉子] 新需求開單。以最新正式 main 建立隔離任務分支；work/chazi 與 main 已知分歧，為避免把 368 個未整合提交帶入正式版，本任務不以 work/chazi 作為交付來源。owner_side 有效 in_progress 任務 0/5；未發現有效 in_progress communicate task，兩道啟動閘門未阻擋。待 Board 開單 PR 合併後再轉 in_progress。
+- 2026-11-26 12:42 [叉子] 狀態轉換：open → in_progress。Board 開單 PR #380 已合併至 main（merge commit `743b942524dc4ca1567234e09c64239dd22c65dc`）；owner_side 有效 in_progress 任務仍低於 5 張，Communicate 閘門未觸發，開始實作。\n- 2026-11-26 12:36 [叉子] 新需求開單。以最新正式 main 建立隔離任務分支；work/chazi 與 main 已知分歧，為避免把 368 個未整合提交帶入正式版，本任務不以 work/chazi 作為交付來源。owner_side 有效 in_progress 任務 0/5；未發現有效 in_progress communicate task，兩道啟動閘門未阻擋。待 Board 開單 PR 合併後再轉 in_progress。
