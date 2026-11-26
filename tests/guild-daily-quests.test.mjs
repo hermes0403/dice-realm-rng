@@ -44,7 +44,7 @@ test('公會升級門檻完整且最高等級為 20', () => {
     assert.match(guildRewards, new RegExp('\\b' + threshold + '\\b'));
   }
   assert.match(guildRewards, /guild_level between 2 and 20/);
-  assert.match(guildRewards, /private\\.guild_level_for_xp/);
+  assert.match(guildRewards, /private\.guild_level_for_xp/);
 });
 
 test('每日擲骰進度由 game_saves trigger 計算，並限制異常跳增', () => {
