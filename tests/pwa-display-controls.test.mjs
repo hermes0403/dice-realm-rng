@@ -329,6 +329,7 @@ test('T-0114 10,000–99,999 使用紫晶配色，1,000,000 以上先以黑幕�
 test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 Service Worker 快取版本一致', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
   assert.match(html, /style\.css\?v=20261126-t0142-inventory-selection/);
