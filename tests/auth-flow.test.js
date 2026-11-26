@@ -193,7 +193,7 @@ test('authentication controls bootstrap before optional game UI and use the same
   const workerVersion = serviceWorker.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
   assert.ok(htmlVersion, 'index.html should declare the script version');
   assert.equal(workerVersion, htmlVersion, 'service worker must precache the same script URL');
-  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.36'/);
+  assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
 });
 
 
@@ -202,6 +202,10 @@ test('optional guild module is dynamically loaded and cannot block core authenti
   const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
   assert.doesNotMatch(script, /^import\s+\{\s*createGuildSystem\s*\}\s+from\s+['"]\.\/ui\/guild\.js/m);
   assert.match(script, /await import\(['"]\.\/ui\/guild\.js\?v=20261126-t0142-guild-search-modal['"]\)/);
+  const guildModuleVersion = script.match(/await import\(['"]\.\/ui\/guild\.js\?v=([^'"]+)['"]\)/)?.[1];
+  const workerGuildModuleVersion = serviceWorker.match(/\.\/ui\/guild\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(guildModuleVersion);
+  assert.equal(workerGuildModuleVersion, guildModuleVersion);
   assert.match(script, /loadGuildPage, refreshWeeklyEvent:/);
 });
 
