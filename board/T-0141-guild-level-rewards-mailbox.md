@@ -1,7 +1,7 @@
 ---
 id: T-0141
 title: 更新公會升級門檻、等級獎勵與公會郵箱
-status: in_progress
+status: review
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -94,6 +94,8 @@ Lv.3、Lv.7 的原成員上限 +1 改為幸運藥水 III ×1；Lv.17 的原成�
 
 ## 紀錄
 
+- 2026-11-26 08:38 [叉子] 狀態轉換：in_progress → review。PR #378 已合併，merge commit `314b69fa1733cc61a83aa125de32825b1cf261a2`；17 項 GitHub Actions 檢查全數成功（包含 PWA、公告、Cloud Save、Board lifecycle）；GitHub Pages deployment run `45730116757` build、deploy、report-build-status 全部 success，版本 V1.60。等待棒子實機驗收。
+
 - 2026-11-26 08:23 [叉子] 狀態轉換：review → in_progress。棒子實機查看後提出郵箱應改為彈出視窗，並將公會公告併入郵箱；依回饋退回同一任務修正，保留既有升級門檻、獎勵及資料庫成果。
 - 2026-11-26 [叉子] 狀態轉換：in_progress → review。PR #376 已合併至 main，merge commit `c3c3efd0b58fef11aa27a680b85c2df4b606cfdd`；正式 Supabase migration `guild_level_rewards_mailbox` 已套用；PR 的 17 項 GitHub Actions 檢查全數成功，main 的 Board、PWA、Cloud Save、Dice Roll Save、Weather/Announcement workflows 全數成功；GitHub Pages deployment run `45726605762` build、deploy、report-build-status 全部 success，版本 V1.59。等待棒子實機驗收。
 
@@ -117,12 +119,13 @@ Lv.3、Lv.7 的原成員上限 +1 改為幸運藥水 III ×1；Lv.17 的原成�
 - migration 在正式資料庫套用前以 BEGIN/ROLLBACK 完整試跑，覆蓋多級升到 Lv.20、19 個等級事件、成員郵件數、重複呼叫、標記已讀、郵箱 RPC、外觀解鎖 payload、XP +5% 及權限；交易已 rollback。
 - migration 正式套用後，再以正式資料庫交易重跑上述整合測試並 rollback，沒有留下測試獎勵或郵件。
 - 正式資料庫確認郵箱表 RLS 啟用、anon/authenticated 無直接 SELECT 權限、anon 無 RPC 執行權限、authenticated 可呼叫公開郵箱 RPC；速度及金錢藥水 grant 欄位存在。
-- PR #376 的 17 項 GitHub Actions 檢查全數成功；新增公會獎勵郵箱測試及 PWA／Cloud Save 回歸測試通過。
-- Pages run `45726605762` 的 build、deploy、report-build-status 全部 success；正式頁面部署版本 V1.59。
+- PR #376 的 17 項 GitHub Actions 檢查全數成功；PR #378 的 17 項檢查亦全數成功，包含公會主介面、公告置入郵箱、PWA、Cloud Save、Board lifecycle 及 JavaScript syntax checks。
+- Pages run `45726605762` 的 build、deploy、report-build-status 全部 success，原始版 V1.59。
+- 本次 Pages run `45730116757` 的 build、deploy、report-build-status 全部 success，正式頁面版本 V1.60。
 
 ### 沒做／做不到的
 
-- 尚未以多個真實玩家帳號在手機瀏覽器人工驗收升級後的藥水背包、不同成員各自收到的郵件，以及已讀狀態；交由棒子實機驗收。
+- 尚未以多個真實玩家帳號在手機瀏覽器人工驗收升級後的藥水背包、不同成員各自收到的郵件、已讀狀態及新版郵箱彈窗；交由棒子實機驗收。
 
 ### 衍生任務／影響任務
 - 無
