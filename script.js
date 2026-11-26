@@ -228,11 +228,25 @@ function toast(t){let e=document.getElementById('toast');e.textContent=t;e.class
 // A guild asset failure must not stop authentication controls from booting.
 let guildSystem=null;
 async function loadGuildPage(){
-  if(!guildSystem){
-    const { createGuildSystem } = await import('./ui/guild.js?v=20261126-t0142-guild-search-modal');
-    guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,documentRef:document,toast});
+  const guildRoot=document.getElementById('guildContent');
+  if(!guildRoot)return false;
+  guildRoot.innerHTML='<div class="card"><p class="muted">正在啟動公會功能…</p></div>';
+  try{
+    if(!guildSystem){
+      const { createGuildSystem } = await import('./ui/guild.js?v=20261126-t0142-guild-search-modal');
+      guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,documentRef:document,toast});
+    }
+    return await guildSystem.load();
+  }catch(error){
+    console.error('[Guild] 公會模組啟動失敗：',error);
+    guildRoot.innerHTML='<div class="card"><p class="muted" role="alert">公會功能載入失敗，請重新嘗試。</p><button type="button" id="guildBootRetryBtn">重新載入公會</button></div>';
+    const retryButton=document.getElementById('guildBootRetryBtn');
+    retryButton?.addEventListener('click',()=>{
+      retryButton.disabled=true;
+      void loadGuildPage();
+    },{once:true});
+    return false;
   }
-  return guildSystem.load();
 }
 function isAdmin(){return (currentUser?.email||'').toLowerCase()==='toby110403@gmail.com'}
 realmSocialSystem.setupRealmSocialUI();
