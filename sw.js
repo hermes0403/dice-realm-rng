@@ -9,6 +9,7 @@ const APP_SHELL = [
   './script.js?v=20261126-t0142-guild-search-modal',
   './ui/navigation.js?v=20261123-daily-shop-prices-d14-v1',
   './ui/guild.js?v=20261126-t0142-guild-search-modal',
+  './ui/inventory.js?v=20261126-t0142-inventory-selection',
   './services/auth.js?v=20261126-t0139-account-isolation',
   './services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox',
   './ui/equipment.js?v=20261123-t0126-click-capture-fix',
