@@ -1,0 +1,48 @@
+name: Guild potion gifting regression tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ui/guild.js'
+      - 'services/cloud-save.js'
+      - 'script.js'
+      - 'guild.css'
+      - 'index.html'
+      - 'sw.js'
+      - 'docs/migrations/*guild_leader_potion_gifting.sql'
+      - 'tests/guild-potion-gifting.test.mjs'
+      - 'tests/guild-level-rewards-mailbox.test.mjs'
+      - 'tests/guild-main-interface.test.mjs'
+      - 'tests/pwa-display-controls.test.mjs'
+      - '.github/workflows/guild-potion-gifting-tests.yml'
+
+jobs:
+  guild-potion-gifting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run guild potion gifting and affected UI regression tests
+        run: >-
+          node --test
+          tests/guild-potion-gifting.test.mjs
+          tests/guild-level-rewards-mailbox.test.mjs
+          tests/guild-main-interface.test.mjs
+          tests/pwa-display-controls.test.mjs
+      - name: Check changed JavaScript syntax
+        run: |
+          node --check ui/guild.js
+          node --check services/cloud-save.js
+          node --check script.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD

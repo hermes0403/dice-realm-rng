@@ -1,10 +1,10 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.43';
+const CACHE_NAME = 'dice-realm-shell-v2.44';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261126-t0151-pages-redeploy',
+  './script.js?v=20261127-t0156-guild-potion-gifting',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/equipment.js?v=20261121-t0123-money-potions',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
@@ -26,7 +26,7 @@ const APP_SHELL = [
   './admin/grants.js',
   './systems/weather.js?v=20261120-t0110-crystal-weather-purple',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
-  './services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox',
+  './services/cloud-save.js?v=20261127-t0156-guild-potion-gifting',
   './systems/coin-boost.js',
   './systems/leaderboards.js',
   './services/auth.js?v=20261126-t0139-account-isolation',
@@ -54,7 +54,7 @@ const APP_SHELL = [
   './ui/display-controls.js?v=20261126-t0149-guild-module-refresh',
   './core/timer-manager.js',
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
-  './ui/guild.js?v=20261127-t0148-guild-promotion',
+  './ui/guild.js?v=20261127-t0156-guild-potion-gifting',
   './systems/weather-summon-odds.js',
   './systems/glitch-dice.js?v=20261114-t0087-heaven-probability',
   './systems/dice-locks.js',
@@ -67,7 +67,7 @@ const APP_SHELL = [
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
   './style.css?v=20261126-t0142-inventory-selection',
-  './guild.css?v=20261127-t0148-guild-promotion',
+  './guild.css?v=20261127-t0156-guild-potion-gifting',
   './favicon.ico',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png',

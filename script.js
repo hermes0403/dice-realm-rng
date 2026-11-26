@@ -18,7 +18,7 @@ import { createAdminGrantService } from './admin/grants.js';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261127-t0156-guild-potion-gifting';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261126-t0139-account-isolation';
@@ -233,8 +233,8 @@ async function loadGuildPage(){
   guildRoot.innerHTML='<div class="card"><p class="muted">正在啟動公會功能…</p></div>';
   try{
     if(!guildSystem){
-      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0148-guild-promotion');
-      guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,documentRef:document,toast});
+      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0156-guild-potion-gifting');
+      guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,getState:()=>S,POTIONS,flushCloudSave,adoptServerPotions:(inventory,updatedAt)=>cloudSaveService?.adoptServerPotions(inventory,updatedAt)||false,documentRef:document,toast});
     }
     return await guildSystem.load();
   }catch(error){

@@ -78,7 +78,7 @@ test('公會郵箱以彈出視窗開啟，關閉後保留主頁，並可用 Esca
   assert.match(source, /function renderMailboxOverlay\(\)/);
   assert.match(source, /data-guild-mailbox-overlay/);
   assert.match(source, /data-guild-mailbox-close/);
-  assert.match(source, /event\.key === 'Escape' && \(mailboxOpen \|\| findOpen\)/);
+  assert.match(source, /event\.key === 'Escape' && \(mailboxOpen \|\| findOpen \|\| potionGiftOpen\)/);
   assert.match(source, /mailboxOpen = false;\s*render\(\)/);
   assert.match(styles, /guild-mailbox-overlay/);
   assert.match(styles, /max-height:min\(88dvh,820px\)/);
