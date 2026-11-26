@@ -272,7 +272,7 @@ body.weather-aura-dumpling #weatherStatus{border-color:#f0c36a;box-shadow:0 0 22
 
 
 /* 寵物變異標籤：每種外觀／天氣變異使用獨立顏色 */
-.pet-mutations{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 8px;position:relative;z-index:2}
+.pet-mutations{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 8px;position:relative;z-index:2}.pet-mutations.is-empty{min-height:19px}
 .pet-mutation-tag{display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border:1px solid currentColor;border-radius:999px;font-size:10px;font-weight:900;line-height:1.25;letter-spacing:.02em;background:#101629;white-space:nowrap}
 .pet-mutation-golden{color:#ffe69a;background:linear-gradient(120deg,#5b471b88,#211b1288);border-color:#f4d77b}
 .pet-mutation-diamond{color:#b9e8ff;background:linear-gradient(120deg,#163d5888,#101b2c88);border-color:#8ed8ff}
