@@ -1,7 +1,7 @@
 ---
 id: T-0156
 title: 公會長贈送藥水與郵箱領取功能
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
