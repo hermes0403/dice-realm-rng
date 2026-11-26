@@ -43,7 +43,7 @@ import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
 import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-rpc-fix';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261126-t0149-guild-module-refresh';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261126-t0154-offline-shell-cache';
 import { createTimerManager } from './core/timer-manager.js';
 import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-buttons-v2';
 
