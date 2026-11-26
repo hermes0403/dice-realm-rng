@@ -12,12 +12,19 @@ const sw = read('../sw.js');
 
 test('T-0141 uses the complete owner-confirmed per-level XP thresholds', () => {
   const expected = [100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500];
-  const arrays = [...migration.matchAll(/v_costs bigint\\[\\] := array\\[([\\s\\S]*?)\\]/g)];
-  assert.equal(arrays.length, 2);
-  for (const match of arrays) {
-    assert.deepEqual(match[1].match(/[0-9]+/g).map(Number), expected);
+  const arrays = [];
+  let cursor = 0;
+  const marker = 'v_costs bigint[] := array[';
+  while ((cursor = migration.indexOf(marker, cursor)) !== -1) {
+    const start = cursor + marker.length;
+    const end = migration.indexOf('];', start);
+    assert.notEqual(end, -1);
+    arrays.push(migration.slice(start, end).match(/[0-9]+/g).map(Number));
+    cursor = end + 2;
   }
-  assert.match(migration, /create or replace function private\\.guild_level_for_xp\\(p_xp bigint\\)/);
+  assert.equal(arrays.length, 2);
+  for (const values of arrays) assert.deepEqual(values, expected);
+  assert.ok(migration.includes('create or replace function private.guild_level_for_xp(p_xp bigint)'));
 });
 
 test('all 19 guild level rewards match the approved reward schedule', () => {
