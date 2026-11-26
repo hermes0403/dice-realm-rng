@@ -74,7 +74,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     el.dataset.kind = kind;
   }
 
-  function roleLabel(role) { return ROLE_LABELS[role] || '一般成員'; }
+  function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
   function guildNameStyle(guild) {
     const value = safeCosmetic(guild?.name_color, NAME_COLOR_IDS, 'default');
     return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + '"';
@@ -111,7 +111,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<label>公會名稱<input name="name" minlength="2" maxlength="16" required placeholder="2～16 個字"></label>' +
       '<label>公會介紹<textarea name="description" maxlength="160" rows="3" placeholder="最多 160 字"></textarea></label>' +
       '<button class="primary" type="submit">建立公會</button></form>' +
-      '<p class="mini">建立者會自動成為會長；每位玩家同一時間只能加入一個公會。</p></section>';
+      '<p class="mini">建立者會自動成為隊長；每位玩家同一時間只能加入一個公會。</p></section>';
   }
 
   function renderFindPanel() {
@@ -382,7 +382,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
         '<form id="guildSettingsForm" class="guild-settings-form">' +
         '<label>公會名稱<input name="name" type="text" minlength="2" maxlength="16" required value="' + escapeHTML(guild.name || '') + '"' + disabled + '><small>2～16 個字</small></label>' +
         '<label>公會介紹<textarea name="description" maxlength="160" rows="4"' + disabled + '>' + escapeHTML(guild.description || '') + '</textarea><small>最多 160 字</small></label>' +
-        '<label>加入方式<select name="join_mode"' + disabled + '><option value="application"' + (joinMode === 'application' ? ' selected' : '') + '>需審核申請</option><option value="open"' + (joinMode === 'open' ? ' selected' : '') + '>公開直接加入</option></select><small>選擇玩家加入公會時，是否需要幹部審核</small></label>' +
+        '<label>加入方式<select name="join_mode"' + disabled + '><option value="application"' + (joinMode === 'application' ? ' selected' : '') + '>需審核申請</option><option value="open"' + (joinMode === 'open' ? ' selected' : '') + '>公開直接加入</option></select><small>選擇玩家加入公會時，是否需要隊長或副隊長審核</small></label>' +
         (canEdit ? '<button class="primary" type="submit">儲存基本設定</button>' : '<p class="guild-settings-readonly">只有隊長可以修改公會名稱、介紹與加入方式。</p>') +
         '</form></section>';
       const announcementPanel = '<section class="card guild-settings-panel guild-announcement-settings"><div class="eyebrow">GUILD ANNOUNCEMENT</div><h3>公會公告</h3>' +
@@ -437,7 +437,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       const initial = escapeHTML(username.slice(0, 1) || '?');
       const level = Number(member.level);
       const levelLabel = Number.isFinite(level) && level > 0 ? '<span class="guild-member-level">Lv.' + level + '</span>' : '';
-      const crown = role === 'leader' ? '<span class="guild-member-crown" aria-label="會長">♛</span>' : '';
+      const crown = role === 'leader' ? '<span class="guild-member-crown" aria-label="隊長">♛</span>' : '';
       const actorRole = currentData?.my_role;
       const canRemoveTarget = Boolean(member.user_id) && (
         (actorRole === 'leader' && ['vice_leader', 'member'].includes(role)) ||
@@ -520,7 +520,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (!searchResults.length) return '<p class="muted guild-mailbox-empty">沒有找到符合的公開公會。</p>';
     const alreadyJoined = Boolean(currentData?.guild);
     return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + escapeHTML(g.name) +
-      '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>會長：' +
+      '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>隊長：' +
       escapeHTML(g.leader_name || '未知玩家') + ' · ' + (Number(g.member_count) || 0) + ' 人</small></div>' +
       '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '"' +
       (alreadyJoined ? ' aria-label="目前已有公會，無法加入"' : '') + '>' +
@@ -581,7 +581,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id === 'guildAnnouncementForm') {
       event.preventDefault();
       if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
-        message('只有會長與副會長可以修改公會公告。', 'error');
+        message('只有隊長與副隊長可以修改公會公告。', 'error');
         return;
       }
       const form = new FormData(event.target);
@@ -601,7 +601,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id === 'guildCosmeticsForm') {
       event.preventDefault();
       if (!['leader', 'vice_leader'].includes(currentData?.my_role)) {
-        message('只有會長與副會長可以更換公會外觀。', 'error');
+        message('只有隊長與副隊長可以更換公會外觀。', 'error');
         return;
       }
       const form = new FormData(event.target);
@@ -620,7 +620,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     if (event.target?.id === 'guildSettingsForm') {
       event.preventDefault();
       if (currentData?.my_role !== 'leader') {
-        message('只有會長可以修改公會設定。', 'error');
+        message('只有隊長可以修改公會設定。', 'error');
         return;
       }
       const form = new FormData(event.target);
