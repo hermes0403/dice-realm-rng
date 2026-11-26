@@ -46,6 +46,8 @@ test('all 19 guild level rewards match the approved reward schedule', () => {
     assert.ok(migration.includes(label), `missing reward label for level ${level}`);
   }
   assert.match(migration, /v_reward_amount := 2/);
+  assert.match(migration, /count\(\*\)::integer into v_bonus_count/);
+  assert.match(migration, /1 \+ v_bonus_count \* 0\.05/);
 });
 
 test('level reward grants and mailbox rows are transactional and idempotent', () => {
