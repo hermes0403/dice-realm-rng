@@ -43,7 +43,7 @@ import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
 import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
 import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-rpc-fix';
-import { setupDisplayControls } from './ui/display-controls.js?v=20261126-t0142-guild-search-modal';
+import { setupDisplayControls } from './ui/display-controls.js?v=20261126-t0149-guild-module-refresh';
 import { createTimerManager } from './core/timer-manager.js';
 import { setupOnboardingUI } from './ui/onboarding.js?v=20261119-settings-buttons-v2';
 
@@ -239,7 +239,10 @@ async function loadGuildPage(){
     return await guildSystem.load();
   }catch(error){
     console.error('[Guild] 公會模組啟動失敗：',error);
-    guildRoot.innerHTML='<div class="card"><p class="muted" role="alert">公會功能載入失敗，請重新嘗試。</p><button type="button" id="guildBootRetryBtn">重新載入公會</button></div>';
+    guildSystem=null;
+    guildRoot.innerHTML='<div class="card"><p class="muted" role="alert">公會模組啟動失敗，錯誤：<span id="guildBootError"></span></p><button type="button" id="guildBootRetryBtn">重新載入公會</button></div>';
+    const errorNode=document.getElementById('guildBootError');
+    if(errorNode)errorNode.textContent=String(error?.message||error||'未知錯誤');
     const retryButton=document.getElementById('guildBootRetryBtn');
     retryButton?.addEventListener('click',()=>{
       retryButton.disabled=true;
