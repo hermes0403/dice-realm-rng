@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
-const migration = read('../docs/migrations/20261126120000_guild_level_rewards_mailbox.sql');
+const migration = read('../docs/migrations/20261126150000_guild_level_xp_rewards_update.sql');
 const guild = read('../ui/guild.js');
 const cloud = read('../services/cloud-save.js');
 const css = read('../guild.css');
@@ -12,7 +12,7 @@ const sw = read('../sw.js');
 const script = read('../script.js');
 
 test('T-0141 uses the complete owner-confirmed per-level XP thresholds', () => {
-  const expected = [100,250,500,850,1300,1900,2700,3000,4000,5600,6500,7800,9500,12800,14800,16500,20000,22500,24500];
+  const expected = [100,250,500,850,1300,1400,1600,1800,2000,2200,2500,2600,2750,3000,3600,3900,4500,4800,5000];
   const arrays = [];
   let cursor = 0;
   const marker = 'v_costs bigint[] := array[';
@@ -35,7 +35,7 @@ test('all 19 guild level rewards match the approved reward schedule', () => {
     [6, 'money1', '金錢藥水 I ×1'], [7, 'luck3', '幸運藥水 III ×1'],
     [8, 'luck2', '幸運藥水 II ×1'], [9, 'name_color', '專屬公會名稱顏色'],
     [10, 'angel1', '天堂藥水 I ×1'], [11, 'guild_xp_bonus_5', '公會 XP 加成 +5%'],
-    [12, 'speed2', '速度藥水 II ×1'], [13, 'guild_title', '專屬公會稱號'],
+    [12, 'speed2', '速度藥水 II ×1'], [13, 'guild_xp_bonus_5', '公會 XP 加成 +5%'],
     [14, 'money2', '金錢藥水 II ×1'], [15, 'badge_effect', '公會徽章特效'],
     [16, 'luck3', '幸運藥水 III ×1'], [17, 'angel1', '天堂藥水 I ×1'],
     [18, 'angel1', '天堂藥水 I ×2'], [19, 'guild_background', '專屬公會背景'],
