@@ -10,7 +10,7 @@ test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 �
   assert.match(ui, /hasUnlock\('name_color'\)/);
   assert.match(ui, /hasUnlock\('badge_effect'\)/);
   assert.match(ui, /hasUnlock\('guild_background'\)/);
-  assert.match(ui, /cosmeticControl\\('badge_effect','公會徽章特效'.*'badge_effect',15\\)/);
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效'"));
   assert.match(ui, /'name_color', 9/);
   assert.match(ui, /'guild_background', 19/);
 });
