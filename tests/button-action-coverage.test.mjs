@@ -77,3 +77,36 @@ test('所有靜態頁面按鈕都有可追蹤的程式事件入口', async () =>
     assert.ok(sources.includes(reference), 'button has no JavaScript reference: ' + reference);
   }
 });
+
+
+test('動態產生的遊戲按鈕都有明確的 id 或委派 data-action', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const sourceFiles = [];
+  async function collect(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await collect(path);
+      else if (/\.m?js$/.test(entry.name)) sourceFiles.push(path);
+    }
+  }
+  for (const directory of ['admin', 'core', 'data', 'services', 'systems', 'ui']) {
+    await collect(join(root, directory));
+  }
+  sourceFiles.push(join(root, 'script.js'), join(root, 'config.js'));
+  const unmarked = [];
+  for (const file of sourceFiles) {
+    const source = await readFile(file, 'utf8');
+    for (const match of source.matchAll(/<button\b[^>]*>/gi)) {
+      const tag = match[0];
+      const hasId = /\bid\s*=\s*["'][^"']+["']/i.test(tag);
+      const hasDataAction = /\bdata-[\w-]+(?:\s*=|\s|>)/i.test(tag);
+      const hasInlineHandler = /\bonclick\s*=/i.test(tag);
+      const isFormSubmit = /\btype\s*=\s*["']submit["']/i.test(tag);
+      const hasConcatenatedAction = /\+\s*action\b/.test(source.slice(match.index, match.index + 220));
+      if (!hasId && !hasDataAction && !hasInlineHandler && !isFormSubmit && !hasConcatenatedAction) {
+        unmarked.push(file.slice(root.length) + ': ' + tag);
+      }
+    }
+  }
+  assert.deepEqual(unmarked, [], 'dynamic buttons need an id or delegated data-action');
+});
