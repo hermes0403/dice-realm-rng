@@ -3071,3 +3071,8 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 
 
 /* T-0127: compact, disclosed system-simulated visitors in the roll lobby. */
+
+
+/* T-0142: make each selected die unmistakable during multi-sell selection. */
+#inventoryGrid.sell-select-mode .inventory-tile.is-sell-selected{border:2px solid #ffe08a!important;border-left:2px solid #ffe08a!important;background:linear-gradient(145deg,#514525,#28223a)!important;box-shadow:0 0 0 2px rgba(255,220,125,.38),0 0 18px rgba(255,210,100,.48)!important;transform:translateY(-1px)}
+#inventoryGrid.sell-select-mode .inventory-tile.is-sell-selected::after{content:"✓";position:absolute;left:5px;top:5px;z-index:2;width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:#ffe08a;color:#181322;font-size:13px;font-weight:1000;box-shadow:0 0 12px #ffe08a99}
