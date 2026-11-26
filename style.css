@@ -141,6 +141,10 @@ body.weather-aura-crystal::before,body.weather-aura-hell::before{display:none!im
 .admin-category-title{margin:16px 0 9px;padding:9px 12px;border-left:3px solid #8c82ff;border-radius:7px;background:linear-gradient(90deg,#7771ff20,transparent);color:#dfe3ff;font-size:13px;font-weight:900;letter-spacing:.4px}
 
 .admin-curve-wrap{margin-top:12px;border:1px solid var(--line,#303650);border-radius:12px;background:#0b1020;padding:10px;overflow:hidden}.admin-curve-svg{display:block;width:100%;height:auto;min-height:180px}.admin-curve-grid{stroke:#29314b;stroke-width:1}.admin-curve-line{fill:none;stroke:#7dceff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #68bfff66)}.admin-curve-point{fill:#d9f3ff;stroke:#4ea9ff;stroke-width:2}.admin-curve-label{fill:#8e9ab9;font-size:10px}.admin-curve-empty{padding:22px;text-align:center;color:var(--muted)}.admin-curve-legend{display:flex;gap:8px;align-items:center;font-size:12px;color:#aab6d5;margin:8px 2px 0}.admin-curve-dot{width:8px;height:8px;border-radius:50%;background:#7dceff;display:inline-block}
+/* T-0143: keep the authentication dialog above every game overlay and interactive on touch devices. */
+#authModal{z-index:20000!important;pointer-events:auto!important;isolation:isolate}
+#authModal>.card{position:relative;z-index:1;pointer-events:auto!important}
+#authModal button,#authModal input{pointer-events:auto!important;touch-action:manipulation}
 body.auth-required .shell{display:none!important}body.auth-required #authModal{display:flex!important}body.auth-required #authCloseBtn{display:none!important}body.auth-required #authModal .card{margin:auto}
 
 /* 寵物系統：品質漸層由左至右，機率條也固定左至右填滿 */
