@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8');
 const ui = read('../ui/guild.js'), css = read('../guild.css'), sql = read('../docs/migrations/20261127010000_guild_member_promotion.sql');
+const aclMigration = read('../docs/migrations/20261127020000_guild_promotion_rpc_acl_fix.sql');
 test('職位只有隊長、副隊長、普通成員，舊幹部轉為普通成員', () => {
  assert.ok(ui.includes("leader: '隊長', vice_leader: '副隊長', member: '普通成員'"));
  assert.match(sql,/update public\.guild_members set role='member' where role='officer'/);
