@@ -195,3 +195,21 @@ test('authentication controls bootstrap before optional game UI and use the same
   assert.equal(workerVersion, htmlVersion, 'service worker must precache the same script URL');
   assert.match(serviceWorker, /CACHE_NAME = 'dice-realm-shell-v2\.34'/);
 });
+
+
+test('auth service declaration and deferred dependencies are initialized without temporal-dead-zone access', async () => {
+  const { readFileSync } = await import('node:fs');
+  const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
+  const declaration = script.indexOf('let authService=null;');
+  const assignment = script.indexOf('authService=createAuthService({');
+  const listener = script.indexOf('authService.registerAuthStateListener();');
+  const leaderboardInitialization = script.indexOf('const { refreshLeaderboards } = createLeaderboardSystem(');
+
+  assert.notEqual(declaration, -1, 'authService must be declared');
+  assert.notEqual(assignment, -1, 'auth service must be created');
+  assert.notEqual(listener, -1, 'auth listener must register');
+  assert.ok(declaration < assignment, 'authService declaration must precede assignment');
+  assert.ok(assignment < leaderboardInitialization, 'auth service setup currently precedes leaderboard module setup');
+  assert.ok(script.includes("refreshLeaderboards:(...args)=>{try{return refreshLeaderboards(...args)}"), 'leaderboard dependency must be deferred until it is initialized');
+  assert.ok(listener < leaderboardInitialization, 'auth listener is installed before later game services initialize');
+});
