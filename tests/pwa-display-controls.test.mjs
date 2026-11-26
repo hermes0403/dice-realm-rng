@@ -95,7 +95,7 @@ test('僅在安全來源註冊 Service Worker，並使用專案根目錄 scope',
   const controls = setupDisplayControls(fixture);
   await controls.serviceWorkerReady;
   assert.equal(fixture.registrations.length, 1);
-  assert.ok(fixture.registrations[0].url.includes('/sw.js?v=20261126-t0142-guild-search-modal'));
+  assert.ok(fixture.registrations[0].url.includes('/sw.js?v=20261127-t0147-guild-cosmetics'));
   assert.ok(fixture.registrations[0].options.scope.endsWith('/'));
   const insecure = createFixture({ secure: false });
   const blocked = setupDisplayControls(insecure);
