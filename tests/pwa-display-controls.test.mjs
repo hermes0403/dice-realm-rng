@@ -303,6 +303,7 @@ test('T-0096 管理員發放骰子後立即同步到自己的背包，圖鑑顯�
 test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const dice = await readFile(new URL('../systems/dice.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
@@ -314,7 +315,10 @@ test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', a
   assert.match(dice, /revealAwaitingDismiss/);
   assert.match(css, /\.rarity-reveal-continue/);
   assert.match(worker, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
-  assert.match(worker, /systems\/dice\.js\?v=20261121-t0121-heaven-mode-persistence/);
+  const diceModuleVersion = script.match(/from\s+['"]\.\/systems\/dice\.js\?v=([^'"]+)['"]/)?.[1];
+  const workerDiceModuleVersion = worker.match(/\.\/systems\/dice\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(diceModuleVersion);
+  assert.equal(workerDiceModuleVersion, diceModuleVersion);
 });
 
 
@@ -360,8 +364,14 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(worker, /guild\.css\?v=20261126-t0142-guild-search-modal/);
   assert.match(script, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
-  assert.match(worker, /ui\/display-controls\.js\?v=20261126-t0142-guild-search-modal/);
-  assert.match(worker, /ui\/navigation\.js\?v=20261123-daily-shop-prices-d14-v1/);
+  const displayControlsVersion = script.match(/from\s+['"]\.\/ui\/display-controls\.js\?v=([^'"]+)['"]/)?.[1];
+  const workerDisplayControlsVersion = worker.match(/\.\/ui\/display-controls\.js\?v=([^'"]+)/)?.[1];
+  const navigationVersion = script.match(/from\s+['"]\.\/ui\/navigation\.js\?v=([^'"]+)['"]/)?.[1];
+  const workerNavigationVersion = worker.match(/\.\/ui\/navigation\.js\?v=([^'"]+)/)?.[1];
+  assert.ok(displayControlsVersion);
+  assert.equal(workerDisplayControlsVersion, displayControlsVersion);
+  assert.ok(navigationVersion);
+  assert.equal(workerNavigationVersion, navigationVersion);
 });
 
 
