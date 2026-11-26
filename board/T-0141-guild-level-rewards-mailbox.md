@@ -1,7 +1,7 @@
 ---
 id: T-0141
 title: 更新公會升級門檻、等級獎勵與公會郵箱
-status: review
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -86,8 +86,15 @@ Lv.3、Lv.7 的原成員上限 +1 改為幸運藥水 III ×1；Lv.17 的原成�
 8. 自動化測試覆蓋所有 XP 門檻、19 級獎勵、重複請求、併發升級、多級升級、成員快照、晚加入成員排除、郵件讀取狀態及既有公會功能回歸。
 9. 遷移及正式資料庫變更先審查 SQL、RLS、權限與安全性；不得未驗證即部署。
 
+## 追加需求（2026-11-26 08:23）
+
+- 點擊「公會郵箱」後，以置中彈出視窗顯示，保留公會主頁於背景；可用關閉按鈕、點擊遮罩及 Escape 關閉，手機版視窗可獨立捲動。
+- 將主頁的 GUILD ANNOUNCEMENT 公告顯示卡移入郵箱彈窗，與個人升級獎勵郵件同一視窗呈現；主頁不再重複顯示公告卡。公告編輯仍保留於公會設定。
+- 郵箱載入、重新整理、標記已讀及錯誤狀態均留在彈窗內，不得把底下主頁替換掉；關閉後回到原公會主頁狀態。
+
 ## 紀錄
 
+- 2026-11-26 08:23 [叉子] 狀態轉換：review → in_progress。棒子實機查看後提出郵箱應改為彈出視窗，並將公會公告併入郵箱；依回饋退回同一任務修正，保留既有升級門檻、獎勵及資料庫成果。
 - 2026-11-26 [叉子] 狀態轉換：in_progress → review。PR #376 已合併至 main，merge commit `c3c3efd0b58fef11aa27a680b85c2df4b606cfdd`；正式 Supabase migration `guild_level_rewards_mailbox` 已套用；PR 的 17 項 GitHub Actions 檢查全數成功，main 的 Board、PWA、Cloud Save、Dice Roll Save、Weather/Announcement workflows 全數成功；GitHub Pages deployment run `45726605762` build、deploy、report-build-status 全部 success，版本 V1.59。等待棒子實機驗收。
 
 - 2026-11-26 [叉子] 狀態轉換：open → in_progress。依最新 main `86d33b60a61b42277a673aa9e9a24136e2dd7ddc` 盤點 owner_side 有效 in_progress／review 任務為 0/5；Communicate 優先搜尋未發現有效任務。兩道啟動閘門均未阻擋，開始 T-0141 實作。

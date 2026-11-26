@@ -22,6 +22,10 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   let showAllMembers = false;
   let searchResults = [];
   let leaveConfirmStep = 0;
+  let mailboxOpen = false;
+  let mailboxRows = [];
+  let mailboxLoading = false;
+  let mailboxError = '';
 
   async function rpc(name, params = {}) {
     if (!supabaseClient) throw new Error('雲端服務暫時無法使用');
@@ -43,7 +47,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const unreadCount = Math.max(0, Number(currentData?.mail_unread_count) || 0);
     return '<div class="guild-nav-grid" aria-label="公會功能導覽">' +
       NAV_ITEMS.map(item => {
-        const active = item.key !== 'home' && activeView === item.key;
+        const active = item.key === 'mailbox' ? mailboxOpen : item.key !== 'home' && activeView === item.key;
         const action = item.go ? ' data-go="' + item.go + '"' : ' data-guild-view="' + item.key + '"';
         const label = item.key === 'mailbox' && unreadCount ? item.label + ' (' + unreadCount + ')' : item.label;
         const description = item.key === 'mailbox' && unreadCount ? '未讀 ' + unreadCount + ' 封升級通知' : item.description;
@@ -60,7 +64,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<section class="guild-empty card"><div class="guild-empty-emblem" aria-hidden="true">✦</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
       '<p class="muted">公會資料會綁定目前登入的遊戲帳號。</p>' +
-      '<button class="primary" type="button" data-guild-login>登入／註冊</button></section>';
+      '<button class="primary" type="button" data-guild-login>登入／註冊</button></section>' + renderMailboxOverlay();
   }
 
   function renderCreatePanel() {
@@ -80,10 +84,9 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
   function renderNoGuild() {
-    if (activeView === 'mailbox') { loadMailbox(); return; }
     if (activeView === 'home') activeView = 'find';
     if (activeView === 'find') {
-      root().innerHTML = navMarkup() + renderBackButton() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>';
+      root().innerHTML = navMarkup() + renderBackButton() + '<div class="guild-empty-state">' + renderCreatePanel() + renderFindPanel() + '</div>' + renderMailboxOverlay();
       return;
     }
     if (activeView === 'ranking') { loadRanking(); return; }
@@ -180,9 +183,21 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   }
 
 
-  function renderMailbox(rows) {
-    const mails = Array.isArray(rows) ? rows : [];
-    const items = mails.map(mail => {
+  function renderMailboxOverlay() {
+    if (!mailboxOpen) return '';
+    const guild = currentData?.guild;
+    const announcement = guild?.announcement && typeof guild.announcement === 'object' ? guild.announcement : null;
+    const announcementMessage = typeof announcement?.message === 'string' ? announcement.message : '';
+    const announcementUpdatedAt = announcement?.updated_at
+      ? new Date(announcement.updated_at).toLocaleString('zh-TW', { hour12: false }) : '';
+    const announcementPanel = guild ? '<section class="guild-mailbox-announcement"><div class="section-head"><div>' +
+      '<div class="eyebrow">GUILD ANNOUNCEMENT</div><h3>公會公告</h3></div><span class="guild-roster-total">ANNOUNCEMENT</span></div>' +
+      (announcementMessage ? '<p class="guild-announcement-message">' + escapeHTML(announcementMessage) + '</p>' +
+        '<small class="guild-announcement-meta">發布者：' + escapeHTML(announcement.updated_by || '未知玩家') +
+        (announcementUpdatedAt ? ' · ' + escapeHTML(announcementUpdatedAt) : '') + '</small>' :
+        '<p class="muted guild-announcement-empty">目前沒有公告。</p>') + '</section>' : '';
+    const mails = Array.isArray(mailboxRows) ? mailboxRows : [];
+    const mailItems = mails.map(mail => {
       const date = mail.created_at ? new Date(mail.created_at).toLocaleString('zh-TW', { hour12: false }) : '時間未知';
       const level = Math.max(1, Number(mail.guild_level) || 1);
       const read = Boolean(mail.is_read);
@@ -195,27 +210,45 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           '<button type="button" class="guild-mail-read-button" data-guild-mail-read="' + escapeHTML(mail.id || '') + '">標記已讀</button>') +
         '</article>';
     }).join('');
-    root().innerHTML = navMarkup() + renderBackButton() +
-      '<section class="card guild-mailbox-panel"><div class="section-head"><div><div class="eyebrow">GUILD MAILBOX</div>' +
-      '<h3>公會郵箱</h3></div><span class="guild-roster-total">' + mails.filter(mail => !mail.is_read).length + ' UNREAD</span></div>' +
-      '<p class="guild-mailbox-note">公會升級時，當下的每位成員都會收到個人獎勵通知。</p>' +
-      '<div class="guild-mail-list">' + (items || '<p class="muted">目前沒有公會郵件。</p>') + '</div></section>';
+    const content = !guild
+      ? '<p class="muted guild-mailbox-empty">加入公會後即可查看公會公告與升級獎勵郵件。</p>'
+      : mailboxLoading
+        ? '<p class="muted guild-mailbox-empty">正在載入公會郵件…</p>'
+        : mailboxError
+          ? '<p class="muted guild-mailbox-empty">無法取得公會郵件，請稍後重試。</p><button type="button" data-guild-mail-refresh>重新載入</button>'
+          : '<div class="guild-mailbox-list-head"><span>' + mails.filter(mail => !mail.is_read).length + ' 封未讀郵件</span>' +
+            '<button type="button" class="guild-mail-refresh" data-guild-mail-refresh>重新整理</button></div>' +
+            '<div class="guild-mail-list">' + (mailItems || '<p class="muted guild-mailbox-empty">目前沒有公會升級郵件。</p>') + '</div>';
+    return '<div class="guild-mailbox-overlay" data-guild-mailbox-overlay>' +
+      '<section class="card guild-mailbox-dialog" role="dialog" aria-modal="true" aria-labelledby="guildMailboxTitle">' +
+      '<header class="guild-mailbox-header"><div><div class="eyebrow">GUILD MAILBOX</div><h2 id="guildMailboxTitle">公會郵箱</h2>' +
+      '<p>公告與公會升級獎勵通知都會集中在這裡。</p></div>' +
+      '<button type="button" class="guild-mailbox-close" data-guild-mailbox-close aria-label="關閉公會郵箱">✕</button></header>' +
+      announcementPanel + '<section class="guild-mailbox-messages"><div class="section-head"><div><div class="eyebrow">REWARD MESSAGES</div>' +
+      '<h3>升級獎勵郵件</h3></div><span class="guild-roster-total">' +
+      (guild ? mails.filter(mail => !mail.is_read).length + ' UNREAD' : 'MAILBOX') + '</span></div>' +
+      content + '</section></section></div>';
   }
 
   async function loadMailbox() {
-    activeView = 'mailbox';
-    root().innerHTML = navMarkup() + renderBackButton() +
-      '<section class="card guild-mailbox-panel"><p class="muted">正在載入公會郵件…</p></section>';
+    mailboxOpen = true;
+    mailboxLoading = Boolean(currentData?.guild);
+    mailboxError = '';
+    mailboxRows = [];
+    render();
+    if (!currentData?.guild) return;
     try {
       const rows = await rpc('guild_get_mailbox', { p_limit: 50 });
-      if (activeView !== 'mailbox') return;
-      renderMailbox(rows);
+      if (!mailboxOpen) return;
+      mailboxRows = Array.isArray(rows) ? rows : [];
+      mailboxLoading = false;
+      render();
     } catch (error) {
-      if (activeView !== 'mailbox') return;
-      root().innerHTML = navMarkup() + renderBackButton() +
-        '<section class="card guild-mailbox-panel"><h3>郵件載入失敗</h3><p>無法取得公會郵件，請稍後重試。</p>' +
-        '<button type="button" data-guild-mail-refresh>重新載入</button></section>';
-      message(error.message || '郵件載入失敗', 'error');
+      if (!mailboxOpen) return;
+      mailboxLoading = false;
+      mailboxError = error.message || '郵件載入失敗';
+      render();
+      message(mailboxError, 'error');
     }
   }
 
@@ -359,9 +392,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     const members = Array.isArray(data.members) ? data.members : [];
     const apps = Array.isArray(data.applications) ? data.applications : [];
     const canManage = ['leader', 'vice_leader', 'officer'].includes(data.my_role);
-    const announcement = guild.announcement && typeof guild.announcement === 'object' ? guild.announcement : null;
-    const announcementMessage = typeof announcement?.message === 'string' ? announcement.message : '';
-    const announcementUpdatedAt = announcement?.updated_at ? new Date(announcement.updated_at).toLocaleString('zh-TW') : '';
     const count = Number(guild.member_count) || members.length;
     const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
     const hasUnlock = key => unlocks.some(item => item.reward_key === key);
@@ -379,13 +409,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
       '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
-      rewardUnlockMarkup + '<section class="card guild-panel guild-announcement-panel"><div class="section-head"><div><div class="eyebrow">GUILD ANNOUNCEMENT</div>' +
-      '<h3>公會公告</h3></div><span class="guild-roster-total">ANNOUNCEMENT</span></div>' +
-      (announcementMessage ? '<p class="guild-announcement-message">' + escapeHTML(announcementMessage) + '</p>' +
-        '<small class="guild-announcement-meta">發布者：' + escapeHTML(announcement.updated_by || '未知玩家') +
-        (announcementUpdatedAt ? ' · ' + escapeHTML(announcementUpdatedAt) : '') + '</small>' :
-        '<p class="muted guild-announcement-empty">目前沒有公告。</p>') + '</section>' +
-      '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
+      rewardUnlockMarkup + '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
       '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div>' +
       '<span class="guild-roster-total">' + members.length + ' MEMBERS</span></div>' +
       '<div class="guild-member-list">' + renderMembers(members) + '</div></section>' +
@@ -395,7 +419,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
           escapeHTML(a.username || '未知玩家') + '</b><p>' + escapeHTML(a.message || '沒有附加訊息') +
           '</p></div><div class="guild-app-actions"><button type="button" data-guild-review="approve" data-app-id="' +
           escapeHTML(a.id) + '">核准</button><button class="quiet" type="button" data-guild-review="reject" data-app-id="' +
-          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '');
+          escapeHTML(a.id) + '">拒絕</button></div></div>').join('') || '<p class="muted">目前沒有待處理申請。</p>') + '</div></section>' : '') + renderMailboxOverlay();
   }
 
   function render() {
@@ -413,7 +437,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (activeView === 'tasks') { loadTasks(); return; }
     if (activeView === 'ranking') { loadRanking(); return; }
-    if (activeView === 'mailbox') { loadMailbox(); return; }
     if (activeView === 'settings') { renderSettings(); return; }
     if (VIEWS[activeView]) { renderFeatureView(activeView); return; }
     activeView = 'home';
@@ -522,8 +545,19 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
   });
 
   documentRef.addEventListener('click', event => {
+    const mailboxOverlay = event.target.closest('[data-guild-mailbox-overlay]');
+    if (mailboxOverlay && event.target === mailboxOverlay) {
+      mailboxOpen = false;
+      render();
+      return;
+    }
     const button = event.target.closest('button');
     if (!button) return;
+    if (button.matches('[data-guild-mailbox-close]')) {
+      mailboxOpen = false;
+      render();
+      return;
+    }
     if (button.matches('[data-guild-back]')) {
       leaveConfirmStep = 0;
       activeView = currentData?.guild ? 'home' : 'find';
@@ -532,9 +566,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
     }
     if (button.dataset.guildView) {
       leaveConfirmStep = 0;
+      if (button.dataset.guildView === 'mailbox') {
+        activeView = currentData?.guild ? 'home' : 'find';
+        loadMailbox();
+        return;
+      }
       activeView = button.dataset.guildView;
       if (activeView === 'tasks') loadTasks();
-      else if (activeView === 'mailbox') loadMailbox();
       else render();
       return;
     }
@@ -626,6 +664,13 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       confirmButton.disabled = true;
       void action.finally(() => { confirmButton.disabled = false; });
       return;
+    }
+  });
+
+  documentRef.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && mailboxOpen) {
+      mailboxOpen = false;
+      render();
     }
   });
 

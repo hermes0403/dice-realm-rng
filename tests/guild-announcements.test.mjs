@@ -36,12 +36,16 @@ test('公告公開 RPC 只授權 authenticated 使用', () => {
   assert.match(migration, /grant execute on function public\.guild_update_announcement\(text\) to authenticated/);
 });
 
-test('公會首頁顯示公告並安全跳脫文字', () => {
-  assert.match(ui, /function renderHome\(\)/);
+test('公會郵箱彈窗顯示公告並安全跳脫文字，主頁不再重複顯示', () => {
+  assert.match(ui, /function renderMailboxOverlay\(\)/);
+  assert.match(ui, /data-guild-mailbox-overlay/);
   assert.match(ui, /GUILD ANNOUNCEMENT/);
   assert.match(ui, /escapeHTML\(announcementMessage\)/);
   assert.match(ui, /escapeHTML\(announcement\.updated_by \|\| '未知玩家'\)/);
   assert.match(ui, /目前沒有公告/);
+  const home = ui.slice(ui.indexOf('function renderHome()'), ui.indexOf('function render()'));
+  assert.doesNotMatch(home, /guild-announcement-panel/);
+  assert.match(home, /renderMailboxOverlay\(\)/);
 });
 
 test('設定頁只有會長與副會長可編輯公告', () => {
@@ -69,9 +73,11 @@ test('公告面板支援換行與手機版寬度', () => {
 });
 
 
-test('一般成員隱藏公告管理面板，但公會首頁公告仍對所有成員顯示', () => {
+test('一般成員隱藏公告管理面板，但郵箱公告仍對所有成員顯示', () => {
   assert.match(ui, /const announcementPanel = isOrdinaryMember \? ''/);
-  const home = ui.slice(ui.indexOf('function renderHome()'), ui.indexOf('function render()'));
-  assert.match(home, /guild-announcement-panel/);
-  assert.match(home, /escapeHTML\(announcementMessage\)/);
+  const mailbox = ui.slice(ui.indexOf('function renderMailboxOverlay()'), ui.indexOf('function renderRanking(rows)'));
+  assert.match(mailbox, /guild-mailbox-announcement/);
+  assert.match(mailbox, /escapeHTML\(announcementMessage\)/);
+  assert.match(ui, /data-guild-mailbox-close/);
+  assert.match(ui, /event\.key === 'Escape' && mailboxOpen/);
 });

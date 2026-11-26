@@ -1,14 +1,14 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.30';
+const CACHE_NAME = 'dice-realm-shell-v2.31';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
-  './script.js?v=20261126-t0141-guild-rewards-mailbox',
+  './script.js?v=20261126-t0141-mailbox-modal',
   './ui/navigation.js?v=20261123-daily-shop-prices-d14-v1',
-  './ui/guild.js?v=20261126-t0141-guild-rewards-mailbox',
+  './ui/guild.js?v=20261126-t0141-mailbox-modal',
   './services/auth.js?v=20261126-t0139-account-isolation',
   './services/cloud-save.js?v=20261126-t0141-guild-rewards-mailbox',
   './ui/equipment.js?v=20261123-t0126-click-capture-fix',
@@ -39,7 +39,7 @@ const APP_SHELL = [
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
   './style.css?v=20261124-t0127-remove-public-ai-panel-v1',
-  './guild.css?v=20261126-t0141-guild-rewards-mailbox',
+  './guild.css?v=20261126-t0141-mailbox-modal',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png'
 ];
