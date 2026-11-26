@@ -102,13 +102,19 @@ export function createInventoryUI({
       button.textContent = inventorySellMode ? (total ? `出售已選骰子 (${format(total)})` : '取消選擇') : '出售';
       button.disabled = false;
     }
+    grid.querySelectorAll('.inventory-tile').forEach(tile => {
+      const input = tile.querySelector('input[data-sell-select]');
+      const selected = Boolean(inventorySellMode && input?.checked && !input.disabled);
+      tile.classList.toggle('is-sell-selected', selected);
+      if (input) input.setAttribute('aria-checked', selected ? 'true' : 'false');
+    });
   }
 
   function renderInventory() {
     const S = getState();
     const grid = document.getElementById('inventoryGrid');
     const previouslySelected = inventorySellMode
-      ? [...grid.querySelectorAll('input[data-sell-select]:checked')].map(input => input.dataset.sellSelect)
+      ? [...grid.querySelectorAll('input[data-sell-select]:checked')].map(input => input.dataset.sellSelect + ':' + input.dataset.sellIndex)
       : [];
     const halloweenIds = new Set(['d33', 'd34', 'd35', 'd36']);
     const mutationColors = { rain: '#3298ff', snow: '#ffffff', thunder: '#fff000', crystal: '#d56bff', hell: '#ff3434' };
@@ -123,19 +129,18 @@ export function createInventoryUI({
       const color = halloween ? '#ff8a3d' : (mutationColors[item.weather] || '#4df27c');
       for (let n = 0; n < count; n++) {
         const locked = lockedDiceIndexes(S, item.id).has(n);
-        html += `<label class="inventory-tile ${locked ? 'dice-locked' : ''}" data-dice-id="${item.id}" data-dice-index="${n}" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}"><input type="checkbox" data-sell-select="${item.id}" ${locked ? "disabled" : ""} aria-label="選擇出售${escapeHTML(item.name)}第${n + 1}顆"><button type="button" class="dice-lock-star" data-toggle-dice-lock="1" aria-label="切換鎖定">${locked ? "★" : ""}</button><span class="tile-chance" style="color:${color}">${chanceText(item)}</span><span class="tile-icon" style="color:${color}">${item.icon}</span><span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span><span class="tile-index">#${n + 1}</span></label>`;
+        html += `<label class="inventory-tile ${locked ? 'dice-locked' : ''}" data-dice-id="${item.id}" data-dice-index="${n}" style="--rarity-color:${color};color:${color}" title="${escapeHTML(item.name)} · ${chanceText(item)}"><input type="checkbox" data-sell-select="${item.id}" data-sell-index="${n}" ${locked ? "disabled" : ""} aria-label="選擇出售${escapeHTML(item.name)}第${n + 1}顆"><button type="button" class="dice-lock-star" data-toggle-dice-lock="1" aria-label="切換鎖定">${locked ? "★" : ""}</button><span class="tile-chance" style="color:${color}">${chanceText(item)}</span><span class="tile-icon" style="color:${color}">${item.icon}</span><span class="tile-name" style="color:${color}">${escapeHTML(item.name)}</span><span class="tile-index">#${n + 1}</span></label>`;
       }
     }
     grid.innerHTML = html || '<div class="empty" style="grid-column:1/-1">背包目前沒有骰子。</div>';
     if (inventorySellMode) {
       grid.classList.add('sell-select-mode');
-      const remaining = new Map();
-      for (const id of previouslySelected) remaining.set(id, (remaining.get(id) || 0) + 1);
+      const remaining = new Set(previouslySelected);
       grid.querySelectorAll('input[data-sell-select]').forEach(input => {
-        const count = remaining.get(input.dataset.sellSelect) || 0;
-        if (count > 0) {
+        const key = input.dataset.sellSelect + ':' + input.dataset.sellIndex;
+        if (!input.disabled && remaining.has(key)) {
           input.checked = true;
-          remaining.set(input.dataset.sellSelect, count - 1);
+          remaining.delete(key);
         }
       });
     }
