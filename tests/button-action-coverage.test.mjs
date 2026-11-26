@@ -15,7 +15,7 @@ test('主要遊戲按鈕都有實際點擊事件或明確的委派事件', async
 
   const checks = [
     ['背包升級', script, /getElementById\('upgradeBagBtn'\)\.onclick=/],
-    ['主頁擲骰與登入', script, /getElementById\('rollBtn'\)\.onclick=doRoll[\s\S]*?getElementById\('authOpenBtn'\)\.onclick=openAuth/],
+    ['主頁擲骰與登入', script, /(?=.*getElementById\('rollBtn'\)\.onclick=doRoll)(?=.*bindAuthClick\('authOpenBtn',openAuth\))/s],
     ['自動擲骰與停止', dice, /getElementById\('autoBtn'\)\.onclick[\s\S]*?getElementById\('stopBtn'\)\.onclick/],
     ['背包鎖定與出售', inventory, /getElementById\('lockDiceModeBtn'\)\.addEventListener\('click'[\s\S]*?getElementById\('sellSelectedDiceBtn'\)\.addEventListener\('click'/],
     ['寵物融合', pets, /getElementById\('petDiceCraftBtn'\)\?\.addEventListener\('click'/],

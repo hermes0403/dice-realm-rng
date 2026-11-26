@@ -119,8 +119,8 @@ test('PWA manifest 使用專案相對路徑、fullscreen 優先顯示模式與�
 test('缺少可選的驗證信按鈕不會中斷設定頁與寵物出售 UI 初始化', async () => {
   const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(script, /getElementById\('authResendBtn'\)\?\.addEventListener/);
-  assert.match(script, /getElementById\('authResetBtn'\)\?\.addEventListener/);
+  assert.match(script, /bindAuthClick\('authResendBtn'/);
+  assert.match(script, /bindAuthClick\('authResetBtn'/);
   assert.match(script, /setupAccountActions\(\{/);
   assert.match(script, /setupDisplayControls\(\{/);
   assert.match(script, /setupPetSellingUI\(\{/);
@@ -133,7 +133,7 @@ test('首頁啟用 viewport-fit、安全區與設定頁全螢幕按鈕', async (
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /id="fullscreenToggleBtn"/);
   assert.match(html, /for="authUsernameSignupName">建立帳號名稱（3–20 字）/);
-  assert.match(html, /script\.js\?v=20261126-t0142-guild-search-modal/);
+  assert.match(html, /script\.js\?v=20261126-t0145-auth-bootstrap/);
   assert.match(html, /V1\.\d+/);
 });
 
@@ -193,8 +193,8 @@ test('V1.61 PWA 快取殼同步更新', async () => {
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
   const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   assert.match(html, /V1.61/);
-  assert.match(html, /script\.js\?v=20261126-t0142-guild-search-modal/);
-  assert.match(worker, /dice-realm-shell-v2\.32/);
+  assert.match(html, /script\.js\?v=20261126-t0145-auth-bootstrap/);
+  assert.match(worker, /dice-realm-shell-v2\.34/);
   assert.match(worker, /systems\/glitch-weather-drops\.js\?v=20261114-t0089-glitch-potion-drops/);
   assert.match(worker, /systems\/secret-pet-skills\.js\?v=20261122-secret-skill-swap-v1/);
   assert.match(worker, /data\/eternal-update\.js\?v=20261122-eternal-income-v1/);
@@ -304,7 +304,7 @@ test('T-0114 稀有骰子揭示會持續顯示，直到玩家確認才繼續', a
   assert.match(dice, /await waitForRevealDismiss\(overlay\)/);
   assert.match(dice, /revealAwaitingDismiss/);
   assert.match(css, /\.rarity-reveal-continue/);
-  assert.match(worker, /dice-realm-shell-v2\.32/);
+  assert.match(worker, /dice-realm-shell-v2\.34/);
   assert.match(worker, /systems\/dice\.js\?v=20261121-t0121-heaven-mode-persistence/);
 });
 
@@ -321,7 +321,7 @@ test('T-0114 10,000–99,999 使用紫晶配色，1,000,000 以上先以黑幕�
   assert.match(css, /\.rarity-overlay\.star-reveal\.blackout\{background:#000\}/);
   assert.match(css, /\.rarity-starburst::before/);
   assert.match(css, /@keyframes realmStarAppear/);
-  assert.match(worker, /dice-realm-shell-v2\.32/);
+  assert.match(worker, /dice-realm-shell-v2\.34/);
   assert.match(worker, /20261126-t0139-account-isolation/);
 });
 
@@ -338,9 +338,9 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
-  assert.match(worker, /dice-realm-shell-v2\.32/);
+  assert.match(worker, /dice-realm-shell-v2\.34/);
   assert.match(worker, /style\.css\?v=20261126-t0142-inventory-selection/);
-  assert.match(worker, /script\.js\?v=20261126-t0142-guild-search-modal/);
+  assert.match(worker, /script\.js\?v=20261126-t0145-auth-bootstrap/);
   assert.match(worker, /ui\/guild\.js\?v=20261126-t0142-guild-search-modal/);
   assert.match(worker, /guild\.css\?v=20261126-t0142-guild-search-modal/);
   assert.match(script, /ui\/guild\.js\?v=20261126-t0142-guild-search-modal/);
