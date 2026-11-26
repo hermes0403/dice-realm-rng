@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
-const migration = read('../docs/migrations/20261126120000_guild_level_rewards_mailbox.sql') + '\\n' + read('../docs/migrations/20261126150000_guild_level_xp_rewards_update.sql');
+const followupMigration = read('../docs/migrations/20261126150000_guild_level_xp_rewards_update.sql');
+const migration = read('../docs/migrations/20261126120000_guild_level_rewards_mailbox.sql') + '\\n' + followupMigration;
 const guild = read('../ui/guild.js');
 const cloud = read('../services/cloud-save.js');
 const css = read('../guild.css');
@@ -16,11 +17,11 @@ test('T-0141 uses the complete owner-confirmed per-level XP thresholds', () => {
   const arrays = [];
   let cursor = 0;
   const marker = 'v_costs bigint[] := array[';
-  while ((cursor = migration.indexOf(marker, cursor)) !== -1) {
+  while ((cursor = followupMigration.indexOf(marker, cursor)) !== -1) {
     const start = cursor + marker.length;
-    const end = migration.indexOf('];', start);
+    const end = followupMigration.indexOf('];', start);
     assert.notEqual(end, -1);
-    arrays.push(migration.slice(start, end).match(/[0-9]+/g).map(Number));
+    arrays.push(followupMigration.slice(start, end).match(/[0-9]+/g).map(Number));
     cursor = end + 2;
   }
   assert.equal(arrays.length, 2);
