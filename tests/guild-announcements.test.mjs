@@ -73,8 +73,9 @@ test('公告面板支援換行與手機版寬度', () => {
 });
 
 
-test('一般成員隱藏公告管理面板，但郵箱公告仍對所有成員顯示', () => {
-  assert.match(ui, /const announcementPanel = isOrdinaryMember \? ''/);
+test('一般成員看不到基本設定入口，郵箱公告仍對所有成員顯示', () => {
+  assert.match(ui, /isOrdinaryMember \? '' : '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="basic"/);
+  assert.match(ui, /const announcementPanel = '<section/);
   const mailbox = ui.slice(ui.indexOf('function renderMailboxOverlay()'), ui.indexOf('function renderRanking(rows)'));
   assert.match(mailbox, /guild-mailbox-announcement/);
   assert.match(mailbox, /escapeHTML\(announcementMessage\)/);
