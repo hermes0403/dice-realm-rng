@@ -64,7 +64,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, documentRef 
       '<section class="guild-empty card"><div class="guild-empty-emblem" aria-hidden="true">✦</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
       '<p class="muted">公會資料會綁定目前登入的遊戲帳號。</p>' +
-      '<button class="primary" type="button" data-guild-login>登入／註冊</button></section>';
+      '<button class="primary" type="button" data-guild-login>登入／註冊</button></section>' + renderMailboxOverlay();
   }
 
   function renderCreatePanel() {
