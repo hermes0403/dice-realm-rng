@@ -88,7 +88,7 @@ test('leader gift entry is inside Guild Settings and only visible to the guild l
 test('PWA assets and service worker cache keys stay synchronized after the Guild Settings move', () => {
   assert.ok(index.includes('guild.css?v=20261127-t0157-trade-top-gap'));
   assert.ok(index.includes('script.js?v=20261127-t0159-guild-xp-ledger'));
-  assert.ok(sw.includes('dice-realm-shell-v2.50'));
+  assert.ok(sw.includes('dice-realm-shell-v2.51'));
   assert.ok(sw.includes('script.js?v=20261127-t0159-guild-xp-ledger'));
   assert.ok(sw.includes('ui/guild.js?v=20261127-t0157-trade-top-gap'));
   assert.ok(sw.includes('services/cloud-save.js?v=20261127-t0156-guild-potion-gifting'));
