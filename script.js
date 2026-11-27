@@ -16,9 +16,9 @@ import { setupPetSellingUI } from './ui/pet-selling.js?v=20261121-pet-inventory-
 import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
 import { createAdminGrantService } from './admin/grants.js?v=20261127-t0160-guild-xp-console';
 
-import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
+import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261128-t0164-weather-deposit-fix';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
-import { createCloudSaveService } from './services/cloud-save.js?v=20261127-t0156-guild-potion-gifting';
+import { createCloudSaveService } from './services/cloud-save.js?v=20261128-t0164-weather-deposit-fix';
 import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261126-t0139-account-isolation';
@@ -167,6 +167,7 @@ const weatherSystem = createWeatherSystem({
  getState: () => S, getCurrentUser: () => currentUser,
  getAnnouncementChannel: () => realmSocialSystem?.getAnnouncementChannel() || null, openAuth, toast, save,
  render, renderCodex, renderGloves, flushCloudSave,
+ adoptServerBag: (bag, updatedAt) => cloudSaveService?.adoptServerBag(bag, updatedAt) || false,
  announceWeatherSummon, triggerWeatherSurge
 });
 const { getWeather, activeWeatherDice, applyServerWeatherRow, applyForcedWeather, refreshServerWeather, setupPlayerWeatherSubscription, loadWeatherSummonData, autoDepositRolledWeatherDice, renderWeatherSummon, refreshPlayerWeatherOverride, updateWeatherUI } = weatherSystem;
