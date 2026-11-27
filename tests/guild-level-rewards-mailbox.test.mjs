@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const followupMigration = read('../docs/migrations/20261126150000_guild_level_xp_rewards_update.sql');
-const migration = read('../docs/migrations/20261126120000_guild_level_rewards_mailbox.sql') + '\\n' + followupMigration;
+const rewardRebalanceMigration = read('../docs/migrations/20261127115300_guild_level_reward_potion_rebalance.sql');
+const migration = read('../docs/migrations/20261126120000_guild_level_rewards_mailbox.sql') + '\\n' + followupMigration + '\\n' + rewardRebalanceMigration;
 const guild = read('../ui/guild.js');
 const cloud = read('../services/cloud-save.js');
 const css = read('../guild.css');
@@ -31,14 +32,14 @@ test('T-0141 uses the complete owner-confirmed per-level XP thresholds', () => {
 
 test('all 19 guild level rewards match the approved reward schedule', () => {
   const rewards = [
-    [2, 'luck1', '幸運藥水 I ×1'], [3, 'luck3', '幸運藥水 III ×1'],
-    [4, 'speed1', '速度藥水 I ×1'], [5, 'badge_frame', '公會徽章框'],
-    [6, 'money1', '金錢藥水 I ×1'], [7, 'luck3', '幸運藥水 III ×1'],
-    [8, 'luck2', '幸運藥水 II ×1'], [9, 'name_color', '專屬公會名稱顏色'],
+    [2, 'luck1', '幸運藥水 I ×1'], [3, 'luck2', '幸運藥水 II ×1'],
+    [4, 'luck3', '幸運藥水 III ×1'], [5, 'speed2', '速度藥水 II ×1'],
+    [6, 'money1', '金錢藥水 I ×1'], [7, 'luck3', '幸運藥水 III ×2'],
+    [8, 'angel1', '天堂藥水 I ×1'], [9, 'name_color', '專屬公會名稱顏色'],
     [10, 'angel1', '天堂藥水 I ×1'], [11, 'guild_xp_bonus_5', '公會 XP 加成 +5%'],
-    [12, 'speed2', '速度藥水 II ×1'], [13, 'guild_xp_bonus_5', '公會 XP 加成 +5%'],
+    [12, 'speed2', '速度藥水 II ×5'], [13, 'guild_xp_bonus_5', '公會 XP 加成 +5%'],
     [14, 'money2', '金錢藥水 II ×1'], [15, 'badge_effect', '公會徽章特效'],
-    [16, 'luck3', '幸運藥水 III ×1'], [17, 'angel1', '天堂藥水 I ×1'],
+    [16, 'luck3', '幸運藥水 III ×5'], [17, 'angel1', '天堂藥水 I ×1'],
     [18, 'angel1', '天堂藥水 I ×2'], [19, 'guild_background', '專屬公會背景'],
     [20, 'angel2', '天堂藥水 II ×1']
   ];
@@ -46,7 +47,9 @@ test('all 19 guild level rewards match the approved reward schedule', () => {
     assert.ok(migration.includes(`when ${level} then v_reward_key := '${key}'`), `missing level ${level}`);
     assert.ok(migration.includes(label), `missing reward label for level ${level}`);
   }
-  assert.match(migration, /v_reward_amount := 2/);
+  assert.ok(migration.includes("when 7 then v_reward_key := 'luck3'; v_reward_type := 'potion'; v_reward_text := '幸運藥水 III ×2'; v_reward_amount := 2;"));
+  assert.ok(migration.includes("when 12 then v_reward_key := 'speed2'; v_reward_type := 'potion'; v_reward_text := '速度藥水 II ×5'; v_reward_amount := 5;"));
+  assert.ok(migration.includes("when 16 then v_reward_key := 'luck3'; v_reward_type := 'potion'; v_reward_text := '幸運藥水 III ×5'; v_reward_amount := 5;"));
   assert.match(migration, /count\(\*\)::integer into v_bonus_count/);
   assert.match(migration, /1 \+ v_bonus_count \* 0\.05/);
 });
