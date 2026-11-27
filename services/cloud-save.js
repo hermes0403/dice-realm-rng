@@ -8,6 +8,9 @@ export function isNewerServerVersion(incoming, current) {
 
 export function mergeLocalBagDelta(serverBag, baseBag, localBag) {
  const merged = { ...(serverBag && typeof serverBag === 'object' ? serverBag : {}) };
+ for (const [id, value] of Object.entries(merged)) {
+  if ((Number(value) || 0) <= 0) delete merged[id];
+ }
  const base = baseBag && typeof baseBag === 'object' ? baseBag : {};
  const local = localBag && typeof localBag === 'object' ? localBag : {};
  const ids = new Set([...Object.keys(base), ...Object.keys(local)]);
