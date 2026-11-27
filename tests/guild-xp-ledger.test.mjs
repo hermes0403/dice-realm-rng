@@ -25,7 +25,7 @@ test('all existing XP task paths write the same ledger', () => {
   assert.match(migration, /admin_manual/);
 });
 test('admin panel can select a player, submit reasoned XP, and inspect recent ledger rows', () => {
-  for (const id of ['adminGuildXpTarget','adminGuildXpAmount','adminGuildXpReason','adminGuildXpGrantBtn','adminGuildXpHistoryFold','adminGuildXpHistoryList']) {
+  for (const id of ['adminGuildXpTarget','adminGuildXpAmount','adminGuildXpReason','adminGuildXpGrantBtn','adminGuildXpFold','adminGuildXpHistoryList']) {
     assert.ok(html.includes(id), 'missing '+id);
   }
   assert.match(playerManagement, /adminGuildXpTarget/);
