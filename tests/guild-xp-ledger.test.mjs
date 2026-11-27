@@ -9,6 +9,7 @@ const adminUi = read('../admin/ui-bindings.js');
 const playerManagement = read('../admin/player-management.js');
 const script = read('../script.js');
 const sw = read('../sw.js');
+const edge = read('../backend/edge-functions/dice-rng-admin/index.ts');
 
 test('guild XP ledger is private to server-side callers and idempotent', () => {
   assert.match(migration, /award_key text not null unique/);
