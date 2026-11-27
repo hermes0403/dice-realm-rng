@@ -8,7 +8,8 @@ export function createNavigationUI({
   loadWeatherSummonData,
   renderPetsPage,
   renderDailyShop,
-  loadGuildPage
+  loadGuildPage,
+  loadGuildSettingsEntry
 }) {
   const primaryItems = [
     ['roll', '大廳', '✦'],
@@ -124,6 +125,7 @@ export function createNavigationUI({
     if (id === 'weather-summon') loadWeatherSummonData();
     if (id === 'daily-shop') renderDailyShop?.();
     if (id === 'guild') loadGuildPage?.();
+    if (id === 'profile') loadGuildSettingsEntry?.();
     if (id === 'workshop') setWorkshopCategory('gloves');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

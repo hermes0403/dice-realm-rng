@@ -76,10 +76,19 @@ test('server potion changes are adopted into the versioned cloud save baseline',
   assert.match(script, /adoptServerPotions:\(inventory,updatedAt\)/);
 });
 
-test('PWA assets use the T-0156 cache-busting version', () => {
-  const version = '20261127-t0156-guild-potion-gifting';
-  assert.ok(index.includes('guild.css?v=' + version));
-  assert.ok(index.includes('script.js?v=' + version));
-  assert.ok(sw.includes('dice-realm-shell-v2.44'));
-  for (const path of ['script.js?v=','services/cloud-save.js?v=','ui/guild.js?v=','guild.css?v=']) assert.ok(sw.includes(path + version), path);
+test('leader gift entry is located in Settings and only visible to the guild leader', () => {
+  assert.ok(index.indexOf('id="guildLeaderGiftSetting"') > index.indexOf('id="page-profile"'));
+  assert.ok(guild.includes("const visible = currentData?.my_role === 'leader'"));
+  assert.ok(guild.includes("button.matches('[data-guild-potion-gift-open]')"));
+  assert.ok(!guild.includes('guild-potion-gift-panel'));
+  assert.ok(script.includes('loadGuildSettingsEntry'));
+});
+test('PWA assets and service worker cache keys stay synchronized after the Settings move', () => {
+  assert.ok(index.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
+  assert.ok(index.includes('script.js?v=20261127-t0157-guild-gift-settings-entry'));
+  assert.ok(sw.includes('dice-realm-shell-v2.45'));
+  assert.ok(sw.includes('script.js?v=20261127-t0157-guild-gift-settings-entry'));
+  assert.ok(sw.includes('ui/guild.js?v=20261127-t0157-guild-gift-settings-entry'));
+  assert.ok(sw.includes('services/cloud-save.js?v=20261127-t0156-guild-potion-gifting'));
+  assert.ok(sw.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
 });

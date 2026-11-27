@@ -227,13 +227,14 @@ function toast(t){let e=document.getElementById('toast');e.textContent=t;e.class
 // Keep the optional guild module outside the core app's static import graph.
 // A guild asset failure must not stop authentication controls from booting.
 let guildSystem=null;
+let guildSettingsEntryUserId=null;
 async function loadGuildPage(){
   const guildRoot=document.getElementById('guildContent');
   if(!guildRoot)return false;
   guildRoot.innerHTML='<div class="card"><p class="muted">正在啟動公會功能…</p></div>';
   try{
     if(!guildSystem){
-      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0156-guild-potion-gifting');
+      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0157-guild-gift-settings-entry');
       guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,getState:()=>S,POTIONS,flushCloudSave,adoptServerPotions:(inventory,updatedAt)=>cloudSaveService?.adoptServerPotions(inventory,updatedAt)||false,documentRef:document,toast});
     }
     return await guildSystem.load();
@@ -250,6 +251,13 @@ async function loadGuildPage(){
     },{once:true});
     return false;
   }
+}
+async function loadGuildSettingsEntry(){
+  const userId=String(currentUser?.id||'');
+  if(!userId){guildSettingsEntryUserId=null;return;}
+  if(guildSettingsEntryUserId===userId&&guildSystem)return;
+  await loadGuildPage();
+  guildSettingsEntryUserId=userId;
 }
 function isAdmin(){return (currentUser?.email||'').toLowerCase()==='toby110403@gmail.com'}
 realmSocialSystem.setupRealmSocialUI();
@@ -316,7 +324,7 @@ const petTradingSearch = createPetTradingSearch({
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop,
-  loadGuildPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  loadGuildPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh(), loadGuildSettingsEntry
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 // Authentication is bootstrapped above, before optional game UI initialization.
