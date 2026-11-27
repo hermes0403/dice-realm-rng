@@ -6,7 +6,6 @@ const service = readFileSync(new URL('../services/pet-trading-search.js', import
 const script = readFileSync(new URL('../script.js', import.meta.url), 'utf8');
 const cloudSave = readFileSync(new URL('../services/cloud-save.js', import.meta.url), 'utf8');
 import { getPendingIncomingTradeRequests } from '../services/pet-trading-search.js';
-const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url), 'utf8');
 const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
@@ -256,7 +255,7 @@ test('guild module and app shell use a fresh cache version with no stale setting
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
   assert.match(index, /script\.js\?v=20261127-t0157-trade-top-gap/);
   assert.match(script, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
-  assert.match(sw, /dice-realm-shell-v2\.47/);
+  assert.match(sw, /dice-realm-shell-v2\.48/);
   assert.match(sw, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
 });
 
