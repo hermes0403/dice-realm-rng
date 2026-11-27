@@ -1,7 +1,7 @@
 ---
 id: T-0147
 title: 實作公會名稱顏色、徽章特效與專屬背景
-status: in_progress
+status: review
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -58,10 +58,10 @@ T-0141 已將這三項設為對應等級的 cosmetic 獎勵；本任務補上解
 - [x] 不改變 XP、獎勵發放、玩家資產與其他公會功能。
 - [x] 新增解鎖、權限、偽造輸入、持久化及 UI 回歸測試；相關測試通過。
 - [x] GitHub Pages 部署成功，並完成程式碼與線上部署版本核對。
-- [ ] Lv.9 僅提供預設、星雲紫、冰晶藍；其餘顏色保留供未來等級使用。
-- [ ] Lv.15 僅提供預設、星環環繞；星環具明顯雙層環繞與發光效果。
-- [ ] Lv.19 僅提供預設、極光幻境；其他背景保留供未來等級使用。
-- [ ] 前端選項與正式資料庫 RPC／CHECK constraint 使用相同白名單，偽造 ID 會被拒絕。
+- [x] Lv.9 僅提供預設、星雲紫、冰晶藍；其餘顏色保留供未來等級使用。
+- [x] Lv.15 僅提供預設、星環環繞；星環具明顯雙層環繞與發光效果。
+- [x] Lv.19 僅提供預設、極光幻境；其他背景保留供未來等級使用。
+- [x] 前端選項與正式資料庫 RPC／CHECK constraint 使用相同白名單，偽造 ID 會被拒絕。
 
 ## 紀錄
 
@@ -71,3 +71,32 @@ T-0141 已將這三項設為對應等級的 cosmetic 獎勵；本任務補上解
 - 2026-11-27 05:50 [叉子] 實作 PR #407 已合併至 main，合併 commit：822db106dc8804c0ad59cbc939de76ccb76925c6。Supabase migration `guild_cosmetics` 套用成功，migration version `20261126214906`；欄位、函式權限及既有公會資料已驗證。GitHub Pages deployment run #45900691950 成功。PWA／公會回歸 workflow 通過；全遊戲回歸仍有一項既有、與本任務無關的寵物管理排序測試失敗（`tests/pet-removal-admin-counts.test.js`）。本任務功能驗收完成。
 
 - 2026-11-27 20:14 [叉子] 依棒子最新要求補強 T-0147：Lv.9 限制為星雲紫／冰晶藍兩種名稱色；Lv.15 限制為星環環繞一種徽章特效，並改為高對比雙層旋轉光環與紫藍發光；Lv.19 限制為極光幻境一種背景並提高色彩辨識度。其他既有外觀 ID 保留於程式樣式及選項定義，暫不開放，供未來等級使用。原任務分支與 main 比較為 DIVERGED（原分支 ahead 23、behind 130），故保留舊分支不覆寫，改由最新 main 建立後續任務分支 task/T-0147-guild-cosmetics-rebalance；本分支已更新 UI、CSS、回歸測試及 migration。正式 Supabase 專案已套用 migration guild_cosmetics_level_option_limits，回讀確認三項 CHECK constraint 與 RPC 白名單一致；現有 5 個公會的外觀設定皆為預設值，未變更玩家資料。尚待 GitHub Actions、PR 整合及 Pages 部署驗證。
+
+## 完工回報
+
+### 改了什麼
+
+- `ui/guild.js`：Lv.9、Lv.15、Lv.19 只顯示各自指定的外觀選項；其餘既有外觀仍保留供未來等級使用。
+- `guild.css`：星環特效改為雙層高對比旋轉環與紫藍光暈；極光背景提高色彩辨識度。
+- `docs/migrations/20261127121441_guild_cosmetics_level_option_limits.sql`：正式資料庫限制三類外觀白名單，並同步 RPC 驗證。
+- `tests/guild-cosmetics.test.mjs`：補上外觀選項限制、資料庫白名單及特效回歸測試。
+- PR #433 已合併，merge commit：`198d128fb5aba634adf7a137fefaa69f23c0ba58`。
+
+### 怎麼驗證的
+
+- Supabase 正式專案 `pkdctcfifauygnjipmab`：migration `20261127121441` 套用成功；回讀三項 CHECK constraint 與 `private.guild_update_cosmetics`，白名單一致。套用前 5 個公會的外觀欄位皆為預設值。
+- GitHub Actions Full game regression audit：`node --test tests/*.test.js tests/*.test.mjs`，457/457 通過，exit code 0；JavaScript syntax 與 `git diff --check` 步驟亦通過。
+- PWA display regression：117/117 通過，exit code 0。
+- Board lifecycle validation、Cloud save rollback、Guild potion gifting、Coin boost workflows 均通過。
+- GitHub Pages deployment run `45997378809`：build、report-build-status、deploy 全部成功。
+
+### 沒做／做不到的
+
+- 目前正式資料最高公會等級為 Lv.8，尚無公會觸發 Lv.9／15／19；因此已驗證程式、資料庫限制與回歸測試，尚未有實際升級到該等級的玩家畫面可供核對。
+- 其餘外觀仍保留於程式，尚未分配到未來等級。
+
+### 衍生任務／影響任務
+
+- 無新增衍生任務；無其他任務需追加 impact。
+
+- 2026-11-27 20:18 [叉子] 完成 T-0147 外觀選項限制與視覺強化，PR #433 已合併至 main；正式 Supabase migration、回歸測試及 GitHub Pages 部署均有成功證據。依完工回報提交 review，等待棒子驗收。
