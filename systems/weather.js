@@ -217,7 +217,10 @@ async function performWeatherDiceDeposit(d, qty, automatic=false){
   if(adopted)toast(automatic
    ? `已自動添加 ${d.name}，增加 ${format(data.added_points)} 點召喚能量`
    : `已投入 ${d.name} ×${qty}，增加 ${format(data.added_points)} 點召喚能量`);
-  else toast('投入已由伺服器處理，正在同步最新背包資料');
+  else {
+   await loadWeatherSummonData(false);
+   toast('投入已由伺服器處理；本機保留較新的背包資料');
+  }
   return data;
  });
 }
