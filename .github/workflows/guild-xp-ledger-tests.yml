@@ -3,7 +3,8 @@ on:
   pull_request:
     paths:
       - 'admin/**'
-      - 'docs/migrations/*guild_xp_award_ledger_and_admin_grants.sql'
+      - 'backend/edge-functions/dice-rng-admin/**'
+      - 'docs/migrations/*guild_xp*.sql'
       - 'index.html'
       - 'script.js'
       - 'sw.js'
@@ -13,7 +14,7 @@ on:
     branches: [main]
     paths:
       - 'admin/**'
-      - 'docs/migrations/*guild_xp_award_ledger_and_admin_grants.sql'
+      - 'docs/migrations/*guild_xp*.sql'
       - 'index.html'
       - 'script.js'
       - 'sw.js'
