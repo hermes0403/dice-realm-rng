@@ -196,15 +196,20 @@
 .guild-name-color-emerald{background:linear-gradient(90deg,#b8f2c5,#61c9a2,#d0f5a9);background-clip:text;-webkit-background-clip:text;color:transparent}
 .guild-name-color-solar{background:linear-gradient(90deg,#fff0a6,#e9b85f,#fff0c2);background-clip:text;-webkit-background-clip:text;color:transparent}
 .guild-banner.guild-bg-nebula{background:radial-gradient(ellipse at 84% 8%,rgba(128,100,219,.38),transparent 48%),linear-gradient(125deg,#171c35,#29213f 55%,#14283d)!important;border-color:rgba(158,135,235,.42)!important}
-.guild-banner.guild-bg-aurora{background:radial-gradient(ellipse at 12% 0%,rgba(64,180,165,.3),transparent 48%),radial-gradient(ellipse at 90% 100%,rgba(100,119,218,.26),transparent 50%),linear-gradient(125deg,#142a32,#1c2940 60%,#20203a)!important;border-color:rgba(105,185,175,.38)!important}
+.guild-banner.guild-bg-aurora{background:radial-gradient(ellipse at 8% 4%,rgba(49,225,196,.48),transparent 43%),radial-gradient(ellipse at 76% 2%,rgba(91,135,255,.42),transparent 46%),radial-gradient(ellipse at 88% 100%,rgba(154,102,255,.34),transparent 48%),linear-gradient(125deg,#102d35 0%,#182d49 52%,#252346 100%)!important;border-color:rgba(93,225,210,.72)!important;box-shadow:inset 0 0 34px rgba(65,204,198,.12),0 0 22px rgba(75,164,220,.12)!important}
 .guild-banner.guild-bg-eclipse{background:radial-gradient(circle at 84% 18%,rgba(173,143,110,.22),transparent 34%),linear-gradient(125deg,#151820,#242638 58%,#111827)!important;border-color:rgba(164,154,134,.34)!important}
 .guild-banner.guild-bg-crimson{background:radial-gradient(ellipse at 88% 10%,rgba(191,75,99,.28),transparent 48%),linear-gradient(125deg,#2b1b2c,#31202e 58%,#1d2438)!important;border-color:rgba(192,105,128,.38)!important}
 .guild-banner-emblem{position:relative}
 .guild-banner-emblem.guild-badge-effect-pulse{animation:guildCosmeticPulse 3.4s ease-in-out infinite}
-.guild-banner-emblem.guild-badge-effect-orbit::after{content:"";position:absolute;inset:-9px;border:1px solid rgba(180,163,255,.68);border-radius:36%;transform:rotate(35deg);box-shadow:0 0 12px rgba(166,145,255,.3);pointer-events:none}
+.guild-banner-emblem.guild-badge-effect-orbit{z-index:0;isolation:isolate;filter:drop-shadow(0 0 9px rgba(90,220,255,.82)) drop-shadow(0 0 18px rgba(163,111,255,.68));animation:guildOrbitCoreGlow 2.8s ease-in-out infinite}
+.guild-banner-emblem.guild-badge-effect-orbit::before,.guild-banner-emblem.guild-badge-effect-orbit::after{content:"";position:absolute;inset:-8px;border:2px solid rgba(99,226,255,.95);border-radius:35%;box-shadow:0 0 10px rgba(75,218,255,.72),inset 0 0 9px rgba(75,218,255,.28);pointer-events:none;animation:guildOrbitSpin 7s linear infinite}
+.guild-banner-emblem.guild-badge-effect-orbit::after{inset:-14px;border:2px dashed rgba(207,163,255,.95);border-radius:50%;box-shadow:0 0 16px rgba(175,119,255,.82);animation:guildOrbitSpinReverse 11s linear infinite}
 .guild-banner-emblem.guild-badge-effect-radiant{filter:drop-shadow(0 0 7px rgba(191,169,255,.62))}
 @keyframes guildCosmeticPulse{0%,100%{filter:drop-shadow(0 0 3px rgba(159,128,255,.24))}50%{filter:drop-shadow(0 0 10px rgba(191,157,255,.7))}}
-@media(prefers-reduced-motion:reduce){.guild-banner-emblem.guild-badge-effect-pulse{animation:none}}
+@keyframes guildOrbitSpin{to{transform:rotate(395deg)}}
+@keyframes guildOrbitSpinReverse{to{transform:rotate(-395deg)}}
+@keyframes guildOrbitCoreGlow{0%,100%{filter:drop-shadow(0 0 7px rgba(90,220,255,.66)) drop-shadow(0 0 14px rgba(163,111,255,.48))}50%{filter:drop-shadow(0 0 13px rgba(90,235,255,1)) drop-shadow(0 0 25px rgba(185,126,255,.9))}}
+@media(prefers-reduced-motion:reduce){.guild-banner-emblem.guild-badge-effect-pulse,.guild-banner-emblem.guild-badge-effect-orbit,.guild-banner-emblem.guild-badge-effect-orbit::before,.guild-banner-emblem.guild-badge-effect-orbit::after{animation:none}}
 @media(max-width:520px){.guild-cosmetics-panel{padding:14px}.guild-cosmetic-control select{font-size:13px}}
 
 .guild-banner-emblem.guild-badge-effect-orbit,.guild-banner-emblem.guild-badge-effect-radiant{animation:none}
