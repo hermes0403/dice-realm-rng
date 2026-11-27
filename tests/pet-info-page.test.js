@@ -12,15 +12,15 @@ test('navigation and page now expose pet information instead of patch notes', as
   assert.doesNotMatch(html, /遊戲更新日誌|REALM PATCH NOTES|update-log-card/);
 });
 
-test('pet information page lists six estimated weight acquisition odds to five decimal places', async () => {
+test('pet information page lists six estimated weight acquisition odds to four decimal places', async () => {
   const html = await read('index.html');
   const rows = [
-    '1K+ kg', '0.24990%',
-    '50K+ kg', '0.02323%',
-    '1M+ kg', '0.00930%',
-    '25M+ kg', '0.00386%',
-    '200M+ kg', '0.00333%',
-    '1B+ kg', '0.00090%'
+    '1K+ kg', '0.2499%',
+    '50K+ kg', '0.0232%',
+    '1M+ kg', '0.0093%',
+    '25M+ kg', '0.0038%',
+    '200M+ kg', '0.0033%',
+    '1B+ kg', '0.0009%'
   ];
   for (const value of rows) assert.ok(html.includes(value), `missing weight odds value: ${value}`);
   assert.match(html, /概略估算/);
