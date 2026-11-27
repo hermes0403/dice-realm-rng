@@ -82,9 +82,9 @@ test('Lv.9、Lv.15、Lv.19 只顯示指定外觀，其他選項保留供未來�
 });
 
 test('資料庫同步限制三個等級可用的外觀，並拒絕直接呼叫 RPC 傳入其他 ID', () => {
-  assert.match(restrictionMigration, /name_color in \('default','nebula','ice'\)/);
-  assert.match(restrictionMigration, /badge_effect in \('none','orbit'\)/);
-  assert.match(restrictionMigration, /background_theme in \('default','aurora'\)/);
+  assert.match(restrictionMigration, /name_color in \\('default','nebula','ice'\\)/);
+  assert.match(restrictionMigration, /badge_effect in \\('none','orbit'\\)/);
+  assert.match(restrictionMigration, /background_theme in \\('default','aurora'\\)/);
   assert.match(restrictionMigration, /guild_name_color_invalid/);
   assert.match(restrictionMigration, /guild_badge_effect_invalid/);
   assert.match(restrictionMigration, /guild_background_invalid/);
@@ -94,6 +94,7 @@ test('Lv.15 星環特效具雙層高對比環繞、發光與減少動態效果�
   assert.match(css, /guildOrbitSpin/);
   assert.match(css, /guildOrbitSpinReverse/);
   assert.match(css, /guildOrbitCoreGlow/);
+  assert.doesNotMatch(css, /guild-badge-effect-orbit,\.guild-banner-emblem\.guild-badge-effect-radiant\{animation:none/);
   assert.match(css, /prefers-reduced-motion:reduce[^}]*guild-badge-effect-orbit/);
   assert.match(css, /guild-bg-aurora[^}]*box-shadow/);
 });
