@@ -72,10 +72,10 @@ test('admin page contains the requested pet sort labels and global inventory pan
     ['income-asc', '依每秒金錢遞增'],
     ['income-desc', '依每秒金錢遞減']
   ];
-  const options = [...html.matchAll(/<option\\b([^>]*)>([^<]*)<\\/option>/g)]
+  const options = [...html.matchAll(/<option\b([^>]*)>([^<]*)<\/option>/g)]
     .map(match => ({ attrs: match[1], label: match[2] }));
   const positions = labels.map(([value, label]) => options.findIndex(option =>
-    new RegExp('(?:^|\\\\s)value="' + value + '"(?:\\\\s|$)').test(option.attrs) && option.label === label
+    option.attrs.includes('value="' + value + '"') && option.label === label
   ));
   assert.ok(positions.every((index, i) => index >= 0 && (i === 0 || index > positions[i - 1])),
     'sort labels should appear in the requested order');
