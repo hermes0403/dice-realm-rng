@@ -77,14 +77,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     el.dataset.kind = kind;
   }
 
-  function syncPotionGiftSettingsEntry() {
-    const visible = currentData?.my_role === 'leader';
-    const entry = documentRef.getElementById('guildLeaderGiftSetting');
-    const hint = documentRef.getElementById('guildLeaderGiftSettingHint');
-    if (entry) entry.hidden = !visible;
-    if (hint) hint.hidden = !visible;
-  }
-
   function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
   function guildNameStyle(guild) {
     const value = safeCosmetic(guild?.name_color, NAME_COLOR_IDS, 'default');
@@ -109,7 +101,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   }
 
   function renderGuest() {
-    syncPotionGiftSettingsEntry();
     root().innerHTML = navMarkup() +
       '<section class="guild-empty card"><div class="guild-empty-emblem" aria-hidden="true">✦</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
@@ -486,9 +477,10 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       const menu = '<section class="card guild-settings-menu"><div class="eyebrow">GUILD CONTROL</div><h2>公會設定</h2><div class="guild-settings-menu-grid">' +
         (isOrdinaryMember ? '' : '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="basic"><b>公會基本設定</b><small>公會名稱、介紹、加入方式與公告</small><span>›</span></button>') +
         (isLeader ? '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="promotion"><b>公會晉升成員</b><small>任命或撤除副隊長職位</small><span>›</span></button>' : '') +
+        (isLeader ? '<button type="button" class="guild-settings-menu-button" data-guild-potion-gift-open><b>會長發放</b><small>把自己持有的藥水贈送給公會成員，對方可在公會郵箱領取</small><span>›</span></button>' : '') +
         '<button type="button" class="guild-settings-menu-button" data-guild-settings-section="cosmetics"><b>公會專屬外觀</b><small>名稱顏色、徽章特效與專屬背景</small><span>›</span></button>' +
         '</div></section>';
-      root().innerHTML = renderBackButton() + menu + leavePanel + renderLeaveConfirmation(); return;
+      root().innerHTML = renderBackButton() + menu + leavePanel + renderLeaveConfirmation() + renderPotionGiftOverlay(); return;
     }
     const back = '<button type="button" class="guild-settings-back" data-guild-settings-back>‹ 返回公會設定</button>';
     if (activeSettingsSection === 'basic') {
