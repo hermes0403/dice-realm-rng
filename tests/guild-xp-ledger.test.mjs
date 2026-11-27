@@ -53,7 +53,7 @@ test('admin panel can select a guild, submit reasoned XP, and inspect recent led
   assert.match(adminUi, /guild_xp_history/);
   assert.match(adminUi, /all_login/);
   assert.match(html, /玩家累積 XP/);
-  assert.match(adminUi, /全員登入 \+20 與管理員整個公會發放屬於公會共享 XP/);
+  assert.match(html, /全員登入 \+20 與管理員整個公會發放屬於公會共享 XP/);
   assert.match(adminUi, /member_snapshot/);
   assert.match(adminUi, /Asia\/Taipei/);
 });
