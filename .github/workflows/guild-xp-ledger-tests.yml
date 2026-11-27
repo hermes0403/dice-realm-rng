@@ -27,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: node --check admin/navigation.js
       - run: node --check admin/ui-bindings.js
       - run: node --check admin/player-management.js
       - run: node --check script.js
