@@ -5,8 +5,9 @@ import { classifyAdminFold, ensureFoldId, matchesAdminFold } from '../admin/navi
 function fold(id, summary, content = summary) {
   return { id, textContent: content, querySelector(selector) { return selector === 'summary' ? { textContent: summary } : null; } };
 }
-test('管理功能依操作或玩家資料分成兩大分類', () => {
+test('管理功能分成操作、玩家資料與 XP 三大分類', () => {
   const cases = [
+    ['adminXpCategoryFold','XP 管理','xp'],
     ['adminIncomeMonitorFold','全體玩家每秒賺錢監控','players'],['adminBroadcastFold','管理員訊息／全服投票','actions'],
     ['adminGrantHistoryFold','管理員發放紀錄','players'],['adminPetFusionLogsFold','全體玩家寵物合成紀錄','players'],
     ['adminPetInventoryCountsFold','全服各寵物持有數量','players'],['adminPetOddsManagementFold','寵物合成機率管理','actions'],
@@ -48,7 +49,7 @@ test('管理員頁面的 28 個功能區塊全部可分類', () => {
   const entries=[...section.matchAll(/<details class="admin-fold"([^>]*)>\s*<summary>(.*?)<\/summary>/gs)];
   assert.equal(entries.length, 28);
   assert.doesNotMatch(section,/反作弊／客戶端完整性|adminClientAuditFold/);
-  const categories=new Set(['actions','players']);
+  const categories=new Set(['actions','players','xp']);
   for(const [,attrs,raw] of entries){const id=attrs.match(/id="([^"]+)"/)?.[1]||'';const title=raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();assert.ok(categories.has(classifyAdminFold(fold(id,title))),title);}
   assert.match(section,/id="adminActivityButton"/);
 });

@@ -105,45 +105,44 @@ Deno.serve(async (req: Request) => {
     }
     if(userData.user.email?.toLowerCase()!==ADMIN_EMAIL) return json({error:"沒有管理員權限"},403);
     if(body.action==="guild_xp_grant"){
-      const targetUserId=String(body.targetUserId||"").trim();
+      const guildId=String(body.guildId||"").trim();
       const amount=Number(body.amount);
       const reason=String(body.reason||"").trim();
       const requestId=String(body.requestId||"");
-      if(!targetUserId) return json({error:"請選擇要發放 XP 的玩家"},400);
+      if(!guildId) return json({error:"請選擇要發放 XP 的公會"},400);
       if(!Number.isSafeInteger(amount)||amount<1||amount>1000000000) return json({error:"XP 必須是 1～1,000,000,000 的正整數"},400);
       if(reason.length<3||reason.length>300) return json({error:"發放原因必須為 3～300 字"},400);
       if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) return json({error:"發放識別碼無效，請重新操作"},400);
-      const {data,error}=await admin.rpc("admin_grant_guild_xp",{
-        p_admin_user_id:userData.user.id,
-        p_admin_email:userData.user.email,
-        p_target_user_id:targetUserId,
-        p_amount:amount,
-        p_reason:reason,
-        p_request_id:requestId
+      const {data,error}=await admin.rpc("admin_grant_guild_xp_to_guild",{
+        p_admin_user_id:userData.user.id,p_admin_email:userData.user.email,p_guild_id:guildId,
+        p_amount:amount,p_reason:reason,p_request_id:requestId
       });
       if(error) {
-        if(String(error.message||"").includes("target_player_not_in_guild")) return json({error:"這位玩家目前沒有加入公會，無法發放 XP"},400);
+        if(String(error.message||"").includes("guild_not_found")) return json({error:"找不到這個公會，請重新整理名單"},404);
         throw error;
       }
-      // Resolve the authoritative ledger row after the RPC. This makes a retry
-      // return the original amount and prevents a reused request ID from being
-      // misreported as a grant to a different player or guild.
       const {data:ledger,error:ledgerError}=await admin.from("guild_xp_award_ledger")
         .select("guild_id,member_id,actor_user_id,base_xp,xp_awarded,actor_admin_email,reason,details")
-        .eq("award_key","admin:"+requestId).maybeSingle();
+        .eq("award_key","admin_guild:"+requestId).maybeSingle();
       if(ledgerError) throw ledgerError;
       if(!ledger) throw new Error("XP 已送出，但找不到對應帳本紀錄；請重新載入紀錄確認。");
-      if(String(ledger.member_id||"").toLowerCase()!==targetUserId.toLowerCase()
+      if(String(ledger.guild_id||"").toLowerCase()!==guildId.toLowerCase()
+        || ledger.member_id!==null
         || String(ledger.actor_user_id||"").toLowerCase()!==String(userData.user.id).toLowerCase()
         || Number(ledger.base_xp)!==amount
         || String(ledger.reason||"")!==reason
-        || String(ledger.actor_admin_email||"").toLowerCase()!==String(userData.user.email||"").toLowerCase()) {
+        || String(ledger.actor_admin_email||"").toLowerCase()!==String(userData.user.email||"").toLowerCase()
+        || ledger.details?.grant_scope!=="guild") {
         return json({error:"這個發放識別碼已用於其他資料，請重新操作；系統沒有重複發放 XP。"},409);
       }
       const guildName=String(ledger.details?.guild_name||data?.guild_name||"該公會");
-      const targetName=String(ledger.details?.member_name||ledger.details?.target_username||data?.target_username||"選定玩家");
-      return json({success:true,result:{...data,guild_name:guildName,target_username:targetName,
-        xp_awarded:Number(ledger.xp_awarded)||0,already_processed:Number(data?.xp_awarded||0)===0}});
+      return json({success:true,result:{...data,guild_name:guildName,xp_awarded:Number(ledger.xp_awarded)||0,
+        already_processed:Number(data?.xp_awarded||0)===0,grant_scope:"guild"}});
+    }
+    if(body.action==="guild_xp_dashboard"){
+      const {data,error}=await admin.rpc("admin_get_guild_xp_dashboard");
+      if(error) throw error;
+      return json({success:true,guilds:Array.isArray(data?.guilds)?data.guilds:[],players:Array.isArray(data?.players)?data.players:[]});
     }
     if(body.action==="guild_xp_history"){
       const {data:rows,error}=await admin.from("guild_xp_award_ledger")
