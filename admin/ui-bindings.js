@@ -27,9 +27,26 @@ document.getElementById('adminWeatherHistoryRefresh')?.addEventListener('click',
 document.getElementById('adminActivityButton')?.addEventListener('click',()=>{if(!isAdmin()){toast('沒有管理員權限');return}const fold=document.getElementById('adminCoinBoostFold');if(fold){fold.open=true;fold.scrollIntoView({behavior:'smooth',block:'center'});}document.getElementById('adminCoinBoostScope')?.focus();document.getElementById('adminCoinBoostStatus').textContent='已開啟收益倍率設定。';});
 document.getElementById('adminApplyGlobalBoostBtn')?.addEventListener('click',async()=>{if(!isAdmin()){toast('沒有管理員權限');return}const luckValue=Number(document.getElementById('adminGlobalLuckPercent').value),speedValue=Number(document.getElementById('adminGlobalSpeedPercent').value),fusionValue=Number(document.getElementById('adminFusionLuckPercent').value),seconds=Math.floor(Number(document.getElementById('adminGlobalBoostSeconds').value)||0),msg=document.getElementById('adminGlobalBoostMessage'),btn=document.getElementById('adminApplyGlobalBoostBtn');if(!Number.isFinite(luckValue)||!Number.isFinite(speedValue)||!Number.isFinite(fusionValue)||luckValue<0||speedValue<0||fusionValue<0||luckValue>500||speedValue>500||fusionValue>500){msg.textContent='全體運氣、速度與寵物融合運氣都需輸入 0 至 500 的百分比';return}if(seconds<1||seconds>604800){msg.textContent='持續時間需輸入 1 至 604800 秒';return}if(!confirm('確定套用全體運氣 +'+luckValue+'%、速度 +'+speedValue+'%、寵物融合運氣 +'+fusionValue+'%，持續 '+seconds+' 秒？各項目前加成都會被取代。'))return;btn.disabled=true;msg.textContent='正在同步全體加成與寵物融合運氣…';try{const fusionResult=await supabaseClient.rpc('admin_set_realm_fusion_luck',{p_fusion_luck_percent:fusionValue,p_duration_seconds:seconds});if(fusionResult.error)throw fusionResult.error;const {data,error}=await supabaseClient.rpc('admin_set_realm_global_boost',{p_luck_percent:luckValue,p_speed_percent:speedValue,p_duration_seconds:seconds});if(error)throw error;setGlobalBoostState({...data,...(fusionResult.data||{})});updateGlobalBoostStatus();renderRealmActivity();render();restartAutoInterval();msg.textContent='已套用全體運氣、速度與寵物融合運氣，持續 '+seconds+' 秒。';toast('全體加成已同步')}catch(e){msg.textContent='設定未完整成功：'+(e.message||'請稍後重試')+'；請重新整理確認目前狀態。';toast(msg.textContent)}finally{btn.disabled=false}});
   let guildXpRequestId=null;
-  for(const id of ['adminGuildXpTarget','adminGuildXpAmount','adminGuildXpReason']){
+  let guildXpDashboardCache=null;
+  for(const id of ['adminGuildXpGuild','adminGuildXpAmount','adminGuildXpReason']){
     const field=document.getElementById(id);
-    field?.addEventListener(id==='adminGuildXpTarget'?'change':'input',()=>{guildXpRequestId=null;});
+    field?.addEventListener(id==='adminGuildXpGuild'?'change':'input',()=>{guildXpRequestId=null;});
+  }
+  async function loadAdminGuildXpDashboard(force=false){
+    if(!isAdmin())return null;
+    if(guildXpDashboardCache&&!force)return guildXpDashboardCache;
+    const data=await adminApi({action:'guild_xp_dashboard'});
+    guildXpDashboardCache={guilds:Array.isArray(data.guilds)?data.guilds:[],players:Array.isArray(data.players)?data.players:[]};
+    const select=document.getElementById('adminGuildXpGuild');
+    if(select){
+      const old=select.value;
+      select.innerHTML='<option value="">請選擇要發放的公會</option>'+guildXpDashboardCache.guilds.map(g=>{
+        const label=String(g.name||'未命名公會')+' · Lv.'+Number(g.level||1)+' · '+format(g.member_count||0)+' 人 · '+format(g.xp_total||0)+' XP';
+        return '<option value="'+escapeHTML(g.id)+'">'+escapeHTML(label)+'</option>';
+      }).join('');
+      if(guildXpDashboardCache.guilds.some(g=>g.id===old))select.value=old;
+    }
+    return guildXpDashboardCache;
   }
   async function loadAdminGuildXpHistory(){
     const list=document.getElementById('adminGuildXpHistoryList');
@@ -45,9 +62,11 @@ document.getElementById('adminApplyGlobalBoostBtn')?.addEventListener('click',as
         const date=row.awarded_at?new Date(row.awarded_at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'時間未知';
         const task=labels[row.task_key]||row.task_key||'未知來源';
         const amount=Number(row.xp_awarded)||0,base=Number(row.base_xp)||0;
-        const member=row.member_name||'未知成員',guild=row.guild_name||'未知公會';
+        const guild=row.guild_name||'未知公會';
+        const groupGrant=row.details?.grant_scope==='guild';
+        const member=groupGrant?'全公會':(row.member_name||'未知成員');
         const detail=row.source==='admin'
-          ? '<div class="mini">管理員：'+escapeHTML(row.actor_admin_email||'未知')+' · 原因：'+escapeHTML(row.reason||'未提供')+'</div>'
+          ? '<div class="mini">管理員：'+escapeHTML(row.actor_admin_email||'未知')+' · 原因：'+escapeHTML(row.reason||'未提供')+(groupGrant?' · 發放範圍：整個公會':'')+'</div>'
           : row.task_key==='all_login'
             ? '<div class="mini">觸發成員：'+escapeHTML(row.details?.trigger_member_name||member)+' · 當時成員：'+escapeHTML(String(row.details?.member_snapshot?.length||0))+' 人（公會整體獎勵）</div>'
             : '<div class="mini">任務完成成員：'+escapeHTML(member)+(row.cycle_number?' · 第 '+escapeHTML(String(row.cycle_number))+' 輪起':'')+'</div>';
@@ -57,31 +76,55 @@ document.getElementById('adminApplyGlobalBoostBtn')?.addEventListener('click',as
       status.textContent='已載入 '+rows.length+' 筆雲端紀錄。';
     }catch(error){list.innerHTML='<div class="empty">載入失敗：'+escapeHTML(error.message||'未知錯誤')+'</div>';status.textContent='無法讀取 XP 紀錄。';}
   }
+  async function loadAdminGuildXpPlayers(force=false){
+    const list=document.getElementById('adminGuildXpPlayersList');
+    const status=document.getElementById('adminGuildXpPlayersStatus');
+    if(!list||!status||!isAdmin())return;
+    list.innerHTML='<div class="empty">正在彙整玩家累積 XP…</div>';status.textContent='正在載入…';
+    try{
+      const data=await loadAdminGuildXpDashboard(force);
+      const rows=data?.players||[];
+      if(!rows.length){list.innerHTML='<div class="empty">目前沒有玩家資料。</div>';status.textContent='讀取完成；0 位玩家。';return;}
+      list.innerHTML=rows.map(row=>{
+        const name=escapeHTML(row.username||'玩家');
+        const guild=escapeHTML(row.guild_name||'未加入公會');
+        const total=format(Number(row.total_xp)||0);
+        const count=format(Number(row.award_count)||0);
+        const last=row.last_awarded_at?new Date(row.last_awarded_at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚無 XP 紀錄';
+        return '<div class="admin-log"><div><b>'+name+'</b><div class="mini">'+guild+' · '+count+' 筆個人 XP 紀錄 · 最近：'+escapeHTML(last)+'</div></div><span class="pill">'+escapeHTML(total)+' XP</span></div>';
+      }).join('');
+      status.textContent='共 '+format(rows.length)+' 位玩家；依累積 XP 由高至低排列。';
+    }catch(error){list.innerHTML='<div class="empty">載入失敗：'+escapeHTML(error.message||'未知錯誤')+'</div>';status.textContent='無法讀取玩家累積 XP。';}
+  }
   document.getElementById('adminGuildXpHistoryRefresh')?.addEventListener('click',loadAdminGuildXpHistory);
-  document.getElementById('adminGuildXpFold')?.addEventListener('toggle',event=>{if(event.target.open){loadAdminDashboard();loadAdminGuildXpHistory();}});
+  document.getElementById('adminGuildXpPlayersRefresh')?.addEventListener('click',()=>loadAdminGuildXpPlayers(true));
+  document.getElementById('adminGuildXpHistoryFold')?.addEventListener('toggle',event=>{if(event.target.open)loadAdminGuildXpHistory();});
+  document.getElementById('adminGuildXpGrantFold')?.addEventListener('toggle',event=>{if(event.target.open)loadAdminGuildXpDashboard(true).catch(error=>{const msg=document.getElementById('adminGuildXpGrantMessage');if(msg)msg.textContent='公會名單載入失敗：'+(error.message||'未知錯誤');});});
+  document.getElementById('adminGuildXpPlayersFold')?.addEventListener('toggle',event=>{if(event.target.open)loadAdminGuildXpPlayers();});
   document.getElementById('adminGuildXpGrantBtn')?.addEventListener('click',async()=>{
     if(!isAdmin()){toast('沒有管理員權限');return;}
-    const target=document.getElementById('adminGuildXpTarget'),amount=Number(document.getElementById('adminGuildXpAmount').value);
+    const guild=document.getElementById('adminGuildXpGuild'),amount=Number(document.getElementById('adminGuildXpAmount').value);
     const reason=document.getElementById('adminGuildXpReason').value.trim();
     const msg=document.getElementById('adminGuildXpGrantMessage'),btn=document.getElementById('adminGuildXpGrantBtn');
-    if(!target.value){msg.textContent='請先選擇一位玩家。';return;}
+    if(!guild.value){msg.textContent='請先選擇要發放的公會。';return;}
     if(!Number.isSafeInteger(amount)||amount<1||amount>1000000000){msg.textContent='XP 必須是 1～1,000,000,000 的正整數。';return;}
     if(reason.length<3||reason.length>300){msg.textContent='請填寫 3～300 字的發放原因。';return;}
-    const label=target.selectedOptions[0]?.text||'選定玩家';
-    if(!confirm('確定發放 '+format(amount)+' XP 至「'+label+'」所屬公會？\n原因：'+reason))return;
+    const guildName=guild.selectedOptions[0]?.text||'選定公會';
+    if(!confirm('確定發放 '+format(amount)+' XP 至「'+guildName+'」？\n原因：'+reason))return;
     if(!guildXpRequestId){
       if(!globalThis.crypto?.randomUUID){msg.textContent='目前瀏覽器無法建立安全識別碼，請更新瀏覽器。';return;}
       guildXpRequestId=globalThis.crypto.randomUUID();
     }
-    btn.disabled=true;msg.textContent='正在驗證公會成員並發放 XP…';
+    btn.disabled=true;msg.textContent='正在驗證公會並發放 XP…';
     try{
-      const result=await adminApi({action:'guild_xp_grant',targetUserId:target.value,amount,reason,requestId:guildXpRequestId});
+      const result=await adminApi({action:'guild_xp_grant',guildId:guild.value,amount,reason,requestId:guildXpRequestId});
       if(!result.success||!result.result?.success)throw new Error('伺服器尚未確認發放結果。');
       guildXpRequestId=null;
       msg.textContent='已成功發放 '+format(Number(result.result.xp_awarded)||amount)+' XP 至「'+(result.result.guild_name||'該公會')+'」。';
       document.getElementById('adminGuildXpReason').value='';
       toast('公會 XP 已發放');
-      await loadAdminGuildXpHistory();
+      guildXpDashboardCache=null;
+      await Promise.all([loadAdminGuildXpHistory(),loadAdminGuildXpDashboard(true)]);
     }catch(error){msg.textContent='發放失敗：'+(error.message||'請稍後重試')+'；可再次按下按鈕安全重試。';toast(msg.textContent);}
     finally{btn.disabled=false;}
   });
