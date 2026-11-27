@@ -607,7 +607,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   }
 
   function render() {
-    syncPotionGiftSettingsEntry();
     if (!root()) return;
     if (!getCurrentUser()) { renderGuest(); return; }
     if (!currentData?.guild) { renderNoGuild(); return; }
