@@ -125,7 +125,25 @@ Deno.serve(async (req: Request) => {
         if(String(error.message||"").includes("target_player_not_in_guild")) return json({error:"這位玩家目前沒有加入公會，無法發放 XP"},400);
         throw error;
       }
-      return json({success:true,result:data});
+      // Resolve the authoritative ledger row after the RPC. This makes a retry
+      // return the original amount and prevents a reused request ID from being
+      // misreported as a grant to a different player or guild.
+      const {data:ledger,error:ledgerError}=await admin.from("guild_xp_award_ledger")
+        .select("guild_id,member_id,actor_user_id,base_xp,xp_awarded,actor_admin_email,reason,details")
+        .eq("award_key","admin:"+requestId).maybeSingle();
+      if(ledgerError) throw ledgerError;
+      if(!ledger) throw new Error("XP 已送出，但找不到對應帳本紀錄；請重新載入紀錄確認。");
+      if(String(ledger.member_id||"").toLowerCase()!==targetUserId.toLowerCase()
+        || String(ledger.actor_user_id||"").toLowerCase()!==String(userData.user.id).toLowerCase()
+        || Number(ledger.base_xp)!==amount
+        || String(ledger.reason||"")!==reason
+        || String(ledger.actor_admin_email||"").toLowerCase()!==String(userData.user.email||"").toLowerCase()) {
+        return json({error:"這個發放識別碼已用於其他資料，請重新操作；系統沒有重複發放 XP。"},409);
+      }
+      const guildName=String(ledger.details?.guild_name||data?.guild_name||"該公會");
+      const targetName=String(ledger.details?.member_name||ledger.details?.target_username||data?.target_username||"選定玩家");
+      return json({success:true,result:{...data,guild_name:guildName,target_username:targetName,
+        xp_awarded:Number(ledger.xp_awarded)||0,already_processed:Number(data?.xp_awarded||0)===0}});
     }
     if(body.action==="guild_xp_history"){
       const {data:rows,error}=await admin.from("guild_xp_award_ledger")
