@@ -66,13 +66,22 @@ test('Realm Exchange is a main navigation entry between fusion and workshop', ()
   assert.doesNotMatch(index, /data-pets-view|pets-page-tabs/);
 });
 
-test('trade sub-view is nested inside the pet page so page layout and spacing rules apply', () => {
+test('trade sub-view is nested inside the pet page with balanced fusion and trade wrappers', () => {
   const petsPageStart = index.indexOf('<section class="page" id="page-pets">');
-  const tradeViewStart = index.indexOf('<div id="petsTradeView"');
+  const fusionViewStart = index.indexOf('<div id="petsFusionView"', petsPageStart);
+  const tradeViewStart = index.indexOf('<div id="petsTradeView"', petsPageStart);
   const tradeViewEnd = index.indexOf('</div></section>', tradeViewStart);
   const workshopPageStart = index.indexOf('<section class="page" id="page-workshop">');
-  assert.ok(petsPageStart >= 0 && petsPageStart < tradeViewStart);
+  const countDivs = markup => ({
+    open: (markup.match(/<div\\b/g) || []).length,
+    close: (markup.match(/<\\/div>/g) || []).length
+  });
+  assert.ok(petsPageStart >= 0 && petsPageStart < fusionViewStart && fusionViewStart < tradeViewStart);
   assert.ok(tradeViewEnd > tradeViewStart && tradeViewEnd < workshopPageStart);
+  assert.deepEqual(countDivs(index.slice(petsPageStart, tradeViewStart)).open,
+    countDivs(index.slice(petsPageStart, tradeViewStart)).close);
+  assert.deepEqual(countDivs(index.slice(tradeViewStart, tradeViewEnd + 6)).open,
+    countDivs(index.slice(tradeViewStart, tradeViewEnd + 6)).close);
   assert.equal(index.slice(petsPageStart, tradeViewStart).includes('</section>'), false);
 });
 
