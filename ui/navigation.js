@@ -94,6 +94,7 @@ export function createNavigationUI({
     if (fusionView) fusionView.hidden = trade;
     if (tradeView) tradeView.hidden = !trade;
     if (title) title.textContent = trade ? '交易' : '融合機';
+    document.getElementById('page-pets')?.classList.toggle('is-trade-view', trade);
   }
 
   function go(id) {
