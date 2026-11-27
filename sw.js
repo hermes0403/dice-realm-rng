@@ -54,7 +54,7 @@ const APP_SHELL = [
   './ui/display-controls.js?v=20261126-t0149-guild-module-refresh',
   './core/timer-manager.js',
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
-  './ui/guild.js?v=20261127-t0157-trade-top-gap',
+  './ui/guild.js?v=20261127-t0161-global-boost-layout',
   './systems/weather-summon-odds.js',
   './systems/glitch-dice.js?v=20261114-t0087-heaven-probability',
   './systems/dice-locks.js',
