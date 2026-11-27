@@ -826,6 +826,15 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     // Delegate the pets-view switch so it also works when navigation tabs are
     // rendered after this module's setup() has already run.
     doc.addEventListener('click', event => {
+      // The primary navigation opens Trade through [data-page="trade"], not
+      // the nested pets-view tabs. Refresh the directory on every entry so
+      // players never have to press the manual refresh button first.
+      const tradeNavigationButton = event.target?.closest?.('[data-page="trade"]');
+      if (tradeNavigationButton) {
+        void refreshPlayers();
+        void refreshInvitations();
+        return;
+      }
       const button = event.target?.closest?.('[data-pets-view]');
       if (!button) return;
       const view = button.dataset.petsView === 'trade' ? 'trade' : 'fusion';
@@ -873,6 +882,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         });
       });
     }
+    // Prime the directory during startup as well. The navigation listener
+    // above refreshes it again whenever the player enters the Trade page.
+    void refreshPlayers();
     refreshInvitations();
   }
 
