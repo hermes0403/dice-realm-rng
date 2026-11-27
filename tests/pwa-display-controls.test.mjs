@@ -371,6 +371,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.ok(displayControlsVersion);
   assert.equal(workerDisplayControlsVersion, displayControlsVersion);
   assert.ok(navigationVersion);
+  assert.equal(navigationVersion, '20261127-t0157-trade-navigation-cache');
   assert.equal(workerNavigationVersion, navigationVersion);
 });
 
