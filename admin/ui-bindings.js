@@ -47,7 +47,8 @@ document.getElementById('adminApplyGlobalBoostBtn')?.addEventListener('click',as
           : row.task_key==='all_login'
             ? '<div class="mini">觸發成員：'+escapeHTML(row.details?.trigger_member_name||member)+' · 當時成員：'+escapeHTML(String(row.details?.member_snapshot?.length||0))+' 人（公會整體獎勵）</div>'
             : '<div class="mini">任務完成成員：'+escapeHTML(member)+(row.cycle_number?' · 第 '+escapeHTML(String(row.cycle_number))+' 輪起':'')+'</div>';
-        return '<div class="admin-log"><div><b>'+escapeHTML(task)+' · '+escapeHTML(member)+'</b><div class="mini">'+escapeHTML(guild)+' · '+escapeHTML(date)+'</div>'+detail+(base!==amount?'<div class="mini">基礎 XP：'+format(base)+' · 加成後：'+format(amount)+'</div>':'')+'</div><span class="pill">+'+escapeHTML(format(amount))+' XP</span></div>';
+        const historical=row.details?.backfilled?'<div class="mini">歷史補登；舊資料無法回推當時加成後 XP 數量</div>':'';
+        return '<div class="admin-log"><div><b>'+escapeHTML(task)+' · '+escapeHTML(member)+'</b><div class="mini">'+escapeHTML(guild)+' · '+escapeHTML(date)+'</div>'+detail+historical+(base!==amount?'<div class="mini">基礎 XP：'+format(base)+' · 加成後：'+format(amount)+'</div>':'')+'</div><span class="pill">+'+escapeHTML(format(amount))+' XP</span></div>';
       }).join('');
       status.textContent='已載入 '+rows.length+' 筆雲端紀錄。';
     }catch(error){list.innerHTML='<div class="empty">載入失敗：'+escapeHTML(error.message||'未知錯誤')+'</div>';status.textContent='無法讀取 XP 紀錄。';}
