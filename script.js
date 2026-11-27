@@ -324,7 +324,7 @@ const petTradingSearch = createPetTradingSearch({
 petTradingSearch.setup();
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop,
-  loadGuildPage, loadGuildSettingsEntry, refreshWeeklyEvent: () => weeklyRealmEvent.refresh()
+  loadGuildPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh(), loadGuildSettingsEntry
 });
 const onboardingUI = setupOnboardingUI({ documentRef: document, getCurrentUser: () => currentUser, isAdmin, go, toast });
 // Authentication is bootstrapped above, before optional game UI initialization.
