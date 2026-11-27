@@ -8,6 +8,7 @@ const backfill = read('../docs/migrations/20261127065146_guild_xp_ledger_backfil
 const snapshots = read('../docs/migrations/20261127065342_guild_xp_ledger_member_name_snapshots.sql');
 const consoleMigration = read('../docs/migrations/20261127071500_guild_xp_admin_console.sql');
 const html = read('../index.html');
+const nav = read('../admin/navigation.js');
 const adminUi = read('../admin/ui-bindings.js');
 const playerManagement = read('../admin/player-management.js');
 const script = read('../script.js');
@@ -51,7 +52,7 @@ test('admin panel can select a guild, submit reasoned XP, and inspect recent led
   assert.match(adminUi, /guild_xp_grant/);
   assert.match(adminUi, /guild_xp_history/);
   assert.match(adminUi, /all_login/);
-  assert.match(adminUi, /玩家累積 XP/);
+  assert.match(html, /玩家累積 XP/);
   assert.match(adminUi, /全員登入 \+20 與管理員整個公會發放屬於公會共享 XP/);
   assert.match(adminUi, /member_snapshot/);
   assert.match(adminUi, /Asia\/Taipei/);
