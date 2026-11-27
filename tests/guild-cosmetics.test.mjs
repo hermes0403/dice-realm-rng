@@ -11,9 +11,9 @@ test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 �
   assert.match(ui, /hasUnlock\('name_color'\)/);
   assert.match(ui, /hasUnlock\('badge_effect'\)/);
   assert.match(ui, /hasUnlock\('guild_background'\)/);
-  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',BADGE_EFFECT_OPTIONS,BADGE_EFFECT_IDS,'none','badge_effect',15)"));
-  assert.ok(ui.includes("cosmeticControl('name_color','公會名稱顏色',NAME_COLOR_OPTIONS,NAME_COLOR_IDS,'default','name_color',9)"));
-  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',BACKGROUND_OPTIONS,BACKGROUND_IDS,'default','guild_background',19)"));
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15)"));
+  assert.ok(ui.includes("cosmeticControl('name_color','公會名稱顏色',LV9_NAME_COLOR_OPTIONS,LV9_NAME_COLOR_IDS,'default','name_color',9)"));
+  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19)"));
 });
 
 test('公會外觀提供固定白名單選項，並由會長與副會長修改', () => {
@@ -82,9 +82,12 @@ test('Lv.9、Lv.15、Lv.19 只顯示指定外觀，其他選項保留供未來�
 });
 
 test('資料庫同步限制三個等級可用的外觀，並拒絕直接呼叫 RPC 傳入其他 ID', () => {
-  assert.match(restrictionMigration, /name_color in \\('default','nebula','ice'\\)/);
-  assert.match(restrictionMigration, /badge_effect in \\('none','orbit'\\)/);
-  assert.match(restrictionMigration, /background_theme in \\('default','aurora'\\)/);
+  assert.ok(restrictionMigration.includes("check (name_color in ('default', 'nebula', 'ice'))"));
+  assert.ok(restrictionMigration.includes("check (badge_effect in ('none', 'orbit'))"));
+  assert.ok(restrictionMigration.includes("check (background_theme in ('default', 'aurora'))"));
+  assert.ok(restrictionMigration.includes("v_name_color not in ('default','nebula','ice')"));
+  assert.ok(restrictionMigration.includes("v_badge_effect not in ('none','orbit')"));
+  assert.ok(restrictionMigration.includes("v_background_theme not in ('default','aurora')"));
   assert.match(restrictionMigration, /guild_name_color_invalid/);
   assert.match(restrictionMigration, /guild_badge_effect_invalid/);
   assert.match(restrictionMigration, /guild_background_invalid/);
