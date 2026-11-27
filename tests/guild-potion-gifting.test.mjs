@@ -86,11 +86,11 @@ test('leader gift entry is inside Guild Settings and only visible to the guild l
   assert.ok(!guild.includes('guild-potion-gift-panel'));
 });
 test('PWA assets and service worker cache keys stay synchronized after the Guild Settings move', () => {
-  assert.ok(index.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
-  assert.ok(index.includes('script.js?v=20261127-t0158-guild-gift-correct-settings-location'));
-  assert.ok(sw.includes('dice-realm-shell-v2.46'));
-  assert.ok(sw.includes('script.js?v=20261127-t0158-guild-gift-correct-settings-location'));
-  assert.ok(sw.includes('ui/guild.js?v=20261127-t0158-guild-gift-correct-settings-location'));
+  assert.ok(index.includes('guild.css?v=20261127-t0157-pet-trading-guild-cache'));
+  assert.ok(index.includes('script.js?v=20261127-t0157-pet-trading-guild-cache'));
+  assert.ok(sw.includes('dice-realm-shell-v2.47'));
+  assert.ok(sw.includes('script.js?v=20261127-t0157-pet-trading-guild-cache'));
+  assert.ok(sw.includes('ui/guild.js?v=20261127-t0157-pet-trading-guild-cache'));
   assert.ok(sw.includes('services/cloud-save.js?v=20261127-t0156-guild-potion-gifting'));
-  assert.ok(sw.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
+  assert.ok(sw.includes('guild.css?v=20261127-t0157-pet-trading-guild-cache'));
 });

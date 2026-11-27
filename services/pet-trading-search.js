@@ -324,7 +324,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     cancelReplace.type = 'button';
     cancelReplace.className = 'quiet pet-trade-cancel-replace';
     cancelReplace.textContent = '取消';
-    slotActions.append(replacePet, cancelReplace);
+    const removePet = doc.createElement('button');
+    removePet.type = 'button';
+    removePet.className = 'quiet pet-trade-remove-pet';
+    removePet.textContent = '移除';
+    slotActions.append(replacePet, removePet, cancelReplace);
     const saveOffer = doc.createElement('button');
     saveOffer.type = 'button';
     saveOffer.className = 'primary pet-trade-save-offer';
@@ -489,6 +493,14 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       openPicker('replace', editingSlotIndex);
     });
     cancelReplace.addEventListener('click', () => {
+      editingSlotIndex = null;
+      slotActions.hidden = true;
+      renderOfferSlots();
+    });
+    removePet.addEventListener('click', () => {
+      if (!Number.isInteger(editingSlotIndex)) return;
+      draftOffer = draftOffer.filter((_, index) => index !== editingSlotIndex);
+      offerDrafts.set(session.id, { revision, uids: [...draftOffer] });
       editingSlotIndex = null;
       slotActions.hidden = true;
       renderOfferSlots();

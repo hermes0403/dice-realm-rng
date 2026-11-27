@@ -2463,7 +2463,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-trade-player-list-head label{display:block;margin:0}
 .pet-trade-player-list-head small{display:none}
 .pet-trade-player-list-head button{flex:0 0 auto;padding:6px 9px;font-size:10px}
-.pet-trade-search-results{display:flex;flex-direction:column;gap:6px;max-height:390px;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 2px;scrollbar-width:thin;scrollbar-color:#59658d #10172a}
+.pet-trade-search-results{display:flex;flex-direction:column;gap:6px;max-height:144px;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 2px 2px;scrollbar-width:thin;scrollbar-color:#59658d #10172a}
 .pet-trade-search-result{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:9px 11px;border:1px solid #39466d;border-radius:9px;background:#111a30;color:#e5eaff;text-align:left;cursor:pointer}
 .pet-trade-search-result:hover,.pet-trade-search-result.is-selected{border-color:#9d8bff;background:#242344}
 .pet-trade-player-name{display:flex;flex-direction:row;align-items:center;gap:8px;min-width:0}
@@ -2474,7 +2474,7 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-trade-player-select-label{flex:0 0 auto;color:#bdb6ff;font-size:10px;font-weight:800}
 .pet-trade-load-more{width:100%;margin-top:8px;padding:8px;font-size:11px}
 #petTradeInviteBtn{width:100%;margin-top:9px}
-@media(max-width:760px){.pets-page-head{align-items:flex-start;flex-direction:column}.pets-page-tabs{width:100%}.pets-page-tab{flex:1}.pet-trade-search-results{max-height:330px}}
+@media(max-width:760px){.pets-page-head{align-items:flex-start;flex-direction:column}.pets-page-tabs{width:100%}.pets-page-tab{flex:1}}
 
 /* T-0026 polish: compact horizontal player list heading; trade lives in the main navigation. */
 .pet-trade-player-list-head{min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #303b5b}
@@ -3115,3 +3115,9 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 #petInventoryGrid .pet-lock-star.is-locked{color:#ffd700!important}
 @media(max-width:600px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}}
 @media(max-width:420px){#petInventoryGrid.pet-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important}#petInventoryGrid .pet-card{padding:5px!important}#petInventoryGrid .pet-art{height:48px!important;min-height:48px!important;margin-bottom:4px!important}}
+
+
+/* T-0157: make editing an offered pet explicit and keep the player directory compact. */
+#petsTradeView .pet-trade-slot-actions button{flex:1;min-height:36px}
+#petsTradeView .pet-trade-remove-pet{border-color:#875b70;color:#f0b8c7}
+#petsTradeView .pet-trade-search-results{max-height:141px}

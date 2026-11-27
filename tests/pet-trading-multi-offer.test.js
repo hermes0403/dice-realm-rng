@@ -10,6 +10,8 @@ const navigation = readFileSync(new URL('../ui/navigation.js', import.meta.url),
 const config = readFileSync(new URL('../config.js', import.meta.url), 'utf8');
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+const guildModule = readFileSync(new URL('../ui/guild.js', import.meta.url), 'utf8');
 const petSystem = readFileSync(new URL('../systems/pets.js', import.meta.url), 'utf8');
 const petSelling = readFileSync(new URL('../ui/pet-selling.js', import.meta.url), 'utf8');
 const migration = readFileSync(new URL('../docs/database/pet-trading-multi-offer.sql', import.meta.url), 'utf8');
@@ -228,6 +230,27 @@ test('trade pet offer uses one sequential plus slot, excludes already selected p
   assert.match(service, /replacePet\.addEventListener/);
   assert.match(service, /取消選擇/);
   assert.match(service, /pet-trade-replace-pet/);
+});
+
+test('trade offer slots support removing a selected pet before submission', () => {
+  assert.match(service, /pet-trade-remove-pet/);
+  assert.match(service, /removePet\.addEventListener\('click'/);
+  assert.match(service, /draftOffer = draftOffer\.filter\(\(_, index\) => index !== editingSlotIndex\)/);
+  assert.match(service, /offerDrafts\.set\(session\.id, \{ revision, uids: \[\.\.\.draftOffer\] \}\)/);
+});
+
+test('effective trade player directory height remains compact after cascade overrides', () => {
+  assert.doesNotMatch(styles, /\.pet-trade-search-results\{[^}]*max-height:390px/);
+  assert.doesNotMatch(styles, /\.pet-trade-search-results\{[^}]*max-height:330px/);
+  assert.match(styles, /#petsTradeView \.pet-trade-search-results\{max-height:141px\}/);
+});
+
+test('guild module and app shell use a fresh cache version with no stale settings sync reference', () => {
+  assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
+  assert.match(index, /script\.js\?v=20261127-t0157-pet-trading-guild-cache/);
+  assert.match(script, /ui\/guild\.js\?v=20261127-t0157-pet-trading-guild-cache/);
+  assert.match(sw, /dice-realm-shell-v2\.47/);
+  assert.match(sw, /ui\/guild\.js\?v=20261127-t0157-pet-trading-guild-cache/);
 });
 
 test('trade room translates rarity labels and weight units into Chinese', () => {
