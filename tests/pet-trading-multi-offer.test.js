@@ -66,6 +66,25 @@ test('Realm Exchange is a main navigation entry between fusion and workshop', ()
   assert.doesNotMatch(index, /data-pets-view|pets-page-tabs/);
 });
 
+test('trade sub-view is nested inside the pet page with balanced fusion and trade wrappers', () => {
+  const petsPageStart = index.indexOf('<section class="page" id="page-pets">');
+  const fusionViewStart = index.indexOf('<div id="petsFusionView"', petsPageStart);
+  const tradeViewStart = index.indexOf('<div id="petsTradeView"', petsPageStart);
+  const tradeViewEnd = index.indexOf('</div></section>', tradeViewStart);
+  const workshopPageStart = index.indexOf('<section class="page" id="page-workshop">');
+  const countDivs = markup => ({
+    open: (markup.match(/<div\b/g) || []).length,
+    close: (markup.match(/<\/div>/g) || []).length
+  });
+  assert.ok(petsPageStart >= 0 && petsPageStart < fusionViewStart && fusionViewStart < tradeViewStart);
+  assert.ok(tradeViewEnd > tradeViewStart && tradeViewEnd < workshopPageStart);
+  assert.deepEqual(countDivs(index.slice(petsPageStart, tradeViewStart)).open,
+    countDivs(index.slice(petsPageStart, tradeViewStart)).close);
+  assert.deepEqual(countDivs(index.slice(tradeViewStart, tradeViewEnd + 6)).open,
+    countDivs(index.slice(tradeViewStart, tradeViewEnd + 6)).close);
+  assert.equal(index.slice(petsPageStart, tradeViewStart).includes('</section>'), false);
+});
+
 test('trade lobby uses a scrollable player list instead of manual username or UUID search', () => {
   assert.doesNotMatch(index, /petTradeTarget|petTradeSearchBtn|輸入玩家名稱或完整 UUID/);
   assert.match(index, /id="petTradeSearchResults"/);
@@ -255,7 +274,7 @@ test('guild module and app shell use a fresh cache version with no stale setting
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
   assert.match(index, /script\.js\?v=20261127-t0157-trade-top-gap/);
   assert.match(script, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
-  assert.match(sw, /dice-realm-shell-v2\.49/);
+  assert.match(sw, /dice-realm-shell-v2\.50/);
   assert.match(sw, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
 });
 
