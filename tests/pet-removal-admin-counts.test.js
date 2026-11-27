@@ -67,17 +67,18 @@ test('admin aggregation counts pet instances and unique holders without exposing
 test('admin page contains the requested pet sort labels and global inventory panel', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const labels = [
-    '<option value="rarity-asc">依稀有度遞增</option>',
-    '<option value="rarity-desc">依稀有度遞減</option>',
-    '<option value="income-asc">依每秒金錢遞增</option>',
-    '<option value="income-desc">依每秒金錢遞減</option>'
+    ['rarity-asc', '依稀有度遞增'],
+    ['rarity-desc', '依稀有度遞減'],
+    ['income-asc', '依每秒金錢遞增'],
+    ['income-desc', '依每秒金錢遞減']
   ];
-  let previousIndex = -1;
-  for (const label of labels) {
-    const index = html.indexOf(label);
-    assert.ok(index > previousIndex, 'sort labels should appear in the requested order');
-    previousIndex = index;
-  }
+  const options = [...html.matchAll(/<option\b([^>]*)>([^<]*)<\/option>/g)]
+    .map(match => ({ attrs: match[1], label: match[2] }));
+  const positions = labels.map(([value, label]) => options.findIndex(option =>
+    option.attrs.includes('value="' + value + '"') && option.label === label
+  ));
+  assert.ok(positions.every((index, i) => index >= 0 && (i === 0 || index > positions[i - 1])),
+    'sort labels should appear in the requested order');
   assert.ok(html.includes('id="adminPetInventoryCountsFold"'));
   assert.ok(html.includes('id="adminPetInventoryCountsList"'));
 });

@@ -1,7 +1,7 @@
 ---
 id: T-0156
 title: 公會長贈送藥水與郵箱領取功能
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-27
 updated: 2026-11-27
 depends_on: []
 branch: task/T-0156-guild-leader-potion-gifting
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-27
 ---
 
 ## 任務
@@ -56,6 +56,11 @@ done_at:
 
 - 2026-11-27 07:11 [叉子] 建立新需求。已確認 T-0149 至 T-0155 的編號均已由公開 PR 使用，因此採用下一個未使用編號 T-0156。棒子方目前有 4 張 in_progress 任務（T-0142、T-0146、T-0147、T-0148），容量閘門未滿；Communicate 優先閘門尚缺完整 Board 證據，故本任務先保持 open，尚未開始程式或資料庫修改。
 - 2026-11-27 07:11 [叉子] 已建立標準任務分支 task/T-0156-guild-leader-potion-gifting，來源為 main 91cf89e60acd2e32ad0c76d9c4b715f9abb5a1af；待完成 Communicate 閘門核對後，才可依流程轉為 in_progress。
+
+
+## Owner 驗收紀錄
+
+- 2026-11-27 [棒子] 確認 T-0156 全部驗收成功，同意結案。來源：棒子於本次對話明確表示「驗收的全部驗收成功」。
 
 ## 完工回報
 
