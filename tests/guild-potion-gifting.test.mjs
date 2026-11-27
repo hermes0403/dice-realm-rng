@@ -91,6 +91,6 @@ test('PWA assets and service worker cache keys stay synchronized after the Guild
   assert.ok(sw.includes('dice-realm-shell-v2.53'));
   assert.ok(sw.includes('script.js?v=20261127-t0160-guild-xp-console'));
   assert.ok(sw.includes('ui/guild.js?v=20261127-t0157-trade-top-gap'));
-  assert.ok(sw.includes('services/cloud-save.js?v=20261127-t0156-guild-potion-gifting'));
+  assert.ok(sw.includes('services/cloud-save.js?v=20261128-t0164-weather-deposit-fix'));
   assert.ok(sw.includes('guild.css?v=20261127-t0157-trade-top-gap'));
 });
