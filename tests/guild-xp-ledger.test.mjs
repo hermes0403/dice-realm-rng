@@ -7,6 +7,7 @@ const migration = read('../docs/migrations/20261127063546_guild_xp_award_ledger_
 const backfill = read('../docs/migrations/20261127065146_guild_xp_ledger_backfill_existing_awards.sql');
 const snapshots = read('../docs/migrations/20261127065342_guild_xp_ledger_member_name_snapshots.sql');
 const consoleMigration = read('../docs/migrations/20261127071500_guild_xp_admin_console.sql');
+const accuracyMigration = read('../docs/migrations/20261127072000_guild_xp_admin_console_history_accuracy.sql');
 const html = read('../index.html');
 const nav = read('../admin/navigation.js');
 const adminUi = read('../admin/ui-bindings.js');
@@ -43,6 +44,9 @@ test('admin XP console groups history, guild grant, and player cumulative XP und
   assert.match(consoleMigration, /admin_grant_guild_xp_to_guild/);
   assert.match(consoleMigration, /admin_get_guild_xp_dashboard/);
   assert.match(consoleMigration, /task_key<>'all_login'/);
+  assert.match(accuracyMigration, /historical_unknown_count/);
+  assert.match(adminUi, /historical_unknown_count/);
+  assert.match(adminUi, /舊加成後數量無法還原/);
 });
 test('admin panel can select a guild, submit reasoned XP, and inspect recent ledger rows', () => {
   for (const id of ['adminGuildXpGuild','adminGuildXpAmount','adminGuildXpReason','adminGuildXpGrantBtn','adminXpCategoryFold','adminGuildXpHistoryList']) {
