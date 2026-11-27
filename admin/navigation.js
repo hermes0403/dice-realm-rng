@@ -1,10 +1,12 @@
 const ADMIN_CATEGORIES = [
   { id: 'actions', label: '管理員操作／施放', icon: '✦', description: '公告投票、獎勵發放、全服加成、天氣與系統設定' },
   { id: 'players', label: '玩家資料／管理', icon: '♙', description: '玩家名單、新玩家、在線狀況、24 小時統計與玩家紀錄' },
+  { id: 'xp', label: 'XP 管理', icon: '✧', description: 'XP 任務紀錄、公會發放與玩家累積' },
   { id: 'all', label: '全部功能', icon: '▦', description: '同時顯示兩大分類' }
 ];
 const CATEGORY_TITLES = Object.fromEntries(ADMIN_CATEGORIES.filter(item => item.id !== 'all').map(item => [item.id, item.label]));
 const FOLD_CATEGORIES = {
+  adminXpCategoryFold: 'xp',
   adminIncomeMonitorFold: 'players',
   adminBroadcastFold: 'actions',
   adminGrantHistoryFold: 'players',
