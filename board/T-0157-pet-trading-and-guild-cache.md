@@ -1,7 +1,7 @@
 ---
 id: T-0157
 title: 修復寵物交易版面、流程與公會舊快取錯誤
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -48,6 +48,7 @@ done_at:
 ## 紀錄
 
 - 2026-11-27 09:17 [叉子] 開單。依最新 main 的 Board 索引，owner_side 有效 in_progress 任務為 T-0142、T-0146、T-0147、T-0148，共 4/5；T-0156 為 review，不計入容量。未發現有效 communicate task，兩道啟動閘門目前未阻擋。任務先保持 open，待開單紀錄整合及開工閘門再次確認後才開始修改。
+- 2026-11-27 09:18 [叉子] 開單 PR #417 已合併至 main（merge commit `31869a90fd064ee671f8b2ec647a3fc381821852`）。重新檢查最新 main：owner_side 有效 in_progress 任務仍為 T-0142、T-0146、T-0147、T-0148，共 4/5；未發現有效 communicate task，兩道啟動閘門未阻擋。狀態轉換：open → in_progress，開始實作。
 
 ## 完工回報
 
