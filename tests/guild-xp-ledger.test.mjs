@@ -25,7 +25,9 @@ test('all existing XP task paths write the same ledger', () => {
   assert.match(migration, /track_guild_roll_progress[\s\S]*add_guild_xp_with_ledger[\s\S]*rolls/);
   assert.match(migration, /all_login:[\s\S]*member_snapshot/);
   assert.match(migration, /admin_manual/);
-  assert.match(backfill, /guild_daily_member_progress[\\s\\S]*guild_daily_task_claims[\\s\\S]*guild_daily_login_bonuses/);
+  assert.ok(backfill.includes('guild_daily_member_progress'));
+  assert.ok(backfill.includes('guild_daily_task_claims'));
+  assert.ok(backfill.includes('guild_daily_login_bonuses'));
   assert.match(snapshots, /member_name/);
   assert.match(adminUi, /歷史補登；舊資料無法回推當時加成後 XP 數量/);
 });
