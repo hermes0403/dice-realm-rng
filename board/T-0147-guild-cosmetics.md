@@ -11,7 +11,7 @@ priority: P2
 created: 2026-11-27
 updated: 2026-11-27
 depends_on: [T-0141]
-branch: task/T-0147-guild-cosmetics
+branch: task/T-0147-guild-cosmetics-rebalance
 done_by:
 done_at:
 ---
@@ -58,6 +58,10 @@ T-0141 已將這三項設為對應等級的 cosmetic 獎勵；本任務補上解
 - [x] 不改變 XP、獎勵發放、玩家資產與其他公會功能。
 - [x] 新增解鎖、權限、偽造輸入、持久化及 UI 回歸測試；相關測試通過。
 - [x] GitHub Pages 部署成功，並完成程式碼與線上部署版本核對。
+- [ ] Lv.9 僅提供預設、星雲紫、冰晶藍；其餘顏色保留供未來等級使用。
+- [ ] Lv.15 僅提供預設、星環環繞；星環具明顯雙層環繞與發光效果。
+- [ ] Lv.19 僅提供預設、極光幻境；其他背景保留供未來等級使用。
+- [ ] 前端選項與正式資料庫 RPC／CHECK constraint 使用相同白名單，偽造 ID 會被拒絕。
 
 ## 紀錄
 
@@ -65,3 +69,5 @@ T-0141 已將這三項設為對應等級的 cosmetic 獎勵；本任務補上解
 
 - 2026-11-27 05:43 [叉子] 開單 PR #405 已合併至 main（merge commit 443749ced158e64b896faf10a5d6d16774ebb400）；任務分支已以非強制快轉方式同步 main。重新檢查最新 main：owner_side in_progress 任務 T-0142、T-0146 共 2/5；檢查所有 open 任務未發現有效 communicate task，兩道啟動閘門未阻擋。狀態轉換：open → in_progress，開始實作。
 - 2026-11-27 05:50 [叉子] 實作 PR #407 已合併至 main，合併 commit：822db106dc8804c0ad59cbc939de76ccb76925c6。Supabase migration `guild_cosmetics` 套用成功，migration version `20261126214906`；欄位、函式權限及既有公會資料已驗證。GitHub Pages deployment run #45900691950 成功。PWA／公會回歸 workflow 通過；全遊戲回歸仍有一項既有、與本任務無關的寵物管理排序測試失敗（`tests/pet-removal-admin-counts.test.js`）。本任務功能驗收完成。
+
+- 2026-11-27 20:14 [叉子] 依棒子最新要求補強 T-0147：Lv.9 限制為星雲紫／冰晶藍兩種名稱色；Lv.15 限制為星環環繞一種徽章特效，並改為高對比雙層旋轉光環與紫藍發光；Lv.19 限制為極光幻境一種背景並提高色彩辨識度。其他既有外觀 ID 保留於程式樣式及選項定義，暫不開放，供未來等級使用。原任務分支與 main 比較為 DIVERGED（原分支 ahead 23、behind 130），故保留舊分支不覆寫，改由最新 main 建立後續任務分支 task/T-0147-guild-cosmetics-rebalance；本分支已更新 UI、CSS、回歸測試及 migration。正式 Supabase 專案已套用 migration guild_cosmetics_level_option_limits，回讀確認三項 CHECK constraint 與 RPC 白名單一致；現有 5 個公會的外觀設定皆為預設值，未變更玩家資料。尚待 GitHub Actions、PR 整合及 Pages 部署驗證。

@@ -25,6 +25,13 @@ const BACKGROUND_OPTIONS = [
 const NAME_COLOR_IDS = new Set(NAME_COLOR_OPTIONS.map(option => option.value));
 const BADGE_EFFECT_IDS = new Set(BADGE_EFFECT_OPTIONS.map(option => option.value));
 const BACKGROUND_IDS = new Set(BACKGROUND_OPTIONS.map(option => option.value));
+// Current guild-level unlocks expose only the initial rewards; remaining styles stay reserved for future levels.
+const LV9_NAME_COLOR_OPTIONS = NAME_COLOR_OPTIONS.filter(option => ['default', 'nebula', 'ice'].includes(option.value));
+const LV15_BADGE_EFFECT_OPTIONS = BADGE_EFFECT_OPTIONS.filter(option => ['none', 'orbit'].includes(option.value));
+const LV19_BACKGROUND_OPTIONS = BACKGROUND_OPTIONS.filter(option => ['default', 'aurora'].includes(option.value));
+const LV9_NAME_COLOR_IDS = new Set(LV9_NAME_COLOR_OPTIONS.map(option => option.value));
+const LV15_BADGE_EFFECT_IDS = new Set(LV15_BADGE_EFFECT_OPTIONS.map(option => option.value));
+const LV19_BACKGROUND_IDS = new Set(LV19_BACKGROUND_OPTIONS.map(option => option.value));
 function safeCosmetic(value, allowed, fallback) {
   return typeof value === 'string' && allowed.has(value) ? value : fallback;
 }
@@ -79,7 +86,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
 
   function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
   function guildNameStyle(guild) {
-    const value = safeCosmetic(guild?.name_color, NAME_COLOR_IDS, 'default');
+    const value = safeCosmetic(guild?.name_color, LV9_NAME_COLOR_IDS, 'default');
     return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + '"';
   }
 
@@ -510,9 +517,9 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       };
       const panel='<section class="card guild-settings-panel guild-cosmetics-panel"><div class="eyebrow">GUILD APPEARANCE</div><h2>公會專屬外觀</h2><p class="guild-cosmetics-note">外觀由公會升級解鎖，所有成員都會看到相同設定。</p>' +
         '<form id="guildCosmeticsForm" class="guild-settings-form">'+
-        cosmeticControl('name_color','公會名稱顏色',NAME_COLOR_OPTIONS,NAME_COLOR_IDS,'default','name_color',9)+
-        cosmeticControl('badge_effect','公會徽章特效',BADGE_EFFECT_OPTIONS,BADGE_EFFECT_IDS,'none','badge_effect',15)+
-        cosmeticControl('background_theme','公會專屬背景',BACKGROUND_OPTIONS,BACKGROUND_IDS,'default','guild_background',19)+
+        cosmeticControl('name_color','公會名稱顏色',LV9_NAME_COLOR_OPTIONS,LV9_NAME_COLOR_IDS,'default','name_color',9)+
+        cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15)+
+        cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19)+
         (canEditCosmetics?'<button class="primary" type="submit">儲存外觀</button>':'<p class="guild-settings-readonly">只有隊長與副隊長可以更換外觀；目前為檢視模式。</p>')+
         '</form></section>';
       root().innerHTML=back+panel+renderLeaveConfirmation(); return;
@@ -574,9 +581,9 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     const count = Number(guild.member_count) || members.length;
     const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
     const hasUnlock = key => unlocks.some(item => item.reward_key === key);
-    const nameColor = hasUnlock('name_color') ? safeCosmetic(guild.name_color, NAME_COLOR_IDS, 'default') : 'default';
-    const badgeEffect = hasUnlock('badge_effect') ? safeCosmetic(guild.badge_effect, BADGE_EFFECT_IDS, 'none') : 'none';
-    const backgroundTheme = hasUnlock('guild_background') ? safeCosmetic(guild.background_theme, BACKGROUND_IDS, 'default') : 'default';
+    const nameColor = hasUnlock('name_color') ? safeCosmetic(guild.name_color, LV9_NAME_COLOR_IDS, 'default') : 'default';
+    const badgeEffect = hasUnlock('badge_effect') ? safeCosmetic(guild.badge_effect, LV15_BADGE_EFFECT_IDS, 'none') : 'none';
+    const backgroundTheme = hasUnlock('guild_background') ? safeCosmetic(guild.background_theme, LV19_BACKGROUND_IDS, 'default') : 'default';
     const bannerClass = 'guild-banner card' + (hasUnlock('guild_background') ? ' has-reward-background' : '') +
       (backgroundTheme !== 'default' ? ' guild-bg-' + backgroundTheme : '');
     const emblemClass = 'guild-banner-emblem' + (hasUnlock('badge_frame') ? ' has-reward-frame' : '') +
