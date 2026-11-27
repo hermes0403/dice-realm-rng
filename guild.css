@@ -212,7 +212,7 @@
 @media(prefers-reduced-motion:reduce){.guild-banner-emblem.guild-badge-effect-pulse,.guild-banner-emblem.guild-badge-effect-orbit,.guild-banner-emblem.guild-badge-effect-orbit::before,.guild-banner-emblem.guild-badge-effect-orbit::after{animation:none}}
 @media(max-width:520px){.guild-cosmetics-panel{padding:14px}.guild-cosmetic-control select{font-size:13px}}
 
-.guild-banner-emblem.guild-badge-effect-orbit,.guild-banner-emblem.guild-badge-effect-radiant{animation:none}
+.guild-banner-emblem.guild-badge-effect-radiant{animation:none}
 
 /* T-0148: grouped guild settings and member promotion */
 .guild-settings-menu{display:grid;gap:14px}.guild-settings-menu h2,.guild-settings-panel h2{margin:0;color:#e1d9f5;font-size:19px}
