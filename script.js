@@ -6,7 +6,7 @@ import { DAILY_TASKS } from './data/progression.js';
 import { KEY, SUPABASE_URL, SUPABASE_KEY, WEATHER_TYPES, DEVICE_ACCOUNT_LIMIT, pages, ADMIN_GRANT_LABELS } from './config.js?v=20261123-daily-shop-v1';
 import { supabaseClient } from './services/supabase.js';
 import { format, formatWalletScientific, compactNum, escapeHTML } from './core/format.js';
-import { createNavigationUI } from './ui/navigation.js?v=20261123-daily-shop-v1';
+import { createNavigationUI } from './ui/navigation.js?v=20261127-t0157-trade-navigation-cache';
 import { createInventoryUI } from './ui/inventory.js?v=20261126-t0142-inventory-selection';
 import { createPetIncomeSystem } from './systems/pet-income.js?v=20261118-pet-income-mutation-v2';
 import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard';
