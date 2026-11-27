@@ -53,7 +53,7 @@ document.getElementById('adminApplyGlobalBoostBtn')?.addEventListener('click',as
     }catch(error){list.innerHTML='<div class="empty">載入失敗：'+escapeHTML(error.message||'未知錯誤')+'</div>';status.textContent='無法讀取 XP 紀錄。';}
   }
   document.getElementById('adminGuildXpHistoryRefresh')?.addEventListener('click',loadAdminGuildXpHistory);
-  document.getElementById('adminGuildXpFold')?.addEventListener('toggle',event=>{if(event.target.open)loadAdminGuildXpHistory();});
+  document.getElementById('adminGuildXpFold')?.addEventListener('toggle',event=>{if(event.target.open){loadAdminDashboard();loadAdminGuildXpHistory();}});
   document.getElementById('adminGuildXpGrantBtn')?.addEventListener('click',async()=>{
     if(!isAdmin()){toast('沒有管理員權限');return;}
     const target=document.getElementById('adminGuildXpTarget'),amount=Number(document.getElementById('adminGuildXpAmount').value);
