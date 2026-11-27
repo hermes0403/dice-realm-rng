@@ -77,6 +77,14 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     el.dataset.kind = kind;
   }
 
+  function syncPotionGiftSettingsEntry() {
+    const visible = currentData?.my_role === 'leader';
+    const entry = documentRef.getElementById('guildLeaderGiftSetting');
+    const hint = documentRef.getElementById('guildLeaderGiftSettingHint');
+    if (entry) entry.hidden = !visible;
+    if (hint) hint.hidden = !visible;
+  }
+
   function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
   function guildNameStyle(guild) {
     const value = safeCosmetic(guild?.name_color, NAME_COLOR_IDS, 'default');
@@ -101,6 +109,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   }
 
   function renderGuest() {
+    syncPotionGiftSettingsEntry();
     root().innerHTML = navMarkup() +
       '<section class="guild-empty card"><div class="guild-empty-emblem" aria-hidden="true">✦</div>' +
       '<div class="eyebrow">GUILD NETWORK</div><h2>登入後加入公會</h2>' +
@@ -582,10 +591,6 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       (badgeEffect !== 'none' ? ' has-reward-effect guild-badge-effect-' + badgeEffect : '');
     const nameClass = nameColor !== 'default' ? ' class="guild-name-color-unlocked guild-name-color-' + nameColor + '"' : '';
     const guildTitle = hasUnlock('guild_title') ? '<span class="guild-exclusive-title">星域公會</span>' : '';
-    const potionGiftPanel = data.my_role === 'leader'
-      ? '<section class="card guild-panel guild-potion-gift-panel"><div><div class="eyebrow">GUILD LEADER GIFT</div><h3>會長發放</h3><p>把自己持有的藥水贈送給公會成員，對方可在公會郵箱領取。</p></div>' +
-        '<button type="button" class="guild-potion-gift-open" data-guild-potion-gift-open>選擇藥水並發放</button></section>'
-      : '';
     const rewardUnlockMarkup = unlocks.length ? '<section class="card guild-panel guild-reward-unlocks"><div class="eyebrow">GUILD REWARDS</div><h3>已解鎖公會獎勵</h3><div class="guild-reward-chip-list">' +
       unlocks.map(item => '<span class="guild-reward-chip">Lv.' + Math.max(1, Number(item.level) || 1) + ' · ' + escapeHTML(item.reward_text || '') + '</span>').join('') +
       '</div></section>' : '';
@@ -596,7 +601,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
       '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
-      rewardUnlockMarkup + potionGiftPanel + '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
+      rewardUnlockMarkup + '<section class="card guild-panel guild-roster-panel"><div class="section-head"><div><div class="eyebrow">MEMBER DIRECTORY</div>' +
       '<h3>公會成員 <span class="guild-count-inline">· ' + count + ' 人</span></h3></div>' +
       '<span class="guild-roster-total">' + members.length + ' MEMBERS</span></div>' +
       '<div class="guild-member-list">' + renderMembers(members) + '</div></section>' +
@@ -610,6 +615,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   }
 
   function render() {
+    syncPotionGiftSettingsEntry();
     if (!root()) return;
     if (!getCurrentUser()) { renderGuest(); return; }
     if (!currentData?.guild) { renderNoGuild(); return; }
