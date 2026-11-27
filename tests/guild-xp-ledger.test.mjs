@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const migration = read('../docs/migrations/20261127063546_guild_xp_award_ledger_and_admin_grants.sql');
+const backfill = read('../docs/migrations/20261127065146_guild_xp_ledger_backfill_existing_awards.sql');
+const snapshots = read('../docs/migrations/20261127065342_guild_xp_ledger_member_name_snapshots.sql');
 const html = read('../index.html');
 const adminUi = read('../admin/ui-bindings.js');
 const playerManagement = read('../admin/player-management.js');
@@ -23,6 +25,9 @@ test('all existing XP task paths write the same ledger', () => {
   assert.match(migration, /track_guild_roll_progress[\s\S]*add_guild_xp_with_ledger[\s\S]*rolls/);
   assert.match(migration, /all_login:[\s\S]*member_snapshot/);
   assert.match(migration, /admin_manual/);
+  assert.match(backfill, /guild_daily_member_progress[\\s\\S]*guild_daily_task_claims[\\s\\S]*guild_daily_login_bonuses/);
+  assert.match(snapshots, /member_name/);
+  assert.match(adminUi, /歷史補登；舊資料無法回推當時加成後 XP 數量/);
 });
 test('admin panel can select a player, submit reasoned XP, and inspect recent ledger rows', () => {
   for (const id of ['adminGuildXpTarget','adminGuildXpAmount','adminGuildXpReason','adminGuildXpGrantBtn','adminGuildXpFold','adminGuildXpHistoryList']) {
