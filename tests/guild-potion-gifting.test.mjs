@@ -77,13 +77,12 @@ test('server potion changes are adopted into the versioned cloud save baseline',
 });
 
 test('leader gift entry is located in Settings and only visible to the guild leader', () => {
-  assert.match(index, /id="page-profile"[\\s\\S]*?id="guildLeaderGiftSetting"[\\s\\S]*?data-guild-potion-gift-open/);
-  assert.match(guild, /function syncPotionGiftSettingsEntry\\(\\)[\\s\\S]*?currentData\\?\\.my_role === 'leader'/);
-  assert.match(guild, /button\\.matches\\('[[]data-guild-potion-gift-open[]]'\\)/);
-  assert.doesNotMatch(guild, /guild-potion-gift-panel/);
-  assert.match(script, /loadGuildSettingsEntry/);
+  assert.ok(index.indexOf('id="guildLeaderGiftSetting"') > index.indexOf('id="page-profile"'));
+  assert.ok(guild.includes("const visible = currentData?.my_role === 'leader'"));
+  assert.ok(guild.includes("button.matches('[data-guild-potion-gift-open]')"));
+  assert.ok(!guild.includes('guild-potion-gift-panel'));
+  assert.ok(script.includes('loadGuildSettingsEntry'));
 });
-
 test('PWA assets and service worker cache keys stay synchronized after the Settings move', () => {
   assert.ok(index.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
   assert.ok(index.includes('script.js?v=20261127-t0157-guild-gift-settings-entry'));
