@@ -88,10 +88,12 @@ document.getElementById('adminApplyGlobalBoostBtn')?.addEventListener('click',as
       list.innerHTML=rows.map(row=>{
         const name=escapeHTML(row.username||'玩家');
         const guild=escapeHTML(row.guild_name||'未加入公會');
-        const total=format(Number(row.total_xp)||0);
+        const unknownCount=Number(row.historical_unknown_count)||0;
+        const total=(unknownCount>0?'≥':'')+format(Number(row.total_xp)||0);
         const count=format(Number(row.award_count)||0);
+        const historicalNote=unknownCount>0?' · 含 '+format(unknownCount)+' 筆歷史補登，舊加成後數量無法還原':'';
         const last=row.last_awarded_at?new Date(row.last_awarded_at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚無 XP 紀錄';
-        return '<div class="admin-log"><div><b>'+name+'</b><div class="mini">'+guild+' · '+count+' 筆個人 XP 紀錄 · 最近：'+escapeHTML(last)+'</div></div><span class="pill">'+escapeHTML(total)+' XP</span></div>';
+        return '<div class="admin-log"><div><b>'+name+'</b><div class="mini">'+guild+' · '+count+' 筆個人 XP 紀錄'+escapeHTML(historicalNote)+' · 最近：'+escapeHTML(last)+'</div></div><span class="pill">'+escapeHTML(total)+' XP</span></div>';
       }).join('');
       status.textContent='共 '+format(rows.length)+' 位玩家；依累積 XP 由高至低排列。';
     }catch(error){list.innerHTML='<div class="empty">載入失敗：'+escapeHTML(error.message||'未知錯誤')+'</div>';status.textContent='無法讀取玩家累積 XP。';}
