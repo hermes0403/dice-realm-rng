@@ -1,10 +1,10 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.46';
+const CACHE_NAME = 'dice-realm-shell-v2.47';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261127-t0158-guild-gift-correct-settings-location',
+  './script.js?v=20261127-t0157-pet-trading-guild-cache',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/equipment.js?v=20261121-t0123-money-potions',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
@@ -54,7 +54,7 @@ const APP_SHELL = [
   './ui/display-controls.js?v=20261126-t0149-guild-module-refresh',
   './core/timer-manager.js',
   './ui/onboarding.js?v=20261119-settings-buttons-v2',
-  './ui/guild.js?v=20261127-t0158-guild-gift-correct-settings-location',
+  './ui/guild.js?v=20261127-t0157-pet-trading-guild-cache',
   './systems/weather-summon-odds.js',
   './systems/glitch-dice.js?v=20261114-t0087-heaven-probability',
   './systems/dice-locks.js',
@@ -66,8 +66,8 @@ const APP_SHELL = [
   './systems/secret-pet-skills.js?v=20261122-secret-skill-swap-v1',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261126-t0142-inventory-selection',
-  './guild.css?v=20261127-t0156-guild-potion-gifting',
+  './style.css?v=20261127-t0157-pet-trading-guild-cache',
+  './guild.css?v=20261127-t0157-pet-trading-guild-cache',
   './favicon.ico',
   './assets/pwa-icon-192.png',
   './assets/pwa-icon-512.png',
