@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const migration = read('../docs/migrations/20261127063546_guild_xp_award_ledger_and_admin_grants.sql');
 const backfill = read('../docs/migrations/20261127065146_guild_xp_ledger_backfill_existing_awards.sql');
 const snapshots = read('../docs/migrations/20261127065342_guild_xp_ledger_member_name_snapshots.sql');
+const consoleMigration = read('../docs/migrations/20261127071500_guild_xp_admin_console.sql');
 const html = read('../index.html');
 const adminUi = read('../admin/ui-bindings.js');
 const playerManagement = read('../admin/player-management.js');
@@ -31,19 +32,32 @@ test('all existing XP task paths write the same ledger', () => {
   assert.match(snapshots, /member_name/);
   assert.match(adminUi, /歷史補登；舊資料無法回推當時加成後 XP 數量/);
 });
-test('admin panel can select a player, submit reasoned XP, and inspect recent ledger rows', () => {
-  for (const id of ['adminGuildXpTarget','adminGuildXpAmount','adminGuildXpReason','adminGuildXpGrantBtn','adminGuildXpFold','adminGuildXpHistoryList']) {
+test('admin XP console groups history, guild grant, and player cumulative XP under one category', () => {
+  for (const id of ['adminXpCategoryFold','adminGuildXpHistoryFold','adminGuildXpGrantFold','adminGuildXpPlayersFold','adminGuildXpHistoryList','adminGuildXpGuild','adminGuildXpPlayersList']) assert.ok(html.includes(id), 'missing '+id);
+  assert.match(nav, /label: 'XP 管理'/);
+  assert.match(adminUi, /guild_xp_dashboard/);
+  assert.match(adminUi, /grant_scope==='guild'/);
+  assert.match(edge, /admin_grant_guild_xp_to_guild/);
+  assert.match(edge, /admin_get_guild_xp_dashboard/);
+  assert.match(consoleMigration, /admin_grant_guild_xp_to_guild/);
+  assert.match(consoleMigration, /admin_get_guild_xp_dashboard/);
+  assert.match(consoleMigration, /task_key<>'all_login'/);
+});
+test('admin panel can select a guild, submit reasoned XP, and inspect recent ledger rows', () => {
+  for (const id of ['adminGuildXpGuild','adminGuildXpAmount','adminGuildXpReason','adminGuildXpGrantBtn','adminXpCategoryFold','adminGuildXpHistoryList']) {
     assert.ok(html.includes(id), 'missing '+id);
   }
-  assert.match(playerManagement, /adminGuildXpTarget/);
+  assert.doesNotMatch(playerManagement, /adminGuildXpTarget/);
   assert.match(adminUi, /guild_xp_grant/);
   assert.match(adminUi, /guild_xp_history/);
   assert.match(adminUi, /all_login/);
+  assert.match(adminUi, /玩家累積 XP/);
+  assert.match(adminUi, /全員登入 \+20 與管理員整個公會發放屬於公會共享 XP/);
   assert.match(adminUi, /member_snapshot/);
   assert.match(adminUi, /Asia\/Taipei/);
 });
 test('XP history is lazy-loaded and adds no timer or realtime subscription', () => {
-  assert.match(adminUi, /adminGuildXpFold.*toggle/);
+  assert.match(adminUi, /adminGuildXpHistoryFold.*toggle/);
   assert.doesNotMatch(adminUi, /setInterval\([^)]*guild.?xp/i);
   assert.doesNotMatch(adminUi, /channel\([^)]*guild.?xp/i);
 });
@@ -55,5 +69,5 @@ test('admin module cache versions are aligned between app imports and service wo
     assert.ok(appVersion, 'missing app cache version for '+path);
     assert.equal(swVersion,appVersion,'cache version mismatch for '+path);
   }
-  assert.match(sw,/dice-realm-shell-v2\.51/);
+  assert.match(sw,/dice-realm-shell-v2\.52/);
 });
