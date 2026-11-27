@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 const ui = await readFile(new URL('../ui/guild.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../guild.css', import.meta.url), 'utf8');
 const migration = await readFile(new URL('../docs/migrations/20261127000000_guild_cosmetics.sql', import.meta.url), 'utf8');
+const restrictionMigration = await readFile(new URL('../docs/migrations/20261127143000_guild_cosmetics_level_option_limits.sql', import.meta.url), 'utf8');
 
 test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 時取得', () => {
   assert.match(ui, /hasUnlock\('name_color'\)/);
@@ -66,4 +67,33 @@ test('徽章效果有低負載 CSS，並尊重減少動態效果設定', () => {
   assert.match(css, /guild-badge-effect-radiant/);
   assert.match(css, /prefers-reduced-motion:reduce/);
   assert.match(css, /guild-bg-aurora/);
+});
+
+test('Lv.9、Lv.15、Lv.19 只顯示指定外觀，其他選項保留供未來等級使用', () => {
+  assert.ok(ui.includes("const LV9_NAME_COLOR_OPTIONS = NAME_COLOR_OPTIONS.filter(option => ['default', 'nebula', 'ice'].includes(option.value));"));
+  assert.ok(ui.includes("const LV15_BADGE_EFFECT_OPTIONS = BADGE_EFFECT_OPTIONS.filter(option => ['none', 'orbit'].includes(option.value));"));
+  assert.ok(ui.includes("const LV19_BACKGROUND_OPTIONS = BACKGROUND_OPTIONS.filter(option => ['default', 'aurora'].includes(option.value));"));
+  assert.ok(ui.includes("cosmeticControl('name_color','公會名稱顏色',LV9_NAME_COLOR_OPTIONS,LV9_NAME_COLOR_IDS"));
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS"));
+  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS"));
+  for (const futureId of ['ember', 'emerald', 'solar', 'pulse', 'radiant', 'nebula', 'eclipse', 'crimson']) {
+    assert.ok(ui.includes("'" + futureId + "'"), '未保留未來外觀：' + futureId);
+  }
+});
+
+test('資料庫同步限制三個等級可用的外觀，並拒絕直接呼叫 RPC 傳入其他 ID', () => {
+  assert.match(restrictionMigration, /name_color in \('default','nebula','ice'\)/);
+  assert.match(restrictionMigration, /badge_effect in \('none','orbit'\)/);
+  assert.match(restrictionMigration, /background_theme in \('default','aurora'\)/);
+  assert.match(restrictionMigration, /guild_name_color_invalid/);
+  assert.match(restrictionMigration, /guild_badge_effect_invalid/);
+  assert.match(restrictionMigration, /guild_background_invalid/);
+});
+
+test('Lv.15 星環特效具雙層高對比環繞、發光與減少動態效果支援', () => {
+  assert.match(css, /guildOrbitSpin/);
+  assert.match(css, /guildOrbitSpinReverse/);
+  assert.match(css, /guildOrbitCoreGlow/);
+  assert.match(css, /prefers-reduced-motion:reduce[^}]*guild-badge-effect-orbit/);
+  assert.match(css, /guild-bg-aurora[^}]*box-shadow/);
 });
