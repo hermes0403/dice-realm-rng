@@ -1,3 +1,26 @@
+export function isNewerServerVersion(incoming, current) {
+ const incomingTime = typeof incoming === 'number' ? incoming : Date.parse(incoming || '');
+ const currentTime = typeof current === 'number' ? current : Date.parse(current || '');
+ if (!Number.isFinite(incomingTime)) return false;
+ if (!Number.isFinite(currentTime)) return true;
+ return incomingTime > currentTime;
+}
+
+export function mergeLocalBagDelta(serverBag, baseBag, localBag) {
+ const merged = { ...(serverBag && typeof serverBag === 'object' ? serverBag : {}) };
+ const base = baseBag && typeof baseBag === 'object' ? baseBag : {};
+ const local = localBag && typeof localBag === 'object' ? localBag : {};
+ const ids = new Set([...Object.keys(base), ...Object.keys(local)]);
+ for (const id of ids) {
+  const delta = (Number(local[id]) || 0) - (Number(base[id]) || 0);
+  if (!delta) continue;
+  const next = Math.max(0, (Number(merged[id]) || 0) + delta);
+  if (next > 0) merged[id] = next;
+  else delete merged[id];
+ }
+ return merged;
+}
+
 export function createCloudSaveService(dependencies) {
   const {
     KEY, D, POTIONS, supabaseClient,
@@ -623,14 +646,19 @@ export function createCloudSaveService(dependencies) {
   function adoptServerBag(bag, updatedAt) {
     const user = getCurrentUser();
     if (!user || cloudLoadReadyUserId !== user.id || lastSyncedUserId !== user.id
-      || !lastSyncedPayload || !bag || typeof bag !== 'object' || !updatedAt) return false;
+      || !lastSyncedPayload || !bag || typeof bag !== 'object' || !updatedAt
+      || !isNewerServerVersion(updatedAt, cloudSaveVersion)) return false;
+    const state = getState();
+    const localBag = clonePayload(state.bag || {});
+    const baseBag = clonePayload(lastSyncedPayload.bag || {});
+    const serverBag = clonePayload(bag);
+    const mergedLocalBag = mergeLocalBagDelta(serverBag, baseBag, localBag);
     const nextPayload = clonePayload(lastSyncedPayload);
-    nextPayload.bag = clonePayload(bag);
+    nextPayload.bag = serverBag;
     lastSyncedPayload = nextPayload;
     cloudSaveVersion = updatedAt;
     writeCloudBase(user.id, nextPayload, updatedAt);
-    const state = getState();
-    state.bag = clonePayload(bag);
+    state.bag = mergedLocalBag;
     state._cloudBaseVersion = updatedAt;
     persistLocalSnapshot(state, user.id);
     try {
