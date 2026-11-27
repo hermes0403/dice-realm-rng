@@ -76,19 +76,21 @@ test('server potion changes are adopted into the versioned cloud save baseline',
   assert.match(script, /adoptServerPotions:\(inventory,updatedAt\)/);
 });
 
-test('leader gift entry is located in Settings and only visible to the guild leader', () => {
-  assert.ok(index.indexOf('id="guildLeaderGiftSetting"') > index.indexOf('id="page-profile"'));
-  assert.ok(guild.includes("const visible = currentData?.my_role === 'leader'"));
+test('leader gift entry is inside Guild Settings and only visible to the guild leader', () => {
+  assert.ok(!index.includes('guildLeaderGiftSetting'));
+  assert.ok(!index.includes('data-guild-potion-gift-open'));
+  assert.ok(guild.includes('(isLeader ? \'<button type="button" class="guild-settings-menu-button" data-guild-potion-gift-open><b>會長發放</b>'));
   assert.ok(guild.includes("button.matches('[data-guild-potion-gift-open]')"));
+  assert.ok(guild.includes('renderPotionGiftOverlay(); return;'));
+  assert.ok(guild.includes("currentData?.my_role !== 'leader'"));
   assert.ok(!guild.includes('guild-potion-gift-panel'));
-  assert.ok(script.includes('loadGuildSettingsEntry'));
 });
-test('PWA assets and service worker cache keys stay synchronized after the Settings move', () => {
+test('PWA assets and service worker cache keys stay synchronized after the Guild Settings move', () => {
   assert.ok(index.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
-  assert.ok(index.includes('script.js?v=20261127-t0157-guild-gift-settings-entry'));
-  assert.ok(sw.includes('dice-realm-shell-v2.45'));
-  assert.ok(sw.includes('script.js?v=20261127-t0157-guild-gift-settings-entry'));
-  assert.ok(sw.includes('ui/guild.js?v=20261127-t0157-guild-gift-settings-entry'));
+  assert.ok(index.includes('script.js?v=20261127-t0158-guild-gift-correct-settings-location'));
+  assert.ok(sw.includes('dice-realm-shell-v2.46'));
+  assert.ok(sw.includes('script.js?v=20261127-t0158-guild-gift-correct-settings-location'));
+  assert.ok(sw.includes('ui/guild.js?v=20261127-t0158-guild-gift-correct-settings-location'));
   assert.ok(sw.includes('services/cloud-save.js?v=20261127-t0156-guild-potion-gifting'));
   assert.ok(sw.includes('guild.css?v=20261127-t0156-guild-potion-gifting'));
 });
