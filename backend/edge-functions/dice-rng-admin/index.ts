@@ -143,7 +143,7 @@ Deno.serve(async (req: Request) => {
       const names=new Map((profilesRes.data||[]).map((p:any)=>[String(p.user_id),String(p.username||"玩家")]));
       const guildNames=new Map((guildsRes.data||[]).map((g:any)=>[String(g.id),String(g.name||"公會")]));
       return json({success:true,records:(rows||[]).map((r:any)=>({
-        ...r,member_name:r.details?.target_username||names.get(String(r.member_id))||"已離開的成員",
+        ...r,member_name:r.details?.member_name||r.details?.target_username||names.get(String(r.member_id))||"已離開的成員",
         guild_name:r.details?.guild_name||guildNames.get(String(r.guild_id))||"已不存在的公會"
       }))});
     }
