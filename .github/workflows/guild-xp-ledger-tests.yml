@@ -1,0 +1,32 @@
+name: Guild XP ledger tests
+on:
+  pull_request:
+    paths:
+      - 'admin/**'
+      - 'docs/migrations/*guild_xp_award_ledger_and_admin_grants.sql'
+      - 'index.html'
+      - 'script.js'
+      - 'sw.js'
+      - 'tests/guild-xp-ledger.test.mjs'
+      - '.github/workflows/guild-xp-ledger-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'admin/**'
+      - 'docs/migrations/*guild_xp_award_ledger_and_admin_grants.sql'
+      - 'index.html'
+      - 'script.js'
+      - 'sw.js'
+      - 'tests/guild-xp-ledger.test.mjs'
+jobs:
+  guild-xp-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check admin/ui-bindings.js
+      - run: node --check admin/player-management.js
+      - run: node --check script.js
+      - run: node --test tests/guild-xp-ledger.test.mjs
