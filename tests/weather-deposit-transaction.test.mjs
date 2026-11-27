@@ -57,7 +57,7 @@ test('手動與自動投入共用同一個伺服器交易佇列', () => {
   assert.match(weather, /const enqueueWeatherDeposit = createSerialQueue\(\)/);
   assert.match(weather, /performWeatherDiceDeposit\(d,qty,false\)/);
   assert.match(weather, /performWeatherDiceDeposit\(d,1,true\)/);
-  assert.match(weather, /return enqueueWeatherDeposit\\(async \\(\\) =>/);
+  assert.ok(weather.includes('return enqueueWeatherDeposit(async () =>'));
   assert.match(weather, /adoptServerBag\(data\.bag,data\.updated_at\)/);
 });
 
