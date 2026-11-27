@@ -1,17 +1,17 @@
 ---
 id: T-0164
 title: 修復天氣骰子投入白名單與併發存檔覆蓋
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
-owner:
+owner: 叉子
 contributors: []
 reviewer: 棒子
 priority: P1
 created: 2026-11-28
 updated: 2026-11-28
 depends_on: []
-branch:
+branch: task/T-0164-weather-deposit-race-fix
 done_by:
 done_at:
 ---
@@ -47,6 +47,7 @@ done_at:
 
 <!-- 只增不改。格式：- YYYY-MM-DD HH:MM [作者] 內容 -->
 - 2026-11-28 01:13 [叉子] 棒子明確授權本任務由叉子採取必要方法完成修復、回歸測試、正式 Supabase RPC 更新、GitHub Pages 部署及部署後抽查。授權限於本任務列明範圍；不得修改 T-0010 或其他任務。新需求開單時棒子方容量為 3/5，未發現有效 Communicate 優先鎖；本任務依 Board 規則先建立為 open。
+- 2026-11-28 01:13 [叉子] 開工准入檢查：Board main SHA d35e53e50694f8884f512ea3904562fabeb79f4a；棒子方有效 in_progress 任務為 T-0142、T-0146、T-0148（3/5）；未發現有效 Communicate 任務；依賴為空。由 open 轉為 in_progress，開始修復。
 - 2026-11-28 01:13 [叉子] 建立任務分支 `task/T-0164-weather-deposit-race-fix`，來源 main SHA `d35e53e50694f8884f512ea3904562fabeb79f4a`。
 
 ## 完工回報
