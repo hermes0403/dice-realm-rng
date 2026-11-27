@@ -1,7 +1,7 @@
 ---
 id: T-0157
 title: 修復寵物交易版面、流程與公會舊快取錯誤
-status: review
+status: done
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -12,8 +12,8 @@ created: 2026-11-27
 updated: 2026-11-27
 depends_on: [T-0026]
 branch: task/T-0157-pet-trading-and-guild-cache
-done_by:
-done_at:
+done_by: 棒子
+done_at: 2026-11-27
 ---
 
 ## 任務
@@ -50,6 +50,11 @@ done_at:
 - 2026-11-27 09:17 [叉子] 開單。依最新 main 的 Board 索引，owner_side 有效 in_progress 任務為 T-0142、T-0146、T-0147、T-0148，共 4/5；T-0156 為 review，不計入容量。未發現有效 communicate task，兩道啟動閘門目前未阻擋。任務先保持 open，待開單紀錄整合及開工閘門再次確認後才開始修改。
 - 2026-11-27 09:18 [叉子] 開單 PR #417 已合併至 main（merge commit `31869a90fd064ee671f8b2ec647a3fc381821852`）。重新檢查最新 main：owner_side 有效 in_progress 任務仍為 T-0142、T-0146、T-0147、T-0148，共 4/5；未發現有效 communicate task，兩道啟動閘門未阻擋。狀態轉換：open → in_progress，開始實作。
 - 2026-11-27 09:22 [叉子] T-0157 內容 PR #419 已合併至 main，merge commit `b4f7fe4bdab6d16882a0d9bf00f86bfa459c5c10`。GitHub Pages 部署 run `45922082249` build／deploy 均成功。交易專屬回歸、PWA display、公會贈禮、Board lifecycle、Auth、Cloud Save、Dice Roll Save、Realtime、天氣、藥水、手套及其他相關測試通過；全站 regression 與寵物管理測試仍因既有 `tests/pet-removal-admin-counts.test.js` 排序標籤斷言失敗，與 T-0157 修改範圍無關。正式 Pages 網址未能透過目前可用的外部頁面讀取工具完成瀏覽器端點擊驗證，因此只記錄 GitHub Pages 部署成功，不宣稱已完成實際手機端驗收。
+
+
+## Owner 驗收紀錄
+
+- 2026-11-27 [棒子] 確認 T-0157 全部驗收成功，同意結案。來源：棒子於本次對話明確表示「驗收的全部驗收成功」。
 
 ## 完工回報
 
