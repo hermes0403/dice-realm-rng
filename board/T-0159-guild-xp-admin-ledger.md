@@ -1,7 +1,7 @@
 ---
 id: T-0159
 title: 管理員手動發放公會 XP 並建立成員任務獎勵紀錄
-status: open
+status: in_progress
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -57,7 +57,9 @@ done_at:
 ## 紀錄
 
 - 2026-11-27 13:26 [叉子] 開單並建立任務分支。T-0158 已出現在既有遠端分支及已合併 PR #415／#416，故本需求使用下一個未使用編號 T-0159，避免重用公開任務 ID。
-- 2026-11-27 13:26 [叉子] 開工容量檢查：owner_side 有效 in_progress／review 任務為 T-0146、T-0147、T-0148、T-0156、T-0157，共 5/5；已達五單上限。本任務保持 open，只提交 Board 開單紀錄，不開始程式或資料庫實作。未發現有效 Communicate task。
+- 2026-11-27 13:26 [叉子] 開工容量檢查：當時 owner_side 有效 in_progress／review 任務為 T-0146、T-0147、T-0148、T-0156、T-0157，共 5/5，因此先保持 open。
+- 2026-11-27 14:32 [棒子] 明確確認 T-0156、T-0157 全部驗收成功，兩項解除 review 待驗收狀態；T-0159 重新檢查 owner_side 容量後可啟動。
+- 2026-11-27 14:33 [叉子] 開始 T-0159 實作。已先部署 Supabase migration `20261127063546_guild_xp_award_ledger_and_admin_grants`，並將管理 Edge Function 更新至 version 37；網站前端及回歸測試仍在進行，尚未完成 Pages 部署。
 
 ## 完工回報
 
