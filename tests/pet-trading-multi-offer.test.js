@@ -66,6 +66,16 @@ test('Realm Exchange is a main navigation entry between fusion and workshop', ()
   assert.doesNotMatch(index, /data-pets-view|pets-page-tabs/);
 });
 
+test('trade sub-view is nested inside the pet page so page layout and spacing rules apply', () => {
+  const petsPageStart = index.indexOf('<section class="page" id="page-pets">');
+  const tradeViewStart = index.indexOf('<div id="petsTradeView"');
+  const tradeViewEnd = index.indexOf('</div></section>', tradeViewStart);
+  const workshopPageStart = index.indexOf('<section class="page" id="page-workshop">');
+  assert.ok(petsPageStart >= 0 && petsPageStart < tradeViewStart);
+  assert.ok(tradeViewEnd > tradeViewStart && tradeViewEnd < workshopPageStart);
+  assert.equal(index.slice(petsPageStart, tradeViewStart).includes('</section>'), false);
+});
+
 test('trade lobby uses a scrollable player list instead of manual username or UUID search', () => {
   assert.doesNotMatch(index, /petTradeTarget|petTradeSearchBtn|輸入玩家名稱或完整 UUID/);
   assert.match(index, /id="petTradeSearchResults"/);
