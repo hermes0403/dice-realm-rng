@@ -15,7 +15,7 @@ const APP_SHELL = [
   './config.js',
   './services/supabase.js',
   './core/format.js',
-  './ui/navigation.js?v=20261123-daily-shop-v1',
+  './ui/navigation.js?v=20261127-t0157-trade-navigation-cache',
   './ui/inventory.js?v=20261126-t0142-inventory-selection',
   './systems/pet-income.js?v=20261118-pet-income-mutation-v2',
   './admin/pet-odds.js?v=20261115-t0100-eternal-odds-db-guard',
