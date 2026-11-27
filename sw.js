@@ -1,10 +1,10 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.51';
+const CACHE_NAME = 'dice-realm-shell-v2.52';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261127-t0159-guild-xp-ledger',
+  './script.js?v=20261127-t0160-guild-xp-console',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/equipment.js?v=20261121-t0123-money-potions',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
@@ -23,7 +23,7 @@ const APP_SHELL = [
   './services/visit-tracking.js',
   './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard',
   './systems/progression.js?v=20261118-roll-milestones-v2',
-  './admin/grants.js?v=20261127-t0159-guild-xp-ledger',
+  './admin/grants.js?v=20261127-t0160-guild-xp-console',
   './systems/weather.js?v=20261120-t0110-crystal-weather-purple',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
   './services/cloud-save.js?v=20261127-t0156-guild-potion-gifting',
@@ -41,7 +41,7 @@ const APP_SHELL = [
   './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion',
   './ui/equipment.js?v=20261123-t0126-click-capture-fix',
   './systems/daily-shop.js?v=20261123-t0126-click-capture-fix',
-  './admin/player-management.js?v=20261127-t0159-guild-xp-ledger',
+  './admin/player-management.js?v=20261127-t0160-guild-xp-console',
   './admin/monitoring.js?v=20261118-shark-weather-history',
   './core/game-state.js?v=20261123-daily-shop-v1',
   './services/presence.js',
@@ -49,7 +49,7 @@ const APP_SHELL = [
   './ui/pet-notices.js',
   './ui/codex.js',
   './ui/main-render.js',
-  './admin/ui-bindings.js?v=20261127-t0159-guild-xp-ledger',
+  './admin/ui-bindings.js?v=20261127-t0160-guild-xp-console',
   './services/account-actions.js?v=20261119-settings-rpc-fix',
   './ui/display-controls.js?v=20261126-t0149-guild-module-refresh',
   './core/timer-manager.js',
