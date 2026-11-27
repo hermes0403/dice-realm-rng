@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 const ui = await readFile(new URL('../ui/guild.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../guild.css', import.meta.url), 'utf8');
 const migration = await readFile(new URL('../docs/migrations/20261127000000_guild_cosmetics.sql', import.meta.url), 'utf8');
-const restrictionMigration = await readFile(new URL('../docs/migrations/20261127143000_guild_cosmetics_level_option_limits.sql', import.meta.url), 'utf8');
+const restrictionMigration = await readFile(new URL('../docs/migrations/20261127121441_guild_cosmetics_level_option_limits.sql', import.meta.url), 'utf8');
 
 test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 時取得', () => {
   assert.match(ui, /hasUnlock\('name_color'\)/);
