@@ -272,7 +272,7 @@ test('effective trade player directory height remains compact after cascade over
 
 test('guild module and app shell use a fresh cache version with no stale settings sync reference', () => {
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
-  assert.match(index, /script\.js\?v=20261127-t0159-guild-xp-ledger/);
+  assert.match(index, /script\.js\?v=20261127-t0160-guild-xp-console/);
   assert.match(script, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
   assert.match(sw, /dice-realm-shell-v2\.51/);
   assert.match(sw, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
