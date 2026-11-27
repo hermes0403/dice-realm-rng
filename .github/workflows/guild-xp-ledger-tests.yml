@@ -30,3 +30,4 @@ jobs:
       - run: node --check admin/player-management.js
       - run: node --check script.js
       - run: node --test tests/guild-xp-ledger.test.mjs
+      - run: git diff --check
