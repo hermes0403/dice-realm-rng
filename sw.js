@@ -66,7 +66,7 @@ const APP_SHELL = [
   './systems/secret-pet-skills.js?v=20261122-secret-skill-swap-v1',
   './assets/pets/eternal-dawn-guardian.svg',
   './assets/pets/eternal-starwish-deer.svg',
-  './style.css?v=20261127-t0157-trade-top-gap',
+  './style.css?v=20261127-t0161-global-boost-layout',
   './guild.css?v=20261127-t0157-trade-top-gap',
   './favicon.ico',
   './assets/pwa-icon-192.png',

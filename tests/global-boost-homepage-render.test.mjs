@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createGlobalBoostSystem } from '../systems/global-boost.js';
 
 function makeSystem({ boost = null, welcome = null } = {}) {
@@ -58,4 +59,14 @@ test('keeps legacy welcome visibility behavior when that element exists', () => 
 
   assert.equal(welcome.hidden, true);
   assert.equal(panel.hidden, false);
+});
+
+
+test('homepage global boost cards have bounded responsive layout and readable wrapping', () => {
+  const css = readFileSync(new URL('../style.css', import.meta.url), 'utf8');
+  assert.match(css, /#realmAdminActivity\s*\{[^}]*width:\s*100%/s);
+  assert.match(css, /#realmAdminActivity \.realm-activity-grid\s*\{[^}]*grid-template-columns:/s);
+  assert.match(css, /#realmAdminActivity \.realm-activity-card\s*\{[^}]*min-width:\s*0/s);
+  assert.match(css, /#realmAdminActivity \.realm-activity-card b\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /@media\s*\(max-width:\s*600px\)\s*\{[^}]*#realmAdminActivity \.realm-activity-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\)/s);
 });
