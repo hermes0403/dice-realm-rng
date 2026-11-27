@@ -73,8 +73,8 @@ test('trade sub-view is nested inside the pet page with balanced fusion and trad
   const tradeViewEnd = index.indexOf('</div></section>', tradeViewStart);
   const workshopPageStart = index.indexOf('<section class="page" id="page-workshop">');
   const countDivs = markup => ({
-    open: (markup.match(/<div\\b/g) || []).length,
-    close: (markup.match(/<\\/div>/g) || []).length
+    open: (markup.match(/<div\b/g) || []).length,
+    close: (markup.match(/<\/div>/g) || []).length
   });
   assert.ok(petsPageStart >= 0 && petsPageStart < fusionViewStart && fusionViewStart < tradeViewStart);
   assert.ok(tradeViewEnd > tradeViewStart && tradeViewEnd < workshopPageStart);
