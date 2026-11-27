@@ -102,6 +102,11 @@ test('trade lobby uses a scrollable player list instead of manual username or UU
 });
 
 
+test('trade directory automatically refreshes on primary navigation and startup', () => {
+  assert.match(service, /data-page="trade"[\s\S]*?void refreshPlayers\(\);[\s\S]*?void refreshInvitations\(\);/);
+  assert.match(service, /Prime the directory during startup[\s\S]*?void refreshPlayers\(\);/);
+});
+
 test('trade player list waits for persisted auth restoration before showing logged-out state', () => {
   assert.match(service, /async function resolveCurrentUser\(\)/);
   assert.match(service, /supabaseClient\.auth\.getSession\(\)/);
