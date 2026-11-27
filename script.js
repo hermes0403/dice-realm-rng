@@ -14,7 +14,7 @@ import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard';
 import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
-import { createAdminGrantService } from './admin/grants.js';
+import { createAdminGrantService } from './admin/grants.js?v=20261127-t0159-guild-xp-ledger';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261120-t0110-crystal-weather-purple';
 import { createGlitchWeatherDropSystem } from './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops';
@@ -33,7 +33,7 @@ import { createGlobalBoostSystem } from './systems/global-boost.js?v=20261117-re
 import { createRealmSocialSystem } from './systems/realm-social.js?v=20261120-t0113-rare-pet-fusion';
 import { createEquipmentUI } from './ui/equipment.js?v=20261123-t0126-click-capture-fix';
 import { createDailyShopSystem } from './systems/daily-shop.js?v=20261123-t0126-click-capture-fix';
-import { createAdminPlayerManagement } from './admin/player-management.js?v=20261124-t0127-ai-npc-v1';
+import { createAdminPlayerManagement } from './admin/player-management.js?v=20261127-t0159-guild-xp-ledger';
 import { createAdminMonitoringSystem } from './admin/monitoring.js?v=20261118-shark-weather-history';
 import { createGameStateService } from './core/game-state.js?v=20261123-daily-shop-v1';
 import { createPresenceService } from './services/presence.js';
@@ -41,7 +41,7 @@ import { createActivityLogService } from './services/activity-logs.js';
 import { createPetNoticeUI } from './ui/pet-notices.js';
 import { createCodexUI } from './ui/codex.js';
 import { createMainRenderUI } from './ui/main-render.js';
-import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261118-t0114-login-name-management';
+import { setupAdminUIBindings } from './admin/ui-bindings.js?v=20261127-t0159-guild-xp-ledger';
 import { setupAccountActions } from './services/account-actions.js?v=20261119-settings-rpc-fix';
 import { setupDisplayControls } from './ui/display-controls.js?v=20261126-t0149-guild-module-refresh';
 import { createTimerManager } from './core/timer-manager.js';
