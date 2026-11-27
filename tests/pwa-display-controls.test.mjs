@@ -345,14 +345,14 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   const script = await readFile(new URL('../script.js', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 
-  assert.match(html, /style\.css\?v=20261127-t0157-trade-top-gap/);
+  assert.match(html, /style\.css\?v=20261127-t0161-global-boost-layout/);
   assert.match(css, /#petSellModal \.pet-sell-dialog #petSellSummary\.pet-sell-summary/);
   assert.match(css, /padding-bottom:calc\(132px \/ var\(--landscape-scale, 1\) \+ env\(safe-area-inset-bottom, 0px\)\)!important/);
   assert.match(css, /-webkit-text-fill-color: #f3f5ff !important/);
   assert.match(css, /mix-blend-mode: normal !important/);
   assert.match(css, /opacity: 1 !important/);
   assert.match(worker, /CACHE_NAME = 'dice-realm-shell-v\d+\.\d+'/);
-  assert.match(worker, /style\.css\?v=20261127-t0157-trade-top-gap/);
+  assert.match(worker, /style\.css\?v=20261127-t0161-global-boost-layout/);
   const htmlScriptVersion = html.match(/script\.js\?v=([^'"]+)/)?.[1];
   const workerScriptVersion = worker.match(/\.\/script\.js\?v=([^'"]+)/)?.[1];
   const guildModuleVersion = script.match(/await import\(['"]\.\/ui\/guild\.js\?v=([^'"]+)['"]\)/)?.[1];
@@ -361,7 +361,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.equal(workerScriptVersion, htmlScriptVersion);
   assert.ok(guildModuleVersion);
   assert.equal(workerGuildModuleVersion, guildModuleVersion);
-  assert.match(worker, /guild\.css\?v=20261127-t0157-trade-top-gap/);
+  assert.match(worker, /guild\.css\?v=20261127-t0161-global-boost-layout/);
   assert.match(script, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   const displayControlsVersion = script.match(/from\s+['"]\.\/ui\/display-controls\.js\?v=([^'"]+)['"]/)?.[1];
