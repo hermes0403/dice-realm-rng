@@ -234,7 +234,7 @@ async function loadGuildPage(){
   guildRoot.innerHTML='<div class="card"><p class="muted">正在啟動公會功能…</p></div>';
   try{
     if(!guildSystem){
-      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0158-guild-gift-correct-settings-location');
+      const { createGuildSystem } = await import('./ui/guild.js?v=20261127-t0157-pet-trading-guild-cache');
       guildSystem=createGuildSystem({supabaseClient,getCurrentUser:()=>currentUser,getState:()=>S,POTIONS,flushCloudSave,adoptServerPotions:(inventory,updatedAt)=>cloudSaveService?.adoptServerPotions(inventory,updatedAt)||false,documentRef:document,toast});
     }
     return await guildSystem.load();
