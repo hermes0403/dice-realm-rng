@@ -20,7 +20,7 @@ const expiredSessionMigration = readFileSync(new URL('../supabase/migrations/202
 test('trade room supports up to four pets per participant', () => {
   assert.match(service, /draftOffer\.length >= 4/);
   assert.match(service, /set_pet_trade_offers/);
-  assert.match(service, /p_pet_uids:\s*draftOffer/);
+  assert.match(service, /p_pet_uids:\s*submittedOffer/);
   assert.match(index, /雙方可各提供最多 4 隻寵物/);
 });
 
