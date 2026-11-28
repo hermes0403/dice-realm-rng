@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.53';
+const CACHE_NAME = 'dice-realm-shell-v2.54';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,9 +24,9 @@ const APP_SHELL = [
   './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard',
   './systems/progression.js?v=20261118-roll-milestones-v2',
   './admin/grants.js?v=20261127-t0160-guild-xp-console',
-  './systems/weather.js?v=20261120-t0110-crystal-weather-purple',
+  './systems/weather.js?v=20261128-t0164-weather-deposit-fix',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',
-  './services/cloud-save.js?v=20261127-t0156-guild-potion-gifting',
+  './services/cloud-save.js?v=20261128-t0164-weather-deposit-fix',
   './systems/coin-boost.js',
   './systems/leaderboards.js',
   './services/auth.js?v=20261126-t0139-account-isolation',
