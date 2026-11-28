@@ -290,8 +290,8 @@ test('guild module and app shell use a fresh cache version with no stale setting
   assert.match(index, /script\.js\?v=20261128-achievement-1m-rolls/);
   assert.match(script, /ui\/guild\.js\?v=20261128-guild-name-cosmetics/);
   assert.match(sw, /dice-realm-shell-v2\.60/);
-  assert.match(sw, /services\/pet-trading-search\.js\?v=20261128-achievement-1m-rolls/);
-  assert.match(script, /pet-trading-search\.js\?v=20261128-achievement-1m-rolls/);
+  assert.match(sw, /services\/pet-trading-search\.js\?v=20261128-trade-substring-search/);
+  assert.match(script, /pet-trading-search\.js\?v=20261128-trade-substring-search/);
   assert.match(sw, /ui\/guild\.js\?v=20261128-guild-name-cosmetics/);
 });
 
