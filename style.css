@@ -3227,3 +3227,9 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
 .pet-trade-player-search::placeholder{color:var(--muted)}
 .pet-trade-player-search:focus-visible{outline:2px solid #8f9cff;outline-offset:2px}
 .pet-trade-own-side[aria-busy="true"]{opacity:.78}
+
+
+/* T-0166: visible server-authoritative trade countdown state. */
+.pet-trade-countdown{display:block;margin:10px 0;padding:10px 12px;border:1px solid rgba(129,145,255,.55);border-radius:10px;background:rgba(74,86,170,.18);color:var(--text);text-align:center;font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.pet-trade-countdown[hidden]{display:none}
+.pet-trade-confirm-button{min-height:42px}
