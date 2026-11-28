@@ -580,5 +580,50 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isCloudSyncBlocked: () => cloudSyncBlocked, markCloudSyncBlocked };
+  // Adopt an atomic server-side bag transaction without replaying its removal as a local delta.
+  function adoptServerBag(bag, updatedAt) {
+    const user = getCurrentUser();
+    const incomingTime = Date.parse(updatedAt);
+    const currentTime = Date.parse(cloudSaveVersion);
+    if (!user || lastSyncedUserId !== user.id || !lastSyncedPayload
+      || !bag || typeof bag !== 'object' || !Number.isFinite(incomingTime)
+      || (Number.isFinite(currentTime) && incomingTime <= currentTime)) return false;
+
+    const state = getState();
+    const baseBag = lastSyncedPayload.bag && typeof lastSyncedPayload.bag === 'object' ? lastSyncedPayload.bag : {};
+    const localBag = state.bag && typeof state.bag === 'object' ? state.bag : {};
+    const serverBag = clonePayload(bag);
+    const mergedBag = { ...serverBag };
+    const ids = new Set([...Object.keys(baseBag), ...Object.keys(localBag)]);
+    for (const id of ids) {
+      const delta = (Number(localBag[id]) || 0) - (Number(baseBag[id]) || 0);
+      if (!delta) continue;
+      const next = Math.max(0, (Number(mergedBag[id]) || 0) + delta);
+      if (next > 0) mergedBag[id] = next;
+      else delete mergedBag[id];
+    }
+
+    lastSyncedPayload = { ...clonePayload(lastSyncedPayload), bag: serverBag };
+    cloudSaveVersion = updatedAt;
+    state.bag = mergedBag;
+    try {
+      const scopedKey = userSaveKey(user.id);
+      if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(state));
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Could not persist adopted server bag', error);
+    }
+    const hasLocalDelta = Object.keys(diffPayload(lastSyncedPayload, savePayload())).length > 0;
+    if (hasLocalDelta) {
+      cloudSyncPending = true;
+      scheduleCloudSync();
+    } else {
+      clearLocalSaveDirty(user.id);
+    }
+    const status = document?.getElementById?.('saveStatus');
+    if (status) status.textContent = hasLocalDelta ? '雲端背包已更新，正在同步新進度' : '雲端背包已同步';
+    return true;
+  }
+
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, isCloudSyncBlocked: () => cloudSyncBlocked, markCloudSyncBlocked };
 }
