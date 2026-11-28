@@ -48,7 +48,22 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   function clearAllCountdownTimers() {
     for (const sessionId of countdownTimers.keys()) clearCountdownTimer(sessionId);
     countdownDisconnectHandlers.clear();
+    sessionRealtimeSignatures.clear();
   }
+
+  function cancelCountdownsWhenLeavingTrade() {
+    for (const cancel of countdownDisconnectHandlers.values()) cancel();
+  }
+
+  doc.addEventListener('visibilitychange', () => {
+    if (doc.hidden) cancelCountdownsWhenLeavingTrade();
+  });
+  doc.addEventListener('click', event => {
+    const navigationTarget = event.target?.closest?.('[data-page]');
+    if (navigationTarget && navigationTarget.dataset.page !== 'trade') {
+      cancelCountdownsWhenLeavingTrade();
+    }
+  });
 
   function scheduleRefreshInvitations() {
     if (refreshScheduleTimer) clearTimeout(refreshScheduleTimer);
