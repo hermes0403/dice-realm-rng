@@ -1,7 +1,7 @@
 ---
 id: T-0164
 title: 修復天氣骰子投入白名單與併發存檔覆蓋
-status: in_progress
+status: blocked
 from: 棒子
 to: 叉子
 owner: 叉子
@@ -36,9 +36,9 @@ done_at:
 ## 驗收條件
 
 - [x] d60～d63 均可投入，伺服器採用正確分母：d60=17100、d61=15222、d62=34321、d63=62200。
-- [ ] 手動與自動投入共用同一序列佇列；同一頁面連續投入不同骰子時，每筆 RPC 都依序完成。
+- [x] 手動與自動投入共用同一序列佇列；同一頁面連續投入不同骰子時，每筆 RPC 都依序完成。
 - [x] RPC 回傳伺服器更新時間；較舊回應不得覆蓋較新的本機／雲端背包基準。
-- [ ] 投入成功後採用伺服器權威背包快照，不再用成功後的整包舊快照回寫覆蓋伺服器交易。
+- [x] 投入成功後採用伺服器權威背包快照，不再用成功後的整包舊快照回寫覆蓋伺服器交易。
 - [x] 回歸測試涵蓋 d60～d63 白名單／分母、兩種骰子連續投入、手動與自動投入共用佇列、舊回應不得回退較新快照。
 - [ ] GitHub Actions 相關測試成功；Supabase migration 已套用至正式 dice-rng 專案並以唯讀查詢驗證函式定義。
 - [ ] GitHub Pages 正式部署完成並回讀確認；任務紀錄附 commit、PR、migration 與部署證據。
@@ -69,3 +69,5 @@ done_at:
 - 影響：T-0010（僅針對現有投入錯誤的熱修復；不變更該任務內容或狀態）。
 
 - 2026-11-28 10:03 [叉子] 依棒子核准的 Owner 單次例外流程，僅豁免 T-0038 §6.3 第 3 項。建立整合分支 `integration/T-0164-weather-deposit-fix`，起點為 `work/chazi` SHA `2ffd91ad46897494a1d491530e2efda33a218dbf`；已逐項移植天氣投入序列佇列、伺服器版本化背包採用、前端依賴注入、RPC migration 文件及回歸測試。PR 與 CI 尚待建立／驗證，未部署前端。
+
+- 2026-11-28 10:06 [叉子] 整合 PR #439 已建立（base `work/chazi`，head `integration/T-0164-weather-deposit-fix`，HEAD `b86da4f871635120243e0de7e189052fd29d199b`）。PR 差異共 7 檔，與 `work/chazi` 比較 ahead 12／behind 0；沒有直接合併舊 task branch。T-0164 新增 6 項回歸測試全數通過（測試 #80–85）；Focused game regression tests PASS。完整 Branch tests 與 Game save delta sync tests 仍失敗，完整測試為 76/90 PASS、14 項既有測試失敗（包含 cloud-save-pet-authority、realm-polls-realtime、global-boost、weather-realtime-lifecycle 等）；尚未取得 work/chazi 基準分支的獨立重跑證據，因此不把它們標為已確認的基準失敗。依停止條件暫停合併及部署，任務轉為 blocked，等待失敗項目釐清／基準驗證。前端仍未部署。
