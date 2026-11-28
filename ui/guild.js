@@ -514,18 +514,19 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     if (activeSettingsSection === 'cosmetics') {
       const unlocks = Array.isArray(guild.reward_unlocks) ? guild.reward_unlocks : [];
       const hasUnlock = key => unlocks.some(item => item.reward_key === key);
-      const cosmeticControl = (field,label,options,allowed,fallback,rewardKey,requiredLevel) => {
+      const cosmeticControl = (field,label,options,allowed,fallback,rewardKey,requiredLevel,comingSoon=false) => {
         const unlocked=hasUnlock(rewardKey), value=safeCosmetic(guild[field],allowed,fallback);
-        const optionRows=(unlocked?options:options.slice(0,1)).map(option=>'<option value="'+option.value+'"'+(value===option.value?' selected':'')+'>'+escapeHTML(option.label)+'</option>').join('');
-        const selectDisabled=!canEditCosmetics||!unlocked?' disabled':'';
-        const note=unlocked?(canEditCosmetics?'已解鎖，隊長與副隊長可以更換。':'已解鎖；目前設定僅供檢視。'):'尚未解鎖，公會達到 Lv.'+requiredLevel+' 後即可使用。';
-        return '<label class="guild-cosmetic-control">'+escapeHTML(label)+'<select name="'+field+'"'+selectDisabled+'>'+optionRows+'</select><small>'+note+'</small></label>';
+        const optionRows=(unlocked&&!comingSoon?options:options.slice(0,1)).map(option=>'<option value="'+option.value+'"'+(value===option.value?' selected':'')+'>'+escapeHTML(option.label)+'</option>').join('');
+        const selectDisabled=!canEditCosmetics||!unlocked||comingSoon?' disabled':'';
+        const note=comingSoon?'尚未開放':(unlocked?(canEditCosmetics?'已解鎖，隊長與副隊長可以更換。':'已解鎖；目前設定僅供檢視。'):'尚未解鎖，公會達到 Lv.'+requiredLevel+' 後即可使用。');
+        const preserved=comingSoon?'<input type="hidden" name="'+field+'" value="'+escapeHTML(value)+'">':'';
+        return '<label class="guild-cosmetic-control">'+escapeHTML(label)+'<select'+(comingSoon?'':' name="'+field+'"')+selectDisabled+'>'+optionRows+'</select>'+preserved+'<small>'+note+'</small></label>';
       };
       const panel='<section class="card guild-settings-panel guild-cosmetics-panel"><div class="eyebrow">GUILD APPEARANCE</div><h2>公會專屬外觀</h2><p class="guild-cosmetics-note">外觀由公會升級解鎖，所有成員都會看到相同設定。</p>' +
         '<form id="guildCosmeticsForm" class="guild-settings-form">'+
         cosmeticControl('name_color','公會名稱顏色',LV9_NAME_COLOR_OPTIONS,LV9_NAME_COLOR_IDS,'default','name_color',9)+
-        cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15)+
-        cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19)+
+        cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15,true)+
+        cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19,true)+
         (canEditCosmetics?'<button class="primary" type="submit">儲存外觀</button>':'<p class="guild-settings-readonly">只有隊長與副隊長可以更換外觀；目前為檢視模式。</p>')+
         '</form></section>';
       root().innerHTML=back+panel+renderLeaveConfirmation(); return;
@@ -594,7 +595,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       (backgroundTheme !== 'default' ? ' guild-bg-' + backgroundTheme : '');
     const emblemClass = 'guild-banner-emblem' + (hasUnlock('badge_frame') ? ' has-reward-frame' : '') +
       (badgeEffect !== 'none' ? ' has-reward-effect guild-badge-effect-' + badgeEffect : '');
-    const nameClass = nameColor !== 'default' ? ' class="guild-name-color-unlocked guild-name-color-' + nameColor + '"' : '';
+    const nameClass = nameColor !== 'default' ? ' class="guild-name-color-unlocked guild-name-color-' + nameColor + ' guild-name-particles guild-name-particles-' + nameColor + '"' : '';
     const guildTitle = hasUnlock('guild_title') ? '<span class="guild-exclusive-title">星域公會</span>' : '';
     const rewardUnlockMarkup = unlocks.length ? '<section class="card guild-panel guild-reward-unlocks"><div class="eyebrow">GUILD REWARDS</div><h3>已解鎖公會獎勵</h3><div class="guild-reward-chip-list">' +
       unlocks.map(item => '<span class="guild-reward-chip">Lv.' + Math.max(1, Number(item.level) || 1) + ' · ' + escapeHTML(item.reward_text || '') + '</span>').join('') +
