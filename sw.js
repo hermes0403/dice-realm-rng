@@ -1,10 +1,10 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.58';
+const CACHE_NAME = 'dice-realm-shell-v2.59';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261128-hotfix-isolated-trade',
+  './script.js?v=20261128-trade-substring-search',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/equipment.js?v=20261121-t0123-money-potions',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
@@ -31,7 +31,7 @@ const APP_SHELL = [
   './systems/leaderboards.js',
   './services/auth.js?v=20261126-t0139-account-isolation',
   './systems/pets.js?v=20261122-secret-skill-swap-v1',
-  './services/pet-trading-search.js?v=20261128-hotfix-isolated-trade',
+  './services/pet-trading-search.js?v=20261128-trade-substring-search',
   './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink',
   './systems/pet-skills.js',
   './systems/dice.js?v=20261122-auto-roll-rare-continue-v1',
