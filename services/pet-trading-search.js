@@ -650,11 +650,13 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     });
 
     function cancelReadyForConnectionLoss() {
-      if (!countdownActive) return;
+      if (!ownConfirmed) return;
       clearCountdownTimer(session.id);
       countdownDisconnectHandlers.delete(String(session.id));
-      countdownLabel.hidden = false;
-      countdownLabel.textContent = '連線中斷，已停止倒數；請重新確認連線後再準備。';
+      countdownLabel.hidden = !countdownActive;
+      countdownLabel.textContent = countdownActive
+        ? '連線中斷，已停止倒數；請重新確認連線後再準備。'
+        : '連線中斷，已取消準備；重新連線後請再次準備。';
       void supabaseClient.rpc('set_pet_trade_ready', {
         p_session_id: session.id,
         p_expected_revision: revision,
@@ -662,8 +664,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       }).finally(scheduleRefreshInvitations);
     }
 
+    if (ownConfirmed) countdownDisconnectHandlers.set(String(session.id), cancelReadyForConnectionLoss);
     if (countdownActive) {
-      countdownDisconnectHandlers.set(String(session.id), cancelReadyForConnectionLoss);
       const startedAtMs = Date.parse(countdownStartedAt);
       let finalizeBusy = false;
       let heartbeatBusy = false;
@@ -737,7 +739,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       tick();
     } else {
       clearCountdownTimer(session.id);
-      countdownDisconnectHandlers.delete(String(session.id));
+      if (!ownConfirmed) countdownDisconnectHandlers.delete(String(session.id));
       countdownLabel.hidden = true;
     }
 
