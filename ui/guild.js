@@ -87,7 +87,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
   function guildNameStyle(guild) {
     const value = safeCosmetic(guild?.name_color, LV9_NAME_COLOR_IDS, 'default');
-    return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + '"';
+    return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + ' guild-name-particles guild-name-particles-' + value + '"';
   }
 
   function guildBadgeMarkup(guild) {
