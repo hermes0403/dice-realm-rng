@@ -15,6 +15,7 @@ const guildModule = readFileSync(new URL('../ui/guild.js', import.meta.url), 'ut
 const petSystem = readFileSync(new URL('../systems/pets.js', import.meta.url), 'utf8');
 const petSelling = readFileSync(new URL('../ui/pet-selling.js', import.meta.url), 'utf8');
 const migration = readFileSync(new URL('../docs/database/pet-trading-multi-offer.sql', import.meta.url), 'utf8');
+const countdownMigration = readFileSync(new URL('../docs/database/pet-trading-countdown.sql', import.meta.url), 'utf8');
 const expiredSessionMigration = readFileSync(new URL('../supabase/migrations/20261122000100_expire_stale_pet_trade_sessions.sql', import.meta.url), 'utf8');
 
 test('trade room supports up to four pets per participant', () => {
@@ -359,4 +360,80 @@ test('trade offer submission exposes progress, prevents duplicate sends, and res
   assert.match(service, /saveOffer\.disabled = false/);
   assert.match(service, /重試送出交易內容/);
   assert.match(service, /ownSide\.inert = false/);
+});
+
+
+test('server countdown migration adds per-side readiness, revision and expiring connection leases', () => {
+  for (const column of ['ready_at_a', 'ready_at_b', 'countdown_started_at', 'countdown_revision', 'ready_lease_until_a', 'ready_lease_until_b']) {
+    assert.match(countdownMigration, new RegExp('ADD COLUMN IF NOT EXISTS ' + column));
+  }
+  assert.match(countdownMigration, /UPDATE public\.pet_trade_sessions[\s\S]*?confirmed_a = false[\s\S]*?revision = revision \+ 1[\s\S]*?WHERE status = 'active'/);
+  assert.match(countdownMigration, /CREATE OR REPLACE FUNCTION public\.set_pet_trade_ready/);
+  assert.match(countdownMigration, /auth\.uid\(\)/);
+  assert.match(countdownMigration, /FOR UPDATE/);
+  assert.match(countdownMigration, /countdown_started_at=clock_timestamp\(\)/);
+});
+
+test('ready cancellation and offer edits invalidate the entire countdown', () => {
+  const readyFn = countdownMigration.slice(
+    countdownMigration.indexOf('FUNCTION public.set_pet_trade_ready'),
+    countdownMigration.indexOf('FUNCTION public.heartbeat_pet_trade_ready')
+  );
+  const offerFn = countdownMigration.slice(
+    countdownMigration.indexOf('FUNCTION public.set_pet_trade_offers'),
+    countdownMigration.indexOf('FUNCTION public.cancel_pet_trade_session')
+  );
+  const cancelFn = countdownMigration.slice(
+    countdownMigration.indexOf('FUNCTION public.cancel_pet_trade_session'),
+    countdownMigration.indexOf('REVOKE ALL ON FUNCTION public.set_pet_trade_ready')
+  );
+  for (const fn of [readyFn, offerFn, cancelFn]) {
+    assert.match(fn, /countdown_started_at\s*=\s*null/);
+    assert.match(fn, /countdown_revision\s*=\s*null/);
+    assert.match(fn, /ready_lease_until_a\s*=\s*null/);
+    assert.match(fn, /ready_lease_until_b\s*=\s*null/);
+  }
+  assert.match(readyFn, /confirmed_a=CASE WHEN v_user_id=participant_a THEN false/);
+  assert.match(readyFn, /confirmed_b=CASE WHEN v_user_id=participant_b THEN false/);
+});
+
+test('final exchange is blocked until the server countdown and both live leases pass', () => {
+  const finalizer = countdownMigration.slice(
+    countdownMigration.indexOf('FUNCTION public.finalize_pet_trade'),
+    countdownMigration.indexOf('FUNCTION public.confirm_pet_trade')
+  );
+  assert.match(finalizer, /countdown_started_at \+ interval '3 seconds' > clock_timestamp\(\)/);
+  assert.match(finalizer, /countdown_revision is distinct from v_session\.revision/);
+  assert.match(finalizer, /ready_lease_until_a <= clock_timestamp\(\)/);
+  assert.match(finalizer, /ready_lease_until_b <= clock_timestamp\(\)/);
+  assert.match(finalizer, /trade_countdown_invalidated/);
+  assert.match(finalizer, /FOR UPDATE/);
+  assert.match(finalizer, /pet_sale_tombstones/);
+  assert.match(finalizer, /offered_pet_no_longer_owned/);
+  assert.match(finalizer, /set status = 'completed'/);
+  assert.match(finalizer, /update public\.game_saves[\s\S]*?update public\.game_saves/);
+  assert.match(finalizer, /already_completed/);
+});
+
+test('legacy confirmation RPC can only set ready and cannot bypass finalization', () => {
+  const compat = countdownMigration.slice(
+    countdownMigration.indexOf('FUNCTION public.confirm_pet_trade'),
+    countdownMigration.indexOf('FUNCTION public.set_pet_trade_offers')
+  );
+  assert.match(compat, /RETURN public\.set_pet_trade_ready\(p_session_id,p_expected_revision,true\)/);
+  assert.doesNotMatch(compat, /update public\.game_saves|set status = 'completed'/);
+  assert.match(countdownMigration, /REVOKE ALL ON FUNCTION public\.finalize_pet_trade/);
+  assert.match(countdownMigration, /GRANT EXECUTE ON FUNCTION public\.finalize_pet_trade\(uuid,integer\) TO authenticated/);
+});
+
+test('client runs a server-timestamp countdown, renews only during countdown, and cancels on realtime loss', () => {
+  assert.match(service, /rpc\('set_pet_trade_ready'/);
+  assert.match(service, /rpc\('heartbeat_pet_trade_ready'/);
+  assert.match(service, /rpc\('finalize_pet_trade'/);
+  assert.match(service, /startedAtMs \+ 3000/);
+  assert.match(service, /setInterval\(\(\) => void heartbeat\(\), 800\)/);
+  assert.match(service, /CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED/);
+  assert.match(service, /連線中斷，已停止倒數/);
+  assert.match(service, /sessionRealtimeSignature/);
+  assert.match(service, /pet-trade-countdown/);
 });
