@@ -1,7 +1,7 @@
 ---
 id: T-0165
 title: 交易玩家搜尋、送出流程修復與雙方準備倒數
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -47,3 +47,5 @@ done_at:
 - 2026-11-28 [叉子] 依棒子要求開單。已讀取 T-0157 完整交付紀錄，確認既有交易已具備草稿移除、revision 確認重置及伺服器原子交換要求；本任務聚焦新增玩家名稱搜尋、查明送出無反應問題及雙方準備倒數。
 - 2026-11-28 [叉子] 最新 main 為 `e46e2d5a63918edf5e01ea4cbeb55be6063b384b`。owner_side 有效 in_progress 任務為 T-0146、T-0148，共 2/5；T-0142 屬 from: 棒子，不計入本方容量。GitHub Board 搜尋未找到有效 communicate task；此結果僅作目前可見 Board／搜尋證據，開工前仍須再次檢查最新 main 與兩道啟動閘門。
 - 2026-11-28 [叉子] 任務先保持 open；依 Board §15，開單 PR 合併及開工閘門再次確認前，不開始程式實作。
+
+- 2026-11-28 13:17 [叉子] 開單 PR #442 已合併至 main（merge commit `b8b7eb5ae97c37b595b4ec924e6f0fdb69301b6a`），任務分支已安全快轉同步至該 main commit。重新讀取最新 main Board：owner_side 有效 in_progress 任務為 T-0146、T-0148，共 2/5；T-0142 為 from: 棒子，T-0147 為 review，T-0164 為 blocked，均不計入容量。檢查有效 Communicate 任務：未發現 `to` 指派 owner_side 且為 open／in_progress，亦未發現 `from: 叉子` 且 returned 的任務；T-0038 為 from: 老查、to: barry，不觸發 owner_side 閘門。T-0157 已 done，依賴解除。兩道啟動閘門均通過，狀態 open → in_progress，提交開工 PR，待合併後開始程式修改。
