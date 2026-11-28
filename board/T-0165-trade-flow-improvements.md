@@ -32,10 +32,10 @@ done_at:
 
 ## 驗收條件
 
-- [ ] 交易介面上方有玩家名稱搜尋，可快速篩選既有可交易玩家；空結果與清除搜尋狀態清楚。
-- [ ] 搜尋不會改變既有邀請權限、玩家列表來源或交易對象驗證。
-- [ ] 送出交易內容流程可正常完成；失敗時有明確錯誤提示並可安全重試，不會卡在 loading。
-- [ ] 送出交易內容採用既有 revision／伺服器回應；重複點擊不會重複提交或造成狀態錯亂。
+- [x] 交易介面上方有玩家名稱搜尋，可快速篩選既有可交易玩家；空結果與清除搜尋狀態清楚。
+- [x] 搜尋不會改變既有邀請權限、玩家列表來源或交易對象驗證。
+- [x] 送出交易內容流程可正常完成；失敗時有明確錯誤提示並可安全重試，不會卡在 loading。
+- [x] 送出交易內容採用既有 revision／伺服器回應；重複點擊不會重複提交或造成狀態錯亂。
 - [ ] 雙方都準備後出現 3、2、1 倒數；倒數期間雙方皆看得到取消交易入口。
 - [ ] 任一方取消準備、修改交易內容、revision 變更、離開房間或連線失效時，倒數立即停止；不可在舊交易內容上完成交易。
 - [ ] 倒數結束後仍須通過既有伺服器端最終確認及原子交換；不因重複請求重複轉移寵物。
@@ -49,3 +49,5 @@ done_at:
 - 2026-11-28 [叉子] 任務先保持 open；依 Board §15，開單 PR 合併及開工閘門再次確認前，不開始程式實作。
 
 - 2026-11-28 13:17 [叉子] 開單 PR #442 已合併至 main（merge commit `b8b7eb5ae97c37b595b4ec924e6f0fdb69301b6a`），任務分支已安全快轉同步至該 main commit。重新讀取最新 main Board：owner_side 有效 in_progress 任務為 T-0146、T-0148，共 2/5；T-0142 為 from: 棒子，T-0147 為 review，T-0164 為 blocked，均不計入容量。檢查有效 Communicate 任務：未發現 `to` 指派 owner_side 且為 open／in_progress，亦未發現 `from: 叉子` 且 returned 的任務；T-0038 為 from: 老查、to: barry，不觸發 owner_side 閘門。T-0157 已 done，依賴解除。兩道啟動閘門均通過，狀態 open → in_progress，提交開工 PR，待合併後開始程式修改。
+
+- 2026-11-28 13:29 [叉子] PR #444 已合併至 main（merge commit `8a8a8b81bd06f11a360e4f9f51d7135c6fd3a2be`）。完成交易玩家名稱本地篩選（不增加資料庫查詢）、送出交易內容進度回饋、防重複提交、送出快照及失敗安全重試；更新 script／Service Worker cache 版本。PR #444 的 20 項 GitHub Actions checks 全數 PASS；合併後 GitHub Pages deployment run `46112380988` 的 build、report-build-status、deploy 全部成功。驗收條件 1～4 已完成。倒數暫緩：現有 `confirm_pet_trade` 在雙方 confirmed 後立即於同一 RPC 完成原子交換，前端倒數無法阻止伺服器提前交換；依本任務禁止未經獨立方案修改 schema／RPC，等待棒子確認是否另開後端任務拆分 ready 與 finalize。
