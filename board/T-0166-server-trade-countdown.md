@@ -1,7 +1,7 @@
 ---
 id: T-0166
 title: 交易雙方準備倒數的伺服器權威 RPC 與安全驗證
-status: open
+status: in_progress
 from: 叉子
 to: 叉子
 owner: 叉子
@@ -63,3 +63,5 @@ done_at:
 ### 沒做／做不到的
 
 ### 衍生任務／影響任務
+
+- 2026-11-28 14:03 [叉子] 開單 PR #446 已合併至 main（merge commit `4b72aa81086c18cfb846b45505304576b24113c1`），任務分支已快轉同步至該 main。重新檢查最新 Board：owner_side 有效 in_progress + review 任務為 T-0146、T-0148、T-0147、T-0165，共 4/5；T-0164 為 blocked 且 from: 棒子，不計入。Communicate 搜尋未找到有效 `to: 叉子` 且 open／in_progress 或 `from: 叉子` 且 returned 的委派單。依賴 T-0157 已由棒子驗收 done。容量與 Communicate 兩道閘門均通過，狀態 open → in_progress；先提交開工 PR，合併後才開始資料庫／RPC 實作。
