@@ -39,7 +39,7 @@ test('公會主頁、搜尋結果與排行榜都會套用已保存的名稱顏�
   assert.match(ui, /function guildNameStyle\(guild\)/);
   assert.match(ui, /guildNameStyle\(g\)/);
   assert.match(ui, /guildNameStyle\(guild\)/);
-  assert.match(ui, /guild-name-particles-' \+ nameColor/);
+  assert.match(ui, /const nameClass = guildNameStyle\(guild\)/);
   assert.match(ui, /guild-bg-/);
   assert.match(ui, /guild-badge-effect-/);
 });
@@ -104,4 +104,18 @@ test('Lv.15 星環特效具雙層高對比環繞、發光與減少動態效果�
   assert.doesNotMatch(css, /guild-badge-effect-orbit,\.guild-banner-emblem\.guild-badge-effect-radiant\{animation:none/);
   assert.match(css, /prefers-reduced-motion:reduce[^}]*guild-badge-effect-orbit/);
   assert.match(css, /guild-bg-aurora[^}]*box-shadow/);
+});
+
+
+test('Lv.9、Lv.15、Lv.19 公會名稱使用單行左右裝飾與對應色系', () => {
+  assert.match(ui, /function guildCosmeticTier\(guild\)/);
+  assert.match(ui, /if \(tier === 9\) return \{ before: '✧　·', after: '·　✧' \}/);
+  assert.match(ui, /if \(tier === 15\) return \{ before: '❄　·', after: '✧　❅' \}/);
+  assert.match(ui, /if \(tier === 19\) return \{ before: '✦　·', after: '☄　✧' \}/);
+  assert.match(ui, /guild-name-decoration/);
+  assert.match(css, /guild-name-tier-9/);
+  assert.match(css, /guild-name-tier-15/);
+  assert.match(css, /guild-name-tier-19/);
+  assert.match(css, /guildAuroraParticles/);
+  assert.match(css, /font-size:\.48em/);
 });

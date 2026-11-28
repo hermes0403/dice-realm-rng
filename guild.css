@@ -285,3 +285,16 @@
 @keyframes guildIceTwinkle{0%,100%{opacity:.2;filter:brightness(.8)}50%{opacity:1;filter:brightness(1.5)}}
 @media(prefers-reduced-motion:reduce){.guild-name-particles::before,.guild-name-particles::after{animation:none!important;opacity:.7}}
 @media(max-width:520px){.guild-name-particles::before,.guild-name-particles::after{inset:-7px -9px}}
+
+
+/* T-0147: compact inline name ornaments for guild cosmetic milestones. */
+.guild-name-decoration{display:inline-block;margin:0 .12em;font-size:.48em;font-weight:800;letter-spacing:.02em;vertical-align:.38em;white-space:pre;opacity:.9;filter:drop-shadow(0 0 3px currentColor);pointer-events:none}
+.guild-name-tier-9 .guild-name-decoration{color:#c5a0ff;text-shadow:0 0 7px rgba(174,139,255,.75)}
+.guild-name-tier-15 .guild-name-decoration{color:#8edfff;text-shadow:0 0 7px rgba(109,208,255,.8)}
+.guild-name-tier-19 .guild-name-decoration{color:#eac477;text-shadow:0 0 7px rgba(234,196,119,.8)}
+.guild-name-particles-solar{filter:drop-shadow(0 0 8px rgba(234,196,119,.5))}
+.guild-name-particles-solar::before{opacity:1;background-image:radial-gradient(circle,rgba(255,231,164,.98) 0 1.4px,transparent 2.2px),radial-gradient(circle,rgba(232,184,95,.98) 0 1.2px,transparent 2px),radial-gradient(circle,rgba(196,157,255,.95) 0 1px,transparent 2px),radial-gradient(circle,rgba(255,216,135,.95) 0 1.2px,transparent 2px);background-position:8% 75%,88% 18%,48% 0%,64% 100%;animation:guildAuroraParticles 4.2s ease-in-out infinite}
+.guild-name-particles-solar::after{opacity:.72;background-image:radial-gradient(circle,rgba(255,238,190,.95) 0 1px,transparent 2px),radial-gradient(circle,rgba(208,170,255,.95) 0 1.2px,transparent 2px);background-position:30% 5%,76% 90%;animation:guildAuroraTwinkle 3s ease-in-out infinite}
+@keyframes guildAuroraParticles{0%,100%{transform:translate3d(-2px,2px,0);opacity:.42}50%{transform:translate3d(3px,-3px,0);opacity:1}}
+@keyframes guildAuroraTwinkle{0%,100%{opacity:.18;filter:brightness(.8)}50%{opacity:1;filter:brightness(1.6)}}
+@media(prefers-reduced-motion:reduce){.guild-name-particles-solar::before,.guild-name-particles-solar::after{animation:none!important;opacity:.7}}
