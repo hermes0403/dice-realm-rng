@@ -313,7 +313,7 @@ const {
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
 // Optional trade UI must never block core game startup.
-void import('./services/pet-trading-search.js?v=20261128-hotfix-isolated-trade')
+void import('./services/pet-trading-search.js?v=20261128-trade-substring-search')
   .then(({ createPetTradingSearch }) => {
     const petTradingSearch = createPetTradingSearch({
       supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt,

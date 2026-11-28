@@ -108,6 +108,15 @@ test('trade directory automatically refreshes on primary navigation and startup'
   assert.match(service, /Prime the directory during startup[\s\S]*?void refreshPlayers\(\);/);
 });
 
+test('trade player search matches substrings across the full player directory on the server', () => {
+  assert.match(service, /playerQuery\.ilike\('username', '%' \+ normalizedQuery \+ '%'\)/);
+  assert.match(service, /setTimeout\(\(\) => \{[\s\S]*?refreshPlayers\(playerSearchQuery\)[\s\S]*?\}, 220\)/);
+  assert.match(service, /playerSearchRequestId/);
+  assert.doesNotMatch(service, /rows\.filter\(row => String\(row\?\.username/);
+  assert.match(service, /找不到符合的玩家/);
+  assert.match(service, /button\.addEventListener\('click', \(\) => selectPlayer\(row\)\)/);
+});
+
 test('trade player list waits for persisted auth restoration before showing logged-out state', () => {
   assert.match(service, /async function resolveCurrentUser\(\)/);
   assert.match(service, /supabaseClient\.auth\.getSession\(\)/);
@@ -278,11 +287,11 @@ test('effective trade player directory height remains compact after cascade over
 
 test('guild module and app shell use a fresh cache version with no stale settings sync reference', () => {
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
-  assert.match(index, /script\.js\?v=20261128-hotfix-isolated-trade/);
+  assert.match(index, /script\.js\?v=20261128-trade-substring-search/);
   assert.match(script, /ui\/guild\.js\?v=20261128-guild-name-cosmetics/);
-  assert.match(sw, /dice-realm-shell-v2\.58/);
-  assert.match(sw, /services\/pet-trading-search\.js\?v=20261128-hotfix-isolated-trade/);
-  assert.match(script, /pet-trading-search\.js\?v=20261128-hotfix-isolated-trade/);
+  assert.match(sw, /dice-realm-shell-v2\.59/);
+  assert.match(sw, /services\/pet-trading-search\.js\?v=20261128-trade-substring-search/);
+  assert.match(script, /pet-trading-search\.js\?v=20261128-trade-substring-search/);
   assert.match(sw, /ui\/guild\.js\?v=20261128-guild-name-cosmetics/);
 });
 
@@ -340,13 +349,14 @@ test('locked pets cannot enter a trade picker or confirm an already-open offer',
 });
 
 
-test('trade player directory filters the already-loaded list by username without extra queries', () => {
+test('trade player directory searches username substrings across the server directory', () => {
   assert.match(index, /id="petTradePlayerSearch"[^>]*type="search"/);
   assert.match(service, /let playerSearchQuery = ''/);
-  assert.match(service, /rows\.filter\(row => String\(row\?\.username \|\| ''\)\.toLocaleLowerCase\(\)\.includes\(query\)\)/);
+  assert.match(service, /playerQuery\.ilike\('username', '%' \+ normalizedQuery \+ '%'\)/);
   assert.match(service, /playerSearch\.addEventListener\('input'/);
+  assert.match(service, /playerSearchRequestId/);
   assert.match(service, /找不到符合的玩家/);
-  assert.match(service, /renderResults\(searchResults\)/);
+  assert.match(service, /button\.addEventListener\('click', \(\) => selectPlayer\(row\)\)/);
 });
 
 test('trade offer submission exposes progress, prevents duplicate sends, and restores safe retry', () => {
