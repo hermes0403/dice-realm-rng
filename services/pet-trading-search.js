@@ -37,16 +37,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     ]);
   }
 
-  function roomRenderSignature(row) {
-    return JSON.stringify([
-      row?.status, row?.expires_at, row?.revision,
-      row?.offered_pet_uids_a, row?.offered_pet_uids_b,
-      row?.offered_pet_snapshots_a, row?.offered_pet_snapshots_b,
-      row?.offered_pet_uid_a, row?.offered_pet_uid_b,
-      row?.offered_pet_snapshot_a, row?.offered_pet_snapshot_b,
-      row?.countdown_started_at, row?.countdown_revision
-    ]);
-  }
+
 
   function clearCountdownTimer(sessionId) {
     const timer = countdownTimers.get(String(sessionId));
@@ -903,7 +894,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       if (activeSessions.length) {
         const retainedRooms = new Set();
         for (const session of activeSessions) {
-          const signature = roomRenderSignature(session);
+          const signature = sessionRealtimeSignature(session);
           const existing = [...host.children].find(node => node.dataset.sessionId === String(session.id));
           if (existing && existing.dataset.sessionSignature === signature) {
             const ownIsA = user.id === session.participant_a;
