@@ -15,7 +15,7 @@ import { setupPetSellingUI } from './ui/pet-selling.js';
 import { createProgressionSystem } from './systems/progression.js';
 import { createAdminGrantService } from './admin/grants.js';
 
-import { createWeatherSystem } from './systems/weather.js';
+import { createWeatherSystem } from './systems/weather.js?v=20261128-t0164-weather-deposit-fix';
 import { createCloudSaveService } from './services/cloud-save.js';
 import { createWeatherDiceStatsLoader } from './services/weather-dice-stats.js';
 import { createCoinBoostService } from './systems/coin-boost.js';
@@ -112,6 +112,7 @@ const weatherSystem = createWeatherSystem({
  markCloudSyncBlocked: error => cloudSaveService?.markCloudSyncBlocked?.(error) || false,
  getAnnouncementChannel: () => realmSocialSystem?.getAnnouncementChannel() || null, openAuth, toast, save,
  render, renderCodex, renderGloves, flushCloudSave,
+ adoptServerBag: (bag, updatedAt) => cloudSaveService?.adoptServerBag(bag, updatedAt) || false,
  announceWeatherSummon, triggerWeatherSurge
 });
 const { getWeather, activeWeatherDice, applyServerWeatherRow, applyForcedWeather, refreshServerWeather, setupServerWeatherSubscription, setupPlayerWeatherSubscription, loadWeatherSummonData, autoDepositRolledWeatherDice, renderWeatherSummon, refreshPlayerWeatherOverride, updateWeatherUI } = weatherSystem;
