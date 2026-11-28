@@ -21,6 +21,21 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   const realtimeChannels = new Map();
   const completedSessionsHandled = new Set();
   const offerDrafts = new Map();
+  const countdownTimers = new Map();
+  const countdownDisconnectHandlers = new Map();
+
+  function clearCountdownTimer(sessionId) {
+    const timer = countdownTimers.get(String(sessionId));
+    if (!timer) return;
+    clearInterval(timer.uiTimer);
+    clearInterval(timer.heartbeatTimer);
+    countdownTimers.delete(String(sessionId));
+  }
+
+  function clearAllCountdownTimers() {
+    for (const sessionId of countdownTimers.keys()) clearCountdownTimer(sessionId);
+    countdownDisconnectHandlers.clear();
+  }
 
   function scheduleRefreshInvitations() {
     if (refreshScheduleTimer) clearTimeout(refreshScheduleTimer);
@@ -231,6 +246,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const ownConfirmed = ownIsA ? session.confirmed_a : session.confirmed_b;
     const otherConfirmed = ownIsA ? session.confirmed_b : session.confirmed_a;
     const revision = Number(session.revision) || 0;
+    const countdownStartedAt = session.countdown_started_at;
+    const countdownRevision = Number(session.countdown_revision);
+    const countdownActive = Boolean(countdownStartedAt && countdownRevision === revision && ownConfirmed && otherConfirmed);
     const pets = Array.isArray(getState()?.pets) ? getState().pets.filter(item => item?.uid && item?.locked !== true && petById(item.id)) : [];
     let draft = offerDrafts.get(session.id);
     if (!draft || draft.revision !== revision) {
@@ -369,12 +387,17 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const ownState = doc.createElement('span');
     ownState.dataset.tradeOwnState = 'true';
     ownState.className = ownConfirmed ? 'is-confirmed' : '';
-    ownState.textContent = '你：' + (ownConfirmed ? '已確認' : '尚未確認');
+    ownState.textContent = '你：' + (ownConfirmed ? '已準備' : '尚未準備');
     const otherState = doc.createElement('span');
     otherState.dataset.tradeOtherState = 'true';
     otherState.className = otherConfirmed ? 'is-confirmed' : '';
-    otherState.textContent = '對方：' + (otherConfirmed ? '已確認' : '尚未確認');
+    otherState.textContent = '對方：' + (otherConfirmed ? '已準備' : '尚未準備');
     state.append(ownState, otherState);
+    const countdownLabel = doc.createElement('strong');
+    countdownLabel.className = 'pet-trade-countdown';
+    countdownLabel.setAttribute('aria-live', 'polite');
+    countdownLabel.hidden = !countdownActive;
+    countdownLabel.textContent = countdownActive ? '正在同步倒數…' : '';
 
     const actions = doc.createElement('div');
     actions.className = 'pet-trade-room-actions';
@@ -382,18 +405,19 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     confirm.type = 'button';
     confirm.className = 'primary pet-trade-confirm-button';
     confirm.dataset.tradeConfirmButton = 'true';
-    confirm.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
-    confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || hasLockedOfferedPet() || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
+    confirm.textContent = ownConfirmed ? '取消準備' : '✓ 準備完成';
+    confirm.disabled = !ownOffer.length || !otherOffer.length || hasLockedOfferedPet() || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
     const hint = doc.createElement('small');
     hint.className = 'pet-trade-room-hint';
-    hint.textContent = '確認前請再次檢查雙方提供的寵物；按下「準備完成」後，仍可在對方確認前取消房間。';
+    hint.textContent = '請檢查雙方提供的寵物；倒數期間可取消準備或取消整個交易房間。';
 
     function updateDraftUI() {
       ownCount.textContent = draftOffer.length + ' / 4 隻';
       saveOffer.disabled = JSON.stringify(draftOffer) === JSON.stringify(ownOffer);
       saveOffer.textContent = saveOffer.disabled ? '交易內容已送出' : '送出交易內容（' + draftOffer.length + ' 隻）';
       confirm.dataset.draftMatchesOffer = String(JSON.stringify(draftOffer) === JSON.stringify(ownOffer));
-      confirm.disabled = !ownOffer.length || !otherOffer.length || ownConfirmed || hasLockedOfferedPet() || confirm.dataset.draftMatchesOffer !== 'true';
+      confirm.textContent = ownConfirmed ? '取消準備' : '✓ 準備完成';
+      confirm.disabled = !ownOffer.length || !otherOffer.length || hasLockedOfferedPet() || confirm.dataset.draftMatchesOffer !== 'true';
       if (JSON.stringify(draftOffer) !== JSON.stringify(ownOffer)) {
         hint.textContent = '你有尚未送出的選擇，送出後雙方確認狀態會重置。';
       } else {
@@ -571,7 +595,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     });
 
     confirm.addEventListener('click', async () => {
-      if (hasLockedOfferedPet()) {
+      if (!ownConfirmed && hasLockedOfferedPet()) {
         hint.textContent = '交易內容包含已鎖定或不在背包中的寵物，請取消房間後重新選擇。';
         confirm.disabled = true;
         toast('已鎖定的寵物不能完成交易');
@@ -579,34 +603,120 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       }
       confirm.disabled = true;
       try {
-        const { data, error } = await supabaseClient.rpc('confirm_pet_trade', {
+        const { error } = await supabaseClient.rpc('set_pet_trade_ready', {
           p_session_id: session.id,
-          p_expected_revision: revision
+          p_expected_revision: revision,
+          p_ready: !ownConfirmed
         });
         if (error) throw error;
-        const result = Array.isArray(data) ? data[0] : data;
-        if (result?.completed) {
-          toast('寵物交換完成！正在同步雙方背包。');
-        } else {
-          toast('你已準備完成，等待對方確認');
-        }
+        toast(ownConfirmed ? '已取消準備，交易倒數已重置' : '已準備完成，等待對方');
         scheduleRefreshInvitations();
       } catch (error) {
-        console.warn('Pet trade confirmation failed', error);
+        console.warn('Pet trade ready state update failed', error);
         hint.textContent = error?.message?.includes('trade_offer_changed_reload')
-          ? '交易內容剛剛有變更，正在重新整理，請再次確認。'
-          : error?.message?.includes('offered_pet_no_longer_owned')
-            ? '有寵物已不在持有清單，請重新選擇。'
-            : '確認失敗：' + (error?.message || '請重新整理後再試。');
+          ? '交易內容剛剛有變更，倒數已取消，正在重新整理。'
+          : '準備狀態更新失敗：' + (error?.message || '請重新整理後再試。');
         confirm.disabled = false;
         if (error?.message?.includes('trade_offer_changed_reload')) await refreshInvitations();
       }
     });
 
+    function cancelReadyForConnectionLoss() {
+      if (!countdownActive) return;
+      clearCountdownTimer(session.id);
+      countdownDisconnectHandlers.delete(String(session.id));
+      countdownLabel.hidden = false;
+      countdownLabel.textContent = '連線中斷，已停止倒數；請重新確認連線後再準備。';
+      void supabaseClient.rpc('set_pet_trade_ready', {
+        p_session_id: session.id,
+        p_expected_revision: revision,
+        p_ready: false
+      }).finally(scheduleRefreshInvitations);
+    }
+
+    if (countdownActive) {
+      countdownDisconnectHandlers.set(String(session.id), cancelReadyForConnectionLoss);
+      const startedAtMs = Date.parse(countdownStartedAt);
+      let finalizeBusy = false;
+      let heartbeatBusy = false;
+      const timerState = { uiTimer: null, heartbeatTimer: null };
+      const finalizeTrade = async () => {
+        if (finalizeBusy) return;
+        finalizeBusy = true;
+        countdownLabel.textContent = '倒數完成，正在由伺服器確認並交換…';
+        try {
+          const { data, error } = await supabaseClient.rpc('finalize_pet_trade', {
+            p_session_id: session.id,
+            p_expected_revision: revision
+          });
+          if (error) throw error;
+          const result = Array.isArray(data) ? data[0] : data;
+          if (result?.completed) {
+            clearCountdownTimer(session.id);
+            countdownDisconnectHandlers.delete(String(session.id));
+            toast('寵物交換完成！正在同步雙方背包。');
+            scheduleRefreshInvitations();
+          } else {
+            throw new Error('trade_finalize_incomplete');
+          }
+        } catch (error) {
+          const message = String(error?.message || '');
+          if (message.includes('trade_countdown_incomplete')) {
+            finalizeBusy = false;
+            return;
+          }
+          clearCountdownTimer(session.id);
+          countdownDisconnectHandlers.delete(String(session.id));
+          countdownLabel.textContent = '連線或交易狀態已失效，倒數取消；請重新準備。';
+          void supabaseClient.rpc('set_pet_trade_ready', {
+            p_session_id: session.id,
+            p_expected_revision: revision,
+            p_ready: false
+          }).finally(scheduleRefreshInvitations);
+        }
+      };
+      const tick = () => {
+        if (!Number.isFinite(startedAtMs)) {
+          countdownLabel.textContent = '倒數時間無效，已停止交易倒數。';
+          clearCountdownTimer(session.id);
+          return;
+        }
+        const remaining = Math.max(0, startedAtMs + 3000 - Date.now());
+        countdownLabel.hidden = false;
+        countdownLabel.textContent = remaining > 0
+          ? '交易倒數：' + Math.ceil(remaining / 1000)
+          : '倒數完成，正在確認…';
+        if (remaining <= 0) void finalizeTrade();
+      };
+      const heartbeat = async () => {
+        if (heartbeatBusy || finalizeBusy) return;
+        heartbeatBusy = true;
+        try {
+          const { error } = await supabaseClient.rpc('heartbeat_pet_trade_ready', {
+            p_session_id: session.id,
+            p_expected_revision: revision
+          });
+          if (error) throw error;
+        } catch (error) {
+          cancelReadyForConnectionLoss();
+        } finally {
+          heartbeatBusy = false;
+        }
+      };
+      timerState.uiTimer = setInterval(tick, 100);
+      timerState.heartbeatTimer = setInterval(() => void heartbeat(), 700);
+      countdownTimers.set(String(session.id), timerState);
+      tick();
+    } else {
+      clearCountdownTimer(session.id);
+      countdownDisconnectHandlers.delete(String(session.id));
+      countdownLabel.hidden = true;
+    }
+
     const cancel = makeSessionActionButton(session.id, '取消交易房間');
     cancel.classList.add('pet-trade-cancel-button');
     actions.append(confirm, cancel);
-    room.append(heading, sides, state, actions, hint);
+    room.append(heading, sides, state, countdownLabel, actions, hint);
     return room;
   }
 
@@ -634,6 +744,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   }
 
   function removeRealtimeChannels() {
+    clearAllCountdownTimers();
     for (const channel of realtimeChannels.values()) {
       if (supabaseClient?.removeChannel) supabaseClient.removeChannel(channel);
       else channel.unsubscribe?.();
@@ -641,7 +752,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     realtimeChannels.clear();
   }
 
-  function ensureRealtimeChannel(key, table, filter) {
+  function ensureRealtimeChannel(key, table, filter, onStatus = null) {
     if (!supabaseClient?.channel || realtimeChannels.has(key)) return;
     const channel = supabaseClient.channel(key)
       .on('postgres_changes', {
@@ -653,7 +764,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         if (refreshing) refreshQueued = true;
         else scheduleRefreshInvitations();
       })
-      .subscribe();
+      .subscribe(status => {
+        if (typeof onStatus === 'function') onStatus(status);
+      });
     realtimeChannels.set(key, channel);
   }
 
@@ -670,7 +783,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       if (session.status !== 'active') continue;
       const key = 'pet-trade-session-' + session.id;
       wanted.add(key);
-      ensureRealtimeChannel(key, 'pet_trade_sessions', 'id=eq.' + session.id);
+      ensureRealtimeChannel(key, 'pet_trade_sessions', 'id=eq.' + session.id, status => {
+        if (['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(status)) {
+          countdownDisconnectHandlers.get(String(session.id))?.();
+        }
+      });
     }
 
     for (const [key, channel] of realtimeChannels) {
@@ -709,7 +826,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       let sessionsByInvitation = new Map();
       if (acceptedIds.length) {
         const sessions = await supabaseClient.from('pet_trade_sessions')
-          .select('id,invitation_id,participant_a,participant_b,status,created_at,expires_at,offered_pet_uid_a,offered_pet_uid_b,offered_pet_snapshot_a,offered_pet_snapshot_b,offered_pet_uids_a,offered_pet_uids_b,offered_pet_snapshots_a,offered_pet_snapshots_b,confirmed_a,confirmed_b,revision')
+          .select('id,invitation_id,participant_a,participant_b,status,created_at,expires_at,offered_pet_uid_a,offered_pet_uid_b,offered_pet_snapshot_a,offered_pet_snapshot_b,offered_pet_uids_a,offered_pet_uids_b,offered_pet_snapshots_a,offered_pet_snapshots_b,confirmed_a,confirmed_b,revision,ready_at_a,ready_at_b,countdown_started_at,countdown_revision')
           .in('invitation_id', acceptedIds);
         if (sessions.error) throw sessions.error;
         sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
@@ -734,7 +851,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             session.offered_pet_uids_a, session.offered_pet_uids_b,
             session.offered_pet_snapshots_a, session.offered_pet_snapshots_b,
             session.offered_pet_uid_a, session.offered_pet_uid_b,
-            session.offered_pet_snapshot_a, session.offered_pet_snapshot_b
+            session.offered_pet_snapshot_a, session.offered_pet_snapshot_b,
+            session.confirmed_a, session.confirmed_b,
+            session.countdown_started_at, session.countdown_revision
           ]);
           const existing = [...host.children].find(node => node.dataset.sessionId === String(session.id));
           if (existing && existing.dataset.sessionSignature === signature) {
@@ -744,19 +863,27 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
             const ownState = existing.querySelector('[data-trade-own-state]');
             const otherState = existing.querySelector('[data-trade-other-state]');
             const confirmButton = existing.querySelector('[data-trade-confirm-button]');
+            const countdownLabel = existing.querySelector('.pet-trade-countdown');
+            const countdownActive = Boolean(session.countdown_started_at &&
+              Number(session.countdown_revision) === Number(session.revision) &&
+              session.confirmed_a && session.confirmed_b);
+            if (countdownLabel) {
+              countdownLabel.hidden = !countdownActive;
+              if (!countdownActive) countdownLabel.textContent = '';
+            }
             if (ownState) {
               ownState.classList.toggle('is-confirmed', Boolean(ownConfirmed));
-              ownState.textContent = '你：' + (ownConfirmed ? '已確認' : '尚未確認');
+              ownState.textContent = '你：' + (ownConfirmed ? '已準備' : '尚未準備');
             }
             if (otherState) {
               otherState.classList.toggle('is-confirmed', Boolean(otherConfirmed));
-              otherState.textContent = '對方：' + (otherConfirmed ? '已確認' : '尚未確認');
+              otherState.textContent = '對方：' + (otherConfirmed ? '已準備' : '尚未準備');
             }
             if (confirmButton) {
-              confirmButton.textContent = ownConfirmed ? '✓ 已準備，等待對方' : '✓ 準備完成';
+              confirmButton.textContent = ownConfirmed ? '取消準備' : '✓ 準備完成';
               const offeredA = Array.isArray(session.offered_pet_uids_a) ? session.offered_pet_uids_a : (session.offered_pet_uid_a ? [session.offered_pet_uid_a] : []);
               const offeredB = Array.isArray(session.offered_pet_uids_b) ? session.offered_pet_uids_b : (session.offered_pet_uid_b ? [session.offered_pet_uid_b] : []);
-              confirmButton.disabled = !offeredA.length || !offeredB.length || Boolean(ownConfirmed) || confirmButton.dataset.draftMatchesOffer !== 'true';
+              confirmButton.disabled = !offeredA.length || !offeredB.length || confirmButton.dataset.draftMatchesOffer !== 'true';
             }
             retainedRooms.add(existing);
             continue;
