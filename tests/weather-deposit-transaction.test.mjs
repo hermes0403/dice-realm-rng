@@ -65,6 +65,6 @@ test('正式 RPC migration 包含四顆缺漏天氣骰子與正確分母', () =>
   for (const [id, denominator] of [['d60', 17100], ['d61', 15222], ['d62', 34321], ['d63', 62200]]) {
     assert.match(sql, new RegExp(`when '${id}' then ${denominator}`));
   }
-  assert.match(sql, /'updated_at',\\s*v_updated_at/);
+  assert.match(sql, /'updated_at',\s*v_updated_at/);
   assert.match(sql, /for update/i);
 });
