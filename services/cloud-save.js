@@ -1,3 +1,29 @@
+export function isNewerServerVersion(incoming, current) {
+  const incomingTime = Date.parse(incoming);
+  const currentTime = Date.parse(current);
+  if (!Number.isFinite(incomingTime)) return false;
+  if (!Number.isFinite(currentTime)) return true;
+  return incomingTime > currentTime;
+}
+
+export function mergeLocalBagDelta(serverBag, baseBag, localBag) {
+  const merged = { ...(serverBag && typeof serverBag === 'object' && !Array.isArray(serverBag) ? serverBag : {}) };
+  for (const [id, value] of Object.entries(merged)) {
+    if ((Number(value) || 0) <= 0) delete merged[id];
+  }
+  const base = baseBag && typeof baseBag === 'object' && !Array.isArray(baseBag) ? baseBag : {};
+  const local = localBag && typeof localBag === 'object' && !Array.isArray(localBag) ? localBag : {};
+  const ids = new Set([...Object.keys(base), ...Object.keys(local)]);
+  for (const id of ids) {
+    const delta = (Number(local[id]) || 0) - (Number(base[id]) || 0);
+    if (!delta) continue;
+    const next = Math.max(0, (Number(merged[id]) || 0) + delta);
+    if (next > 0) merged[id] = next;
+    else delete merged[id];
+  }
+  return merged;
+}
+
 export function createCloudSaveService(dependencies) {
   const {
     KEY, D, POTIONS, supabaseClient,
@@ -623,22 +649,32 @@ export function createCloudSaveService(dependencies) {
   function adoptServerBag(bag, updatedAt) {
     const user = getCurrentUser();
     if (!user || cloudLoadReadyUserId !== user.id || lastSyncedUserId !== user.id
-      || !lastSyncedPayload || !bag || typeof bag !== 'object' || !updatedAt) return false;
+      || !lastSyncedPayload || !bag || typeof bag !== 'object' || Array.isArray(bag)
+      || !isNewerServerVersion(updatedAt, cloudSaveVersion)) return false;
+
+    const state = getState();
+    const baseBag = lastSyncedPayload.bag && typeof lastSyncedPayload.bag === 'object'
+      ? lastSyncedPayload.bag : {};
+    const localBag = state.bag && typeof state.bag === 'object' ? state.bag : {};
+    const serverBag = clonePayload(bag);
+    const mergedBag = mergeLocalBagDelta(serverBag, baseBag, localBag);
     const nextPayload = clonePayload(lastSyncedPayload);
-    nextPayload.bag = clonePayload(bag);
+    nextPayload.bag = serverBag;
     lastSyncedPayload = nextPayload;
     cloudSaveVersion = updatedAt;
     writeCloudBase(user.id, nextPayload, updatedAt);
-    const state = getState();
-    state.bag = clonePayload(bag);
+
+    state.bag = mergedBag;
     state._cloudBaseVersion = updatedAt;
     persistLocalSnapshot(state, user.id);
     try {
       const savedAtKey = localSavedAtKey(user.id);
       if (savedAtKey) localStorage.setItem(savedAtKey, String(Date.now()));
     } catch {}
-    document.getElementById('saveStatus').textContent = '材料已同步至雲端';
-    if (!valuesEqual(savePayload(), lastSyncedPayload)) {
+    const hasLocalDelta = !valuesEqual(savePayload(), lastSyncedPayload);
+    document.getElementById('saveStatus').textContent = hasLocalDelta
+      ? '雲端背包已更新，正在同步新進度' : '材料已同步至雲端';
+    if (hasLocalDelta) {
       cloudSyncPending = true;
       scheduleCloudSync();
     }
