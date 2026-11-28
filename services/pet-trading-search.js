@@ -37,6 +37,17 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     ]);
   }
 
+  function roomRenderSignature(row) {
+    return JSON.stringify([
+      row?.status, row?.expires_at, row?.revision,
+      row?.offered_pet_uids_a, row?.offered_pet_uids_b,
+      row?.offered_pet_snapshots_a, row?.offered_pet_snapshots_b,
+      row?.offered_pet_uid_a, row?.offered_pet_uid_b,
+      row?.offered_pet_snapshot_a, row?.offered_pet_snapshot_b,
+      row?.countdown_started_at, row?.countdown_revision
+    ]);
+  }
+
   function clearCountdownTimer(sessionId) {
     const timer = countdownTimers.get(String(sessionId));
     if (!timer) return;
@@ -433,6 +444,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     confirm.type = 'button';
     confirm.className = 'primary pet-trade-confirm-button';
     confirm.dataset.tradeConfirmButton = 'true';
+    confirm.dataset.ownReady = String(Boolean(ownConfirmed));
     confirm.textContent = ownConfirmed ? '取消準備' : '✓ 準備完成';
     confirm.disabled = !ownOffer.length || !otherOffer.length || hasLockedOfferedPet() || JSON.stringify(draftOffer) !== JSON.stringify(ownOffer);
     const hint = doc.createElement('small');
@@ -444,7 +456,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       saveOffer.disabled = JSON.stringify(draftOffer) === JSON.stringify(ownOffer);
       saveOffer.textContent = saveOffer.disabled ? '交易內容已送出' : '送出交易內容（' + draftOffer.length + ' 隻）';
       confirm.dataset.draftMatchesOffer = String(JSON.stringify(draftOffer) === JSON.stringify(ownOffer));
-      confirm.textContent = ownConfirmed ? '取消準備' : '✓ 準備完成';
+      const isReady = confirm.dataset.ownReady === 'true';
+      confirm.textContent = isReady ? '取消準備' : '✓ 準備完成';
       confirm.disabled = !ownOffer.length || !otherOffer.length || hasLockedOfferedPet() || confirm.dataset.draftMatchesOffer !== 'true';
       if (JSON.stringify(draftOffer) !== JSON.stringify(ownOffer)) {
         hint.textContent = '你有尚未送出的選擇，送出後雙方確認狀態會重置。';
@@ -623,7 +636,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     });
 
     confirm.addEventListener('click', async () => {
-      if (!ownConfirmed && hasLockedOfferedPet()) {
+      const isReady = confirm.dataset.ownReady === 'true';
+      if (!isReady && hasLockedOfferedPet()) {
         hint.textContent = '交易內容包含已鎖定或不在背包中的寵物，請取消房間後重新選擇。';
         confirm.disabled = true;
         toast('已鎖定的寵物不能完成交易');
@@ -634,10 +648,10 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         const { error } = await supabaseClient.rpc('set_pet_trade_ready', {
           p_session_id: session.id,
           p_expected_revision: revision,
-          p_ready: !ownConfirmed
+          p_ready: !isReady
         });
         if (error) throw error;
-        toast(ownConfirmed ? '已取消準備，交易倒數已重置' : '已準備完成，等待對方');
+        toast(isReady ? '已取消準備，交易倒數已重置' : '已準備完成，等待對方');
         scheduleRefreshInvitations();
       } catch (error) {
         console.warn('Pet trade ready state update failed', error);
@@ -889,7 +903,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       if (activeSessions.length) {
         const retainedRooms = new Set();
         for (const session of activeSessions) {
-          const signature = sessionRealtimeSignature(session);
+          const signature = roomRenderSignature(session);
           const existing = [...host.children].find(node => node.dataset.sessionId === String(session.id));
           if (existing && existing.dataset.sessionSignature === signature) {
             const ownIsA = user.id === session.participant_a;
@@ -915,6 +929,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
               otherState.textContent = '對方：' + (otherConfirmed ? '已準備' : '尚未準備');
             }
             if (confirmButton) {
+              confirmButton.dataset.ownReady = String(Boolean(ownConfirmed));
               confirmButton.textContent = ownConfirmed ? '取消準備' : '✓ 準備完成';
               const offeredA = Array.isArray(session.offered_pet_uids_a) ? session.offered_pet_uids_a : (session.offered_pet_uid_a ? [session.offered_pet_uid_a] : []);
               const offeredB = Array.isArray(session.offered_pet_uids_b) ? session.offered_pet_uids_b : (session.offered_pet_uid_b ? [session.offered_pet_uid_b] : []);
