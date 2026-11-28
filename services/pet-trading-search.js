@@ -13,7 +13,8 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   let searchResults = [];
   let playerSearchQuery = '';
   const PLAYER_LIMIT = 40;
-  let searching = false;
+  let playerSearchTimer = null;
+  let playerSearchRequestId = 0;
   let refreshing = false;
   let refreshQueued = false;
   let refreshScheduleTimer = null;
@@ -98,12 +99,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const host = doc.getElementById('petTradeSearchResults');
     if (!host) return;
     host.replaceChildren();
-    const query = playerSearchQuery.trim().toLocaleLowerCase();
-    const visibleRows = query
-      ? rows.filter(row => String(row?.username || '').toLocaleLowerCase().includes(query))
-      : rows;
+    const visibleRows = Array.isArray(rows) ? rows : [];
     if (!visibleRows.length) {
-      host.textContent = query ? '找不到符合的玩家，請調整搜尋名稱。' : '目前沒有其他玩家。';
+      host.textContent = playerSearchQuery.trim() ? '找不到符合的玩家，請調整搜尋名稱。' : '目前沒有其他玩家。';
       return;
     }
     for (const row of visibleRows) {
@@ -141,44 +139,41 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     setStatus('玩家已選擇，可以發送交易邀請。邀請有效時間為 2 分鐘。');
   }
 
-  async function refreshPlayers() {
+  async function refreshPlayers(query = playerSearchQuery) {
     const host = doc.getElementById('petTradeSearchResults');
-    if (!host || !supabaseClient || searching) return;
-    searching = true;
-    host.textContent = '正在確認雲端登入狀態…';
+    if (!host || !supabaseClient) return;
+    const requestId = ++playerSearchRequestId;
+    const normalizedQuery = String(query || '').trim();
+    host.textContent = normalizedQuery ? '正在搜尋玩家…' : '正在確認雲端登入狀態…';
     try {
       const user = await resolveCurrentUser();
+      if (requestId !== playerSearchRequestId) return;
       if (!user?.id) {
         host.textContent = '目前尚未登入雲端帳號。';
         setStatus('');
         return;
       }
-      searchResults = [];
-      selectedPlayer = null;
-      const selected = doc.getElementById('petTradeSelectedTarget');
-      const invite = doc.getElementById('petTradeInviteBtn');
-      if (selected) selected.hidden = true;
-      if (invite) {
-        invite.disabled = true;
-        invite.textContent = '發送交易邀請';
-      }
-      host.textContent = '正在載入玩家列表…';
+      host.textContent = normalizedQuery ? '正在搜尋玩家…' : '正在載入玩家列表…';
       setStatus('');
-      const { data, error } = await supabaseClient.from('player_profiles')
+      let playerQuery = supabaseClient.from('player_profiles')
         .select('user_id,username')
-        .neq('user_id', user.id)
+        .neq('user_id', user.id);
+      // Search the full player directory on the server. The previous implementation
+      // fetched only the first 40 names and filtered that small page locally.
+      if (normalizedQuery) playerQuery = playerQuery.ilike('username', '%' + normalizedQuery + '%');
+      const { data, error } = await playerQuery
         .order('username', { ascending: true })
         .range(0, PLAYER_LIMIT - 1);
+      if (requestId !== playerSearchRequestId) return;
       if (error) throw error;
       searchResults = (Array.isArray(data) ? data : []).filter(row => row?.user_id && row.user_id !== user.id);
       renderResults(searchResults);
       setStatus('');
     } catch (error) {
+      if (requestId !== playerSearchRequestId) return;
       console.warn('Pet trade player list failed', error);
       host.textContent = '玩家列表載入失敗，請稍後重新整理。';
       setStatus('無法讀取玩家列表，請稍後重試。');
-    } finally {
-      searching = false;
     }
   }
 
@@ -1015,7 +1010,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     if (playerSearch) {
       playerSearch.addEventListener('input', () => {
         playerSearchQuery = String(playerSearch.value || '');
-        renderResults(searchResults);
+        if (playerSearchTimer) clearTimeout(playerSearchTimer);
+        playerSearchTimer = setTimeout(() => {
+          playerSearchTimer = null;
+          void refreshPlayers(playerSearchQuery);
+        }, 220);
       });
     }
     if (invite) invite.addEventListener('click', sendInvitation);
