@@ -289,7 +289,7 @@ test('guild module and app shell use a fresh cache version with no stale setting
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
   assert.match(index, /script\.js\?v=20261128-trade-substring-search/);
   assert.match(script, /ui\/guild\.js\?v=20261128-guild-name-cosmetics/);
-  assert.match(sw, /dice-realm-shell-v2\.58/);
+  assert.match(sw, /dice-realm-shell-v2\.59/);
   assert.match(sw, /services\/pet-trading-search\.js\?v=20261128-trade-substring-search/);
   assert.match(script, /pet-trading-search\.js\?v=20261128-trade-substring-search/);
   assert.match(sw, /ui\/guild\.js\?v=20261128-guild-name-cosmetics/);
