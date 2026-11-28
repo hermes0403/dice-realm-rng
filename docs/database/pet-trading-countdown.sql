@@ -7,6 +7,22 @@ ALTER TABLE public.pet_trade_sessions
   ADD COLUMN IF NOT EXISTS ready_lease_until_a timestamptz,
   ADD COLUMN IF NOT EXISTS ready_lease_until_b timestamptz;
 
+-- In-flight confirmations from the previous immediate-exchange protocol are
+-- not valid countdowns. Force those rooms to re-confirm under the new protocol.
+UPDATE public.pet_trade_sessions
+SET confirmed_a = false,
+    confirmed_b = false,
+    ready_at_a = null,
+    ready_at_b = null,
+    countdown_started_at = null,
+    countdown_revision = null,
+    ready_lease_until_a = null,
+    ready_lease_until_b = null,
+    revision = revision + 1,
+    updated_at = clock_timestamp()
+WHERE status = 'active'
+  AND (confirmed_a OR confirmed_b);
+
 CREATE OR REPLACE FUNCTION public.set_pet_trade_ready(p_session_id uuid, p_expected_revision integer, p_ready boolean)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER
 SET search_path TO 'pg_catalog', 'public', 'auth'
