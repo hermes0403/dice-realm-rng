@@ -293,14 +293,14 @@ test('trade room translates rarity labels and weight units into Chinese', () => 
   assert.doesNotMatch(service, /weight\.textContent = .*\+ ' kg'/);
 });
 
-test('confirmation status updates in the existing room without replacing the room DOM', () => {
-  assert.match(service, /session\.offered_pet_snapshot_a, session\.offered_pet_snapshot_b\s*\]\)/);
-  assert.doesNotMatch(service, /session\.offered_pet_snapshot_a, session\.offered_pet_snapshot_b,\s*session\.confirmed_a/);
+test('confirmation state is tracked while heartbeat-only changes are ignored', () => {
+  assert.match(service, /sessionRealtimeSignature/);
+  assert.match(service, /row\?\.confirmed_a, row\?\.confirmed_b/);
+  assert.match(service, /row\?\.countdown_started_at, row\?\.countdown_revision/);
   assert.match(service, /existing\.querySelector\('\[data-trade-own-state\]'\)/);
   assert.match(service, /existing\.querySelector\('\[data-trade-other-state\]'\)/);
-  assert.match(service, /confirmButton\.dataset\.draftMatchesOffer/);
+  assert.match(service, /sessionRealtimeSignatures\.get\(id\) === nextSignature/);
 });
-
 
 test('refreshing trade invitations never replaces an already visible active room with a loading message', () => {
   assert.match(service, /const hasVisibleTradeRoom = \[\.\.\.host\.children\]\.some\(node => node\.classList\.contains\('pet-trade-active-room-only'\)\)/);
@@ -388,10 +388,10 @@ test('ready cancellation and offer edits invalidate the entire countdown', () =>
     countdownMigration.indexOf('REVOKE ALL ON FUNCTION public.set_pet_trade_ready')
   );
   for (const fn of [readyFn, offerFn, cancelFn]) {
-    assert.match(fn, /countdown_started_at\s*=\s*null/);
-    assert.match(fn, /countdown_revision\s*=\s*null/);
-    assert.match(fn, /ready_lease_until_a\s*=\s*null/);
-    assert.match(fn, /ready_lease_until_b\s*=\s*null/);
+    assert.match(fn, /countdown_started_at\s*=\s*null/i);
+    assert.match(fn, /countdown_revision\s*=\s*null/i);
+    assert.match(fn, /ready_lease_until_a\s*=\s*null/i);
+    assert.match(fn, /ready_lease_until_b\s*=\s*null/i);
   }
   assert.match(readyFn, /confirmed_a=CASE WHEN v_user_id=participant_a THEN false/);
   assert.match(readyFn, /confirmed_b=CASE WHEN v_user_id=participant_b THEN false/);
