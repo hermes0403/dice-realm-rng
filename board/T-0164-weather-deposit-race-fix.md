@@ -55,6 +55,8 @@ done_at:
 - 2026-11-28 01:19 [叉子] 整合阻擋：main SHA `d35e53e50694f8884f512ea3904562fabeb79f4a`；work/chazi SHA `2ffd91ad46897494a1d491530e2efda33a218dbf`；共同祖先 `dbbefa05bc110004c6f420c1e9d0c0505543d10f`；compare 為 DIVERGED（work/chazi ahead 368、behind 1691）。main 與 work/chazi 的差異同時包含本任務修改的 `script.js`、`services/cloud-save.js`、`systems/weather.js`。T-0164 task branch 由 main 建立，不符合 T-0038 §6.3 第 3 項「任務分支以 work/chazi 為建立基準」；條件 6、7 亦無法確認安全。不得直接整合或覆蓋。
 - 2026-11-28 01:19 [叉子] PR #436（base main）已關閉且未合併，避免違反棒子方現行整合流程；原 task branch 保留，不刪除、不改寫歷史。前端程式尚未部署至 GitHub Pages；正式 Supabase RPC 已部署。任務保持 blocked，等待合法整合條件解除。
 
+- 2026-11-28 09:22 [代記:棒子/叉子] 棒子核准建立正式「棒子方 Owner 單次整合例外」流程；此流程僅允許逐案豁免 T-0038 §6.3 七條件中的第 3 項，其他六項及保護措施全部保留。T-0164 可依新流程提出一次性整合審查，並非已核准合併或部署；須先依 Board README §7.1 完成逐檔差異審查及驗證。｜來源：棒子於 2026-11-28 對話原話「我說 是」，回覆對象為「可以決定是否制定正式例外流程」。
+
 ## 完工回報
 
 ### 改了什麼
