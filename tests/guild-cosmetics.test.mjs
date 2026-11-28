@@ -39,7 +39,7 @@ test('公會主頁、搜尋結果與排行榜都會套用已保存的名稱顏�
   assert.match(ui, /function guildNameStyle\(guild\)/);
   assert.match(ui, /guildNameStyle\(g\)/);
   assert.match(ui, /guildNameStyle\(guild\)/);
-  assert.match(ui, /guild-name-particles-' \+ nameColor/);
+  assert.match(ui, /const nameClass = guildNameStyle\(guild\)/);
   assert.match(ui, /guild-bg-/);
   assert.match(ui, /guild-badge-effect-/);
 });
