@@ -349,13 +349,14 @@ test('locked pets cannot enter a trade picker or confirm an already-open offer',
 });
 
 
-test('trade player directory filters the already-loaded list by username without extra queries', () => {
+test('trade player directory searches username substrings across the server directory', () => {
   assert.match(index, /id="petTradePlayerSearch"[^>]*type="search"/);
   assert.match(service, /let playerSearchQuery = ''/);
-  assert.match(service, /rows\.filter\(row => String\(row\?\.username \|\| ''\)\.toLocaleLowerCase\(\)\.includes\(query\)\)/);
+  assert.match(service, /playerQuery\.ilike\('username', '%' \+ normalizedQuery \+ '%'\)/);
   assert.match(service, /playerSearch\.addEventListener\('input'/);
+  assert.match(service, /playerSearchRequestId/);
   assert.match(service, /找不到符合的玩家/);
-  assert.match(service, /renderResults\(searchResults\)/);
+  assert.match(service, /button\.addEventListener\('click', \(\) => selectPlayer\(row\)\)/);
 });
 
 test('trade offer submission exposes progress, prevents duplicate sends, and restores safe retry', () => {
