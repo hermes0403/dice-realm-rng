@@ -11,6 +11,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   const doc = documentRef;
   let selectedPlayer = null;
   let searchResults = [];
+  let playerSearchQuery = '';
   const PLAYER_LIMIT = 40;
   let searching = false;
   let refreshing = false;
@@ -52,11 +53,15 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const host = doc.getElementById('petTradeSearchResults');
     if (!host) return;
     host.replaceChildren();
-    if (!rows.length) {
-      host.textContent = '目前沒有其他玩家。';
+    const query = playerSearchQuery.trim().toLocaleLowerCase();
+    const visibleRows = query
+      ? rows.filter(row => String(row?.username || '').toLocaleLowerCase().includes(query))
+      : rows;
+    if (!visibleRows.length) {
+      host.textContent = query ? '找不到符合的玩家，請調整搜尋名稱。' : '目前沒有其他玩家。';
       return;
     }
-    for (const row of rows) {
+    for (const row of visibleRows) {
       const button = doc.createElement('button');
       button.type = 'button';
       button.className = 'pet-trade-search-result' + (selectedPlayer?.user_id === row.user_id ? ' is-selected' : '');
@@ -509,23 +514,37 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     renderOfferSlots();
 
     otherCount.textContent = otherOffer.length + ' / 4 隻';
+    let offerSubmitting = false;
     saveOffer.addEventListener('click', async () => {
-      if (saveOffer.disabled) return;
+      if (saveOffer.disabled || offerSubmitting) return;
+      offerSubmitting = true;
+      const submittedOffer = [...draftOffer];
       saveOffer.disabled = true;
+      saveOffer.textContent = '正在送出交易內容…';
+      ownSide.setAttribute('aria-busy', 'true');
+      ownSide.inert = true;
+      hint.setAttribute('role', 'status');
+      hint.setAttribute('aria-live', 'polite');
+      hint.textContent = '正在同步雲端背包，請稍候…';
+      let submitted = false;
       try {
         const synced = await flushCloudSave();
         if (synced !== true) throw new Error('pet_trade_cloud_save_not_ready');
         const currentPets = Array.isArray(getState()?.pets) ? getState().pets : [];
         const currentUids = new Set(currentPets.map(item => String(item?.uid || '')).filter(Boolean));
-        if (draftOffer.some(uid => !currentUids.has(String(uid)))) {
+        if (submittedOffer.some(uid => !currentUids.has(String(uid)))) {
           throw new Error('pet_trade_local_inventory_changed');
         }
+        hint.textContent = '雲端背包已同步，正在送出交易內容…';
         const { error } = await supabaseClient.rpc('set_pet_trade_offers', {
           p_session_id: session.id,
-          p_pet_uids: draftOffer
+          p_pet_uids: submittedOffer
         });
         if (error) throw error;
         offerDrafts.delete(session.id);
+        submitted = true;
+        saveOffer.textContent = '已送出，正在更新交易房間…';
+        hint.textContent = '交易內容已成功送出，雙方需要重新確認。';
         toast('交易內容已送出，雙方需要重新確認');
         scheduleRefreshInvitations();
       } catch (error) {
@@ -540,10 +559,14 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
               : message.includes('trade_offer_limit_exceeded')
                 ? '每次交易最多只能提供 4 隻寵物。'
                 : '交易內容送出失敗，已保留選擇；可以重新嘗試。';
-        // Always restore the action after a rejected request. The player must
-        // never be trapped with a permanently disabled "send offer" button.
+        // Always restore the action after a rejected request so a safe retry is possible.
         saveOffer.disabled = false;
         saveOffer.textContent = '重試送出交易內容（' + draftOffer.length + ' 隻）';
+      } finally {
+        offerSubmitting = false;
+        ownSide.inert = false;
+        ownSide.removeAttribute('aria-busy');
+        if (submitted) saveOffer.disabled = true;
       }
     });
 
@@ -820,6 +843,13 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     const invite = doc.getElementById('petTradeInviteBtn');
     const refresh = doc.getElementById('petTradeRefreshInvites');
     const refreshPlayersButton = doc.getElementById('petTradeRefreshPlayers');
+    const playerSearch = doc.getElementById('petTradePlayerSearch');
+    if (playerSearch) {
+      playerSearch.addEventListener('input', () => {
+        playerSearchQuery = String(playerSearch.value || '');
+        renderResults(searchResults);
+      });
+    }
     if (invite) invite.addEventListener('click', sendInvitation);
     if (refresh) refresh.addEventListener('click', refreshInvitations);
     if (refreshPlayersButton) refreshPlayersButton.addEventListener('click', () => refreshPlayers());
