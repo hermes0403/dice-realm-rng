@@ -1,0 +1,45 @@
+name: Weather deposit transaction tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'systems/weather.js'
+      - 'services/cloud-save.js'
+      - 'script.js'
+      - 'sw.js'
+      - 'docs/migrations/20261128011300_t0164_weather_deposit_rpc.sql'
+      - 'tests/weather-deposit-transaction.test.js'
+      - '.github/workflows/weather-deposit-transaction-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'systems/weather.js'
+      - 'services/cloud-save.js'
+      - 'script.js'
+      - 'sw.js'
+      - 'docs/migrations/20261128011300_t0164_weather_deposit_rpc.sql'
+      - 'tests/weather-deposit-transaction.test.js'
+      - '.github/workflows/weather-deposit-transaction-tests.yml'
+
+jobs:
+  weather-deposit-transaction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run T-0164 transaction regression tests
+        run: node --test tests/weather-deposit-transaction.test.js
+      - name: Check JavaScript syntax
+        run: |
+          node --input-type=module --check < systems/weather.js
+          node --input-type=module --check < services/cloud-save.js
+          node --input-type=module --check < script.js
+      - name: Check patch whitespace
+        run: |
+          git fetch origin main
+          git diff --check origin/main...HEAD
