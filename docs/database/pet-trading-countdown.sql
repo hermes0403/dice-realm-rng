@@ -319,8 +319,7 @@ begin
     'offered_count_b', cardinality(v_uids_b)
   );
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.confirm_pet_trade(p_session_id uuid,p_expected_revision integer)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER
@@ -460,8 +459,7 @@ begin
 
   return v_session;
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.cancel_pet_trade_session(p_session_id uuid)
  RETURNS pet_trade_sessions
@@ -530,8 +528,7 @@ begin
 
   return v_session;
 end;
-$function$
-
+$function$;
 
 REVOKE ALL ON FUNCTION public.set_pet_trade_ready(uuid,integer,boolean) FROM PUBLIC,anon;
 REVOKE ALL ON FUNCTION public.heartbeat_pet_trade_ready(uuid,integer) FROM PUBLIC,anon;
