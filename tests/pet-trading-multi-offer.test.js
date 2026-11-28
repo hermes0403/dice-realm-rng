@@ -108,6 +108,15 @@ test('trade directory automatically refreshes on primary navigation and startup'
   assert.match(service, /Prime the directory during startup[\s\S]*?void refreshPlayers\(\);/);
 });
 
+test('trade player search matches substrings across the full player directory on the server', () => {
+  assert.match(service, /playerQuery\.ilike\('username', '%' \+ normalizedQuery \+ '%'\)/);
+  assert.match(service, /setTimeout\(\(\) => \{[\s\S]*?refreshPlayers\(playerSearchQuery\)[\s\S]*?\}, 220\)/);
+  assert.match(service, /playerSearchRequestId/);
+  assert.doesNotMatch(service, /rows\.filter\(row => String\(row\?\.username/);
+  assert.match(service, /找不到符合的玩家/);
+  assert.match(service, /button\.addEventListener\('click', \(\) => selectPlayer\(row\)\)/);
+});
+
 test('trade player list waits for persisted auth restoration before showing logged-out state', () => {
   assert.match(service, /async function resolveCurrentUser\(\)/);
   assert.match(service, /supabaseClient\.auth\.getSession\(\)/);
