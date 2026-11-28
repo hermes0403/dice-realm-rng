@@ -335,3 +335,26 @@ test('locked pets cannot enter a trade picker or confirm an already-open offer',
   assert.match(service, /hasLockedOfferedPet/);
   assert.match(service, /已鎖定或不在背包中的寵物/);
 });
+
+
+test('trade player directory filters the already-loaded list by username without extra queries', () => {
+  assert.match(index, /id="petTradePlayerSearch"[^>]*type="search"/);
+  assert.match(service, /let playerSearchQuery = ''/);
+  assert.match(service, /rows\.filter\(row => String\(row\?\.username \|\| ''\)\.toLocaleLowerCase\(\)\.includes\(query\)\)/);
+  assert.match(service, /playerSearch\.addEventListener\('input'/);
+  assert.match(service, /找不到符合的玩家/);
+  assert.match(service, /renderResults\(searchResults\)/);
+});
+
+test('trade offer submission exposes progress, prevents duplicate sends, and restores safe retry', () => {
+  assert.match(service, /let offerSubmitting = false/);
+  assert.match(service, /if \(saveOffer\.disabled \|\| offerSubmitting\) return/);
+  assert.match(service, /正在同步雲端背包/);
+  assert.match(service, /正在送出交易內容/);
+  assert.match(service, /ownSide\.setAttribute\('aria-busy', 'true'\)/);
+  assert.match(service, /ownSide\.inert = true/);
+  assert.match(service, /p_pet_uids: submittedOffer/);
+  assert.match(service, /saveOffer\.disabled = false/);
+  assert.match(service, /重試送出交易內容/);
+  assert.match(service, /ownSide\.inert = false/);
+});
