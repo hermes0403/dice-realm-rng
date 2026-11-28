@@ -11,9 +11,9 @@ test('三項外觀依實際升級獎勵鍵解鎖，徽章特效在升至 Lv.15 �
   assert.match(ui, /hasUnlock\('name_color'\)/);
   assert.match(ui, /hasUnlock\('badge_effect'\)/);
   assert.match(ui, /hasUnlock\('guild_background'\)/);
-  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15)"));
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15,true)"));
   assert.ok(ui.includes("cosmeticControl('name_color','公會名稱顏色',LV9_NAME_COLOR_OPTIONS,LV9_NAME_COLOR_IDS,'default','name_color',9)"));
-  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19)"));
+  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19,true)"));
 });
 
 test('公會外觀提供固定白名單選項，並由會長與副會長修改', () => {
@@ -26,16 +26,20 @@ test('公會外觀提供固定白名單選項，並由會長與副會長修改',
   assert.match(ui, /只有隊長與副隊長可以更換公會外觀/);
 });
 
-test('未解鎖的外觀選單保持鎖定，且顯示所需公會等級', () => {
-  assert.ok(ui.includes("const selectDisabled=!canEditCosmetics||!unlocked?' disabled':'';"));
+test('Lv.15 徽章與 Lv.19 背景暫未開放，鎖定時仍保留既有設定', () => {
+  assert.ok(ui.includes("cosmeticControl('badge_effect','公會徽章特效',LV15_BADGE_EFFECT_OPTIONS,LV15_BADGE_EFFECT_IDS,'none','badge_effect',15,true)"));
+  assert.ok(ui.includes("cosmeticControl('background_theme','公會專屬背景',LV19_BACKGROUND_OPTIONS,LV19_BACKGROUND_IDS,'default','guild_background',19,true)"));
+  assert.match(ui, /comingSoon\?'尚未開放'/);
+  assert.match(ui, /const preserved=comingSoon\?/);
+  assert.match(ui, /!unlocked\|\|comingSoon/);
   assert.match(ui, /尚未解鎖，公會達到 Lv\.'/);
-  assert.ok(ui.includes('options.slice(0,1)'));
 });
 
 test('公會主頁、搜尋結果與排行榜都會套用已保存的名稱顏色', () => {
   assert.match(ui, /function guildNameStyle\(guild\)/);
   assert.match(ui, /guildNameStyle\(g\)/);
   assert.match(ui, /guildNameStyle\(guild\)/);
+  assert.match(ui, /guild-name-particles-' \+ nameColor/);
   assert.match(ui, /guild-bg-/);
   assert.match(ui, /guild-badge-effect-/);
 });
