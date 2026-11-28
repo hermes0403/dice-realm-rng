@@ -1,10 +1,10 @@
 const CACHE_PREFIX = 'dice-realm-shell-';
-const CACHE_NAME = 'dice-realm-shell-v2.59';
+const CACHE_NAME = 'dice-realm-shell-v2.60';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './script.js?v=20261128-trade-substring-search',
+  './script.js?v=20261128-achievement-1m-rolls',
   './data/dice.js?v=20261117-t0102-void-startrail-gloves',
   './data/equipment.js?v=20261121-t0123-money-potions',
   './data/pets.js?v=20261122-pet-skill-swap-v1',
@@ -22,7 +22,7 @@ const APP_SHELL = [
   './services/device-lock.js',
   './services/visit-tracking.js',
   './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard',
-  './systems/progression.js?v=20261118-roll-milestones-v2',
+  './systems/progression.js?v=20261128-achievement-1m-rolls',
   './admin/grants.js?v=20261127-t0160-guild-xp-console',
   './systems/weather.js?v=20261128-t0164-weather-deposit-fix',
   './systems/glitch-weather-drops.js?v=20261114-t0089-glitch-potion-drops',

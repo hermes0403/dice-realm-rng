@@ -57,3 +57,51 @@ test('an existing weather achievement record prevents duplicate reward grants', 
     else globalThis.document = previousDocument;
   }
 });
+
+
+test('one million rolls unlocks both Heaven Potions exactly once', () => {
+  const state = {
+    rolls: 1000000,
+    first: {},
+    bag: {},
+    achievements: { roll100: {}, roll1000: {}, roll10000: {}, roll100000: {}, roll200000: {}, roll400000: {} },
+    dailyQuestCompletions: 0,
+    coins: 0,
+    potions: { inventory: {} }
+  };
+  const previousDocument = globalThis.document;
+  globalThis.document = { getElementById() { return null; }, addEventListener() {} };
+  try {
+    const progression = createProgressionSystem({
+      getState: () => state,
+      D: [],
+      DAILY_TASKS: [],
+      POTIONS: [
+        { id: 'angel1', name: '天堂藥水 I' },
+        { id: 'angel2', name: '天堂藥水 II' }
+      ],
+      format: String,
+      compactNum: String,
+      totalUnique: () => 0,
+      coinEarningMultiplier: () => 1,
+      fresh: () => ({ potions: { inventory: {} } }),
+      save() {},
+      toast() {},
+      timerManager: { clearTimeout() {}, setTimeout() { return 1; } }
+    });
+
+    progression.checkAchievements();
+    assert.equal(state.achievements.roll1000000.name, '百萬擲骰者');
+    assert.equal(state.achievements.roll1000000.desc, '累計擲骰 1,000,000 次');
+    assert.equal(state.achievements.roll1000000.reward, '天堂藥水 I ×1 · 天堂藥水 II ×1');
+    assert.equal(state.potions.inventory.angel1, 1);
+    assert.equal(state.potions.inventory.angel2, 1);
+
+    progression.checkAchievements();
+    assert.equal(state.potions.inventory.angel1, 1);
+    assert.equal(state.potions.inventory.angel2, 1);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+});

@@ -13,7 +13,7 @@ import { setupAdminPetOddsUI } from './admin/pet-odds.js?v=20261115-t0100-eterna
 import { createDeviceLockService } from './services/device-lock.js';
 import { createVisitTrackingService } from './services/visit-tracking.js';
 import { setupPetSellingUI } from './ui/pet-selling.js?v=20261121-pet-inventory-sync-guard';
-import { createProgressionSystem } from './systems/progression.js?v=20261118-roll-milestones-v2';
+import { createProgressionSystem } from './systems/progression.js?v=20261128-achievement-1m-rolls';
 import { createAdminGrantService } from './admin/grants.js?v=20261127-t0160-guild-xp-console';
 
 import { createWeatherSystem, getWeatherSpeedBonus } from './systems/weather.js?v=20261128-t0164-weather-deposit-fix';
