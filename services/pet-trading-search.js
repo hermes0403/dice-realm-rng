@@ -23,6 +23,19 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
   const offerDrafts = new Map();
   const countdownTimers = new Map();
   const countdownDisconnectHandlers = new Map();
+  const sessionRealtimeSignatures = new Map();
+
+  function sessionRealtimeSignature(row) {
+    return JSON.stringify([
+      row?.status, row?.expires_at, row?.revision,
+      row?.offered_pet_uids_a, row?.offered_pet_uids_b,
+      row?.offered_pet_snapshots_a, row?.offered_pet_snapshots_b,
+      row?.offered_pet_uid_a, row?.offered_pet_uid_b,
+      row?.offered_pet_snapshot_a, row?.offered_pet_snapshot_b,
+      row?.confirmed_a, row?.confirmed_b,
+      row?.countdown_started_at, row?.countdown_revision
+    ]);
+  }
 
   function clearCountdownTimer(sessionId) {
     const timer = countdownTimers.get(String(sessionId));
@@ -704,7 +717,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         }
       };
       timerState.uiTimer = setInterval(tick, 100);
-      timerState.heartbeatTimer = setInterval(() => void heartbeat(), 700);
+      timerState.heartbeatTimer = setInterval(() => void heartbeat(), 800);
       countdownTimers.set(String(session.id), timerState);
       tick();
     } else {
@@ -760,7 +773,13 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         schema: 'public',
         table,
         filter
-      }, () => {
+      }, payload => {
+        if (table === 'pet_trade_sessions' && payload?.new?.id) {
+          const id = String(payload.new.id);
+          const nextSignature = sessionRealtimeSignature(payload.new);
+          if (sessionRealtimeSignatures.get(id) === nextSignature) return;
+          sessionRealtimeSignatures.set(id, nextSignature);
+        }
         if (refreshing) refreshQueued = true;
         else scheduleRefreshInvitations();
       })
@@ -780,7 +799,11 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
     ensureRealtimeChannel(receivedKey, 'pet_trade_invitations', 'recipient_id=eq.' + user.id);
 
     for (const session of sessions) {
-      if (session.status !== 'active') continue;
+      if (session.status !== 'active') {
+        clearCountdownTimer(session.id);
+        countdownDisconnectHandlers.delete(String(session.id));
+        continue;
+      }
       const key = 'pet-trade-session-' + session.id;
       wanted.add(key);
       ensureRealtimeChannel(key, 'pet_trade_sessions', 'id=eq.' + session.id, status => {
@@ -831,6 +854,9 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
         if (sessions.error) throw sessions.error;
         sessionsByInvitation = new Map((sessions.data || []).map(row => [row.invitation_id, row]));
       }
+      for (const session of sessionsByInvitation.values()) {
+        sessionRealtimeSignatures.set(String(session.id), sessionRealtimeSignature(session));
+      }
       syncRealtimeChannels(user, [...sessionsByInvitation.values()]);
       const completedSessionsToSync = [...sessionsByInvitation.values()]
         .filter(session => session.status === 'completed')
@@ -846,15 +872,7 @@ export function createPetTradingSearch({ supabaseClient, getCurrentUser, getStat
       if (activeSessions.length) {
         const retainedRooms = new Set();
         for (const session of activeSessions) {
-          const signature = JSON.stringify([
-            session.status, session.expires_at, session.revision,
-            session.offered_pet_uids_a, session.offered_pet_uids_b,
-            session.offered_pet_snapshots_a, session.offered_pet_snapshots_b,
-            session.offered_pet_uid_a, session.offered_pet_uid_b,
-            session.offered_pet_snapshot_a, session.offered_pet_snapshot_b,
-            session.confirmed_a, session.confirmed_b,
-            session.countdown_started_at, session.countdown_revision
-          ]);
+          const signature = sessionRealtimeSignature(session);
           const existing = [...host.children].find(node => node.dataset.sessionId === String(session.id));
           if (existing && existing.dataset.sessionSignature === signature) {
             const ownIsA = user.id === session.participant_a;
