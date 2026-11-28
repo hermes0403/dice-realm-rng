@@ -85,9 +85,23 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
   }
 
   function roleLabel(role) { return ROLE_LABELS[role] || '普通成員'; }
+  function guildCosmeticTier(guild) {
+    const level = Math.max(1, Number(guild?.level) || 1);
+    return level >= 19 ? 19 : level >= 15 ? 15 : level >= 9 ? 9 : 0;
+  }
+
   function guildNameStyle(guild) {
-    const value = safeCosmetic(guild?.name_color, LV9_NAME_COLOR_IDS, 'default');
-    return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + ' guild-name-particles guild-name-particles-' + value + '"';
+    const tier = guildCosmeticTier(guild);
+    const value = tier === 19 ? 'solar' : tier === 15 ? 'ice' : tier === 9 ? 'nebula' : 'default';
+    return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + ' guild-name-particles guild-name-particles-' + value + ' guild-name-tier-' + tier + '"';
+  }
+
+  function guildNameDecorations(guild) {
+    const tier = guildCosmeticTier(guild);
+    if (tier === 9) return { before: '✧　·', after: '·　✧' };
+    if (tier === 15) return { before: '❄　·', after: '✧　❅' };
+    if (tier === 19) return { before: '✦　·', after: '☄　✧' };
+    return { before: '', after: '' };
   }
 
   function guildBadgeMarkup(guild) {
@@ -417,7 +431,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       const members = Math.max(0, Number(guild.member_count) || 0);
       return '<article class="guild-ranking-row">' +
         '<span class="guild-ranking-rank">#' + rank + '</span>' +
-        '<span class="guild-ranking-main"><b' + guildNameStyle(guild) + '>' + escapeHTML(guild.name || '未命名公會') + guildBadgeMarkup(guild) + '</b>' +
+        '<span class="guild-ranking-main"><b' + guildNameStyle(guild) + '>' + '<span class="guild-name-decoration" aria-hidden="true">' + guildNameDecorations(guild).before + '</span>' + escapeHTML(guild.name || '未命名公會') + '<span class="guild-name-decoration" aria-hidden="true">' + guildNameDecorations(guild).after + '</span>' + guildBadgeMarkup(guild) + '</b>' +
         '<small>Lv.' + level + '</small></span>' +
         '<span class="guild-ranking-stats"><b>' + xp.toLocaleString('en-US') + ' XP</b>' +
         '<small>' + members + ' 位成員</small></span></article>';
@@ -595,7 +609,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       (backgroundTheme !== 'default' ? ' guild-bg-' + backgroundTheme : '');
     const emblemClass = 'guild-banner-emblem' + (hasUnlock('badge_frame') ? ' has-reward-frame' : '') +
       (badgeEffect !== 'none' ? ' has-reward-effect guild-badge-effect-' + badgeEffect : '');
-    const nameClass = nameColor !== 'default' ? ' class="guild-name-color-unlocked guild-name-color-' + nameColor + ' guild-name-particles guild-name-particles-' + nameColor + '"' : '';
+    const nameClass = guildNameStyle(guild);
     const guildTitle = hasUnlock('guild_title') ? '<span class="guild-exclusive-title">星域公會</span>' : '';
     const rewardUnlockMarkup = unlocks.length ? '<section class="card guild-panel guild-reward-unlocks"><div class="eyebrow">GUILD REWARDS</div><h3>已解鎖公會獎勵</h3><div class="guild-reward-chip-list">' +
       unlocks.map(item => '<span class="guild-reward-chip">Lv.' + Math.max(1, Number(item.level) || 1) + ' · ' + escapeHTML(item.reward_text || '') + '</span>').join('') +
@@ -603,7 +617,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     root().innerHTML = navMarkup() +
       '<section class="' + bannerClass + '"><div class="' + emblemClass + '" aria-hidden="true"><span>✦</span></div>' +
       '<div class="guild-banner-main"><div class="guild-banner-topline"><span class="eyebrow">GUILD PROFILE</span>' +
-      '<span class="guild-joined"><i></i> 已加入</span><span class="guild-level-pill">Lv.' + Math.max(1, Number(guild.level) || 1) + '</span></div><h2' + nameClass + '>' + escapeHTML(guild.name) + '</h2>' + guildTitle +
+      '<span class="guild-joined"><i></i> 已加入</span><span class="guild-level-pill">Lv.' + Math.max(1, Number(guild.level) || 1) + '</span></div><h2' + nameClass + '><span class="guild-name-decoration" aria-hidden="true">' + guildNameDecorations(guild).before + '</span>' + escapeHTML(guild.name) + '<span class="guild-name-decoration" aria-hidden="true">' + guildNameDecorations(guild).after + '</span></h2>' + guildTitle +
       '<p class="guild-banner-description">' + escapeHTML(guild.description || '一起探索、一起成長，征服無限的骰界！') + '</p>' +
       '<div class="guild-banner-meta"><span>♟ ' + count + ' 位成員</span>' +
       '<span>◆ ' + escapeHTML(roleLabel(data.my_role)) + '</span></div></div></section>' +
@@ -639,7 +653,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     if (!searchPerformed) return '<p class="muted guild-mailbox-empty">輸入公會名稱後搜尋；留空可瀏覽公開公會。</p>';
     if (!searchResults.length) return '<p class="muted guild-mailbox-empty">沒有找到符合的公開公會。</p>';
     const alreadyJoined = Boolean(currentData?.guild);
-    return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + escapeHTML(g.name) + guildBadgeMarkup(g) +
+    return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + '<span class="guild-name-decoration" aria-hidden="true">' + guildNameDecorations(g).before + '</span>' + escapeHTML(g.name) + '<span class="guild-name-decoration" aria-hidden="true">' + guildNameDecorations(g).after + '</span>' + guildBadgeMarkup(g) +
       '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>隊長：' +
       escapeHTML(g.leader_name || '未知玩家') + ' · ' + (Number(g.member_count) || 0) + ' 人</small></div>' +
       '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '"' +
