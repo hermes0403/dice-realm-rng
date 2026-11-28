@@ -1,3 +1,29 @@
+export function isNewerServerVersion(incoming, current) {
+ const incomingTime = Date.parse(incoming);
+ const currentTime = Date.parse(current);
+ if (!Number.isFinite(incomingTime)) return false;
+ if (!Number.isFinite(currentTime)) return true;
+ return incomingTime > currentTime;
+}
+
+export function mergeLocalBagDelta(serverBag, baseBag, localBag) {
+ const merged = { ...(serverBag && typeof serverBag === 'object' ? serverBag : {}) };
+ for (const [id, value] of Object.entries(merged)) {
+  if ((Number(value) || 0) <= 0) delete merged[id];
+ }
+ const base = baseBag && typeof baseBag === 'object' ? baseBag : {};
+ const local = localBag && typeof localBag === 'object' ? localBag : {};
+ const ids = new Set([...Object.keys(base), ...Object.keys(local)]);
+ for (const id of ids) {
+  const delta = (Number(local[id]) || 0) - (Number(base[id]) || 0);
+  if (!delta) continue;
+  const next = Math.max(0, (Number(merged[id]) || 0) + delta);
+  if (next > 0) merged[id] = next;
+  else delete merged[id];
+ }
+ return merged;
+}
+
 export function createCloudSaveService(dependencies) {
   const {
     KEY, D, POTIONS, supabaseClient,
@@ -580,5 +606,39 @@ export function createCloudSaveService(dependencies) {
     }
   }
 
-  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, scheduleSync, flushOnExit, isCloudSyncBlocked: () => cloudSyncBlocked, markCloudSyncBlocked };
+  // Adopt an atomic server-side bag transaction without replaying its removal as a local delta.
+  function adoptServerBag(bag, updatedAt) {
+    const user = getCurrentUser();
+    if (!user || lastSyncedUserId !== user.id || !lastSyncedPayload
+      || !bag || typeof bag !== 'object' || !isNewerServerVersion(updatedAt, cloudSaveVersion)) return false;
+
+    const state = getState();
+    const baseBag = lastSyncedPayload.bag && typeof lastSyncedPayload.bag === 'object' ? lastSyncedPayload.bag : {};
+    const localBag = state.bag && typeof state.bag === 'object' ? state.bag : {};
+    const serverBag = clonePayload(bag);
+    const mergedBag = mergeLocalBagDelta(serverBag, baseBag, localBag);
+
+    lastSyncedPayload = { ...clonePayload(lastSyncedPayload), bag: serverBag };
+    cloudSaveVersion = updatedAt;
+    state.bag = mergedBag;
+    try {
+      const scopedKey = userSaveKey(user.id);
+      if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(state));
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Could not persist adopted server bag', error);
+    }
+    const hasLocalDelta = Object.keys(diffPayload(lastSyncedPayload, savePayload())).length > 0;
+    if (hasLocalDelta) {
+      cloudSyncPending = true;
+      scheduleCloudSync();
+    } else {
+      clearLocalSaveDirty(user.id);
+    }
+    const status = document?.getElementById?.('saveStatus');
+    if (status) status.textContent = hasLocalDelta ? '雲端背包已更新，正在同步新進度' : '雲端背包已同步';
+    return true;
+  }
+
+  return { userSaveKey, save, savePayload, achievementStats, applyPendingGrants, syncCloudSave, flushCloudSave, loadCloudSave, adoptServerBag, scheduleSync, flushOnExit, isCloudSyncBlocked: () => cloudSyncBlocked, markCloudSyncBlocked };
 }

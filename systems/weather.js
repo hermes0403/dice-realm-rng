@@ -1,9 +1,18 @@
+export function createSerialQueue() {
+ let tail = Promise.resolve();
+ return function enqueue(operation) {
+  const result = tail.then(operation, operation);
+  tail = result.then(() => undefined, () => undefined);
+  return result;
+ };
+}
+
 export function createWeatherSystem(dependencies) {
  const {
   D, WEATHER_TYPES, format, escapeHTML, chanceText, byId, supabaseClient, timerManager,
   getState, getCurrentUser, getAnnouncementChannel, openAuth, toast, save,
   isCloudSyncBlocked = () => false, markCloudSyncBlocked = () => false,
-  render, renderCodex, renderGloves, flushCloudSave,
+  render, renderCodex, renderGloves, flushCloudSave, adoptServerBag,
   announceWeatherSummon, triggerWeatherSurge
  } = dependencies;
 // 全服一致的遊戲天氣：以 UTC 當日每分鐘為固定種子，讓所有玩家看到同一場天氣；特殊天氣持續 5 分鐘。
@@ -14,6 +23,7 @@ let lastServerWeatherUpdatedAt=0;
 let serverWeatherState=null,lastWeatherAnnouncementKey='';
 let playerWeatherOverride=null,playerWeatherChannel=null,lastPlayerWeatherKey='';
 let serverWeatherChannel=null;
+const enqueueWeatherDeposit = createSerialQueue();
 let serverWeatherRefreshBusy=false,playerWeatherRefreshBusy=false,summonDataLoadBusy=false;
 let forcedWeatherState=(()=>{try{const v=JSON.parse(localStorage.getItem('diceRealmForcedWeather')||'null');return v&&Number(v.until)>Date.now()?v:null}catch{return null}})();
 function specialWeatherLocked(now=Date.now()){return false}
@@ -157,6 +167,33 @@ async function loadWeatherSummonData(refreshState=true){
  catch(e){markCloudSyncBlocked(e);console.error('Weather contribution read failed',e);renderWeatherSummon();document.getElementById('summonStatus').textContent='讀取召喚資料失敗：'+(e.message||'請稍後重試')}
  } finally { summonDataLoadBusy=false; }
 }
+async function performWeatherDiceDeposit(d, qty, automatic=false){
+ return enqueueWeatherDeposit(async () => {
+  if(!getCurrentUser()||!supabaseClient)throw new Error('請先登入雲端帳號');
+  const have=Number(getState().bag?.[d.id])||0;
+  if(qty<1||qty>have)throw new Error('背包中的骰子數量不足');
+  const flushed=await flushCloudSave();
+  if(flushed!==true)throw new Error('雲端存檔尚未同步完成，請稍後重試');
+  const {data,error}=await supabaseClient.rpc('deposit_weather_dice',{p_dice_id:d.id,p_quantity:qty});
+  if(error)throw error;
+  if(!data?.bag||!data.updated_at)throw new Error('伺服器沒有回傳完整背包版本');
+  const adopted=typeof adoptServerBag==='function'
+   ? adoptServerBag(data.bag,data.updated_at)
+   : (getState().bag=data.bag,save(),true);
+  if(adopted){
+   weatherContributionPoints=Number(data.points)||0;
+   weatherContributionDeposits=data.deposits||{};
+  }else{
+   await loadWeatherSummonData(false);
+  }
+  renderWeatherSummon();
+  if(adopted)toast(automatic
+   ? `已自動添加 ${d.name}，增加 ${format(data.added_points)} 點召喚能量`
+   : `已投入 ${d.name} ×${qty}，增加 ${format(data.added_points)} 點召喚能量`);
+  else toast('投入已由伺服器處理；本機保留較新的背包資料');
+  return data;
+ });
+}
 async function depositWeatherDice(id){
  if(!getCurrentUser()||!supabaseClient){openAuth();toast('請先登入雲端帳號');return}
  const d=byId(id);if(!d?.weather){toast('這顆不是天氣變異骰子');return}
@@ -165,11 +202,9 @@ async function depositWeatherDice(id){
  if(d.den>8000&&!confirm(`你準備投入 ${d.name}（1/${format(d.den)}）×${qty}。這類骰子相當稀有，投入後會永久扣除、無法取回。確定投入嗎？`))return;
  const button=document.querySelector(`[data-weather-deposit="${id}"]`);if(button){button.disabled=true;button.textContent='投入中…'}
  try{
-  await flushCloudSave();
-  const {data,error}=await supabaseClient.rpc('deposit_weather_dice',{p_dice_id:id,p_quantity:qty});if(error)throw error;
-  if(!data||!data.bag)throw new Error('伺服器沒有回傳背包資料');
-  getState().bag=data.bag;weatherContributionPoints=Number(data.points)||0;weatherContributionDeposits=data.deposits||{};save();render();await flushCloudSave();renderWeatherSummon();toast(`已投入 ${d.name} ×${qty}，增加 ${format(data.added_points)} 點召喚能量`);
- }catch(e){console.error('Weather dice deposit failed',e);toast('投入失敗：'+(e.message||'請確認已登入並同步存檔'));}finally{renderWeatherSummon()}
+  await performWeatherDiceDeposit(d,qty,false);
+ }catch(e){console.error('Weather dice deposit failed',e);toast('投入失敗：'+(e.message||'請確認已登入並同步存檔'))}
+ finally{renderWeatherSummon()}
 }
 async function summonSpecialWeather(){
  if(!getCurrentUser()||!supabaseClient){openAuth();toast('請先登入雲端帳號');return}
@@ -193,13 +228,13 @@ async function autoDepositRolledWeatherDice(d){
  if(!d?.weather||!getCurrentUser()||!supabaseClient)return false;
  if(!getState().autoDepositWeatherEnabled||!(getState().autoDepositDice||[]).includes(d.id))return false;
  try{
-  // 先把剛抽到的骰子存進雲端，再由後端扣除並計入召喚能量，避免新骰子尚未同步而投入失敗。
-  await flushCloudSave();
-  const {data,error}=await supabaseClient.rpc('deposit_weather_dice',{p_dice_id:d.id,p_quantity:1});if(error)throw error;
-  if(!data?.bag)throw new Error('伺服器沒有回傳背包資料');
-  getState().bag=data.bag;weatherContributionPoints=Number(data.points)||0;weatherContributionDeposits=data.deposits||{};
-  await flushCloudSave();renderWeatherSummon();toast(`已自動添加 ${d.name}，增加 ${format(data.added_points)} 點召喚能量`);return true;
- }catch(e){console.error('Auto deposit rolled weather die failed',e);toast('自動添加失敗，骰子已保留在背包：'+(e.message||'請稍後重試'));return false}
+  await performWeatherDiceDeposit(d,1,true);
+  return true;
+ }catch(e){
+  console.error('Auto deposit rolled weather die failed',e);
+  toast('自動添加失敗，骰子已保留在背包：'+(e.message||'請稍後重試'));
+  return false;
+ }
 }
 document.addEventListener('click',e=>{const d=e.target.closest('[data-weather-deposit]');if(d)depositWeatherDice(d.dataset.weatherDeposit);if(e.target.closest('#summonWeatherBtn'))summonSpecialWeather();if(e.target.closest('#autoDepositWeatherBtn'))toggleAutoDepositWeather()});
 // Realtime delivers shared and personal weather changes immediately. Five-minute
