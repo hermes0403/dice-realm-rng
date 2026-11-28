@@ -279,7 +279,7 @@ test('guild module and app shell use a fresh cache version with no stale setting
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
   assert.match(index, /script\.js\?v=20261127-t0160-guild-xp-console/);
   assert.match(script, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
-  assert.match(sw, /dice-realm-shell-v2\.53/);
+  assert.match(sw, /dice-realm-shell-v2\.54/);
   assert.match(sw, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
 });
 
