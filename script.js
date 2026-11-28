@@ -23,7 +23,6 @@ import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261126-t0139-account-isolation';
 import { createPetSystem } from './systems/pets.js?v=20261122-secret-skill-swap-v1';
-import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261128-t0166-server-countdown';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261122-auto-roll-rare-continue-v1';
@@ -313,16 +312,21 @@ const {
  renderPetChance, dicePairAllowed, dicePairTier, refreshPetDiceSelects, updatePetDicePreview,
  onPetDiceSelectionChange, craftPetFromDice
 } = petSystem;
-const petTradingSearch = createPetTradingSearch({
-  supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt,
-  onTradeCompleted: async () => {
-    await loadCloudSave({ renderAfterLoad: false });
-    renderPetsPage();
-    renderPetCodex();
-  },
-  flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast
-});
-petTradingSearch.setup();
+// Optional trade UI must never block core game startup.
+void import('./services/pet-trading-search.js?v=20261128-hotfix-isolated-trade')
+  .then(({ createPetTradingSearch }) => {
+    const petTradingSearch = createPetTradingSearch({
+      supabaseClient, getCurrentUser: () => currentUser, getState: () => S, petById, petArt,
+      onTradeCompleted: async () => {
+        await loadCloudSave({ renderAfterLoad: false });
+        renderPetsPage();
+        renderPetCodex();
+      },
+      flushCloudSave: () => flushCloudSave(), escapeHTML, documentRef: document, toast
+    });
+    petTradingSearch.setup();
+  })
+  .catch(error => console.error('[PetTrade] Optional module failed to load:', error));
 const { updateAdminVisibility, navHTML, go } = createNavigationUI({
   pages, isAdmin, toast, loadAdminDashboard, refreshLeaderboards, loadWeatherSummonData, renderPetsPage, renderDailyShop,
   loadGuildPage, refreshWeeklyEvent: () => weeklyRealmEvent.refresh(), loadGuildSettingsEntry
