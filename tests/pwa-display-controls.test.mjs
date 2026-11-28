@@ -361,7 +361,7 @@ test('T-0117 寵物出售摘要維持高對比，且首頁 HTML／CSS／JS 與 S
   assert.equal(workerScriptVersion, htmlScriptVersion);
   assert.ok(guildModuleVersion);
   assert.equal(workerGuildModuleVersion, guildModuleVersion);
-  assert.match(worker, /guild\.css\?v=20261127-t0157-trade-top-gap/);
+  assert.match(worker, /guild\.css\?v=20261128-guild-name-cosmetics/);
   assert.match(script, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   assert.match(worker, /ui\/inventory\.js\?v=20261126-t0142-inventory-selection/);
   const displayControlsVersion = script.match(/from\s+['"]\.\/ui\/display-controls\.js\?v=([^'"]+)['"]/)?.[1];

@@ -74,5 +74,5 @@ test('admin module cache versions are aligned between app imports and service wo
     assert.ok(appVersion, 'missing app cache version for '+path);
     assert.equal(swVersion,appVersion,'cache version mismatch for '+path);
   }
-  assert.match(sw,/dice-realm-shell-v2\.57/);
+  assert.match(sw,/dice-realm-shell-v2\.58/);
 });
