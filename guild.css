@@ -128,6 +128,10 @@
 .guild-banner-emblem.has-reward-effect{animation:guildBadgeGlow 2.8s ease-in-out infinite}
 @keyframes guildBadgeGlow{0%,100%{filter:drop-shadow(0 0 3px rgba(159,128,255,.25))}50%{filter:drop-shadow(0 0 12px rgba(191,157,255,.85))}}
 .guild-name-color-unlocked{background:linear-gradient(90deg,#d9c5ff,#83d9ff,#d9c5ff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.guild-banner h2.guild-name-color-unlocked{color:transparent!important}
+.guild-name-badge{display:inline-flex;position:relative;align-items:center;justify-content:center;width:20px;height:20px;margin-left:7px;vertical-align:middle;font-size:15px;line-height:1;color:#a9efff;filter:drop-shadow(0 0 5px rgba(93,218,255,.85)) drop-shadow(0 0 9px rgba(163,111,255,.75))}
+.guild-name-badge-orbit::before,.guild-name-badge-orbit::after{content:"";position:absolute;inset:1px;border:1.5px solid rgba(99,226,255,.95);border-radius:35%;pointer-events:none;animation:guildOrbitSpin 7s linear infinite}
+.guild-name-badge-orbit::after{inset:-3px;border:1.5px dashed rgba(207,163,255,.95);border-radius:50%;animation:guildOrbitSpinReverse 11s linear infinite}
 .guild-level-pill{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid rgba(170,143,238,.35);border-radius:999px;background:rgba(87,69,135,.22);color:#d8c8ff;font-size:11px;font-weight:800}
 .guild-exclusive-title{display:inline-flex;margin:7px 0 0;padding:4px 9px;border:1px solid rgba(162,137,227,.3);border-radius:8px;background:rgba(103,78,157,.2);color:#d8c6ff;font-size:11px;font-weight:800;letter-spacing:.04em}
 .guild-reward-unlocks{display:grid;gap:10px}

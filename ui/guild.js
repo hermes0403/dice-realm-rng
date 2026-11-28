@@ -90,6 +90,12 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     return value === 'default' ? '' : ' class="guild-name-color-unlocked guild-name-color-' + value + '"';
   }
 
+  function guildBadgeMarkup(guild) {
+    const effect = safeCosmetic(guild?.badge_effect, LV15_BADGE_EFFECT_IDS, 'none');
+    return effect === 'orbit'
+      ? '<span class="guild-name-badge guild-name-badge-orbit" aria-label="星環徽章">✦</span>'
+      : '';
+  }
 
   function navMarkup() {
     const unreadCount = Math.max(0, Number(currentData?.mail_unread_count) || 0);
@@ -411,7 +417,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
       const members = Math.max(0, Number(guild.member_count) || 0);
       return '<article class="guild-ranking-row">' +
         '<span class="guild-ranking-rank">#' + rank + '</span>' +
-        '<span class="guild-ranking-main"><b' + guildNameStyle(guild) + '>' + escapeHTML(guild.name || '未命名公會') + '</b>' +
+        '<span class="guild-ranking-main"><b' + guildNameStyle(guild) + '>' + escapeHTML(guild.name || '未命名公會') + guildBadgeMarkup(guild) + '</b>' +
         '<small>Lv.' + level + '</small></span>' +
         '<span class="guild-ranking-stats"><b>' + xp.toLocaleString('en-US') + ' XP</b>' +
         '<small>' + members + ' 位成員</small></span></article>';
@@ -632,7 +638,7 @@ export function createGuildSystem({ supabaseClient, getCurrentUser, getState = (
     if (!searchPerformed) return '<p class="muted guild-mailbox-empty">輸入公會名稱後搜尋；留空可瀏覽公開公會。</p>';
     if (!searchResults.length) return '<p class="muted guild-mailbox-empty">沒有找到符合的公開公會。</p>';
     const alreadyJoined = Boolean(currentData?.guild);
-    return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + escapeHTML(g.name) +
+    return searchResults.map(g => '<article class="guild-result-row"><div><b' + guildNameStyle(g) + '>' + escapeHTML(g.name) + guildBadgeMarkup(g) +
       '</b><p>' + escapeHTML(g.description || '尚未設定介紹') + '</p><small>隊長：' +
       escapeHTML(g.leader_name || '未知玩家') + ' · ' + (Number(g.member_count) || 0) + ' 人</small></div>' +
       '<button type="button" data-guild-apply="' + escapeHTML(g.id) + '"' +
