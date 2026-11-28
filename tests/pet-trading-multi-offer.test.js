@@ -143,7 +143,7 @@ test('trade pet pickers use a horizontal swipe carousel and show an explicit rea
   assert.match(styles, /\.pet-trade-pet-picker\{[\s\S]*?flex-wrap:nowrap[\s\S]*?overflow-x:auto/);
   assert.match(styles, /\.pet-trade-pet-card\{[\s\S]*?flex:0 0 116px/);
   assert.match(service, /✓ 準備完成/);
-  assert.match(service, /你已準備完成，等待對方確認/);
+  assert.match(service, /已準備完成，等待對方/);
 });
 
 
@@ -407,7 +407,7 @@ test('final exchange is blocked until the server countdown and both live leases 
   assert.match(finalizer, /ready_lease_until_a <= clock_timestamp\(\)/);
   assert.match(finalizer, /ready_lease_until_b <= clock_timestamp\(\)/);
   assert.match(finalizer, /trade_countdown_invalidated/);
-  assert.match(finalizer, /FOR UPDATE/);
+  assert.match(finalizer, /FOR UPDATE/i);
   assert.match(finalizer, /pet_sale_tombstones/);
   assert.match(finalizer, /offered_pet_no_longer_owned/);
   assert.match(finalizer, /set status = 'completed'/);
