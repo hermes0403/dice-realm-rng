@@ -20,7 +20,7 @@ const expiredSessionMigration = readFileSync(new URL('../supabase/migrations/202
 test('trade room supports up to four pets per participant', () => {
   assert.match(service, /draftOffer\.length >= 4/);
   assert.match(service, /set_pet_trade_offers/);
-  assert.match(service, /p_pet_uids:\s*draftOffer/);
+  assert.match(service, /p_pet_uids:\s*submittedOffer/);
   assert.match(index, /雙方可各提供最多 4 隻寵物/);
 });
 
@@ -277,9 +277,11 @@ test('effective trade player directory height remains compact after cascade over
 
 test('guild module and app shell use a fresh cache version with no stale settings sync reference', () => {
   assert.doesNotMatch(guildModule + script + index, /syncPotionGiftSettingsEntry/);
-  assert.match(index, /script\.js\?v=20261127-t0160-guild-xp-console/);
+  assert.match(index, /script\.js\?v=20261128-t0165-trade-search-feedback/);
   assert.match(script, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
-  assert.match(sw, /dice-realm-shell-v2\.54/);
+  assert.match(sw, /dice-realm-shell-v2\.55/);
+  assert.match(sw, /services\/pet-trading-search\.js\?v=20261128-t0165-trade-search-feedback/);
+  assert.match(script, /pet-trading-search\.js\?v=20261128-t0165-trade-search-feedback/);
   assert.match(sw, /ui\/guild\.js\?v=20261127-t0157-trade-top-gap/);
 });
 
@@ -334,4 +336,27 @@ test('locked pets cannot enter a trade picker or confirm an already-open offer',
   assert.match(service, /latestPet\.locked === true/);
   assert.match(service, /hasLockedOfferedPet/);
   assert.match(service, /已鎖定或不在背包中的寵物/);
+});
+
+
+test('trade player directory filters the already-loaded list by username without extra queries', () => {
+  assert.match(index, /id="petTradePlayerSearch"[^>]*type="search"/);
+  assert.match(service, /let playerSearchQuery = ''/);
+  assert.match(service, /rows\.filter\(row => String\(row\?\.username \|\| ''\)\.toLocaleLowerCase\(\)\.includes\(query\)\)/);
+  assert.match(service, /playerSearch\.addEventListener\('input'/);
+  assert.match(service, /找不到符合的玩家/);
+  assert.match(service, /renderResults\(searchResults\)/);
+});
+
+test('trade offer submission exposes progress, prevents duplicate sends, and restores safe retry', () => {
+  assert.match(service, /let offerSubmitting = false/);
+  assert.match(service, /if \(saveOffer\.disabled \|\| offerSubmitting\) return/);
+  assert.match(service, /正在同步雲端背包/);
+  assert.match(service, /正在送出交易內容/);
+  assert.match(service, /ownSide\.setAttribute\('aria-busy', 'true'\)/);
+  assert.match(service, /ownSide\.inert = true/);
+  assert.match(service, /p_pet_uids: submittedOffer/);
+  assert.match(service, /saveOffer\.disabled = false/);
+  assert.match(service, /重試送出交易內容/);
+  assert.match(service, /ownSide\.inert = false/);
 });

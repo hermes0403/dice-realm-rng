@@ -3220,3 +3220,10 @@ button:not(.primary):not(.danger) { color: #e8edf9 !important; }
   #realmAdminActivity .realm-activity-card{min-height:54px;padding:9px 10px!important}
   #realmAdminActivity .realm-activity-card b{font-size:13px!important}
 }
+
+
+/* T-0165: fast local player-name filtering and visible trade submission progress. */
+.pet-trade-player-search{display:block;width:100%;min-width:0;min-height:40px;margin:0 0 8px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(10,16,34,.72);color:var(--text);font:inherit;box-sizing:border-box}
+.pet-trade-player-search::placeholder{color:var(--muted)}
+.pet-trade-player-search:focus-visible{outline:2px solid #8f9cff;outline-offset:2px}
+.pet-trade-own-side[aria-busy="true"]{opacity:.78}
