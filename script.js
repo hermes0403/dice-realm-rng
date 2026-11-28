@@ -23,7 +23,7 @@ import { createCoinBoostService } from './systems/coin-boost.js';
 import { createLeaderboardSystem } from './systems/leaderboards.js';
 import { createAuthService } from './services/auth.js?v=20261126-t0139-account-isolation';
 import { createPetSystem } from './systems/pets.js?v=20261122-secret-skill-swap-v1';
-import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261122-trade-slot-picker-v2';
+import { createPetTradingSearch } from './services/pet-trading-search.js?v=20261128-t0165-trade-search-feedback';
 import { applyEternalPetRarityTheme } from './systems/pet-rarity-theme.js?v=20261120-t0113-eternal-blue-pink';
 import { petWeightSkillMultiplier } from './systems/pet-skills.js';
 import { createDiceSystem } from './systems/dice.js?v=20261122-auto-roll-rare-continue-v1';
