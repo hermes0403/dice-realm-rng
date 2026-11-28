@@ -437,6 +437,6 @@ test('client runs a server-timestamp countdown, renews only during countdown, an
   assert.match(service, /sessionRealtimeSignature/);
   assert.match(service, /pet-trade-countdown/);
   assert.match(service, /cancelCountdownsWhenLeavingTrade/);
-  assert.match(service, /navigationTarget\\.dataset\\.page !== 'trade'/);
-  assert.match(service, /if \\(ownConfirmed\\) countdownDisconnectHandlers\\.set/);
+  assert.match(service, /navigationTarget\.dataset\.page !== 'trade'/);
+  assert.match(service, /if \(ownConfirmed\) countdownDisconnectHandlers\.set/);
 });
