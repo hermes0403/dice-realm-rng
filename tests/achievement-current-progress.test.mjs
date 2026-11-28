@@ -64,7 +64,7 @@ test('one million rolls unlocks both Heaven Potions exactly once', () => {
     rolls: 1000000,
     first: {},
     bag: {},
-    achievements: {},
+    achievements: { roll100: {}, roll1000: {}, roll10000: {}, roll100000: {}, roll200000: {}, roll400000: {} },
     dailyQuestCompletions: 0,
     coins: 0,
     potions: { inventory: {} }
