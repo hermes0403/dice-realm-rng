@@ -271,6 +271,19 @@ begin
   v_discovered_a := coalesce(v_save_a->'petDiscovered', '{}'::jsonb) || v_discovered_a;
   v_discovered_b := coalesce(v_save_b->'petDiscovered', '{}'::jsonb) || v_discovered_b;
 
+  -- Recheck the lease after acquiring both save locks and validating ownership.
+  -- A slow lock wait must not let an expired connection lease complete the trade.
+  if v_session.status <> 'active'
+     or v_session.expires_at <= clock_timestamp()
+     or v_session.revision <> p_expected_revision
+     or v_session.countdown_revision is distinct from v_session.revision
+     or not (v_session.confirmed_a and v_session.confirmed_b)
+     or v_session.countdown_started_at + interval '3 seconds' > clock_timestamp()
+     or v_session.ready_lease_until_a <= clock_timestamp()
+     or v_session.ready_lease_until_b <= clock_timestamp() then
+    raise exception 'trade_countdown_invalidated' using errcode='P0001';
+  end if;
+
   update public.pet_trade_sessions
   set status = 'completed', updated_at = clock_timestamp()
   where id = p_session_id;
